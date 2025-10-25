@@ -3,228 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Inscripción a Cursos - ITD</title>
     
-    <title>Sistema de Inscripción - Instituto Tecnológico de Durango</title>
-    
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Estilos Personalizados -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-                sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            background-color: #f3f4f6;
-        }
-
-        #root {
-            min-height: 100vh;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .animate-fadeIn {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-slideDown {
-            animation: slideDown 0.4s ease-out;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .animate-spin {
-            animation: spin 1s linear infinite;
-        }
-
-        button {
-            transition: all 0.2s ease-in-out;
-        }
-
-        .card-hover {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .card-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        @media (max-width: 640px) {
-            h1 {
-                font-size: 1.25rem;
-            }
-            
-            h2 {
-                font-size: 1.125rem;
-            }
-        }
-
-        @media print {
-            body {
-                background: white;
-            }
-            
-            button,
-            nav,
-            .no-print {
-                display: none !important;
-            }
-        }
-    </style>
-
-    <script>
-        window.CONFIG = {
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby_ESgq4InYsgJMqbsJz_je6M62PQ8uFFwiNwrHUuPt-131BxiiesiXf4wuEORrr7Cd4A/exec',
-            APP_NAME: 'Sistema de Inscripción ITD',
-            INSTITUTION: 'Instituto Tecnológico de Durango',
-            REQUEST_TIMEOUT: 30000,
-            MAX_COURSES_PER_STUDENT: 3,
-            MIN_CURP_LENGTH: 18,
-            MAX_CURP_LENGTH: 18
-        };
-
-        window.addEventListener('error', function(event) {
-            console.error('❌ Error:', event.error);
-        });
-
-        window.addEventListener('unhandledrejection', function(event) {
-            console.error('❌ Promesa rechazada:', event.reason);
-            event.preventDefault();
-        });
-
-        window.addEventListener('DOMContentLoaded', function() {
-            console.log('%c 🎓 Sistema ITD - Cargando... ', 
-                'background: #1e3a8a; color: white; font-size: 16px; padding: 8px; border-radius: 4px;'
-            );
-            
-            if (!window.CONFIG.APPS_SCRIPT_URL) {
-                console.warn('⚠️ URL del Apps Script no configurada');
-            } else {
-                console.log('✅ Configuración OK');
-                console.log('📡 URL:', window.CONFIG.APPS_SCRIPT_URL);
-            }
-            
-            if (!document.getElementById('root')) {
-                console.error('❌ Elemento #root no encontrado');
-            } else {
-                console.log('✅ Elemento #root encontrado');
-            }
-        });
-    </script>
-</head>
-
-<body>
-    <div id="root"></div>
-
-    <noscript>
-        <div style="
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-        ">
-            <div>
-                <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
-                <h1 style="font-size: 2rem; margin-bottom: 1rem;">JavaScript Requerido</h1>
-                <p style="font-size: 1.125rem;">Este sistema requiere JavaScript habilitado.</p>
-            </div>
-        </div>
-    </noscript>
-
-    <!-- React 18 -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
 
-    <!-- 🔴 IMPORTANTE: Ahora carga index.js en lugar de index.tsx -->
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between gap-4 py-4 min-h-[100px]">
+                <div class="flex-shrink-0">
+                    <img class="h-16 md:h-20 lg:h-24" src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="Logo TecNM">
+                </div>
+                <div class="text-center flex-1 px-2">
+                    <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-blue-900">
+                        SISTEMA DE INSCRIPCIÓN A CURSOS DE ACTUALIZACIÓN DOCENTE
+                    </h1>
+                    <h2 class="text-sm sm:text-base md:text-lg text-blue-900 mt-1">
+                        INSTITUTO TECNOLÓGICO DE DURANGO
+                    </h2>
+                </div>
+                <div class="flex-shrink-0">
+                    <img class="h-16 md:h-20 lg:h-24" src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="Logo Instituto Tecnológico de Durango">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="root"></div>
+
+    <!-- Footer -->
+    <footer class="bg-blue-800 text-white text-center p-4 mt-auto">
+        <p class="font-semibold text-sm sm:text-base">© Coordinación de actualización docente - M.C. Alejandro Calderón Rentería.</p>
+        <p class="text-xs sm:text-sm">Todos los derechos reservados 2026.</p>
+    </footer>
+
+    <!-- ========================================================================== -->
+    <!-- CONFIGURACIÓN: Coloque aquí la URL de su Google Apps Script              -->
+    <!-- ========================================================================== -->
+    <script>
+        window.CONFIG = {
+            // 👇 REEMPLACE ESTA URL CON LA URL DE SU GOOGLE APPS SCRIPT
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby_ESgq4InYsgJMqbsJz_je6M62PQ8uFFwiNwrHUuPt-131BxiiesiXf4wuEORrr7Cd4A/exec'
+        };
+    </script>
+    <!-- ========================================================================== -->
+
+    <!-- Carga el archivo index.js que contiene toda la lógica -->
     <script src="index.js"></script>
 
-    <script>
-        setTimeout(function() {
-            console.log('%c 📊 Verificación del Sistema ', 
-                'background: #8b5cf6; color: white; font-size: 14px; padding: 6px; border-radius: 4px;'
-            );
-            
-            if (typeof React !== 'undefined') {
-                console.log('✅ React cargado - Versión:', React.version);
-            } else {
-                console.error('❌ React no cargado');
-            }
-
-            if (typeof ReactDOM !== 'undefined') {
-                console.log('✅ ReactDOM cargado');
-            } else {
-                console.error('❌ ReactDOM no cargado');
-            }
-
-            var root = document.getElementById('root');
-            if (root && root.children.length > 0) {
-                console.log('✅ App renderizada (' + root.children.length + ' elementos)');
-                console.log('%c 🎉 TODO FUNCIONANDO CORRECTAMENTE ', 
-                    'background: #10b981; color: white; font-size: 14px; padding: 6px; border-radius: 4px; font-weight: bold;'
-                );
-            } else if (root) {
-                console.warn('%c ⚠️ #root vacío - Verifica index.js ', 
-                    'background: #f59e0b; color: white; font-size: 12px; padding: 4px; border-radius: 4px;'
-                );
-                console.log('💡 Asegúrate de que index.js esté en la misma carpeta');
-            }
-        }, 1000);
-    </script>
 </body>
 </html>
