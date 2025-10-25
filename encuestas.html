@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encuestas de Opinión - ITD</title>
+    
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        .survey-card {
+            transition: all 0.3s ease;
+        }
+        
+        .survey-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-xl sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 sm:py-6">
+            <div class="flex items-center justify-between gap-4">
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" 
+                     alt="TecNM" 
+                     class="h-12 sm:h-16 md:h-20 object-contain">
+                
+                <div class="text-center flex-1 px-2 sm:px-4">
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">
+                        ENCUESTAS DE OPINIÓN
+                    </h1>
+                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">
+                        Desarrollo Académico
+                    </p>
+                    <p class="text-xs sm:text-sm text-blue-600">
+                        TecNM - Instituto Tecnológico de Durango
+                    </p>
+                </div>
+                
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
+                     alt="ITD" 
+                     class="h-12 sm:h-16 md:h-20 object-contain">
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            
+            <!-- Botón Volver -->
+            <a href="index.html" 
+               class="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline mb-6 text-sm sm:text-base">
+                ← Volver al Portal Principal
+            </a>
+
+            <!-- Mensaje de Bienvenida -->
+            <div class="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl shadow-xl p-6 sm:p-8 text-white mb-8 animate-fadeIn">
+                <div class="flex items-center gap-4">
+                    <div class="text-5xl">📊</div>
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-bold mb-2">Encuestas de Opinión</h2>
+                        <p class="text-sm sm:text-base opacity-90">
+                            Tu opinión es muy importante para mejorar nuestros servicios de actualización docente.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid de Encuestas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                
+                <!-- ============================================================ -->
+                <!-- ENCUESTA 1: EVALUACIÓN DE CURSOS                             -->
+                <!-- ============================================================ -->
+                <div class="survey-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500">
+                    <div class="text-5xl mb-4 text-center">📚</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">
+                        Evaluación de Cursos
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Evalúa la calidad de los cursos que has tomado
+                    </p>
+                    <div class="bg-blue-50 rounded-lg p-3 mb-4">
+                        <p class="text-xs text-blue-800">
+                            ⏱️ Tiempo estimado: 5-7 minutos
+                        </p>
+                    </div>
+                    <!-- 👇 REEMPLAZA CON TU URL DE GOOGLE FORM -->
+                    <a href="https://forms.gle/TU_FORMULARIO_1" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
+                        📝 Responder Encuesta
+                    </a>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- ENCUESTA 2: EVALUACIÓN DE INSTRUCTORES                       -->
+                <!-- ============================================================ -->
+                <div class="survey-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500">
+                    <div class="text-5xl mb-4 text-center">👨‍🏫</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">
+                        Evaluación de Instructores
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Evalúa el desempeño de los instructores
+                    </p>
+                    <div class="bg-green-50 rounded-lg p-3 mb-4">
+                        <p class="text-xs text-green-800">
+                            ⏱️ Tiempo estimado: 3-5 minutos
+                        </p>
+                    </div>
+                    <!-- 👇 REEMPLAZA CON TU URL DE GOOGLE FORM -->
+                    <a href="https://forms.gle/TU_FORMULARIO_2" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
+                        📝 Responder Encuesta
+                    </a>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- ENCUESTA 3: SATISFACCIÓN GENERAL                             -->
+                <!-- ============================================================ -->
+                <div class="survey-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-purple-500">
+                    <div class="text-5xl mb-4 text-center">⭐</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">
+                        Satisfacción General
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Tu experiencia con el servicio de actualización docente
+                    </p>
+                    <div class="bg-purple-50 rounded-lg p-3 mb-4">
+                        <p class="text-xs text-purple-800">
+                            ⏱️ Tiempo estimado: 4-6 minutos
+                        </p>
+                    </div>
+                    <!-- 👇 REEMPLAZA CON TU URL DE GOOGLE FORM -->
+                    <a href="https://forms.gle/TU_FORMULARIO_3" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="block w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
+                        📝 Responder Encuesta
+                    </a>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- ENCUESTA 4: SUGERENCIAS Y MEJORAS                            -->
+                <!-- ============================================================ -->
+                <div class="survey-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-orange-500">
+                    <div class="text-5xl mb-4 text-center">💡</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">
+                        Sugerencias y Mejoras
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Comparte tus ideas para mejorar el servicio
+                    </p>
+                    <div class="bg-orange-50 rounded-lg p-3 mb-4">
+                        <p class="text-xs text-orange-800">
+                            ⏱️ Tiempo estimado: 5-8 minutos
+                        </p>
+                    </div>
+                    <!-- 👇 REEMPLAZA CON TU URL DE GOOGLE FORM -->
+                    <a href="https://forms.gle/TU_FORMULARIO_4" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="block w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
+                        📝 Responder Encuesta
+                    </a>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- ENCUESTA 5: NECESIDADES DE CAPACITACIÓN                      -->
+                <!-- ============================================================ -->
+                <div class="survey-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-red-500">
+                    <div class="text-5xl mb-4 text-center">🎯</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">
+                        Necesidades de Capacitación
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Indica qué cursos te gustaría tomar
+                    </p>
+                    <div class="bg-red-50 rounded-lg p-3 mb-4">
+                        <p class="text-xs text-red-800">
+                            ⏱️ Tiempo estimado: 3-5 minutos
+                        </p>
+                    </div>
+                    <!-- 👇 REEMPLAZA CON TU URL DE GOOGLE FORM -->
+                    <a href="https://forms.gle/TU_FORMULARIO_5" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="block w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
+                        📝 Responder Encuesta
+                    </a>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- ENCUESTA 6: EVALUACIÓN DE INSTALACIONES                      -->
+                <!-- ============================================================ -->
+                <div class="survey-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-teal-500">
+                    <div class="text-5xl mb-4 text-center">🏢</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">
+                        Evaluación de Instalaciones
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Evalúa las instalaciones y recursos disponibles
+                    </p>
+                    <div class="bg-teal-50 rounded-lg p-3 mb-4">
+                        <p class="text-xs text-teal-800">
+                            ⏱️ Tiempo estimado: 3-4 minutos
+                        </p>
+                    </div>
+                    <!-- 👇 REEMPLAZA CON TU URL DE GOOGLE FORM -->
+                    <a href="https://forms.gle/TU_FORMULARIO_6" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="block w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
+                        📝 Responder Encuesta
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Información Adicional -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+                <div class="flex items-start gap-4">
+                    <div class="text-4xl">ℹ️</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">
+                            Información sobre las Encuestas
+                        </h3>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-600 font-bold">✓</span>
+                                <span>Todas las encuestas son <strong>anónimas</strong> y confidenciales</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-600 font-bold">✓</span>
+                                <span>Tus respuestas nos ayudan a <strong>mejorar continuamente</strong></span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-600 font-bold">✓</span>
+                                <span>Puedes contestar las encuestas <strong>en cualquier momento</strong></span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-600 font-bold">✓</span>
+                                <span>Se recomienda responder con <strong>sinceridad</strong> para obtener mejores resultados</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contacto -->
+            <div class="mt-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white text-center">
+                <div class="text-4xl mb-3">💬</div>
+                <h3 class="text-xl font-bold mb-2">¿Necesitas Ayuda?</h3>
+                <p class="text-sm opacity-90 mb-4">
+                    Si tienes problemas con alguna encuesta, contáctanos
+                </p>
+                <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
+                   class="inline-block bg-white text-blue-600 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
+                    📧 Enviar Email
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <p class="font-semibold text-sm sm:text-base mb-2">
+                © Coordinación de Actualización Docente
+            </p>
+            <p class="text-xs sm:text-sm opacity-90">
+                M.C. Alejandro Calderón Rentería
+            </p>
+            <p class="text-xs sm:text-sm opacity-75 mt-1">
+                Todos los derechos reservados 2024
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
