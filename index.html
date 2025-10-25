@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Actualización Docente - ITD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .card-portal {
+            transition: all 0.3s ease;
+        }
+        .card-portal:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    
+    <!-- Header -->
+    <header class="bg-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" 
+                     alt="TecNM" class="h-16 md:h-20">
+                <div class="text-center flex-1 px-4">
+                    <h1 class="text-xl md:text-3xl font-bold text-blue-900">
+                        PORTAL DE ACTUALIZACIÓN DOCENTE
+                    </h1>
+                    <p class="text-sm md:text-lg text-blue-700 mt-1">
+                        Instituto Tecnológico de Durango
+                    </p>
+                </div>
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
+                     alt="ITD" class="h-16 md:h-20">
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="container mx-auto px-4 py-12">
+        
+        <!-- Título de Bienvenida -->
+        <div class="text-center mb-12 animate-fadeIn">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                Bienvenido al Portal
+            </h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Seleccione la opción que necesite para acceder a los diferentes servicios
+            </p>
+        </div>
+
+        <!-- Grid de Opciones -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            
+            <!-- Opción 1: Inscripción -->
+            <a href="inscripciones.html" 
+               class="card-portal bg-white rounded-xl shadow-lg p-8 text-center hover:bg-gradient-to-br hover:from-rose-50 hover:to-red-50 border-2 border-transparent hover:border-rose-300">
+                <div class="text-6xl mb-4">📝</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">
+                    Inscripción a Cursos
+                </h3>
+                <p class="text-sm text-gray-600">
+                    Registrarse en cursos de actualización docente
+                </p>
+            </a>
+
+            <!-- Opción 2: Consultar -->
+            <a href="consultas.html" 
+               class="card-portal bg-white rounded-xl shadow-lg p-8 text-center hover:bg-gradient-to-br hover:from-blue-50 hover:to-indigo-50 border-2 border-transparent hover:border-blue-300">
+                <div class="text-6xl mb-4">📊</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">
+                    Consultar Registro
+                </h3>
+                <p class="text-sm text-gray-600">
+                    Ver mis cursos inscritos y folios
+                </p>
+            </a>
+
+            <!-- Opción 3: Formatos -->
+            <a href="formatos.html" 
+               class="card-portal bg-white rounded-xl shadow-lg p-8 text-center hover:bg-gradient-to-br hover:from-green-50 hover:to-emerald-50 border-2 border-transparent hover:border-green-300">
+                <div class="text-6xl mb-4">📋</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">
+                    Formatos Oficiales
+                </h3>
+                <p class="text-sm text-gray-600">
+                    Descargar formatos y documentos
+                </p>
+            </a>
+
+            <!-- Opción 4: SGI -->
+            <a href="sgi.html" 
+               class="card-portal bg-white rounded-xl shadow-lg p-8 text-center hover:bg-gradient-to-br hover:from-purple-50 hover:to-violet-50 border-2 border-transparent hover:border-purple-300">
+                <div class="text-6xl mb-4">📁</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">
+                    Información SGI
+                </h3>
+                <p class="text-sm text-gray-600">
+                    Sistema de Gestión Integral
+                </p>
+            </a>
+
+            <!-- Opción 5: Portal Instructores -->
+            <a href="inscripciones.html#instructor" 
+               class="card-portal bg-white rounded-xl shadow-lg p-8 text-center hover:bg-gradient-to-br hover:from-indigo-50 hover:to-blue-50 border-2 border-transparent hover:border-indigo-300">
+                <div class="text-6xl mb-4">👨‍🏫</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">
+                    Portal Instructores
+                </h3>
+                <p class="text-sm text-gray-600">
+                    Subir propuestas y evidencias
+                </p>
+            </a>
+
+            <!-- Opción 6: Estadísticas -->
+            <a href="estadisticas.html" 
+               class="card-portal bg-white rounded-xl shadow-lg p-8 text-center hover:bg-gradient-to-br hover:from-orange-50 hover:to-amber-50 border-2 border-transparent hover:border-orange-300">
+                <div class="text-6xl mb-4">📈</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">
+                    Estadísticas
+                </h3>
+                <p class="text-sm text-gray-600">
+                    Métricas e indicadores
+                </p>
+                <span class="inline-block mt-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                    Próximamente
+                </span>
+            </a>
+
+        </div>
+
+        <!-- Información Adicional -->
+        <div class="mt-12 text-center max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-3">
+                ℹ️ Información Importante
+            </h3>
+            <ul class="text-sm text-gray-600 space-y-2 text-left">
+                <li>✅ Para inscribirse necesita su CURP y email institucional</li>
+                <li>✅ Puede inscribirse hasta en 3 cursos simultáneamente</li>
+                <li>✅ Los formatos deben llenarse en formato digital</li>
+                <li>✅ Consulte su folio después de inscribirse</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-blue-900 text-white text-center py-6 mt-12">
+        <p class="font-semibold">
+            © Coordinación de Actualización Docente
+        </p>
+        <p class="text-sm mt-1">
+            M.C. Alejandro Calderón Rentería - Todos los derechos reservados 2024
+        </p>
+    </footer>
+
+</body>
+</html>
