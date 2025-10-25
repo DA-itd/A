@@ -1,7 +1,7 @@
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
-// Versión: 1.2.0 - Optimizado y corregido
-// Última actualización: Enero 2024
+// Versión: 1.3.0 - Sin Portal de Instructores
+// Última actualización: Enero 2025
 // =============================================================================
 
 // =============================================================================
@@ -220,63 +220,6 @@ const cancelSingleCourse = async (payload) => {
     }
 };
 
-const fileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-};
-
-const submitInstructorProposal = async (data) => {
-    const APPS_SCRIPT_URL = window.CONFIG?.APPS_SCRIPT_URL;
-    if (!APPS_SCRIPT_URL) throw new Error("URL no disponible");
-    
-    try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'cors',
-            redirect: 'follow',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'submitInstructorProposal', ...data })
-        });
-
-        const result = await response.json();
-        if (result?.success) {
-            return result;
-        } else {
-            throw new Error(result.message || 'Error al enviar propuesta');
-        }
-    } catch (error) {
-        throw new Error("No se pudo enviar la propuesta.");
-    }
-};
-
-const submitEvidence = async (data) => {
-    const APPS_SCRIPT_URL = window.CONFIG?.APPS_SCRIPT_URL;
-    if (!APPS_SCRIPT_URL) throw new Error("URL no disponible");
-    
-    try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'cors',
-            redirect: 'follow',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'submitInstructorEvidence', ...data })
-        });
-
-        const result = await response.json();
-        if (result?.success) {
-            return result;
-        } else {
-            throw new Error(result.message || 'Error al enviar evidencia');
-        }
-    } catch (error) {
-        throw new Error("No se pudo enviar la evidencia.");
-    }
-};
-
 // =============================================================================
 // == COMPONENTE PRINCIPAL APP
 // =============================================================================
@@ -285,7 +228,6 @@ const App = () => {
     const { useState, useEffect } = React;
     
     const [currentStep, setCurrentStep] = useState(1);
-    const [mode, setMode] = useState('student');
     const [formData, setFormData] = useState({
         fullName: '',
         curp: '',
@@ -329,29 +271,11 @@ const App = () => {
     }, []);
     
     const studentSteps = ["Información", "Cursos", "Confirmar", "Finalizado"];
-    const instructorStep = "Portal Instructor";
-    const allSteps = [...studentSteps, instructorStep];
     
     const handleNext = () => setCurrentStep(prev => prev < 4 ? prev + 1 : prev);
     const handleBack = () => setCurrentStep(prev => prev > 1 ? prev - 1 : prev);
     const goToStep = (step) => {
         if (step > 0 && step <= studentSteps.length) setCurrentStep(step);
-    };
-
-    const handleStepClick = (stepIndex) => {
-        const instructorStepIndex = studentSteps.length;
-        if (stepIndex === instructorStepIndex) {
-            setMode('instructor');
-            setCurrentStep(5);
-        } else if (stepIndex < currentStep - 1) {
-            setMode('student');
-            setCurrentStep(stepIndex + 1);
-        }
-    };
-    
-    const handleBackToStudentForm = () => {
-        setMode('student');
-        setCurrentStep(1);
     };
 
     const handleSubmit = async () => {
@@ -418,14 +342,6 @@ const App = () => {
                 React.createElement('p', null, error)
             );
         }
-        
-        if (mode === 'instructor') {
-            return React.createElement(InstructorForm, {
-                onBack: handleBackToStudentForm,
-                teachers: teachers,
-                courses: allCourses
-            });
-        }
 
         switch (currentStep) {
             case 1:
@@ -458,9 +374,8 @@ const App = () => {
     };
 
     return React.createElement('div', { className: 'flex flex-col min-h-screen bg-gray-100' },
-        React.createElement(Header),
         React.createElement('main', { className: 'flex-grow' },
-            React.createElement(Stepper, { currentStep, steps: allSteps, mode, onStepClick: handleStepClick }),
+            React.createElement(Stepper, { currentStep, steps: studentSteps }),
             React.createElement('div', { className: 'container mx-auto px-4 sm:px-6 lg:px-8 pb-8' },
                 error && currentStep === 3 && React.createElement('div', {
                     className: 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md w-full max-w-4xl mx-auto',
@@ -471,86 +386,31 @@ const App = () => {
                 ),
                 renderContent()
             )
-        ),
-        React.createElement(Footer)
-    );
-};
-
-// =============================================================================
-// == COMPONENTES UI - HEADER Y FOOTER
-// =============================================================================
-
-const Header = () => {
-    return React.createElement('header', { className: 'bg-white shadow-md' },
-        React.createElement('div', { className: 'container mx-auto px-4 sm:px-6 lg:px-8' },
-            React.createElement('div', { className: 'flex items-center justify-between gap-4 py-4 min-h-[100px]' },
-                React.createElement('div', { className: 'flex-shrink-0' },
-                    React.createElement('img', {
-                        className: 'h-16 md:h-20 lg:h-24',
-                        src: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg',
-                        alt: 'Logo TecNM'
-                    })
-                ),
-                React.createElement('div', { className: 'text-center flex-1 px-2' },
-                    React.createElement('h1', { className: 'text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-blue-900' },
-                        'SISTEMA DE INSCRIPCIÓN A CURSOS DE ACTUALIZACIÓN DOCENTE'
-                    ),
-                    React.createElement('h2', { className: 'text-sm sm:text-base md:text-lg text-blue-900 mt-1' },
-                        'INSTITUTO TECNOLÓGICO DE DURANGO'
-                    )
-                ),
-                React.createElement('div', { className: 'flex-shrink-0' },
-                    React.createElement('img', {
-                        className: 'h-16 md:h-20 lg:h-24',
-                        src: 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png',
-                        alt: 'Logo Instituto Tecnológico de Durango'
-                    })
-                )
-            )
         )
     );
 };
 
-const Footer = () => {
-    return React.createElement('footer', { className: 'bg-blue-800 text-white text-center p-4 mt-auto' },
-        React.createElement('p', { className: 'font-semibold text-sm sm:text-base' },
-            '© Coordinación de actualización docente - M.C. Alejandro Calderón Rentería.'
-        ),
-        React.createElement('p', { className: 'text-xs sm:text-sm' }, 'Todos los derechos reservados 2026.')
-    );
-};
 // =============================================================================
 // == COMPONENTE STEPPER
 // =============================================================================
 
-const Stepper = ({ currentStep, steps, mode, onStepClick }) => {
-    const instructorStepIndex = 4;
-
+const Stepper = ({ currentStep, steps }) => {
     return React.createElement('div', { className: 'w-full max-w-5xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8' },
         React.createElement('div', { className: 'flex items-start overflow-x-auto pb-2' },
             steps.map((step, index) => {
-                const isStudentStep = index < instructorStepIndex;
-                const isInstructorStep = index === instructorStepIndex;
-                const isCompleted = isStudentStep && mode === 'student' && index < currentStep - 1;
-                const isActive = (isStudentStep && mode === 'student' && index === currentStep - 1) || 
-                                (isInstructorStep && mode === 'instructor');
-                const isClickable = (isStudentStep && isCompleted) || isInstructorStep;
+                const isCompleted = index < currentStep - 1;
+                const isActive = index === currentStep - 1;
 
                 return React.createElement(React.Fragment, { key: index },
-                    React.createElement('button', {
-                        type: 'button',
-                        onClick: () => onStepClick(index),
-                        disabled: !isClickable && !isActive,
+                    React.createElement('div', {
                         'aria-current': isActive ? 'step' : undefined,
-                        className: `flex flex-col items-center text-center group disabled:cursor-not-allowed ${isInstructorStep ? 'w-1/5 min-w-[80px]' : 'w-1/4 min-w-[70px]'}`
+                        className: `flex flex-col items-center text-center w-1/4 min-w-[70px]`
                     },
                         React.createElement('div', { className: 'relative flex items-center justify-center' },
                             React.createElement('div', {
                                 className: `w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center z-10 rounded-full font-semibold text-white text-sm sm:text-base transition-colors duration-300 ${
-                                    isInstructorStep 
-                                        ? (isActive ? 'bg-indigo-600 ring-4 ring-indigo-300' : 'bg-gray-400 group-hover:bg-gray-500') 
-                                        : (isCompleted ? 'bg-rose-800 group-hover:bg-rose-900' : (isActive ? 'bg-rose-800' : 'bg-gray-300'))
-                                } group-disabled:bg-gray-300`
+                                    isCompleted ? 'bg-rose-800' : (isActive ? 'bg-rose-800' : 'bg-gray-300')
+                                }`
                             }, index + 1),
                             index < steps.length - 1 && React.createElement('div', {
                                 className: `absolute w-full top-1/2 -translate-y-1/2 left-1/2 h-1 ${isCompleted ? 'bg-rose-800' : 'bg-gray-300'}`
@@ -559,10 +419,8 @@ const Stepper = ({ currentStep, steps, mode, onStepClick }) => {
                         React.createElement('div', { className: 'mt-2' },
                             React.createElement('p', {
                                 className: `text-xs sm:text-sm font-medium transition-colors duration-300 ${
-                                    isInstructorStep 
-                                        ? (isActive ? 'text-indigo-700' : 'text-gray-600 group-hover:text-gray-800') 
-                                        : (isCompleted || isActive ? 'text-rose-800' : 'text-gray-500')
-                                } group-disabled:text-gray-500`
+                                    isCompleted || isActive ? 'text-rose-800' : 'text-gray-500'
+                                }`
                             }, step)
                         )
                     )
@@ -997,6 +855,7 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
         )
     );
 };
+
 // =============================================================================
 // == STEP 2: SELECCIÓN DE CURSOS
 // =============================================================================
@@ -1272,16 +1131,6 @@ const Step4Success = ({ registrationResult, applicantName, selectedCourses, subm
                 : `Gracias, ${applicantName}. Tu inscripción ha sido procesada.`
         ),
         
-        !isCancellation && emailSent === false && React.createElement('div', {
-            className: 'mt-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md text-left max-w-2xl mx-auto',
-            role: 'alert'
-        },
-            React.createElement('p', { className: 'font-bold text-sm sm:text-base' }, '⚠️ Advertencia sobre el email'),
-            React.createElement('p', { className: 'text-xs sm:text-sm mt-1' }, 
-                emailError || 'No se pudo enviar el email de confirmación. Tu inscripción SÍ fue registrada exitosamente. Verifica tu bandeja de spam.'
-            )
-        ),
-        
         !isCancellation && coursesToDisplay && coursesToDisplay.length > 0 && React.createElement('div', {
             className: 'mt-6 text-left border border-gray-200 rounded-lg p-4 sm:p-6'
         },
@@ -1319,639 +1168,6 @@ const Step4Success = ({ registrationResult, applicantName, selectedCourses, subm
 };
 
 // =============================================================================
-// == COMPONENTE DE DESCARGA DE FORMATOS
-// =============================================================================
-
-const DownloadFormatsSection = () => {
-    const formats = [
-        {
-            name: 'CVU - Curriculum del Instructor',
-            url: 'https://github.com/DA-itd/DA-itd-web/raw/main/TecNM-AC-PO-005-11%20CVU%20curriculum%20del%20instructor%20(1).doc',
-            icon: '📘'
-        },
-        {
-            name: 'Ficha Técnica del Curso',
-            url: 'https://github.com/DA-itd/DA-itd-web/raw/main/TecNM-AC-PO-005-12%20FICHA%20TECNICA%20(1).doc',
-            icon: '📗'
-        }
-    ];
-
-    return React.createElement('div', { 
-        className: 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-lg p-4 sm:p-6 mb-6' 
-    },
-        React.createElement('div', { className: 'flex items-center mb-4' },
-            React.createElement('div', { className: 'text-3xl mr-3' }, '📋'),
-            React.createElement('h3', { className: 'text-lg sm:text-xl font-bold text-indigo-900' }, 
-                'Formatos Oficiales'
-            )
-        ),
-        React.createElement('p', { className: 'text-sm text-gray-700 mb-4' },
-            'Descargue los formatos oficiales, complételos y conviértalos a PDF antes de subirlos.'
-        ),
-        React.createElement('div', { className: 'grid grid-cols-1 sm:grid-cols-2 gap-3' },
-            formats.map((format, index) =>
-                React.createElement('a', {
-                    key: index,
-                    href: format.url,
-                    download: true,
-                    target: '_blank',
-                    rel: 'noopener noreferrer',
-                    className: 'flex items-center gap-3 bg-white hover:bg-indigo-50 border-2 border-indigo-300 rounded-lg p-4 transition-all hover:shadow-md group'
-                },
-                    React.createElement('div', { 
-                        className: 'text-4xl group-hover:scale-110 transition-transform' 
-                    }, format.icon),
-                    React.createElement('div', { className: 'flex-1' },
-                        React.createElement('p', { className: 'font-semibold text-sm text-gray-800' }, 
-                            format.name
-                        ),
-                        React.createElement('p', { className: 'text-xs text-gray-500 mt-1' }, 
-                            'Formato Word (.doc)'
-                        )
-                    ),
-                    React.createElement('div', { className: 'text-indigo-600 text-xl' }, '⬇️')
-                )
-            )
-        ),
-        React.createElement('div', { className: 'mt-4 flex items-start gap-2 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded' },
-            React.createElement('span', { className: 'text-xl' }, '⚠️'),
-            React.createElement('p', { className: 'text-xs text-yellow-800' },
-                React.createElement('strong', null, 'Importante: '),
-                'Los archivos deben ser convertidos a PDF antes de subirlos al sistema.'
-            )
-        )
-    );
-};
-
-// =============================================================================
-// == COMPONENTE DE PANTALLA FINAL
-// =============================================================================
-
-const FinalScreen = ({ onClose }) => {
-    return React.createElement('div', { 
-        className: 'fixed inset-0 bg-gradient-to-br from-blue-900 to-indigo-900 z-50 flex items-center justify-center p-4'
-    },
-        React.createElement('div', { 
-            className: 'bg-white rounded-2xl shadow-2xl p-8 sm:p-12 max-w-2xl w-full text-center animate-fadeIn'
-        },
-            React.createElement('div', { className: 'mb-6' },
-                React.createElement('img', {
-                    src: 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png',
-                    alt: 'Logo ITD',
-                    className: 'h-24 sm:h-32 mx-auto mb-6'
-                })
-            ),
-            React.createElement('div', { className: 'text-6xl mb-6' }, '🎓'),
-            React.createElement('h2', { 
-                className: 'text-2xl sm:text-4xl font-bold text-blue-900 mb-4' 
-            }, '¡Gracias!'),
-            React.createElement('div', { 
-                className: 'text-base sm:text-lg text-gray-700 space-y-3 mb-8' 
-            },
-                React.createElement('p', null, 
-                    'Por tu interés en la ',
-                    React.createElement('strong', { className: 'text-indigo-700' }, 
-                        'superación académica'
-                    ),
-                    ' y la ',
-                    React.createElement('strong', { className: 'text-indigo-700' }, 
-                        'mejora continua'
-                    ),
-                    ' del'
-                ),
-                React.createElement('p', { className: 'text-xl sm:text-2xl font-bold text-blue-900' },
-                    'Instituto Tecnológico de Durango'
-                )
-            ),
-            React.createElement('div', { 
-                className: 'border-t-2 border-gray-200 pt-6 mt-6' 
-            },
-                React.createElement('p', { className: 'text-sm text-gray-600 mb-4' },
-                    'Tu compromiso con la excelencia educativa es fundamental para nuestra institución.'
-                ),
-                React.createElement('button', {
-                    onClick: onClose,
-                    className: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg'
-                }, '✓ Cerrar')
-            )
-        )
-    );
-};
-
-// =============================================================================
-// == COMPONENTE FILE INPUT
-// =============================================================================
-
-const FileInput = ({ id, label, onFileSelect, onError, acceptedFile, acceptedTypes, maxSizeMB }) => {
-    const { useState, useRef } = React;
-    const [isDragging, setIsDragging] = useState(false);
-    const inputRef = useRef(null);
-
-    const handleFileValidation = (file) => {
-        const fileTypeParts = file.type.split('/');
-        const fileTypeMajor = fileTypeParts[0];
-        
-        const isValidType = acceptedTypes.some(type => {
-            if (type.endsWith('/*')) {
-                const typeMajor = type.split('/')[0];
-                return typeMajor === fileTypeMajor;
-            }
-            return type === file.type;
-        });
-
-        if (!isValidType) {
-            onError(`Tipo de archivo no permitido: ${file.type}`);
-            return false;
-        }
-
-        if (file.size > maxSizeMB * 1024 * 1024) {
-            onError(`El archivo excede ${maxSizeMB} MB`);
-            return false;
-        }
-
-        onError(null);
-        onFileSelect(file);
-        return true;
-    };
-
-    const handleChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            handleFileValidation(e.target.files[0]);
-        } else {
-            onFileSelect(null);
-        }
-    };
-
-    const handleRemoveFile = () => {
-        onFileSelect(null);
-        if (inputRef.current) inputRef.current.value = "";
-    };
-
-    return React.createElement('div', null,
-        React.createElement('label', {
-            htmlFor: id,
-            className: `relative flex flex-col items-center justify-center w-full h-28 sm:h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 ${isDragging ? 'border-indigo-500' : ''}`
-        },
-            React.createElement('input', {
-                type: 'file',
-                id: id,
-                ref: inputRef,
-                className: 'sr-only',
-                accept: acceptedTypes.join(','),
-                onChange: handleChange
-            }),
-            React.createElement('div', { className: 'flex flex-col items-center justify-center space-y-2 text-center px-4' },
-                acceptedFile 
-                    ? React.createElement('p', { className: 'text-xs sm:text-sm font-semibold text-green-700 break-all' }, 
-                        `📄 ${acceptedFile.name}`
-                    )
-                    : React.createElement('p', { className: 'text-xs sm:text-sm text-gray-500' }, 
-                        label
-                    )
-            )
-        ),
-        React.createElement('div', { className: 'flex justify-between items-center mt-1' },
-            React.createElement('p', { className: 'text-xs text-gray-500' }, 
-                `PDF. Máx ${maxSizeMB}MB`
-            ),
-            acceptedFile && React.createElement('button', {
-                type: 'button',
-                onClick: handleRemoveFile,
-                className: 'text-xs text-red-600 hover:underline'
-            }, 'Quitar')
-        )
-    );
-};
-
-// =============================================================================
-// == FORMULARIO DE INSTRUCTOR
-// =============================================================================
-
-const formatCourseDates = (dates) => {
-    if (!dates) return '';
-    return dates.split(',').map(d => d.trim()).join(' | ');
-};
-
-const InstructorForm = ({ onBack, teachers, courses }) => {
-    const { useState } = React;
-    const [activeTab, setActiveTab] = useState('proposal');
-    const [showFinalScreen, setShowFinalScreen] = useState(false);
-
-    const [proposalForm, setProposalForm] = useState({ instructorName: '', instructorEmail: '', courseName: '', courseId: '' });
-    const [cvuFile, setCvuFile] = useState(null);
-    const [fichaFile, setFichaFile] = useState(null);
-    const [proposalStatus, setProposalStatus] = useState({ isSubmitting: false, error: null, success: null, progress: null });
-    const [cvuError, setCvuError] = useState(null);
-    const [fichaError, setFichaError] = useState(null);
-    
-    const [evidenceForm, setEvidenceForm] = useState({ instructorName: '', instructorEmail: '', courseName: '' });
-    const [evidenceFiles, setEvidenceFiles] = useState([]);
-    const [evidenceError, setEvidenceError] = useState(null);
-    const [evidenceStatus, setEvidenceStatus] = useState({ isSubmitting: false, error: null, success: null });
-
-    const handleProposalTeacherSelect = (teacher) => {
-        setProposalForm(prev => ({
-            ...prev,
-            instructorName: teacher.nombreCompleto.toUpperCase(),
-            instructorEmail: (teacher.email || '').toLowerCase()
-        }));
-    };
-    
-    const handleEvidenceTeacherSelect = (teacher) => {
-        setEvidenceForm(prev => ({
-            ...prev,
-            instructorName: teacher.nombreCompleto.toUpperCase(),
-            instructorEmail: (teacher.email || '').toLowerCase()
-        }));
-    };
-
-    const handleProposalSubmit = async (e) => {
-        e.preventDefault();
-        setProposalStatus({ isSubmitting: true, error: null, success: null, progress: null });
-        
-        if (cvuError || fichaError) {
-            setProposalStatus({ isSubmitting: false, error: 'Corrija los errores en los archivos', success: null, progress: null });
-            return;
-        }
-
-        if (!proposalForm.instructorName || !proposalForm.instructorEmail || !proposalForm.courseName || !cvuFile || !fichaFile) {
-            setProposalStatus({ isSubmitting: false, error: 'Todos los campos son obligatorios', success: null, progress: null });
-            return;
-        }
-
-        try {
-            setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Convirtiendo archivos... ⏳' });
-            const cvuFileBase64 = await fileToBase64(cvuFile);
-            
-            setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Subiendo CVU... 📤' });
-            const fichaFileBase64 = await fileToBase64(fichaFile);
-            
-            setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Subiendo Ficha Técnica... 📤' });
-
-            await submitInstructorProposal({
-                instructorName: proposalForm.instructorName,
-                instructorEmail: proposalForm.instructorEmail,
-                courseName: proposalForm.courseName,
-                courseId: proposalForm.courseId,
-                cvuFile: cvuFileBase64,
-                fichaFile: fichaFileBase64
-            });
-
-            setProposalStatus({ isSubmitting: false, error: null, success: '¡Propuesta enviada con éxito! ✅', progress: null });
-        } catch (err) {
-            setProposalStatus({ isSubmitting: false, error: err instanceof Error ? err.message : "Error al enviar", success: null, progress: null });
-        }
-    };
-
-    const handleEvidenceSubmit = async (e) => {
-        e.preventDefault();
-        setEvidenceStatus({ isSubmitting: true, error: null, success: null });
-
-        if (evidenceFiles.length === 0) {
-            setEvidenceStatus({ isSubmitting: false, error: 'Debe subir al menos un archivo', success: null });
-            return;
-        }
-
-        if (!evidenceForm.instructorName || !evidenceForm.instructorEmail || !evidenceForm.courseName) {
-            setEvidenceStatus({ isSubmitting: false, error: 'Todos los campos son obligatorios', success: null });
-            return;
-        }
-
-        try {
-            const evidenceFilesBase64 = await Promise.all(evidenceFiles.map(file => fileToBase64(file)));
-            
-            await submitEvidence({
-                instructorName: evidenceForm.instructorName,
-                instructorEmail: evidenceForm.instructorEmail,
-                courseName: evidenceForm.courseName,
-                evidenceFiles: evidenceFilesBase64
-            });
-
-            setEvidenceStatus({ isSubmitting: false, error: null, success: '¡Evidencias enviadas con éxito! ✅' });
-        } catch (err) {
-            setEvidenceStatus({ isSubmitting: false, error: err instanceof Error ? err.message : "Error al enviar", success: null });
-        }
-    };
-
-    const handleExit = () => {
-        setShowFinalScreen(true);
-    };
-
-    const handleCloseFinalScreen = () => {
-        setShowFinalScreen(false);
-        window.location.reload();
-    };
-
-    const groupedCourses = courses.reduce((acc, course) => {
-        const period = course.period || 'Sin Periodo';
-        if (!acc[period]) acc[period] = { courses: [], dates: '' };
-        acc[period].courses.push(course);
-        if (!acc[period].dates && course.dates) acc[period].dates = formatCourseDates(course.dates);
-        return acc;
-    }, {});
-
-    const renderProposalForm = () => {
-        if (proposalStatus.success) {
-            return React.createElement('div', { className: 'text-center py-8' },
-                React.createElement('div', { className: 'bg-green-100 border-l-4 border-green-500 text-green-700 p-6 mb-8 rounded-md' },
-                    React.createElement('div', { className: 'text-5xl mb-4' }, '✅'),
-                    React.createElement('p', { className: 'font-bold text-xl' }, proposalStatus.success),
-                    React.createElement('p', { className: 'text-sm mt-2' }, 
-                        'Tu documentación ha sido recibida y será revisada por la coordinación.'
-                    )
-                ),
-                React.createElement('button', {
-                    onClick: handleExit,
-                    className: 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg'
-                }, '🚪 Salir')
-            );
-        }
-
-        return React.createElement('form', { onSubmit: handleProposalSubmit, noValidate: true },
-            React.createElement(DownloadFormatsSection),
-            
-            React.createElement('div', { className: 'bg-blue-700 text-white p-4 rounded-lg mb-6 text-xs sm:text-sm text-center' },
-                React.createElement('p', null, '⚠️ Envíe CVU y ficha técnica en PDF genuinos (No fotos ni capturas de pantalla).')
-            ),
-            proposalStatus.error && React.createElement('div', { className: 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md' },
-                React.createElement('p', { className: 'text-sm' }, proposalStatus.error)
-            ),
-            proposalStatus.progress && React.createElement('div', { className: 'bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-md' },
-                React.createElement('p', { className: 'font-bold text-sm animate-pulse' }, proposalStatus.progress)
-            ),
-            React.createElement('div', { className: 'space-y-6' },
-                React.createElement('div', null,
-                    React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 'Nombre Completo *'),
-                    React.createElement(AutocompleteInput, {
-                        teachers, onSelect: handleProposalTeacherSelect, value: proposalForm.instructorName,
-                        onChange: (e) => setProposalForm(prev => ({ ...prev, instructorName: e.target.value.toUpperCase() })),
-                        name: 'proposalInstructorName', required: true
-                    })
-                ),
-                React.createElement('div', null,
-                    React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 'Email *'),
-                    React.createElement('input', {
-                        type: 'email', value: proposalForm.instructorEmail,
-                        onChange: (e) => setProposalForm(prev => ({ ...prev, instructorEmail: e.target.value.toLowerCase() })),
-                        className: 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-sm sm:text-base',
-                        required: true, placeholder: 'email@itdurango.edu.mx'
-                    })
-                ),
-                React.createElement('div', null,
-                    React.createElement('fieldset', null,
-                        React.createElement('legend', { className: 'block text-sm font-medium text-gray-700 mb-4' }, 'Curso a Ofrecer *'),
-                        courses.length === 0 ? React.createElement('p', { className: 'text-red-500 text-sm' }, 
-                            'No hay cursos disponibles.'
-                        ) : Object.entries(groupedCourses).map(([period, data]) =>
-                            React.createElement('div', { key: period, className: 'mb-6' },
-                                React.createElement('h4', { className: 'text-sm sm:text-md font-semibold text-gray-600 border-b pb-2 mb-4' },
-                                    data.dates ? `${period.replace(/_/g, ' ')} | ${data.dates}` : period.replace(/_/g, ' ')
-                                ),
-                                React.createElement('div', { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3' },
-                                    data.courses.map(course => {
-                                        const isSelected = proposalForm.courseName === course.name;
-                                        return React.createElement('div', { key: course.id, className: 'relative' },
-                                            React.createElement('input', {
-                                                type: 'radio',
-                                                id: `proposal-course-${course.id}`,
-                                                name: 'course-selection',
-                                                checked: isSelected,
-                                                onChange: () => setProposalForm(prev => ({ ...prev, courseName: course.name, courseId: course.id })),
-                                                className: 'sr-only peer'
-                                            }),
-                                            React.createElement('label', {
-                                                htmlFor: `proposal-course-${course.id}`,
-                                                className: `block p-3 rounded-lg border transition-all hover:shadow-md cursor-pointer ${
-                                                    course.period === 'PERIODO_1' ? 'border-teal-400 bg-teal-50' : 'border-indigo-400 bg-indigo-50'
-                                                } peer-checked:ring-2 peer-checked:ring-indigo-500`
-                                            },
-                                                React.createElement('h3', { className: 'font-bold text-xs sm:text-sm' }, course.name)
-                                            )
-                                        );
-                                    })
-                                )
-                            )
-                        )
-                    )
-                ),
-                React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6' },
-                    React.createElement('div', null,
-                        React.createElement(FileInput, {
-                            id: 'cvuFile', label: 'CVU (PDF)', onFileSelect: setCvuFile, onError: setCvuError,
-                            acceptedFile: cvuFile, acceptedTypes: ['application/pdf'], maxSizeMB: 1
-                        }),
-                        cvuError && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, cvuError)
-                    ),
-                    React.createElement('div', null,
-                        React.createElement(FileInput, {
-                            id: 'fichaFile', label: 'Ficha Técnica (PDF)', onFileSelect: setFichaFile, onError: setFichaError,
-                            acceptedFile: fichaFile, acceptedTypes: ['application/pdf'], maxSizeMB: 1
-                        }),
-                        fichaError && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, fichaError)
-                    )
-                )
-            ),
-            React.createElement('div', { className: 'mt-8 flex justify-end' },
-                React.createElement('button', {
-                    type: 'submit',
-                    disabled: proposalStatus.isSubmitting,
-                    className: 'w-full sm:w-auto bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 disabled:opacity-50'
-                }, proposalStatus.isSubmitting ? 'Enviando...' : 'Enviar Documentación')
-            )
-        );
-    };
-
-  const renderEvidenceForm = () => {
-    if (evidenceStatus.success) {
-        return React.createElement('div', { className: 'text-center py-8' },
-            React.createElement('div', { className: 'bg-green-100 border-l-4 border-green-500 text-green-700 p-6 mb-8 rounded-md' },
-                React.createElement('div', { className: 'text-5xl mb-4' }, '✅'),
-                React.createElement('p', { className: 'font-bold text-xl' }, evidenceStatus.success),
-                React.createElement('p', { className: 'text-sm mt-2' }, 
-                    'Tus evidencias han sido recibidas correctamente.'
-                )
-            ),
-            React.createElement('button', {
-                onClick: handleExit,
-                className: 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg'
-            }, '🚪 Salir')
-        );
-    }
-
-    return React.createElement('form', { onSubmit: handleEvidenceSubmit },
-        React.createElement('div', { className: 'bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg mb-6 text-xs sm:text-sm' },
-            React.createElement('p', null, 'Suba hasta 6 archivos (máx 5MB cada uno). Formatos: PDF o imágenes.')
-        ),
-        evidenceStatus.error && React.createElement('div', { className: 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md' },
-            React.createElement('p', { className: 'text-sm' }, evidenceStatus.error)
-        ),
-        evidenceError && React.createElement('div', { className: 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md' },
-            React.createElement('p', { className: 'text-sm' }, evidenceError)
-        ),
-        React.createElement('div', { className: 'space-y-6' },
-            React.createElement('div', null,
-                React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 'Nombre *'),
-                React.createElement(AutocompleteInput, {
-                    teachers, onSelect: handleEvidenceTeacherSelect, value: evidenceForm.instructorName,
-                    onChange: (e) => setEvidenceForm(prev => ({ ...prev, instructorName: e.target.value.toUpperCase() })),
-                    name: 'evidenceInstructorName', required: true
-                })
-            ),
-            React.createElement('div', null,
-                React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 'Email *'),
-                React.createElement('input', {
-                    type: 'email', value: evidenceForm.instructorEmail,
-                    onChange: (e) => setEvidenceForm(prev => ({ ...prev, instructorEmail: e.target.value.toLowerCase() })),
-                    className: 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-sm sm:text-base',
-                    required: true, placeholder: 'email@itdurango.edu.mx'
-                })
-            ),
-            React.createElement('div', null,
-                React.createElement('fieldset', null,
-                    React.createElement('legend', { className: 'block text-sm font-medium text-gray-700 mb-4' }, 'Curso Impartido *'),
-                    courses.length === 0 ? React.createElement('p', { className: 'text-red-500 text-sm' }, 
-                        'No hay cursos disponibles.'
-                    ) : Object.entries(groupedCourses).map(([period, data]) =>
-                        React.createElement('div', { key: period, className: 'mb-6' },
-                            React.createElement('h4', { className: 'text-sm sm:text-md font-semibold text-gray-600 border-b pb-2 mb-4' },
-                                data.dates ? `${period.replace(/_/g, ' ')} | ${data.dates}` : period.replace(/_/g, ' ')
-                            ),
-                            React.createElement('div', { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3' },
-                                data.courses.map(course => {
-                                    const isSelected = evidenceForm.courseName === course.name;
-                                    return React.createElement('div', { key: course.id, className: 'relative' },
-                                        React.createElement('input', {
-                                            type: 'radio',
-                                            id: `evidence-course-${course.id}`,
-                                            name: 'evidence-course-selection',
-                                            checked: isSelected,
-                                            onChange: () => setEvidenceForm(prev => ({ ...prev, courseName: course.name })),
-                                            className: 'sr-only peer'
-                                        }),
-                                        React.createElement('label', {
-                                            htmlFor: `evidence-course-${course.id}`,
-                                            className: `block p-3 rounded-lg border transition-all hover:shadow-md cursor-pointer ${
-                                                course.period === 'PERIODO_1' ? 'border-teal-400 bg-teal-50' : 'border-indigo-400 bg-indigo-50'
-                                            } peer-checked:ring-2 peer-checked:ring-indigo-500`
-                                        },
-                                            React.createElement('h3', { className: 'font-bold text-xs sm:text-sm' }, course.name)
-                                        )
-                                    );
-                                })
-                            )
-                        )
-                    )
-                )
-            ),
-            // MEJORADO: Selector de archivos más visible y en español
-            React.createElement('div', null,
-                React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, 
-                    'Archivos de Evidencia (hasta 6 archivos) *'
-                ),
-                React.createElement('div', { 
-                    className: 'border-2 border-dashed border-indigo-300 rounded-lg p-6 bg-indigo-50 hover:bg-indigo-100 transition-colors'
-                },
-                    React.createElement('div', { className: 'text-center' },
-                        React.createElement('div', { className: 'text-5xl mb-3' }, '📎'),
-                        React.createElement('label', {
-                            htmlFor: 'evidence-files',
-                            className: 'cursor-pointer inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-md'
-                        },
-                            React.createElement('span', { className: 'text-2xl mr-2' }, '📁'),
-                            React.createElement('span', null, 'Seleccionar Archivos')
-                        ),
-                        React.createElement('input', {
-                            type: 'file',
-                            id: 'evidence-files',
-                            multiple: true,
-                            accept: 'application/pdf,image/*',
-                            onChange: (e) => {
-                                if (e.target.files) {
-                                    const filesArray = Array.from(e.target.files);
-                                    if (filesArray.length > 6) {
-                                        setEvidenceError('No puede seleccionar más de 6 archivos');
-                                        setEvidenceFiles([]);
-                                        e.target.value = '';
-                                    } else {
-                                        setEvidenceError(null);
-                                        setEvidenceFiles(filesArray);
-                                    }
-                                }
-                            },
-                            className: 'hidden'
-                        }),
-                        React.createElement('p', { className: 'text-xs text-gray-600 mt-3' },
-                            'PDF o imágenes (JPG, PNG) • Máximo 5MB por archivo'
-                        )
-                    )
-                ),
-                evidenceFiles.length > 0 && React.createElement('div', { 
-                    className: 'mt-4 bg-green-50 border border-green-300 rounded-lg p-4'
-                },
-                    React.createElement('p', { className: 'text-sm font-semibold text-green-800 mb-2' },
-                        `✅ ${evidenceFiles.length} archivo(s) seleccionado(s):`
-                    ),
-                    React.createElement('ul', { className: 'space-y-1' },
-                        evidenceFiles.map((file, index) =>
-                            React.createElement('li', { 
-                                key: index,
-                                className: 'text-xs text-green-700 flex items-center gap-2'
-                            },
-                                React.createElement('span', null, '📄'),
-                                React.createElement('span', { className: 'truncate' }, file.name),
-                                React.createElement('span', { className: 'text-gray-500' }, 
-                                    `(${(file.size / 1024).toFixed(1)} KB)`
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        ),
-        React.createElement('div', { className: 'mt-8 flex justify-end' },
-            React.createElement('button', {
-                type: 'submit',
-                disabled: evidenceStatus.isSubmitting || evidenceFiles.length === 0,
-                className: 'w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all'
-            },
-                evidenceStatus.isSubmitting && React.createElement('div', { 
-                    className: 'animate-spin rounded-full h-5 w-5 border-b-2 border-white' 
-                }),
-                evidenceStatus.isSubmitting ? 'Enviando archivos...' : `📤 Enviar ${evidenceFiles.length > 0 ? `(${evidenceFiles.length})` : ''} Evidencia${evidenceFiles.length !== 1 ? 's' : ''}`
-            )
-        )
-    );
-};
-
-    if (showFinalScreen) {
-        return React.createElement(FinalScreen, { onClose: handleCloseFinalScreen });
-    }
-
-    return React.createElement('div', { className: 'bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md w-full max-w-4xl mx-auto' },
-        React.createElement('button', {
-            onClick: onBack,
-            className: 'text-sm text-blue-600 hover:underline mb-4'
-        }, '← Volver'),
-        React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold mb-4' }, 'Portal de Instructores'),
-        React.createElement('div', { className: 'border-b mb-4 bg-gray-50 rounded-t-lg' },
-            React.createElement('nav', { className: 'flex space-x-2 sm:space-x-4 px-2 sm:px-4' },
-                React.createElement('button', {
-                    onClick: () => setActiveTab('proposal'),
-                    className: `px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base rounded-t-lg transition-colors ${activeTab === 'proposal' ? 'bg-white text-indigo-700 border-b-2 border-indigo-500 -mb-px' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'}`
-                }, 'Subir documentación'),
-                React.createElement('button', {
-                    onClick: () => setActiveTab('evidence'),
-                    className: `px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base rounded-t-lg transition-colors ${activeTab === 'evidence' ? 'bg-white text-indigo-700 border-b-2 border-indigo-500 -mb-px' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'}`
-                }, 'Subir Evidencias')
-            )
-        ),
-        React.createElement('div', { className: 'pt-6' },
-            activeTab === 'proposal' ? renderProposalForm() : renderEvidenceForm()
-        )
-    );
-};
-
-// =============================================================================
 // == RENDERIZADO DE LA APLICACIÓN
 // =============================================================================
 
@@ -1965,4 +1181,14 @@ if (rootElement) {
     );
 } else {
     console.error('No se encontró el elemento root');
-}
+}sCancellation && emailSent === false && React.createElement('div', {
+            className: 'mt-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md text-left max-w-2xl mx-auto',
+            role: 'alert'
+        },
+            React.createElement('p', { className: 'font-bold text-sm sm:text-base' }, '⚠️ Advertencia sobre el email'),
+            React.createElement('p', { className: 'text-xs sm:text-sm mt-1' }, 
+                emailError || 'No se pudo enviar el email de confirmación. Tu inscripción SÍ fue registrada exitosamente. Verifica tu bandeja de spam.'
+            )
+        ),
+        
+        !i
