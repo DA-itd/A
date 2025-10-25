@@ -109,6 +109,12 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
         }
+
+        /* Estilo mejorado para la frase inspiracional */
+        .quote-container {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-left: 3px solid rgba(99, 102, 241, 0.5);
+        }
     </style>
 </head>
 
@@ -169,16 +175,16 @@
     <!-- Contenido Principal -->
     <main class="container mx-auto px-4 py-8 sm:py-12">
         
-        <!-- Frase Inspiracional -->
-        <div class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
-            <div class="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl shadow-xl p-6 sm:p-8 text-white">
-                <div class="flex items-start gap-4">
-                    <div class="text-4xl sm:text-5xl flex-shrink-0 animate-pulse-slow">💡</div>
+        <!-- Frase Inspiracional - MÁS DISCRETA -->
+        <div class="max-w-4xl mx-auto mb-6 animate-fadeInUp">
+            <div class="quote-container rounded-lg shadow-sm p-4 sm:p-5">
+                <div class="flex items-start gap-3">
+                    <div class="text-2xl sm:text-3xl flex-shrink-0 opacity-60">💡</div>
                     <div class="flex-1">
-                        <p class="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold mb-3 italic leading-relaxed" id="inspirationalQuote">
+                        <p class="text-sm sm:text-base italic text-gray-700 leading-relaxed" id="inspirationalQuote">
                             "La educación es el arma más poderosa que puedes usar para cambiar el mundo."
                         </p>
-                        <p class="text-sm sm:text-base opacity-90 text-right" id="quoteAuthor">
+                        <p class="text-xs sm:text-sm text-gray-600 text-right mt-2" id="quoteAuthor">
                             - Nelson Mandela
                         </p>
                     </div>
@@ -253,7 +259,7 @@
             <div onclick="showComingSoon('Información SGI')" 
                class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-purple-400 cursor-pointer animate-fadeInUp delay-400">
                 <span class="badge-soon">Próximamente</span>
-                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📁</div>
+                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📊</div>
                 <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
                     Información SGI
                 </h3>
@@ -265,12 +271,12 @@
                 </div>
             </div>
 
-            <!-- Opción 5: Portal Instructores -->
-            <a href="inscripciones.html" 
+            <!-- Opción 5: Área para Instructores -->
+            <a href="instructores.html" 
                class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-500">
                 <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
                 <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
-                    Portal Instructores
+                    Área para Instructores
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Subir propuestas y evidencias
@@ -314,6 +320,39 @@
 
         </div>
 
+        <!-- Enlaces Institucionales -->
+        <div class="max-w-4xl mx-auto mb-8">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
+                <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <a href="https://www.itdurango.edu.mx" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
+                        <div class="text-3xl mb-2">🏛️</div>
+                        <p class="font-semibold text-sm">ITD</p>
+                        <p class="text-xs opacity-90">Portal Principal</p>
+                    </a>
+                    <a href="https://www.tecnm.mx" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
+                        <div class="text-3xl mb-2">🎓</div>
+                        <p class="font-semibold text-sm">TecNM</p>
+                        <p class="text-xs opacity-90">Sitio Nacional</p>
+                    </a>
+                    <a href="https://mooc.tecnm.mx/portal/" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
+                        <div class="text-3xl mb-2">💻</div>
+                        <p class="font-semibold text-sm">MOOC</p>
+                        <p class="text-xs opacity-90">Cursos en Línea</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Panel de Información -->
         <div class="max-w-4xl mx-auto">
             <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600">
@@ -350,7 +389,7 @@
                     </div>
                     
                     <div class="flex items-start gap-3 bg-orange-50 p-4 rounded-lg">
-                        <div class="text-2xl flex-shrink-0">🔍</div>
+                        <div class="text-2xl flex-shrink-0">🔢</div>
                         <div>
                             <p class="text-sm font-semibold text-gray-800">Folio</p>
                             <p class="text-xs text-gray-600 mt-1">Guarde su folio de registro</p>
@@ -509,7 +548,7 @@
         }
 
         // =============================================================================
-        // FRASES INSPIRACIONALES (Cambian cada 20 segundos)
+        // FRASES INSPIRACIONALES (Cambian cada 30 segundos)
         // =============================================================================
         function showRandomQuote() {
             const randomIndex = Math.floor(Math.random() * inspirationalQuotes.length);
@@ -534,8 +573,8 @@
             }, 500);
         }
 
-        // Cambiar frase cada 20 segundos
-        setInterval(showRandomQuote, 20000);
+        // Cambiar frase cada 30 segundos
+        setInterval(showRandomQuote, 30000);
 
         // =============================================================================
         // MODALES
