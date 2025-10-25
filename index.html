@@ -4,163 +4,574 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal de Actualización Docente - ITD</title>
+    
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
+        
         .card-portal {
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
+        
+        .card-portal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .card-portal:hover::before {
+            left: 100%;
+        }
+        
         .card-portal:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .animate-fadeIn {
-            animation: fadeIn 0.6s ease-out;
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .delay-100 { animation-delay: 0.1s; opacity: 0; }
+        .delay-200 { animation-delay: 0.2s; opacity: 0; }
+        .delay-300 { animation-delay: 0.3s; opacity: 0; }
+        .delay-400 { animation-delay: 0.4s; opacity: 0; }
+        .delay-500 { animation-delay: 0.5s; opacity: 0; }
+        .delay-600 { animation-delay: 0.6s; opacity: 0; }
+        .delay-700 { animation-delay: 0.7s; opacity: 0; }
+        
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
+        
+        .badge-soon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .animate-slideIn {
+            animation: slideIn 1s ease-out forwards;
+        }
+
+        .weather-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
     
     <!-- Header -->
-    <header class="bg-white shadow-lg">
-        <div class="container mx-auto px-4 py-6">
-            <div class="flex items-center justify-between">
+    <header class="bg-white shadow-xl sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 sm:py-6">
+            <div class="flex items-center justify-between gap-4">
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" 
-                     alt="TecNM" class="h-16 md:h-20">
-                <div class="text-center flex-1 px-4">
-                    <h1 class="text-xl md:text-3xl font-bold text-blue-900">
+                     alt="TecNM" 
+                     class="h-12 sm:h-16 md:h-20 object-contain">
+                
+                <div class="text-center flex-1 px-2 sm:px-4">
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">
                         PORTAL DE ACTUALIZACIÓN DOCENTE
                     </h1>
-                    <p class="text-sm md:text-lg text-blue-700 mt-1">
-                        Instituto Tecnológico de Durango
+                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">
+                        Desarrollo Académico
+                    </p>
+                    <p class="text-xs sm:text-sm text-blue-600">
+                        TecNM - Instituto Tecnológico de Durango
                     </p>
                 </div>
+                
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
-                     alt="ITD" class="h-16 md:h-20">
+                     alt="ITD" 
+                     class="h-12 sm:h-16 md:h-20 object-contain">
             </div>
         </div>
     </header>
 
+    <!-- Barra de Información: Clima y Hora -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 text-sm">
+                <!-- Fecha -->
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📅</span>
+                    <span id="currentDate" class="font-semibold">Cargando...</span>
+                </div>
+                
+                <!-- Clima -->
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl weather-icon">🌤️</span>
+                    <span class="font-semibold">Durango, Dgo.</span>
+                </div>
+                
+                <!-- Hora -->
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🕐</span>
+                    <span id="clock" class="font-mono font-bold text-lg">--:--:--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Contenido Principal -->
-    <main class="container mx-auto px-4 py-12">
+    <main class="container mx-auto px-4 py-8 sm:py-12">
         
-        <!-- Título de Bienvenida -->
-        <div class="text-center mb-12 animate-fadeIn">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                Bienvenido al Portal
+        <!-- Frase Inspiracional -->
+        <div class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
+            <div class="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl shadow-xl p-6 sm:p-8 text-white">
+                <div class="flex items-start gap-4">
+                    <div class="text-4xl sm:text-5xl flex-shrink-0 animate-pulse-slow">💡</div>
+                    <div class="flex-1">
+                        <p class="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold mb-3 italic leading-relaxed" id="inspirationalQuote">
+                            "La educación es el arma más poderosa que puedes usar para cambiar el mundo."
+                        </p>
+                        <p class="text-sm sm:text-base opacity-90 text-right" id="quoteAuthor">
+                            - Nelson Mandela
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banner de Bienvenida -->
+        <div class="text-center mb-8 sm:mb-12 animate-fadeInUp">
+            <div class="inline-block mb-4 animate-pulse-slow">
+                <div class="text-6xl sm:text-7xl md:text-8xl">🎓</div>
+            </div>
+            <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
+                Servicios Disponibles
             </h2>
-            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
                 Seleccione la opción que necesite para acceder a los diferentes servicios
             </p>
         </div>
 
         <!-- Grid de Opciones -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto mb-12">
             
-            <!-- Opción 1: Inscripción -->
+            <!-- Opción 1: Inscripción a Cursos -->
             <a href="inscripciones.html" 
-               class="card-portal bg-white rounded-xl shadow-lg p-8 text-center hover:bg-gradient-to-br hover:from-rose-50 hover:to-red-50 border-2 border-transparent hover:border-rose-300">
-                <div class="text-6xl mb-4">📝</div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp delay-100">
+                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📝</div>
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
                     Inscripción a Cursos
                 </h3>
-                <p class="text-sm text-gray-600">
-                    Registrarse en cursos de actualización docente
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Registrarse en cursos de actualización
                 </p>
+                <div class="inline-block bg-rose-100 text-rose-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
             </a>
 
-            <!-- Opción 2: Consultar -->
-            <a href="consultas.html" 
-               class="card-portal bg-white rounded-xl shadow-lg p-8 text-center hover:bg-gradient-to-br hover:from-blue-50 hover:to-indigo-50 border-2 border-transparent hover:border-blue-300">
-                <div class="text-6xl mb-4">📊</div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">
-                    Consultar Registro
+            <!-- Opción 2: Historial de Cursos -->
+            <div onclick="showComingSoon('Historial de Cursos')" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-blue-400 cursor-pointer animate-fadeInUp delay-200">
+                <span class="badge-soon">Próximamente</span>
+                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📚</div>
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+                    Historial de Cursos
                 </h3>
-                <p class="text-sm text-gray-600">
-                    Ver mis cursos inscritos y folios
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Ver mi historial de actualización docente
                 </p>
-            </a>
+                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
+                    En desarrollo
+                </div>
+            </div>
 
-            <!-- Opción 3: Formatos -->
-            <a href="formatos.html" 
-               class="card-portal bg-white rounded-xl shadow-lg p-8 text-center hover:bg-gradient-to-br hover:from-green-50 hover:to-emerald-50 border-2 border-transparent hover:border-green-300">
-                <div class="text-6xl mb-4">📋</div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">
+            <!-- Opción 3: Formatos Oficiales -->
+            <div onclick="showComingSoon('Formatos Oficiales')" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-green-400 cursor-pointer animate-fadeInUp delay-300">
+                <span class="badge-soon">Próximamente</span>
+                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📋</div>
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
                     Formatos Oficiales
                 </h3>
-                <p class="text-sm text-gray-600">
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Descargar formatos y documentos
                 </p>
-            </a>
+                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
+                    En desarrollo
+                </div>
+            </div>
 
-            <!-- Opción 4: SGI -->
-            <a href="sgi.html" 
-               class="card-portal bg-white rounded-xl shadow-lg p-8 text-center hover:bg-gradient-to-br hover:from-purple-50 hover:to-violet-50 border-2 border-transparent hover:border-purple-300">
-                <div class="text-6xl mb-4">📁</div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">
+            <!-- Opción 4: Información SGI -->
+            <div onclick="showComingSoon('Información SGI')" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-purple-400 cursor-pointer animate-fadeInUp delay-400">
+                <span class="badge-soon">Próximamente</span>
+                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📁</div>
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
                     Información SGI
                 </h3>
-                <p class="text-sm text-gray-600">
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Sistema de Gestión Integral
                 </p>
-            </a>
+                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
+                    En desarrollo
+                </div>
+            </div>
 
             <!-- Opción 5: Portal Instructores -->
-            <a href="inscripciones.html#instructor" 
-               class="card-portal bg-white rounded-xl shadow-lg p-8 text-center hover:bg-gradient-to-br hover:from-indigo-50 hover:to-blue-50 border-2 border-transparent hover:border-indigo-300">
-                <div class="text-6xl mb-4">👨‍🏫</div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">
+            <a href="inscripciones.html" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-500">
+                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
                     Portal Instructores
                 </h3>
-                <p class="text-sm text-gray-600">
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Subir propuestas y evidencias
                 </p>
+                <div class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
             </a>
 
-            <!-- Opción 6: Estadísticas -->
-            <a href="estadisticas.html" 
-               class="card-portal bg-white rounded-xl shadow-lg p-8 text-center hover:bg-gradient-to-br hover:from-orange-50 hover:to-amber-50 border-2 border-transparent hover:border-orange-300">
-                <div class="text-6xl mb-4">📈</div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">
+            <!-- Opción 6: Encuestas de Opinión -->
+            <div onclick="showComingSoon('Encuestas de Opinión')" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-yellow-400 cursor-pointer animate-fadeInUp delay-600">
+                <span class="badge-soon">Próximamente</span>
+                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📊</div>
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+                    Encuestas de Opinión
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Evaluación de cursos y servicios
+                </p>
+                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
+                    En desarrollo
+                </div>
+            </div>
+
+            <!-- Opción 7: Estadísticas -->
+            <div onclick="showComingSoon('Estadísticas')" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-orange-400 cursor-pointer animate-fadeInUp delay-700">
+                <span class="badge-soon">Próximamente</span>
+                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📈</div>
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
                     Estadísticas
                 </h3>
-                <p class="text-sm text-gray-600">
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Métricas e indicadores
                 </p>
-                <span class="inline-block mt-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
-                    Próximamente
-                </span>
-            </a>
+                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
+                    En desarrollo
+                </div>
+            </div>
 
         </div>
 
-        <!-- Información Adicional -->
-        <div class="mt-12 text-center max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-3">
-                ℹ️ Información Importante
-            </h3>
-            <ul class="text-sm text-gray-600 space-y-2 text-left">
-                <li>✅ Para inscribirse necesita su CURP y email institucional</li>
-                <li>✅ Puede inscribirse hasta en 3 cursos simultáneamente</li>
-                <li>✅ Los formatos deben llenarse en formato digital</li>
-                <li>✅ Consulte su folio después de inscribirse</li>
-            </ul>
+        <!-- Panel de Información -->
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="text-3xl sm:text-4xl">ℹ️</div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800">
+                        Información Importante
+                    </h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-start gap-3 bg-blue-50 p-4 rounded-lg">
+                        <div class="text-2xl flex-shrink-0">✅</div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Requisitos</p>
+                            <p class="text-xs text-gray-600 mt-1">CURP y email institucional válidos</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 bg-green-50 p-4 rounded-lg">
+                        <div class="text-2xl flex-shrink-0">📚</div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Límite de cursos</p>
+                            <p class="text-xs text-gray-600 mt-1">Hasta 3 cursos simultáneamente</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 bg-purple-50 p-4 rounded-lg">
+                        <div class="text-2xl flex-shrink-0">📝</div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Formatos</p>
+                            <p class="text-xs text-gray-600 mt-1">Deben llenarse en formato digital (PDF)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 bg-orange-50 p-4 rounded-lg">
+                        <div class="text-2xl flex-shrink-0">🔍</div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Folio</p>
+                            <p class="text-xs text-gray-600 mt-1">Guarde su folio de registro</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ayuda y Soporte -->
+        <div class="max-w-4xl mx-auto mt-8">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 sm:p-8 text-white text-center">
+                <div class="text-4xl mb-4">💬</div>
+                <h3 class="text-xl sm:text-2xl font-bold mb-2">
+                    ¿Necesitas Ayuda?
+                </h3>
+                <p class="text-sm sm:text-base mb-4 opacity-90">
+                    Contacta a la Coordinación de Actualización Docente
+                </p>
+                <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
+                   class="inline-block bg-white text-blue-600 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
+                    📧 Enviar Email
+                </a>
+            </div>
         </div>
 
     </main>
 
     <!-- Footer -->
-    <footer class="bg-blue-900 text-white text-center py-6 mt-12">
-        <p class="font-semibold">
-            © Coordinación de Actualización Docente
-        </p>
-        <p class="text-sm mt-1">
-            M.C. Alejandro Calderón Rentería - Todos los derechos reservados 2024
-        </p>
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <p class="font-semibold text-sm sm:text-base mb-2">
+                © Coordinación de Actualización Docente
+            </p>
+            <p class="text-xs sm:text-sm opacity-90">
+                M.C. Alejandro Calderón Rentería
+            </p>
+            <p class="text-xs sm:text-sm opacity-75 mt-1">
+                Todos los derechos reservados 2024
+            </p>
+        </div>
     </footer>
+
+    <!-- Modal "Próximamente" -->
+    <div id="comingSoonModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center transform transition-all animate-fadeInUp">
+            <div class="text-6xl mb-4">🚧</div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2" id="modalTitle">
+                Próximamente
+            </h3>
+            <p class="text-gray-600 mb-6">
+                Esta sección está en desarrollo y estará disponible pronto.
+            </p>
+            <button onclick="closeModal()" 
+                    class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // =============================================================================
+        // FRASES INSPIRACIONALES SOBRE EDUCACIÓN Y CIENCIA
+        // =============================================================================
+        const inspirationalQuotes = [
+            {
+                quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.",
+                author: "Nelson Mandela"
+            },
+            {
+                quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.",
+                author: "Carl Sagan"
+            },
+            {
+                quote: "La educación no es preparación para la vida; la educación es la vida misma.",
+                author: "John Dewey"
+            },
+            {
+                quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.",
+                author: "Albert Einstein"
+            },
+            {
+                quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.",
+                author: "Platón"
+            },
+            {
+                quote: "La ciencia no conoce fronteras, porque el conocimiento pertenece a la humanidad.",
+                author: "Louis Pasteur"
+            },
+            {
+                quote: "Educación es lo que queda después de olvidar lo que se ha aprendido en la escuela.",
+                author: "Albert Einstein"
+            },
+            {
+                quote: "La investigación es ver lo que todos han visto y pensar lo que nadie ha pensado.",
+                author: "Albert Szent-Györgyi"
+            },
+            {
+                quote: "Un maestro afecta la eternidad; nunca se sabe dónde termina su influencia.",
+                author: "Henry Adams"
+            },
+            {
+                quote: "La mejor forma de predecir el futuro es inventándolo.",
+                author: "Alan Kay"
+            },
+            {
+                quote: "La ciencia es el alma de la prosperidad de las naciones y la fuente de vida de todo progreso.",
+                author: "Louis Pasteur"
+            },
+            {
+                quote: "El aprendizaje es un tesoro que seguirá a su dueño a todas partes.",
+                author: "Proverbio Chino"
+            },
+            {
+                quote: "La educación genera confianza. La confianza genera esperanza. La esperanza genera paz.",
+                author: "Confucio"
+            },
+            {
+                quote: "En la ciencia no hay caminos reales, y sólo aquellos que no temen la fatiga de escalar sus senderos abruptos tienen esperanza de llegar a sus cimas luminosas.",
+                author: "Karl Marx"
+            },
+            {
+                quote: "La función de la educación es enseñar a pensar intensa y críticamente. Inteligencia más carácter: ese es el objetivo de la verdadera educación.",
+                author: "Martin Luther King Jr."
+            }
+        ];
+
+        // =============================================================================
+        // RELOJ EN TIEMPO REAL
+        // =============================================================================
+        function startClock() {
+            function updateClock() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+
+        // =============================================================================
+        // FECHA ACTUAL
+        // =============================================================================
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateString = now.toLocaleDateString('es-MX', options);
+            document.getElementById('currentDate').textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+        }
+
+        // =============================================================================
+        // FRASES INSPIRACIONALES (Cambian cada 20 segundos)
+        // =============================================================================
+        function showRandomQuote() {
+            const randomIndex = Math.floor(Math.random() * inspirationalQuotes.length);
+            const quote = inspirationalQuotes[randomIndex];
+            
+            const quoteElement = document.getElementById('inspirationalQuote');
+            const authorElement = document.getElementById('quoteAuthor');
+            
+            // Fade out
+            quoteElement.style.opacity = '0';
+            authorElement.style.opacity = '0';
+            
+            setTimeout(() => {
+                quoteElement.textContent = `"${quote.quote}"`;
+                authorElement.textContent = `- ${quote.author}`;
+                
+                // Fade in
+                quoteElement.style.transition = 'opacity 1s ease-in';
+                authorElement.style.transition = 'opacity 1s ease-in';
+                quoteElement.style.opacity = '1';
+                authorElement.style.opacity = '1';
+            }, 500);
+        }
+
+        // Cambiar frase cada 20 segundos
+        setInterval(showRandomQuote, 20000);
+
+        // =============================================================================
+        // MODALES
+        // =============================================================================
+        function showComingSoon(sectionName) {
+            document.getElementById('modalTitle').textContent = sectionName;
+            document.getElementById('comingSoonModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('comingSoonModal').classList.add('hidden');
+        }
+
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Cerrar modal al hacer click fuera
+        document.getElementById('comingSoonModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // =============================================================================
+        // INICIALIZACIÓN
+        // =============================================================================
+        window.addEventListener('load', function() {
+            startClock();
+            updateDate();
+            showRandomQuote();
+            
+            console.log('%c Portal ITD - Listo ', 
+                'background: #1e3a8a; color: white; font-size: 16px; padding: 8px; border-radius: 4px;'
+            );
+        });
+    </script>
 
 </body>
 </html>
