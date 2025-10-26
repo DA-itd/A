@@ -1159,11 +1159,14 @@ const Step4Success = ({ registrationResult, applicantName, selectedCourses, subm
                 )
             )
         ),
-        React.createElement('div', { className: 'mt-8 border-t pt-6' },
-            React.createElement('p', { className: 'text-xs sm:text-sm text-gray-500' },
-                'El proceso ha finalizado. Puede cerrar esta ventana.'
+            React.createElement('div', { className: 'mt-8 border-t pt-6' },
+                React.createElement('div', { className: 'flex justify-center' },
+                    React.createElement('a', {
+                        href: 'index.html',
+                        className: 'bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors inline-block'
+                    }, '← Volver al Portal Principal')
+                )
             )
-        )
     );
 };
 
