@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -191,7 +192,7 @@
                                                 <p className="text-xs text-gray-500 mb-4 font-mono bg-gray-100 px-2 py-1 rounded inline-block">
                                                     {formato.fileType}
                                                 </p>
-                                                <a href={formato.url}
+                                                <a href={formato.url.replace(/ /g, '%20')}
                                                    target="_blank" rel="noopener noreferrer" download
                                                    className="block w-full mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors flex items-center justify-center gap-2">
                                                     <span>⬇️</span> Descargar
@@ -223,11 +224,13 @@
             );
         };
 
-        const rootElement = document.getElementById('root');
-        if (rootElement) {
-            const root = ReactDOM.createRoot(rootElement);
-            root.render(<React.StrictMode><FormatosApp /></React.StrictMode>);
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const rootElement = document.getElementById('root');
+            if (rootElement) {
+                const root = ReactDOM.createRoot(rootElement);
+                root.render(<React.StrictMode><FormatosApp /></React.StrictMode>);
+            }
+        });
     </script>
 </body>
 </html>
