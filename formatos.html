@@ -7,6 +7,9 @@
     
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
     
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
@@ -21,7 +24,7 @@
         }
         
         .animate-fadeIn {
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeIn 0.5s ease-out forwards;
         }
 
         .format-card {
@@ -63,143 +66,8 @@
         </div>
     </header>
 
-    <!-- Contenido Principal -->
-    <main class="container mx-auto px-4 py-8 sm:py-12">
-        <div class="max-w-6xl mx-auto">
-            
-            <!-- Botón Volver -->
-            <a href="index.html" 
-               class="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline mb-6 text-sm sm:text-base">
-                ← Volver al Portal Principal
-            </a>
-
-            <!-- Mensaje de Bienvenida -->
-            <div class="bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl p-6 sm:p-8 text-white mb-8 animate-fadeIn">
-                <div class="flex items-center gap-4">
-                    <div class="text-5xl">📋</div>
-                    <div>
-                        <h2 class="text-2xl sm:text-3xl font-bold mb-2">Descarga de Formatos</h2>
-                        <p class="text-sm sm:text-base opacity-90">
-                            Aquí encontrará los documentos oficiales necesarios para los procesos de actualización docente.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Grid de Formatos -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                
-                <!-- Formato 1 -->
-                <div class="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500">
-                    <div class="text-5xl mb-4">📘</div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-2 h-16">
-                        CVU - Curriculum del Instructor
-                    </h3>
-                    <p class="text-xs text-gray-500 mb-4">
-                        Formato Word (.doc)
-                    </p>
-                    <a href="https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/TecNM-AC-PO-005-11%20CVU%20curriculum%20del%20instructor%20(1).doc"
-                       target="_blank" rel="noopener noreferrer" download
-                       class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
-                        ⬇️ Descargar
-                    </a>
-                </div>
-                
-                <!-- Formato 2 -->
-                <div class="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500">
-                    <div class="text-5xl mb-4">📗</div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-2 h-16">
-                        Ficha Técnica del Curso
-                    </h3>
-                    <p class="text-xs text-gray-500 mb-4">
-                        Formato Word (.doc)
-                    </p>
-                    <a href="https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/TecNM-AC-PO-005-12%20FICHA%20TECNICA%20(1).doc"
-                       target="_blank" rel="noopener noreferrer" download
-                       class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
-                        ⬇️ Descargar
-                    </a>
-                </div>
-
-                <!-- Formato 3 -->
-                <div class="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500">
-                    <div class="text-5xl mb-4">📝</div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-2 h-16">
-                        Detección de necesidades
-                    </h3>
-                    <p class="text-xs text-gray-500 mb-4">
-                        Formato Word (.docx)
-                    </p>
-                    <a href="https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/ITD-AC-PO-10-01%20Deteccion%20de%20necesidades.docx"
-                       target="_blank" rel="noopener noreferrer" download
-                       class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
-                        ⬇️ Descargar
-                    </a>
-                </div>
-
-                <!-- Formato 4 -->
-                <div class="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500">
-                    <div class="text-5xl mb-4">🔐</div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-2 h-16">
-                        Criterios para Seleccionar Instructores
-                    </h3>
-                    <p class="text-xs text-gray-500 mb-4">
-                        Formato Word (.docx)
-                    </p>
-                    <a href="https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/ITD-AD-FO-06%20Formatos%20de%20Criterios%20para%20Seleccionar%20Instructores.docx"
-                       target="_blank" rel="noopener noreferrer" download
-                       class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
-                        ⬇️ Descargar
-                    </a>
-                </div>
-
-                <!-- Formato 5 -->
-                <div class="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-purple-500">
-                    <div class="text-5xl mb-4">📄</div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-2 h-16">
-                        Oficio de registro de cursos 2025
-                    </h3>
-                    <p class="text-xs text-gray-500 mb-4">
-                        Formato Word (.docx)
-                    </p>
-                    <a href="https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/ITD-AD-FO-07-Oficio%20de%20registro%20de%20cursos%202025.docx"
-                       target="_blank" rel="noopener noreferrer" download
-                       class="block w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
-                        ⬇️ Descargar
-                    </a>
-                </div>
-
-                <!-- Formato 6 -->
-                <div class="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-teal-500">
-                    <div class="text-5xl mb-4">📊</div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-2 h-16">
-                        Formato de Lista de Asistencia
-                    </h3>
-                    <p class="text-xs text-gray-500 mb-4">
-                        Formato Excel (.xlsx)
-                    </p>
-                    <a href="https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/ITD-AD-FO-08%20Formato%20de%20Lista%20de%20Asistencia_.xlsx"
-                       target="_blank" rel="noopener noreferrer" download
-                       class="block w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
-                        ⬇️ Descargar
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Contacto -->
-            <div class="mt-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white text-center">
-                <div class="text-4xl mb-3">💬</div>
-                <h3 class="text-xl font-bold mb-2">¿Necesitas Ayuda?</h3>
-                <p class="text-sm opacity-90 mb-4">
-                    Si tienes problemas para descargar algún formato, contáctanos.
-                </p>
-                <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
-                   class="inline-block bg-white text-blue-600 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
-                    📧 Enviar Email
-                </a>
-            </div>
-        </div>
-    </main>
+    <!-- Contenido Principal (React lo renderizará aquí) -->
+    <div id="root"></div>
 
     <!-- Footer -->
     <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
@@ -216,5 +84,188 @@
         </div>
     </footer>
 
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        const FORMATOS_DATA = [
+            {
+                id: 'cvu',
+                title: 'CVU - Curriculum del Instructor',
+                description: 'Formato estandarizado para registrar el curriculum vitae de los instructores.',
+                category: 'Instructores',
+                fileType: 'Word (.doc)',
+                icon: '📘',
+                url: 'https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/TecNM-AC-PO-005-11%20CVU%20curriculum%20del%20instructor%20(1).doc'
+            },
+            {
+                id: 'ficha_tecnica',
+                title: 'Ficha Técnica del Curso',
+                description: 'Documento con los detalles técnicos, objetivos y contenido de un curso propuesto.',
+                category: 'Instructores',
+                fileType: 'Word (.doc)',
+                icon: '📗',
+                url: 'https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/TecNM-AC-PO-005-12%20FICHA%20TECNICA%20(1).doc'
+            },
+            {
+                id: 'deteccion_necesidades',
+                title: 'Detección de necesidades',
+                description: 'Formato para la Detección de Necesidades de los Departamentos Académicos.',
+                category: 'Generales',
+                fileType: 'Word (.docx)',
+                icon: '📝',
+                url: 'https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/ITD-AC-PO-10-01%20Deteccion%20de%20necesidades.docx'
+            },
+            {
+                id: 'criterios_instructores',
+                title: 'Criterios para Seleccionar Instructores',
+                description: 'Define los lineamientos y requisitos para la selección de instructores.',
+                category: 'Generales',
+                fileType: 'Word (.docx)',
+                icon: '🔐',
+                url: 'https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/ITD-AD-FO-06%20Formatos%20de%20Criterios%20para%20Seleccionar%20Instructores.docx'
+            },
+            {
+                id: 'oficio_registro',
+                title: 'Oficio de registro de cursos 2025',
+                description: 'Documento oficial para el registro de cursos para el próximo ciclo.',
+                category: 'Generales',
+                fileType: 'Word (.docx)',
+                icon: '📄',
+                url: 'https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/ITD-AD-FO-07-Oficio%20de%20registro%20de%20cursos%202025.docx'
+            },
+            {
+                id: 'lista_asistencia',
+                title: 'Formato de Lista de Asistencia',
+                description: 'Plantilla para registrar la asistencia de los participantes a los cursos.',
+                category: 'Reportes',
+                fileType: 'Excel (.xlsx)',
+                icon: '📊',
+                url: 'https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/ITD-AD-FO-08%20Formato%20de%20Lista%20de%20Asistencia_.xlsx'
+            }
+        ];
+
+        const removeAccents = (text) => text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+
+        const FormatosApp = () => {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [activeCategory, setActiveCategory] = useState('Todos');
+
+            const categories = ['Todos', ...new Set(FORMATOS_DATA.map(f => f.category))];
+
+            const filteredFormatos = useMemo(() => {
+                return FORMATOS_DATA.filter(formato => {
+                    const categoryMatch = activeCategory === 'Todos' || formato.category === activeCategory;
+                    const searchMatch = removeAccents(formato.title.toLowerCase()).includes(removeAccents(searchTerm.toLowerCase()));
+                    return categoryMatch && searchMatch;
+                });
+            }, [searchTerm, activeCategory]);
+
+            return (
+                <main className="container mx-auto px-4 py-8 sm:py-12">
+                    <div className="max-w-6xl mx-auto">
+                        <a href="index.html" className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline mb-6 text-sm sm:text-base">
+                            ← Volver al Portal Principal
+                        </a>
+
+                        <div className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl shadow-xl p-6 sm:p-8 text-white mb-8 animate-fadeIn">
+                            <div className="flex items-center gap-4">
+                                <div className="text-5xl">📋</div>
+                                <div>
+                                    <h2 className="text-2xl sm:text-3xl font-bold mb-2">Descarga de Formatos</h2>
+                                    <p className="text-sm sm:text-base opacity-90">
+                                        Aquí encontrará los documentos oficiales necesarios para los procesos de actualización docente.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-8 animate-fadeIn">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
+                                <div className="lg:col-span-2">
+                                    <label htmlFor="search-format" className="sr-only">Buscar formato</label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            id="search-format"
+                                            placeholder="Buscar por nombre..."
+                                            value={searchTerm}
+                                            onChange={e => setSearchTerm(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                                     {categories.map(category => (
+                                        <button
+                                            key={category}
+                                            onClick={() => setActiveCategory(category)}
+                                            className={`px-4 py-2 text-sm font-semibold rounded-full whitespace-nowrap transition-colors ${
+                                                activeCategory === category
+                                                    ? 'bg-indigo-600 text-white shadow-md'
+                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            }`}
+                                        >
+                                            {category}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {filteredFormatos.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                                {filteredFormatos.map(formato => (
+                                    <div key={formato.id} className="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-indigo-500 flex flex-col animate-fadeIn">
+                                        <div className="text-5xl mb-4">{formato.icon}</div>
+                                        <h3 className="text-lg font-bold text-gray-800 mb-2 flex-grow">
+                                            {formato.title}
+                                        </h3>
+                                        <p className="text-sm text-gray-600 mb-4">{formato.description}</p>
+                                        <p className="text-xs text-gray-500 mb-4 font-mono bg-gray-100 px-2 py-1 rounded inline-block">
+                                            {formato.fileType}
+                                        </p>
+                                        <a href={formato.url}
+                                           target="_blank" rel="noopener noreferrer" download
+                                           className="block w-full mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors flex items-center justify-center gap-2">
+                                            <span>⬇️</span> Descargar
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-16 bg-white rounded-lg shadow-md animate-fadeIn">
+                                <div className="text-5xl mb-4">🙁</div>
+                                <h3 className="text-xl font-bold text-gray-700">No se encontraron formatos</h3>
+                                <p className="text-gray-500 mt-2">Intente ajustar su búsqueda o cambiar la categoría.</p>
+                            </div>
+                        )}
+                        
+                        <div className="mt-8 bg-gradient-to-r from-gray-700 to-gray-800 rounded-2xl shadow-xl p-6 text-white text-center">
+                            <div className="text-4xl mb-3">💬</div>
+                            <h3 className="text-xl font-bold mb-2">¿Necesitas Ayuda?</h3>
+                            <p className="text-sm opacity-90 mb-4">
+                                Si tienes problemas para descargar algún formato, contáctanos.
+                            </p>
+                            <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
+                               className="inline-block bg-white text-gray-800 font-bold px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors">
+                                📧 Enviar Email
+                            </a>
+                        </div>
+                    </div>
+                </main>
+            );
+        };
+
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+            const root = ReactDOM.createRoot(rootElement);
+            root.render(<React.StrictMode><FormatosApp /></React.StrictMode>);
+        }
+    </script>
 </body>
 </html>
