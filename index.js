@@ -1205,15 +1205,16 @@ const Step4Success = ({ registrationResult, applicantName, selectedCourses, subm
 // =============================================================================
 // == RENDERIZADO DE LA APLICACIÓN
 // =============================================================================
-
-const rootElement = document.getElementById('root');
-if (rootElement) {
-    const root = ReactDOM.createRoot(rootElement);
-    root.render(
-        React.createElement(React.StrictMode, null,
-            React.createElement(App, null)
-        )
-    );
-} else {
-    console.error('No se encontró el elemento root');
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(
+            React.createElement(React.StrictMode, null,
+                React.createElement(App, null)
+            )
+        );
+    } else {
+        console.error('No se encontró el elemento root');
+    }
+});
