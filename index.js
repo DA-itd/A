@@ -1,8 +1,7 @@
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
-// Versión: 1.2.0 - Optimizado y corregido
+// Versión: 2.0.0 - UI/UX Mejorada
 // Última actualización: Enero 2024
-// PARTE 1 DE 4
 // =============================================================================
 
 // =============================================================================
@@ -71,9 +70,6 @@ const cleanCSVValue = (val) => {
     }
     return cleaned;
 };
-// =============================================================================
-// PARTE 2 DE 4
-// =============================================================================
 
 // =============================================================================
 // == API SERVICE
@@ -224,15 +220,6 @@ const cancelSingleCourse = async (payload) => {
     }
 };
 
-const fileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-};
-
 // =============================================================================
 // == COMPONENTE PRINCIPAL APP
 // =============================================================================
@@ -342,7 +329,7 @@ const App = () => {
     const renderContent = () => {
         if (isLoading) {
             return React.createElement('div', { className: 'flex justify-center items-center h-64' },
-                React.createElement('div', { className: 'animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-rose-800' })
+                React.createElement('div', { className: 'animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-800' })
             );
         }
         
@@ -402,9 +389,6 @@ const App = () => {
         )
     );
 };
-// =============================================================================
-// PARTE 3 DE 4
-// =============================================================================
 
 // =============================================================================
 // == COMPONENTE STEPPER
@@ -425,17 +409,17 @@ const Stepper = ({ currentStep, steps }) => {
                         React.createElement('div', { className: 'relative flex items-center justify-center' },
                             React.createElement('div', {
                                 className: `w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center z-10 rounded-full font-semibold text-white text-sm sm:text-base transition-colors duration-300 ${
-                                    isCompleted ? 'bg-rose-800' : (isActive ? 'bg-rose-800' : 'bg-gray-300')
+                                    isCompleted ? 'bg-blue-800' : (isActive ? 'bg-blue-800' : 'bg-gray-300')
                                 }`
                             }, index + 1),
                             index < steps.length - 1 && React.createElement('div', {
-                                className: `absolute w-full top-1/2 -translate-y-1/2 left-1/2 h-1 ${isCompleted ? 'bg-rose-800' : 'bg-gray-300'}`
+                                className: `absolute w-full top-1/2 -translate-y-1/2 left-1/2 h-1 ${isCompleted ? 'bg-blue-800' : 'bg-gray-300'}`
                             })
                         ),
                         React.createElement('div', { className: 'mt-2' },
                             React.createElement('p', {
                                 className: `text-xs sm:text-sm font-medium transition-colors duration-300 ${
-                                    isCompleted || isActive ? 'text-rose-800' : 'text-gray-500'
+                                    isCompleted || isActive ? 'text-blue-800' : 'text-gray-500'
                                 }`
                             }, step)
                         )
@@ -511,7 +495,7 @@ const ExistingRegistrationModal = ({ isOpen, courses, onModify, onClose, onDelet
             React.createElement('div', { className: 'mt-8 flex flex-col sm:flex-row-reverse gap-3' },
                 React.createElement('button', {
                     onClick: onModify,
-                    className: 'w-full sm:w-auto bg-rose-800 text-white font-bold py-2 px-6 rounded-lg hover:bg-rose-900'
+                    className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800'
                 }, 'Modificar Selección'),
                 React.createElement('button', {
                     onClick: onCancelAll,
@@ -864,24 +848,27 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                 React.createElement('div', { className: 'mt-8 flex justify-end' },
                     React.createElement('button', {
                         type: 'submit',
-                        className: 'w-full sm:w-auto bg-rose-800 text-white font-bold py-2 px-6 rounded-lg hover:bg-rose-900'
+                        className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800'
                     }, 'Continuar')
                 )
             )
         )
     );
 };
-// =============================================================================
-// PARTE 4 DE 4 - FINAL
-// =============================================================================
 
 // =============================================================================
-// == STEP 2: SELECCIÓN DE CURSOS
+// == STEP 2: SELECCIÓN DE CURSOS (UI/UX Mejorada)
 // =============================================================================
 
 const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, originalSelectedCourses, onNext, onBack }) => {
-    const { useState } = React;
+    const { useState, useMemo } = React;
     const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterPeriod, setFilterPeriod] = useState('all');
+    const [filterType, setFilterType] = useState('all');
+
+    const availablePeriods = useMemo(() => [...new Set(courses.map(c => c.period).filter(Boolean))], [courses]);
+    const availableTypes = useMemo(() => [...new Set(courses.map(c => c.type).filter(Boolean))], [courses]);
 
     const schedulesOverlap = (course1, course2) => {
         if (!course1.dates || !course2.dates || course1.dates !== course2.dates) return false;
@@ -912,11 +899,11 @@ const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, or
             newSelection = newSelection.filter(c => c.id !== course.id);
         } else {
             if (selectedCourses.length >= 3) {
-                setError("No puede seleccionar más de 3 cursos");
+                setError("No puede seleccionar más de 3 cursos.");
                 return;
             }
             if (selectedCourses.some(selected => schedulesOverlap(selected, course))) {
-                setError("Horario se solapa con otra selección");
+                setError("El horario de este curso se solapa con otra selección.");
                 return;
             }
             newSelection.push(course);
@@ -927,110 +914,125 @@ const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, or
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
-        const isTotalCancellation = selectedCourses.length === 0 && 
-                                   originalSelectedCourses && 
-                                   originalSelectedCourses.length > 0;
-        
+        const isTotalCancellation = selectedCourses.length === 0 && originalSelectedCourses && originalSelectedCourses.length > 0;
         if (selectedCourses.length > 0 || isTotalCancellation) {
             onNext();
         } else {
-            setError("Debe seleccionar al menos un curso o confirmar la cancelación total");
+            setError("Debe seleccionar al menos un curso.");
         }
     };
+    
+    const filteredCourses = useMemo(() => {
+        return courses.filter(course => {
+            const searchMatch = removeAccents(course.name.toLowerCase()).includes(removeAccents(searchTerm.toLowerCase()));
+            const periodMatch = filterPeriod === 'all' || course.period === filterPeriod;
+            const typeMatch = filterType === 'all' || course.type === filterType;
+            return searchMatch && periodMatch && typeMatch;
+        });
+    }, [courses, searchTerm, filterPeriod, filterType]);
 
-    return React.createElement('div', { className: 'bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md w-full max-w-4xl mx-auto' },
-        React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold mb-2 text-gray-800' }, 
-            'Selección de Cursos'
-        ),
-        React.createElement('p', { className: 'text-sm sm:text-base text-gray-600 mb-6' }, 
-            'Seleccione hasta 3 cursos. No puede seleccionar cursos con horarios que se solapen.'
-        ),
-        React.createElement('div', { className: 'bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-md' },
-            React.createElement('p', { className: 'font-bold text-sm sm:text-base' }, 
-                `Cursos seleccionados: ${selectedCourses.length} / 3`
-            )
-        ),
-        error && React.createElement('div', { 
-            className: 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md', 
-            role: 'alert' 
-        },
-            React.createElement('p', { className: 'text-sm sm:text-base' }, error)
-        ),
-        React.createElement('div', { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' },
-            courses.map(course => {
-                const isSelected = selectedCourses.some(c => c.id === course.id);
-                const hasConflict = !isSelected && selectedCourses.some(selected => schedulesOverlap(selected, course));
-                const hasReachedMax = !isSelected && selectedCourses.length >= 3;
-                const isDisabled = hasConflict || hasReachedMax;
+    const CheckmarkIcon = () => React.createElement('svg', {
+        className: 'h-3 w-3 sm:h-4 sm:w-4 text-white', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor'
+    }, React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: '3', d: 'M5 13l4 4L19 7' }));
 
-                const basePeriodStyles = course.period === 'PERIODO_1' 
-                    ? 'border-t-4 border-teal-400 bg-teal-50 hover:shadow-md' 
-                    : 'border-t-4 border-indigo-400 bg-indigo-50 hover:shadow-md';
-                const selectedRing = course.period === 'PERIODO_1' 
-                    ? 'peer-checked:ring-teal-500' 
-                    : 'peer-checked:ring-indigo-500';
-                const textColor = course.period === 'PERIODO_1' ? 'text-teal-800' : 'text-indigo-800';
-
-                return React.createElement('div', { key: course.id, className: 'relative h-full' },
+    return React.createElement('div', { className: 'bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md w-full max-w-7xl mx-auto' },
+        React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold mb-2 text-gray-800' }, 'Selección de Cursos'),
+        React.createElement('p', { className: 'text-sm sm:text-base text-gray-600 mb-6' }, 'Seleccione hasta 3 cursos. No puede inscribir cursos con horarios que se solapen.'),
+        
+        React.createElement('div', { className: 'flex flex-col lg:flex-row gap-8' },
+            React.createElement('div', { className: 'flex-grow lg:w-2/3' },
+                React.createElement('div', { className: 'mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-gray-50 p-4 rounded-lg' },
                     React.createElement('input', {
-                        type: 'checkbox',
-                        id: `course-${course.id}`,
-                        checked: isSelected,
-                        disabled: isDisabled,
-                        onChange: () => handleSelectCourse(course),
-                        className: 'sr-only peer'
+                        type: 'text',
+                        placeholder: '🔍 Buscar por nombre...',
+                        className: 'sm:col-span-3 lg:col-span-1 w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm',
+                        value: searchTerm,
+                        onChange: e => setSearchTerm(e.target.value)
                     }),
-                    React.createElement('label', {
-                        htmlFor: `course-${course.id}`,
-                        className: `p-3 sm:p-4 rounded-lg border border-gray-200 transition-all duration-200 flex flex-col justify-between h-full ${basePeriodStyles} peer-disabled:opacity-60 peer-disabled:cursor-not-allowed peer-checked:ring-2 peer-checked:ring-offset-2 ${selectedRing} cursor-pointer`
+                    React.createElement('select', {
+                        className: 'w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm',
+                        value: filterPeriod,
+                        onChange: e => setFilterPeriod(e.target.value)
                     },
-                        React.createElement('div', null,
-                            React.createElement('h3', { className: `font-bold text-xs sm:text-sm mb-2 ${textColor}` }, 
-                                course.name
-                            ),
-                            React.createElement('div', { className: 'text-xs text-gray-600 space-y-1' },
-                                React.createElement('p', null, React.createElement('strong', null, 'Fechas: '), course.dates),
-                                React.createElement('p', null, React.createElement('strong', null, 'Horario: '), course.schedule),
-                                React.createElement('p', null, React.createElement('strong', null, 'Lugar: '), course.location)
-                            )
-                        ),
-                        React.createElement('div', { className: 'flex justify-end mt-3 h-5 w-5' },
-                            React.createElement('div', {
-                                className: `h-5 w-5 border-2 rounded-sm flex items-center justify-center transition-colors ${
-                                    isSelected ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'
-                                } ${isDisabled ? 'bg-gray-200 border-gray-300' : ''}`
-                            },
-                                isSelected && React.createElement('svg', {
-                                    className: 'h-4 w-4 text-white',
-                                    fill: 'none',
-                                    viewBox: '0 0 24 24',
-                                    stroke: 'currentColor'
-                                },
-                                    React.createElement('path', {
-                                        strokeLinecap: 'round',
-                                        strokeLinejoin: 'round',
-                                        strokeWidth: '3',
-                                        d: 'M5 13l4 4L19 7'
-                                    })
+                        React.createElement('option', { value: 'all' }, 'Todos los Periodos'),
+                        availablePeriods.map(p => React.createElement('option', { key: p, value: p }, p.replace(/_/g, ' ')))
+                    ),
+                    React.createElement('select', {
+                        className: 'w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm',
+                        value: filterType,
+                        onChange: e => setFilterType(e.target.value)
+                    },
+                        React.createElement('option', { value: 'all' }, 'Todos los Tipos'),
+                        availableTypes.map(t => React.createElement('option', { key: t, value: t }, t))
+                    )
+                ),
+                error && React.createElement('div', { className: 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md', role: 'alert' },
+                    React.createElement('p', { className: 'text-sm sm:text-base' }, error)
+                ),
+                filteredCourses.length > 0
+                    ? React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
+                        filteredCourses.map(course => {
+                            const isSelected = selectedCourses.some(c => c.id === course.id);
+                            const hasConflict = !isSelected && selectedCourses.some(selected => schedulesOverlap(selected, course));
+                            const hasReachedMax = !isSelected && selectedCourses.length >= 3;
+                            const isDisabled = hasConflict || hasReachedMax;
+
+                            const baseStyles = course.period === 'PERIODO_1' 
+                                ? 'border-teal-300 bg-teal-50' 
+                                : 'border-indigo-300 bg-indigo-50';
+                            const checkedStyles = isSelected 
+                                ? (course.period === 'PERIODO_1' ? 'ring-2 ring-offset-2 ring-teal-500' : 'ring-2 ring-offset-2 ring-indigo-500') 
+                                : 'hover:shadow-md';
+
+                            return React.createElement('div', { key: course.id, className: 'relative h-full' },
+                                React.createElement('input', { type: 'checkbox', id: `course-${course.id}`, checked: isSelected, disabled: isDisabled, onChange: () => handleSelectCourse(course), className: 'sr-only peer' }),
+                                React.createElement('label', { htmlFor: `course-${course.id}`, className: `p-4 rounded-lg border-2 transition-all flex flex-col h-full ${baseStyles} ${isDisabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'} ${checkedStyles}` },
+                                    React.createElement('div', { className: 'flex-grow' },
+                                        React.createElement('div', { className: 'flex justify-between items-start' },
+                                            React.createElement('h3', { className: 'font-bold text-sm mb-3 pr-4 text-gray-800' }, course.name),
+                                            React.createElement('div', { className: `flex-shrink-0 h-5 w-5 sm:h-6 sm:w-6 border-2 rounded-md flex items-center justify-center transition-colors ${isSelected ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400'}` }, isSelected && React.createElement(CheckmarkIcon))
+                                        ),
+                                        React.createElement('div', { className: 'text-xs text-gray-700 space-y-2' },
+                                            React.createElement('p', null, React.createElement('span', { className: 'mr-2' }, '📅'), React.createElement('strong', null, 'Fechas: '), course.dates),
+                                            React.createElement('p', null, React.createElement('span', { className: 'mr-2' }, '🕒'), React.createElement('strong', null, 'Horario: '), course.schedule),
+                                            React.createElement('p', null, React.createElement('span', { className: 'mr-2' }, '📍'), React.createElement('strong', null, 'Lugar: '), course.location),
+                                            React.createElement('p', null, React.createElement('span', { className: 'mr-2' }, '💻'), React.createElement('strong', null, 'Tipo: '), course.type)
+                                        )
+                                    ),
+                                    React.createElement('div', { className: 'mt-3 text-right' },
+                                        React.createElement('span', { className: `px-2 py-1 text-xs font-semibold rounded-full ${course.period === 'PERIODO_1' ? 'bg-teal-200 text-teal-800' : 'bg-indigo-200 text-indigo-800'}` }, course.period.replace('_', ' '))
+                                    )
+                                ),
+                                hasConflict && React.createElement('div', { className: 'absolute inset-0 bg-yellow-200 bg-opacity-80 flex items-center justify-center p-2 rounded-lg' },
+                                    React.createElement('p', { className: 'text-xs font-bold text-yellow-800 text-center' }, '⚠️', React.createElement('br'), 'Conflicto de horario')
+                                )
+                            );
+                        })
+                    )
+                    : React.createElement('div', { className: 'text-center p-8 bg-gray-50 rounded-lg' },
+                        React.createElement('p', { className: 'text-gray-600' }, 'No se encontraron cursos con los filtros aplicados.')
+                      )
+            ),
+            React.createElement('div', { className: 'lg:w-1/3' },
+                React.createElement('div', { className: 'sticky top-24 bg-gray-50 p-4 rounded-lg shadow-inner border' },
+                    React.createElement('h3', { className: 'text-lg font-bold text-gray-800 border-b pb-2 mb-3' }, `Tu Selección (${selectedCourses.length} / 3)`),
+                    selectedCourses.length > 0 
+                        ? React.createElement('ul', { className: 'space-y-3' },
+                            selectedCourses.map(course => 
+                                React.createElement('li', { key: course.id, className: 'bg-white p-3 rounded-md shadow-sm flex justify-between items-center text-sm' },
+                                    React.createElement('span', { className: 'font-semibold text-gray-700 pr-2' }, course.name),
+                                    React.createElement('button', { onClick: () => handleSelectCourse(course), className: 'text-red-500 hover:text-red-700 font-bold text-lg', 'aria-label': `Quitar ${course.name}` }, '×')
                                 )
                             )
                         )
-                    )
-                );
-            })
+                        : React.createElement('p', { className: 'text-sm text-gray-500 p-4 text-center' }, 'Selecciona hasta 3 cursos de la lista.')
+                )
+            )
         ),
         React.createElement('form', { onSubmit: handleSubmit },
             React.createElement('div', { className: 'mt-8 flex flex-col-reverse sm:flex-row justify-between gap-3' },
-                React.createElement('button', {
-                    type: 'button',
-                    onClick: onBack,
-                    className: 'w-full sm:w-auto bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-400'
-                }, 'Regresar'),
-                React.createElement('button', {
-                    type: 'submit',
-                    className: 'w-full sm:w-auto bg-rose-800 text-white font-bold py-2 px-6 rounded-lg hover:bg-rose-900'
-                }, 'Continuar')
+                React.createElement('button', { type: 'button', onClick: onBack, className: 'w-full sm:w-auto bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-400' }, 'Regresar'),
+                React.createElement('button', { type: 'submit', className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800' }, 'Continuar')
             )
         )
     );
@@ -1122,7 +1124,7 @@ const Step3Confirmation = ({ formData, courses, originalCourses, onBack, onSubmi
             React.createElement('button', {
                 onClick: handleSubmit,
                 disabled: isSubmitting,
-                className: 'w-full sm:w-auto bg-rose-800 text-white font-bold py-2 px-6 rounded-lg hover:bg-rose-900 flex items-center justify-center gap-2 disabled:opacity-50'
+                className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800 flex items-center justify-center gap-2 disabled:opacity-50'
             },
                 isSubmitting ? '⏳ Procesando...' : (isCancellation ? 'Confirmar Cancelación' : 'Confirmar Registro')
             )
@@ -1131,7 +1133,7 @@ const Step3Confirmation = ({ formData, courses, originalCourses, onBack, onSubmi
 };
 
 // =============================================================================
-// == STEP 4: ÉXITO (CON BOTÓN DE SALIDA)
+// == STEP 4: ÉXITO
 // =============================================================================
 
 const Step4Success = ({ registrationResult, applicantName, selectedCourses, submissionType, emailSent, emailError }) => {
@@ -1170,7 +1172,7 @@ const Step4Success = ({ registrationResult, applicantName, selectedCourses, subm
                 coursesToDisplay.map((result) =>
                     React.createElement('li', {
                         key: result.registrationId || result.id,
-                        className: 'p-3 bg-gray-50 rounded-md border'
+                        className: `p-3 rounded-md border ${result.error ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'}`
                     },
                         React.createElement('div', { className: 'flex flex-col sm:flex-row sm:justify-between gap-2' },
                             React.createElement('span', { className: 'font-semibold text-sm sm:text-base text-gray-800' },
@@ -1179,11 +1181,12 @@ const Step4Success = ({ registrationResult, applicantName, selectedCourses, subm
                             ),
                             result.folio && React.createElement('span', { className: 'text-xs sm:text-sm' },
                                 'Folio: ',
-                                React.createElement('strong', { className: 'font-mono bg-gray-200 px-2 py-1 rounded' }, 
+                                React.createElement('strong', { className: `font-mono px-2 py-1 rounded ${result.error ? 'bg-red-200 text-red-800' : 'bg-gray-200'}` }, 
                                     result.folio
                                 )
                             )
-                        )
+                        ),
+                        result.error && React.createElement('p', { className: 'text-xs text-red-700 mt-1' }, `⚠️ ${result.error}`)
                     )
                 )
             )
@@ -1192,7 +1195,7 @@ const Step4Success = ({ registrationResult, applicantName, selectedCourses, subm
             React.createElement('div', { className: 'flex justify-center' },
                 React.createElement('a', {
                     href: 'index.html',
-                    className: 'bg-rose-800 hover:bg-rose-900 text-white font-bold py-3 px-8 rounded-lg transition-colors inline-block'
+                    className: 'bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-lg transition-colors inline-block'
                 }, '← Volver al Portal Principal')
             )
         )
