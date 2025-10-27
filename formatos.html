@@ -96,7 +96,7 @@
                 category: 'Instructores',
                 fileType: 'Word (.doc)',
                 icon: '📘',
-                url: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM-AC-PO-005-11%20CVU%20curriculum%20del%20instructor%20(1).doc'
+                url: 'https://github.com/DA-itd/web/raw/main/TecNM-AC-PO-005-11%20CVU%20curriculum%20del%20instructor%20(1).doc'
             },
             {
                 id: 'ficha_tecnica',
@@ -105,7 +105,7 @@
                 category: 'Instructores',
                 fileType: 'Word (.doc)',
                 icon: '📗',
-                url: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM-AC-PO-005-12%20FICHA%20TECNICA%20(1).doc'
+                url: 'https://github.com/DA-itd/web/raw/main/TecNM-AC-PO-005-12%20FICHA%20TECNICA%20(1).doc'
             },
             {
                 id: 'deteccion_necesidades',
@@ -114,7 +114,7 @@
                 category: 'Generales',
                 fileType: 'Word (.docx)',
                 icon: '🔍',
-                url: 'https://raw.githubusercontent.com/DA-itd/web/main/ITD-AC-PO-10-01%20Deteccion%20de%20necesidades.docx'
+                url: 'https://github.com/DA-itd/web/raw/main/ITD-AC-PO-10-01%20Deteccion%20de%20necesidades.docx'
             },
             {
                 id: 'criterios_instructores',
@@ -123,7 +123,7 @@
                 category: 'Instructores',
                 fileType: 'Word (.docx)',
                 icon: '🧑‍🏫',
-                url: 'https://raw.githubusercontent.com/DA-itd/web/main/ITD-AD-FO-06%20Formatos%20de%20Criterios%20para%20Seleccionar%20Instructores.docx'
+                url: 'https://github.com/DA-itd/web/raw/main/ITD-AD-FO-06%20Formatos%20de%20Criterios%20para%20Seleccionar%20Instructores.docx'
             },
             {
                 id: 'oficio_registro',
@@ -132,7 +132,7 @@
                 category: 'Generales',
                 fileType: 'Word (.docx)',
                 icon: '✉️',
-                url: 'https://raw.githubusercontent.com/DA-itd/web/main/ITD-AD-FO-07-Oficio%20de%20registro%20de%20cursos%202025.docx'
+                url: 'https://github.com/DA-itd/web/raw/main/ITD-AD-FO-07-Oficio%20de%20registro%20de%20cursos%202025.docx'
             },
             {
                 id: 'lista_asistencia',
@@ -141,7 +141,7 @@
                 category: 'Instructores',
                 fileType: 'Excel (.xlsx)',
                 icon: '📝',
-                url: 'https://raw.githubusercontent.com/DA-itd/web/main/ITD-AD-FO-08%20Formato%20de%20Lista%20de%20Asistencia_.xlsx'
+                url: 'https://github.com/DA-itd/web/raw/main/ITD-AD-FO-08%20Formato%20de%20Lista%20de%20Asistencia_.xlsx'
             }
         ];
 
@@ -167,23 +167,39 @@
                         
                         {FORMATOS_DATA.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                {FORMATOS_DATA.map(formato => (
-                                    <div key={formato.id} className="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-indigo-500 flex flex-col animate-fadeIn">
-                                        <div className="text-5xl mb-4">{formato.icon}</div>
-                                        <h3 className="text-lg font-bold text-gray-800 mb-2 flex-grow">
-                                            {formato.title}
-                                        </h3>
-                                        <p className="text-sm text-gray-600 mb-4">{formato.description}</p>
-                                        <p className="text-xs text-gray-500 mb-4 font-mono bg-gray-100 px-2 py-1 rounded inline-block">
-                                            {formato.fileType}
-                                        </p>
-                                        <a href={formato.url}
-                                           target="_blank" rel="noopener noreferrer" download
-                                           className="block w-full mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors flex items-center justify-center gap-2">
-                                            <span>⬇️</span> Descargar
-                                        </a>
-                                    </div>
-                                ))}
+                                {FORMATOS_DATA.map((formato, index) => {
+                                    const isHighlighted = formato.id === 'oficio_registro';
+                                    const cardClasses = isHighlighted 
+                                        ? "format-card bg-amber-50 rounded-xl shadow-xl p-6 border-t-4 border-amber-500 flex flex-col h-full"
+                                        : "format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-indigo-500 flex flex-col h-full";
+                                    
+                                    const animationDelay = { animationDelay: `${index * 100}ms`, opacity: 0 };
+
+                                    return (
+                                        <div key={formato.id} className="relative animate-fadeIn" style={animationDelay}>
+                                            {isHighlighted && (
+                                                <div className="absolute top-0 right-0 mt-3 mr-3 z-10 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                                                    MÁS USADO
+                                                </div>
+                                            )}
+                                            <div className={cardClasses}>
+                                                <div className="text-5xl mb-4">{formato.icon}</div>
+                                                <h3 className="text-lg font-bold text-gray-800 mb-2 flex-grow">
+                                                    {formato.title}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 mb-4">{formato.description}</p>
+                                                <p className="text-xs text-gray-500 mb-4 font-mono bg-gray-100 px-2 py-1 rounded inline-block">
+                                                    {formato.fileType}
+                                                </p>
+                                                <a href={formato.url}
+                                                   target="_blank" rel="noopener noreferrer" download
+                                                   className="block w-full mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors flex items-center justify-center gap-2">
+                                                    <span>⬇️</span> Descargar
+                                                </a>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         ) : (
                              <div className="text-center py-12 bg-gray-50 rounded-lg">
