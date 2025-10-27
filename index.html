@@ -158,7 +158,7 @@
                 </div>
                 
                 <!-- Clima -->
-                <div class="flex items-center gap-2">
+                <div id="weatherInfo" class="flex items-center gap-2">
                     <span class="text-2xl weather-icon">🌤️</span>
                     <span class="font-semibold">Durango, Dgo.</span>
                 </div>
@@ -240,9 +240,8 @@
             </div>
 
             <!-- Opción 3: Formatos Oficiales -->
-            <div onclick="showComingSoon('Formatos Oficiales')" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-green-400 cursor-pointer animate-fadeInUp delay-300">
-                <span class="badge-soon">Próximamente</span>
+            <a href="formatos.html" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-300">
                 <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📋</div>
                 <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
                     Formatos Oficiales
@@ -250,10 +249,10 @@
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Descargar formatos y documentos
                 </p>
-                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
-                    En desarrollo
+                <div class="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
                 </div>
-            </div>
+            </a>
 
             <!-- Opción 4: Información SGI -->
             <div onclick="showComingSoon('Información SGI')" 
@@ -517,6 +516,68 @@
         ];
 
         // =============================================================================
+        // CLIMA LOCAL
+        // =============================================================================
+        function updateWeather() {
+            const weatherElement = document.getElementById('weatherInfo');
+            if (!weatherElement) return;
+
+            const getWeatherIcon = (code) => {
+                if (code === 0) return '☀️';
+                if ([1, 2, 3].includes(code)) return '⛅';
+                if ([45, 48].includes(code)) return '🌫️';
+                if ([51, 53, 55].includes(code)) return '🌦️';
+                if ([56, 57].includes(code)) return '🥶';
+                if ([61, 63, 65].includes(code)) return '🌧️';
+                if ([66, 67].includes(code)) return '🥶';
+                if ([71, 73, 75, 77].includes(code)) return '🌨️';
+                if ([80, 81, 82].includes(code)) return '⛈️';
+                if ([85, 86].includes(code)) return '🌨️';
+                if ([95, 96, 99].includes(code)) return '🌩️';
+                return '🌤️';
+            };
+
+            const showWeather = (lat, lon) => {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Weather response not ok');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data && data.current_weather) {
+                            const temp = Math.round(data.current_weather.temperature);
+                            const icon = getWeatherIcon(data.current_weather.weathercode);
+                            weatherElement.innerHTML = `
+                                <span class="text-2xl weather-icon">${icon}</span>
+                                <span class="font-semibold">Durango, Dgo. ${temp}°C</span>`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching weather:", error);
+                    });
+            };
+
+            // Default coordinates for Durango, Dgo.
+            const durangoLat = 24.0277;
+            const durangoLon = -104.653;
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        showWeather(position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                        console.warn(`Geolocation error (${error.code}): ${error.message}`);
+                        showWeather(durangoLat, durangoLon); // Fallback to Durango's coords
+                    }
+                );
+            } else {
+                showWeather(durangoLat, durangoLon); // Geolocation not supported
+            }
+        }
+
+        // =============================================================================
         // RELOJ EN TIEMPO REAL
         // =============================================================================
         function startClock() {
@@ -603,6 +664,7 @@
         window.addEventListener('load', function() {
             startClock();
             updateDate();
+            updateWeather();
             showRandomQuote();
             
             console.log('%c Portal ITD - Listo ', 
