@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -97,7 +95,7 @@
                 category: 'Instructores',
                 fileType: 'Word (.doc)',
                 icon: '📘',
-                url: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM-AC-PO-005-11%20CVU%20curriculum%20del%20instructor%20(1).doc'
+                url: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM-AC-PO-005-11%20CVU%20curriculum%20del%20instructor%20%281%29.doc'
             },
             {
                 id: 'ficha_tecnica',
@@ -106,7 +104,7 @@
                 category: 'Instructores',
                 fileType: 'Word (.doc)',
                 icon: '📗',
-                url: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM-AC-PO-005-12%20FICHA%20TECNICA%20(1).doc'
+                url: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM-AC-PO-005-12%20FICHA%20TECNICA%20%281%29.doc'
             },
             {
                 id: 'deteccion_necesidades',
@@ -192,7 +190,7 @@
                                                 <p className="text-xs text-gray-500 mb-4 font-mono bg-gray-100 px-2 py-1 rounded inline-block">
                                                     {formato.fileType}
                                                 </p>
-                                                <a href={formato.url.replace(/ /g, '%20')}
+                                                <a href={formato.url}
                                                    target="_blank" rel="noopener noreferrer" download
                                                    className="block w-full mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors flex items-center justify-center gap-2">
                                                     <span>⬇️</span> Descargar
@@ -224,13 +222,11 @@
             );
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const rootElement = document.getElementById('root');
-            if (rootElement) {
-                const root = ReactDOM.createRoot(rootElement);
-                root.render(<React.StrictMode><FormatosApp /></React.StrictMode>);
-            }
-        });
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+            const root = ReactDOM.createRoot(rootElement);
+            root.render(<React.StrictMode><FormatosApp /></React.StrictMode>);
+        }
     </script>
 </body>
 </html>
