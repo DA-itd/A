@@ -48,8 +48,8 @@
         }
         
         .card-portal:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
         }
         
         @keyframes fadeInUp {
@@ -128,7 +128,6 @@
             border-left: 3px solid rgba(99, 102, 241, 0.5);
         }
     </style>
-<link rel="stylesheet" href="/index.css">
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
@@ -219,13 +218,13 @@
         </div>
 
         <!-- Grid de Opciones -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto mb-12">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
             
             <!-- Opción 1: Inscripción a Cursos -->
             <a href="inscripciones.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp delay-100">
-                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📝</div>
-                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp delay-100">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📝</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Inscripción a Cursos
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
@@ -238,10 +237,10 @@
 
             <!-- Opción 2: Historial de Cursos -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('Historial de Cursos')"
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-blue-400 cursor-pointer animate-fadeInUp delay-200">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-400 cursor-pointer animate-fadeInUp delay-200">
                 <span class="badge-soon">Próximamente</span>
-                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📚</div>
-                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Historial de Cursos
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
@@ -254,9 +253,9 @@
 
             <!-- Opción 3: Formatos Oficiales -->
             <a href="formatos.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-300">
-                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📋</div>
-                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-300">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📋</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Formatos Oficiales
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
@@ -269,13 +268,13 @@
 
             <!-- Opción 4: Validación de Constancias -->
             <a href="verificador.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-400">
-                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">✅</div>
-                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
-                    Validación de Constancias y Reconocimientos
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-400">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">✅</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    Validación de Constancias
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Verificar la autenticidad de documentos oficiales.
+                    Verificar la autenticidad de documentos.
                 </p>
                 <div class="inline-block bg-cyan-100 text-cyan-700 text-xs font-semibold px-3 py-1 rounded-full">
                     ✓ Disponible
@@ -284,9 +283,9 @@
 
             <!-- Opción 5: Área para Instructores -->
             <a href="instructores.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-500">
-                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
-                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-500">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Área para Instructores
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
@@ -299,9 +298,9 @@
 
             <!-- Opción 6: Encuestas de Opinión -->
             <a href="encuestas.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-yellow-400 animate-fadeInUp delay-600">
-                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📊</div>
-                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 animate-fadeInUp delay-600">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📊</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Encuestas de Opinión
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
@@ -314,10 +313,10 @@
             
             <!-- Opción 7: Estadísticas -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('Estadísticas')"
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-purple-400 cursor-pointer animate-fadeInUp delay-700">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 cursor-pointer animate-fadeInUp delay-700">
                 <span class="badge-soon">Próximamente</span>
-                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📈</div>
-                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📈</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Estadísticas
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
@@ -331,10 +330,12 @@
             <!-- Opción 8: SGI -->
             <a href="https://www.itdurango.edu.mx/sgi/"
                target="_blank" rel="noopener noreferrer"
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-800">
-                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">🏢</div>
-                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
-                    Sistema de Gestión Integral (SGI)
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-800">
+                <div class="h-10 sm:h-12 flex justify-center items-center mb-4">
+                    <img src="https://cdn.jsdelivr.net/gh/DA-itd/A@main/SGI.jpg" alt="Logo SGI" class="max-h-full object-contain transform transition-transform hover:scale-110">
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    Sistema de Gestión Integrado
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Acceder al portal del SGI del ITD.
@@ -418,7 +419,7 @@
         </div>
 
         <!-- Ayuda y Soporte -->
-        <div class="max-w-4xl mx-auto mt-8">
+        <div class="max-w-2xl mx-auto mt-8">
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 sm:p-8 text-white text-center">
                 <div class="text-4xl mb-4">💬</div>
                 <h3 class="text-xl sm:text-2xl font-bold mb-2">
@@ -437,7 +438,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-8">
         <div class="container mx-auto px-4">
             <p class="font-semibold text-sm sm:text-base mb-2">
                 © Coordinación de Actualización Docente
@@ -705,6 +706,5 @@
         });
     </script>
 
-<script type="module" src="/index.tsx"></script>
 </body>
 </html>
