@@ -1,196 +1,236 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formatos Oficiales - ITD</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formatos Oficiales - ITD</title>
+    
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
 
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/logo_itdurango.png">
-  <script src="https://cdn.tailwindcss.com"></script>
+        .format-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
 
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fadeIn { animation: fadeIn 0.5s ease-out; }
-    .format-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-    .format-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-  </style>
+        .format-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
-
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
 
-  <!-- Header -->
-  <header class="bg-white shadow-xl sticky top-0 z-40">
-    <div class="container mx-auto px-4 py-4 sm:py-6">
-      <div class="flex items-center justify-between gap-4">
-        <img src="https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/TecNM_logo.jpg" 
-             alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
-
-        <div class="text-center flex-1 px-2 sm:px-4">
-          <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">
-            FORMATOS OFICIALES
-          </h1>
-          <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">
-            Desarrollo Académico
-          </p>
-          <p class="text-xs sm:text-sm text-blue-600">
-            TecNM - Instituto Tecnológico de Durango
-          </p>
+    <!-- Header -->
+    <header class="bg-white shadow-xl sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 sm:py-6">
+            <div class="flex items-center justify-between gap-4">
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" 
+                     alt="TecNM" 
+                     class="h-12 sm:h-16 md:h-20 object-contain">
+                
+                <div class="text-center flex-1 px-2 sm:px-4">
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">
+                        FORMATOS OFICIALES
+                    </h1>
+                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">
+                        Desarrollo Académico
+                    </p>
+                    <p class="text-xs sm:text-sm text-blue-600">
+                        TecNM - Instituto Tecnológico de Durango
+                    </p>
+                </div>
+                
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
+                     alt="ITD" 
+                     class="h-12 sm:h-16 md:h-20 object-contain">
+            </div>
         </div>
+    </header>
 
-        <img src="https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/logo_itdurango.png" 
-             alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
-      </div>
-    </div>
-  </header>
+    <!-- Contenido Principal (React lo renderizará aquí) -->
+    <div id="root"></div>
 
-  <!-- Contenido principal -->
-  <main class="container mx-auto px-4 py-8 sm:py-12">
-    <div class="max-w-6xl mx-auto">
-
-      <!-- Botón Volver -->
-      <a href="/A/index.html" 
-         class="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline mb-6 text-sm sm:text-base">
-         ← Volver al Portal Principal
-      </a>
-
-      <!-- Mensaje de bienvenida -->
-      <div class="bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl p-6 sm:p-8 text-white mb-8 animate-fadeIn">
-        <div class="flex items-center gap-4">
-          <div class="text-5xl">📋</div>
-          <div>
-            <h2 class="text-2xl sm:text-3xl font-bold mb-2">Descarga de Formatos</h2>
-            <p class="text-sm sm:text-base opacity-90">
-              Aquí encontrará los documentos oficiales necesarios para los procesos de actualización docente.
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <p class="font-semibold text-sm sm:text-base mb-2">
+                © Coordinación de Actualización Docente
             </p>
-          </div>
+            <p class="text-xs sm:text-sm opacity-90">
+                M.C. Alejandro Calderón Rentería
+            </p>
+            <p class="text-xs sm:text-sm opacity-75 mt-1">
+                Todos los derechos reservados 2024
+            </p>
         </div>
-      </div>
+    </footer>
 
-      <!-- Grid de formatos -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <script type="text/babel">
+        const { useState } = React;
 
-        <!-- Formato 1 -->
-        <div class="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500">
-          <div class="text-5xl mb-4">📘</div>
-          <h3 class="text-lg font-bold text-gray-800 mb-2 h-16">
-            CVU - Curriculum del Instructor
-          </h3>
-          <p class="text-xs text-gray-500 mb-4">Formato Word (.doc)</p>
-          <a href="https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/TecNM-AC-PO-005-11%20CVU%20curriculum%20del%20instructor%20(1).doc"
-             target="_blank" rel="noopener noreferrer" download
-             class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
-             ⬇️ Descargar
-          </a>
-        </div>
+        const FORMATOS_DATA = [
+            {
+                id: 'cvu',
+                title: 'CVU - Curriculum del Instructor',
+                description: 'Formato estandarizado para registrar el curriculum vitae de los instructores.',
+                category: 'Instructores',
+                fileType: 'Word (.doc)',
+                icon: '📘',
+                url: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM-AC-PO-005-11%20CVU%20curriculum%20del%20instructor%20%281%29.doc'
+            },
+            {
+                id: 'ficha_tecnica',
+                title: 'Ficha Técnica del Curso',
+                description: 'Documento con los detalles técnicos, objetivos y contenido de un curso propuesto.',
+                category: 'Instructores',
+                fileType: 'Word (.doc)',
+                icon: '📗',
+                url: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM-AC-PO-005-12%20FICHA%20TECNICA%20%281%29.doc'
+            },
+            {
+                id: 'deteccion_necesidades',
+                title: 'Detección de Necesidades',
+                description: 'Formato para la detección de necesidades de actualización docente.',
+                category: 'Generales',
+                fileType: 'Word (.docx)',
+                icon: '🔍',
+                url: 'https://raw.githubusercontent.com/DA-itd/web/main/ITD-AC-PO-10-01%20Deteccion%20de%20necesidades.docx'
+            },
+            {
+                id: 'criterios_instructores',
+                title: 'Criterios para Instructores',
+                description: 'Documento con los criterios utilizados para la selección de instructores de cursos.',
+                category: 'Instructores',
+                fileType: 'Word (.docx)',
+                icon: '🧑‍🏫',
+                url: 'https://raw.githubusercontent.com/DA-itd/web/main/ITD-AD-FO-06%20Formatos%20de%20Criterios%20para%20Seleccionar%20Instructores.docx'
+            },
+            {
+                id: 'oficio_registro',
+                title: 'Oficio de Registro de Cursos',
+                description: 'Oficio oficial para el registro de los cursos de actualización docente.',
+                category: 'Generales',
+                fileType: 'Word (.docx)',
+                icon: '✉️',
+                url: 'https://raw.githubusercontent.com/DA-itd/web/main/ITD-AD-FO-07-Oficio%20de%20registro%20de%20cursos%202025.docx'
+            },
+            {
+                id: 'lista_asistencia',
+                title: 'Lista de Asistencia',
+                description: 'Formato oficial para el registro de asistencia de los participantes a los cursos.',
+                category: 'Instructores',
+                fileType: 'Excel (.xlsx)',
+                icon: '📝',
+                url: 'https://raw.githubusercontent.com/DA-itd/web/main/ITD-AD-FO-08%20Formato%20de%20Lista%20de%20Asistencia_.xlsx'
+            }
+        ];
 
-        <!-- Formato 2 -->
-        <div class="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500">
-          <div class="text-5xl mb-4">📗</div>
-          <h3 class="text-lg font-bold text-gray-800 mb-2 h-16">
-            Ficha Técnica del Curso
-          </h3>
-          <p class="text-xs text-gray-500 mb-4">Formato Word (.doc)</p>
-          <a href="https://raw.githubusercontent.com/DA-itd/DA-itd-web/main/TecNM-AC-PO-005-12%20FICHA%20TECNICA%20(1).doc"
-             target="_blank" rel="noopener noreferrer" download
-             class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
-             ⬇️ Descargar
-          </a>
-        </div>
+        const FormatosApp = () => {
+            return (
+                <main className="container mx-auto px-4 py-8 sm:py-12">
+                    <div className="max-w-4xl mx-auto">
+                        <a href="index.html" className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline mb-6 text-sm sm:text-base">
+                            ← Volver al Portal Principal
+                        </a>
 
-        <!-- Formato 3 -->
-        <div class="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500">
-          <div class="text-5xl mb-4">📝</div>
-          <h3 class="text-lg font-bold text-gray-800 mb-2 h-16">
-            Detección de necesidades
-          </h3>
-          <p class="text-xs text-gray-500 mb-4">Formato Word (.docx)</p>
-          <a href="https://raw.githubusercontent.com/DA-itd/A/main/ITD-AC-PO-10-01%20Deteccion%20de%20necesidades.docx"
-             target="_blank" rel="noopener noreferrer" download
-             class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
-             ⬇️ Descargar
-          </a>
-        </div>
+                        <div className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl shadow-xl p-6 sm:p-8 text-white mb-8 animate-fadeIn">
+                            <div className="flex items-center gap-4">
+                                <div className="text-5xl">📋</div>
+                                <div>
+                                    <h2 className="text-2xl sm:text-3xl font-bold mb-2">Descarga de Formatos</h2>
+                                    <p className="text-sm sm:text-base opacity-90">
+                                        Aquí encontrará los documentos oficiales necesarios para los procesos de actualización docente.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {FORMATOS_DATA.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                {FORMATOS_DATA.map((formato, index) => {
+                                    const isHighlighted = formato.id === 'oficio_registro';
+                                    const cardClasses = isHighlighted 
+                                        ? "format-card bg-amber-50 rounded-xl shadow-xl p-6 border-t-4 border-amber-500 flex flex-col h-full"
+                                        : "format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-indigo-500 flex flex-col h-full";
+                                    
+                                    const animationDelay = { animationDelay: `${index * 100}ms`, opacity: 0 };
 
-        <!-- Formato 4 -->
-        <div class="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500">
-          <div class="text-5xl mb-4">🔐</div>
-          <h3 class="text-lg font-bold text-gray-800 mb-2 h-16">
-            Criterios para Seleccionar Instructores
-          </h3>
-          <p class="text-xs text-gray-500 mb-4">Formato Word (.docx)</p>
-          <a href="https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-06%20Formatos%20de%20Criterios%20para%20Seleccionar%20Instructores.docx"
-             target="_blank" rel="noopener noreferrer" download
-             class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
-             ⬇️ Descargar
-          </a>
-        </div>
+                                    return (
+                                        <div key={formato.id} className="relative animate-fadeIn" style={animationDelay}>
+                                            {isHighlighted && (
+                                                <div className="absolute top-0 right-0 mt-3 mr-3 z-10 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                                                    MÁS USADO
+                                                </div>
+                                            )}
+                                            <div className={cardClasses}>
+                                                <div className="text-5xl mb-4">{formato.icon}</div>
+                                                <h3 className="text-lg font-bold text-gray-800 mb-2 flex-grow">
+                                                    {formato.title}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 mb-4">{formato.description}</p>
+                                                <p className="text-xs text-gray-500 mb-4 font-mono bg-gray-100 px-2 py-1 rounded inline-block">
+                                                    {formato.fileType}
+                                                </p>
+                                                <a href={formato.url}
+                                                   target="_blank" rel="noopener noreferrer" download
+                                                   className="block w-full mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors flex items-center justify-center gap-2">
+                                                    <span>⬇️</span> Descargar
+                                                </a>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                             <div className="text-center py-12 bg-gray-50 rounded-lg">
+                                <p className="text-gray-600">No hay formatos disponibles en este momento.</p>
+                             </div>
+                        )}
+                        
+                        <div className="mt-8 bg-gradient-to-r from-gray-700 to-gray-800 rounded-2xl shadow-xl p-6 text-white text-center">
+                            <div className="text-4xl mb-3">💬</div>
+                            <h3 className="text-xl font-bold mb-2">¿Necesitas Ayuda?</h3>
+                            <p className="text-sm opacity-90 mb-4">
+                                Si tienes problemas para descargar algún formato, contáctanos.
+                            </p>
+                            <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
+                               className="inline-block bg-white text-gray-800 font-bold px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors">
+                                📧 Enviar Email
+                            </a>
+                        </div>
+                    </div>
+                </main>
+            );
+        };
 
-        <!-- Formato 5 -->
-        <div class="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-purple-500">
-          <div class="text-5xl mb-4">📄</div>
-          <h3 class="text-lg font-bold text-gray-800 mb-2 h-16">
-            Oficio de registro de cursos 2025
-          </h3>
-          <p class="text-xs text-gray-500 mb-4">Formato Word (.docx)</p>
-          <a href="https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-07-Oficio%20de%20registro%20de%20cursos%202025.docx"
-             target="_blank" rel="noopener noreferrer" download
-             class="block w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
-             ⬇️ Descargar
-          </a>
-        </div>
-
-        <!-- Formato 6 -->
-        <div class="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-teal-500">
-          <div class="text-5xl mb-4">📊</div>
-          <h3 class="text-lg font-bold text-gray-800 mb-2 h-16">
-            Formato de Lista de Asistencia
-          </h3>
-          <p class="text-xs text-gray-500 mb-4">Formato Excel (.xlsx)</p>
-          <a href="https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-08%20Formato%20de%20Lista%20de%20Asistencia_.xlsx"
-             target="_blank" rel="noopener noreferrer" download
-             class="block w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors">
-             ⬇️ Descargar
-          </a>
-        </div>
-
-      </div>
-
-      <!-- Contacto -->
-      <div class="mt-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white text-center">
-        <div class="text-4xl mb-3">💬</div>
-        <h3 class="text-xl font-bold mb-2">¿Necesitas Ayuda?</h3>
-        <p class="text-sm opacity-90 mb-4">
-          Si tienes problemas para descargar algún formato, contáctanos.
-        </p>
-        <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
-           class="inline-block bg-white text-blue-600 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
-          📧 Enviar Email
-        </a>
-      </div>
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
-    <div class="container mx-auto px-4">
-      <p class="font-semibold text-sm sm:text-base mb-2">
-        © Coordinación de Actualización Docente
-      </p>
-      <p class="text-xs sm:text-sm opacity-90">
-        M.C. Alejandro Calderón Rentería
-      </p>
-      <p class="text-xs sm:text-sm opacity-75 mt-1">
-        Todos los derechos reservados 2024
-      </p>
-    </div>
-  </footer>
-
+        document.addEventListener('DOMContentLoaded', () => {
+            const rootElement = document.getElementById('root');
+            if (rootElement) {
+                const root = ReactDOM.createRoot(rootElement);
+                root.render(<React.StrictMode><FormatosApp /></React.StrictMode>);
+            } else {
+                console.error('No se encontró el elemento root');
+            }
+        });
+    </script>
 </body>
 </html>

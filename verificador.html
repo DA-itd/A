@@ -457,7 +457,7 @@
                     <input
                       type="text"
                       className="w-full pl-4 pr-4 py-2 border-none focus:outline-none bg-transparent"
-                      placeholder="93-2025-17"
+                      placeholder="00-YYYY-00"
                       value={query}
                       onChange={e => setQuery(e.target.value.toUpperCase())}
                       autoFocus
@@ -741,8 +741,19 @@
       );
     };
     
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    document.addEventListener('DOMContentLoaded', () => {
+      const rootElement = document.getElementById('root');
+      if (rootElement) {
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(
+          <React.StrictMode>
+            <App />
+          </React.StrictMode>
+        );
+      } else {
+        console.error('No se encontró el elemento root');
+      }
+    });
 
     </script>
 </body>
