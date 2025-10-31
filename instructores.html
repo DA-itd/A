@@ -1057,14 +1057,16 @@
         // =============================================================================
         // RENDER
         // =============================================================================
-        document.addEventListener('DOMContentLoaded', () => {
+    </script>
+    <script>
+        window.addEventListener('load', () => {
             const rootElement = document.getElementById('root');
             if (rootElement) {
                 const root = ReactDOM.createRoot(rootElement);
                 root.render(
-                    <React.StrictMode>
-                        <InstructorApp />
-                    </React.StrictMode>
+                    React.createElement(React.StrictMode, null, 
+                        React.createElement(InstructorApp, null)
+                    )
                 );
             } else {
                 console.error('No se encontró el elemento root');

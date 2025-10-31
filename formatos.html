@@ -221,12 +221,17 @@
                 </main>
             );
         };
-
-        document.addEventListener('DOMContentLoaded', () => {
+    </script>
+    <script>
+        window.addEventListener('load', () => {
             const rootElement = document.getElementById('root');
             if (rootElement) {
                 const root = ReactDOM.createRoot(rootElement);
-                root.render(<React.StrictMode><FormatosApp /></React.StrictMode>);
+                root.render(
+                    React.createElement(React.StrictMode, null, 
+                        React.createElement(FormatosApp, null)
+                    )
+                );
             } else {
                 console.error('No se encontró el elemento root');
             }
