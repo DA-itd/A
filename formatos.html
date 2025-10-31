@@ -156,6 +156,51 @@
             }
         ];
 
+        const handleDownload = (e, url) => {
+            e.preventDefault();
+            const link = e.currentTarget;
+            const originalContent = link.innerHTML;
+            
+            link.setAttribute('disabled', 'true');
+            link.classList.add('opacity-75', 'cursor-not-allowed');
+            link.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Descargando...`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('La respuesta de la red no fue correcta.');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = blobUrl;
+                    const filename = url.substring(url.lastIndexOf('/') + 1);
+                    a.download = decodeURIComponent(filename); 
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(blobUrl);
+                    document.body.removeChild(a);
+                })
+                .catch(err => {
+                    console.error('Error de descarga:', err);
+                    alert('Hubo un error al descargar el archivo. Se abrirá en una nueva pestaña como alternativa.');
+                    window.open(url, '_blank');
+                })
+                .finally(() => {
+                    link.removeAttribute('disabled');
+                    link.classList.remove('opacity-75', 'cursor-not-allowed');
+                    link.innerHTML = originalContent;
+                });
+        };
+
         const FormatosApp = () => {
             return (
                 <main className="container mx-auto px-4 py-8 sm:py-12">
@@ -203,7 +248,7 @@
                                                     {formato.fileType}
                                                 </p>
                                                 <a href={formato.url}
-                                                   target="_blank" rel="noopener noreferrer"
+                                                   onClick={(e) => handleDownload(e, formato.url)}
                                                    className="block w-full mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors flex items-center justify-center gap-2">
                                                     <span>⬇️</span> Descargar
                                                 </a>
