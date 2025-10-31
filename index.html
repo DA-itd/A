@@ -62,7 +62,6 @@
         .delay-400 { animation-delay: 0.4s; opacity: 0; }
         .delay-500 { animation-delay: 0.5s; opacity: 0; }
         .delay-600 { animation-delay: 0.6s; opacity: 0; }
-        .delay-700 { animation-delay: 0.7s; opacity: 0; }
         
         @keyframes pulse-slow {
             0%, 100% { transform: scale(1); }
@@ -116,6 +115,7 @@
             border-left: 3px solid rgba(99, 102, 241, 0.5);
         }
     </style>
+<link rel="stylesheet" href="/index.css">
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
@@ -206,7 +206,7 @@
         </div>
 
         <!-- Grid de Opciones -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto mb-12">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto mb-12">
             
             <!-- Opción 1: Inscripción a Cursos -->
             <a href="inscripciones.html" 
@@ -254,21 +254,20 @@
                 </div>
             </a>
 
-            <!-- Opción 4: Información SGI -->
-            <div onclick="showComingSoon('Información SGI')" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-purple-400 cursor-pointer animate-fadeInUp delay-400">
-                <span class="badge-soon">Próximamente</span>
-                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📊</div>
+            <!-- Opción 4: Validación de Constancias -->
+            <a href="verificador.html" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-400">
+                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">✅</div>
                 <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
-                    Información SGI
+                    Validación de Constancias y Reconocimientos
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Sistema de Gestión Integral
+                    Verificar la autenticidad de documentos oficiales.
                 </p>
-                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
-                    En desarrollo
+                <div class="inline-block bg-cyan-100 text-cyan-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
                 </div>
-            </div>
+            </a>
 
             <!-- Opción 5: Área para Instructores -->
             <a href="instructores.html" 
@@ -299,22 +298,6 @@
                     ✓ Disponible
                 </div>
             </a>
-
-            <!-- Opción 7: Estadísticas -->
-            <div onclick="showComingSoon('Estadísticas')" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-orange-400 cursor-pointer animate-fadeInUp delay-700">
-                <span class="badge-soon">Próximamente</span>
-                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📈</div>
-                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
-                    Estadísticas
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Métricas e indicadores
-                </p>
-                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
-                    En desarrollo
-                </div>
-            </div>
 
         </div>
 
@@ -673,5 +656,6 @@
         });
     </script>
 
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>
