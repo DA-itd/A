@@ -63,6 +63,7 @@
         .delay-500 { animation-delay: 0.5s; opacity: 0; }
         .delay-600 { animation-delay: 0.6s; opacity: 0; }
         .delay-700 { animation-delay: 0.7s; opacity: 0; }
+        .delay-800 { animation-delay: 0.8s; opacity: 0; }
         
         @keyframes pulse-slow {
             0%, 100% { transform: scale(1); }
@@ -116,7 +117,6 @@
             border-left: 3px solid rgba(99, 102, 241, 0.5);
         }
     </style>
-<link rel="stylesheet" href="/index.css">
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
@@ -299,11 +299,27 @@
                     ✓ Disponible
                 </div>
             </a>
+            
+            <!-- Opción 7: Estadísticas -->
+            <a href="#" onclick="event.preventDefault(); showComingSoon('Estadísticas')"
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-purple-400 cursor-pointer animate-fadeInUp delay-700">
+                <span class="badge-soon">Próximamente</span>
+                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📈</div>
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+                    Estadísticas
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Análisis y resultados de encuestas
+                </p>
+                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
+                    En desarrollo
+                </div>
+            </a>
 
         </div>
         
         <!-- Banner SGI -->
-        <div class="max-w-sm mx-auto my-8 sm:my-12 animate-fadeInUp delay-700">
+        <div class="max-w-sm mx-auto my-8 sm:my-12 animate-fadeInUp delay-800">
             <a href="https://www.itdurango.edu.mx/sgi/" 
                target="_blank" 
                rel="noopener noreferrer"
@@ -662,6 +678,5 @@
         });
     </script>
 
-<script type="module" src="/index.tsx"></script>
 </body>
 </html>
