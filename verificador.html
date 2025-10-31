@@ -519,6 +519,11 @@
           <div className="w-full max-w-2xl mx-auto mt-8 p-6 bg-red-50 border-l-4 border-red-500 animate-fade-in rounded-r-lg shadow">
             <h3 className="text-lg font-bold text-red-800">Documento no Encontrado</h3>
             <p className="text-red-700">El folio o código ingresado no fue encontrado. Verifique e intente de nuevo.</p>
+            <div className="mt-6 border-t border-red-200 pt-4 text-center">
+                <a href="index.html" className="text-sm text-blue-600 hover:underline">
+                    ← Volver al Portal Principal
+                </a>
+            </div>
           </div>
         );
       }
@@ -556,13 +561,18 @@
                   </button>
                 )}
             </div>
-            <div className="bg-white p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm rounded-b-lg border-t border-green-200">
+            <div className="bg-white p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm border-t border-green-200">
               {Object.entries(data).map(([key, value]) => value ? (
                 <div key={key}>
                   <p className="text-gray-500">{key}</p>
                   <p className="font-bold text-gray-800 break-words">{String(value).toUpperCase()}</p>
                 </div>
               ) : null)}
+            </div>
+            <div className="bg-white p-4 text-center border-t border-gray-100 rounded-b-lg">
+                <a href="index.html" className="text-sm text-blue-600 hover:underline">
+                ← Volver al Portal Principal
+                </a>
             </div>
           </div>
         );
