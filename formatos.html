@@ -235,16 +235,15 @@
                 </main>
             );
         };
-    </script>
-    <script>
+
         window.addEventListener('load', () => {
             const rootElement = document.getElementById('root');
             if (rootElement) {
                 const root = ReactDOM.createRoot(rootElement);
                 root.render(
-                    React.createElement(React.StrictMode, null, 
-                        React.createElement(FormatosApp, null)
-                    )
+                    <React.StrictMode>
+                        <FormatosApp />
+                    </React.StrictMode>
                 );
             } else {
                 console.error('No se encontró el elemento root');
