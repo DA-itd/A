@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -24,6 +24,7 @@
         }
         
         .animate-fadeIn {
+            opacity: 0;
             animation: fadeIn 0.5s ease-out forwards;
         }
 
@@ -172,7 +173,7 @@
                                         ? "format-card bg-amber-50 rounded-xl shadow-xl p-6 border-t-4 border-amber-500 flex flex-col h-full"
                                         : "format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-indigo-500 flex flex-col h-full";
                                     
-                                    const animationDelay = { animationDelay: `${index * 100}ms`, opacity: 0 };
+                                    const animationDelay = { animationDelay: `${index * 100}ms` };
 
                                     return (
                                         <div key={formato.id} className="relative animate-fadeIn" style={animationDelay}>
