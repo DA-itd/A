@@ -166,7 +166,7 @@
                 
                 <!-- Hora -->
                 <div class="flex items-center gap-2">
-                    <span class="text-xl">🕐</span>
+                    <span class="text-xl">🕒</span>
                     <span id="clock" class="font-mono font-bold text-lg">--:--:--</span>
                 </div>
             </div>
@@ -182,10 +182,10 @@
                 <div class="flex items-start gap-3">
                     <div class="text-2xl sm:text-3xl flex-shrink-0 opacity-60">💡</div>
                     <div class="flex-1">
-                        <p class="text-sm sm:text-base italic text-gray-700 leading-relaxed" id="inspirationalQuote">
+                        <p class="text-base sm:text-lg italic text-gray-700 leading-relaxed" id="inspirationalQuote">
                             "La educación es el arma más poderosa que puedes usar para cambiar el mundo."
                         </p>
-                        <p class="text-xs sm:text-sm text-gray-600 text-right mt-2" id="quoteAuthor">
+                        <p class="text-sm sm:text-base text-gray-600 text-right mt-2" id="quoteAuthor">
                             - Nelson Mandela
                         </p>
                     </div>
@@ -316,20 +316,23 @@
                 </div>
             </a>
 
-        </div>
-        
-        <!-- Banner SGI -->
-        <div class="max-w-sm mx-auto my-8 sm:my-12 animate-fadeInUp delay-800">
-            <a href="https://www.itdurango.edu.mx/sgi/" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="block rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden transform hover:-translate-y-1">
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/A@main/SGI.jpg" 
-                     alt="Sistema de Gestión Integral" 
-                     class="w-full h-auto object-cover">
+            <!-- Opción 8: SGI -->
+            <a href="https://www.itdurango.edu.mx/sgi/"
+               target="_blank" rel="noopener noreferrer"
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-800">
+                <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">🏢</div>
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+                    Sistema de Gestión Integral (SGI)
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Acceder al portal del SGI del ITD.
+                </p>
+                <div class="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
             </a>
-        </div>
 
+        </div>
 
         <!-- Enlaces Institucionales -->
         <div class="max-w-4xl mx-auto mb-8">
@@ -391,10 +394,10 @@
                         </div>
                     </div>
                     
-                    <a href="https://www.itdurango.edu.mx/alumnos/calendario-escolar/" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-red-50 p-4 rounded-lg hover:bg-red-100 transition-colors">
+                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-red-50 p-4 rounded-lg hover:bg-red-100 transition-colors">
                         <div class="text-2xl flex-shrink-0">🗓️</div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800">Calendario Institucional 2025</p>
+                            <p id="calendar-year-text" class="text-sm font-semibold text-gray-800">Calendario Institucional</p>
                             <p class="text-xs text-gray-600 mt-1">Consulte las fechas importantes del ciclo escolar.</p>
                         </div>
                     </a>
@@ -613,6 +616,17 @@
         }
 
         // =============================================================================
+        // AÑO DEL CALENDARIO
+        // =============================================================================
+        function updateCalendarYear() {
+            const calendarElement = document.getElementById('calendar-year-text');
+            if (calendarElement) {
+                const currentYear = new Date().getFullYear();
+                calendarElement.textContent = `Calendario Institucional ${currentYear}`;
+            }
+        }
+
+        // =============================================================================
         // FRASES INSPIRACIONALES (Cambian cada 30 segundos)
         // =============================================================================
         function showRandomQuote() {
@@ -671,6 +685,7 @@
             updateDate();
             updateWeather();
             showRandomQuote();
+            updateCalendarYear();
             
             console.log('%c Portal ITD - Listo ', 
                 'background: #1e3a8a; color: white; font-size: 16px; padding: 8px; border-radius: 4px;'
