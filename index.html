@@ -225,7 +225,7 @@
             </a>
 
             <!-- Opción 2: Historial de Cursos -->
-            <div onclick="showComingSoon('Historial de Cursos')" 
+            <a href="#" onclick="event.preventDefault(); showComingSoon('Historial de Cursos')"
                class="card-portal bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center border-2 border-transparent hover:border-blue-400 cursor-pointer animate-fadeInUp delay-200">
                 <span class="badge-soon">Próximamente</span>
                 <div class="text-5xl sm:text-6xl mb-4 transform transition-transform hover:scale-110">📚</div>
@@ -238,7 +238,7 @@
                 <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
                     En desarrollo
                 </div>
-            </div>
+            </a>
 
             <!-- Opción 3: Formatos Oficiales -->
             <a href="formatos.html" 
@@ -303,7 +303,7 @@
         </div>
         
         <!-- Banner SGI -->
-        <div class="max-w-5xl mx-auto my-8 sm:my-12 animate-fadeInUp delay-700">
+        <div class="max-w-lg mx-auto my-8 sm:my-12 animate-fadeInUp delay-700">
             <a href="https://www.itdurango.edu.mx/sgi/" 
                target="_blank" 
                rel="noopener noreferrer"
@@ -358,15 +358,7 @@
                     </h3>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="flex items-start gap-3 bg-blue-50 p-4 rounded-lg">
-                        <div class="text-2xl flex-shrink-0">✅</div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Requisitos</p>
-                            <p class="text-xs text-gray-600 mt-1">CURP y email institucional válidos</p>
-                        </div>
-                    </div>
-                    
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="flex items-start gap-3 bg-green-50 p-4 rounded-lg">
                         <div class="text-2xl flex-shrink-0">📚</div>
                         <div>
@@ -383,13 +375,13 @@
                         </div>
                     </div>
                     
-                    <div class="flex items-start gap-3 bg-orange-50 p-4 rounded-lg">
-                        <div class="text-2xl flex-shrink-0">🔢</div>
+                    <a href="https://www.itdurango.edu.mx/alumnos/calendario-escolar/" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-red-50 p-4 rounded-lg hover:bg-red-100 transition-colors">
+                        <div class="text-2xl flex-shrink-0">🗓️</div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800">Folio</p>
-                            <p class="text-xs text-gray-600 mt-1">Guarde su folio de registro</p>
+                            <p class="text-sm font-semibold text-gray-800">Calendario Institucional 2025</p>
+                            <p class="text-xs text-gray-600 mt-1">Consulte las fechas importantes del ciclo escolar.</p>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
