@@ -41,7 +41,7 @@
                 
                 <div class="text-center flex-1 px-2 sm:px-4">
                     <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">
-                        ENCUESTAS DE OPINIÓN
+                        ENCUESTAS DE OPINIÓN Y EFICACIA
                     </h1>
                     <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">
                         Desarrollo Académico
@@ -78,35 +78,93 @@
     <script type="text/babel">
         // =============================================================================
         // CONFIGURACIÓN DE ENCUESTAS
-        // Para agregar o cambiar una encuesta, simplemente edite esta lista.
-        // - `periodo`: El título que se mostrará para el grupo de encuestas.
-        // - `surveys`: Una lista de las encuestas para ese periodo.
-        //   - `name`: El nombre del curso o encuesta que verá el usuario.
-        //   - `url`: El enlace directo a su Google Form.
+        // Para agregar o cambiar, edite las listas 'opinion' o 'eficacia'.
         // =============================================================================
-        const SURVEY_DATA = [
-            {
-                periodo: "Encuestas de Enero 2025",
-                surveys: [
-                    { name: "CURSO O ENCUESTA 1", url: "#" },
-                    { name: "CURSO O ENCUESTA 2", url: "#" }
-                ]
-            },
-            {
-                periodo: "Encuestas de Junio 2025",
-                surveys: [
-                    { name: "CURSO O ENCUESTA 1", url: "#" },
-                    { name: "CURSO O ENCUESTA 2", url: "#" }
-                ]
-            },
-            {
-                periodo: "Encuestas de Agosto 2025",
-                surveys: [
-                    { name: "CURSO O ENCUESTA 1", url: "#" },
-                    { name: "CURSO O ENCUESTA 2", url: "#" }
-                ]
-            }
-        ];
+        const SURVEY_DEFINITIONS = {
+            opinion: [
+                {
+                    periodo: "Encuestas de Enero 2025",
+                    surveys: [
+                        { name: "CURSO O ENCUESTA 1 (OPINIÓN)", url: "#" },
+                        { name: "CURSO O ENCUESTA 2 (OPINIÓN)", url: "#" }
+                    ]
+                },
+                {
+                    periodo: "Encuestas de Junio 2025",
+                    surveys: [
+                        { name: "CURSO O ENCUESTA 1 (OPINIÓN)", url: "#" },
+                        { name: "CURSO O ENCUESTA 2 (OPINIÓN)", url: "#" }
+                    ]
+                },
+                {
+                    periodo: "Encuestas de Agosto 2025",
+                    surveys: [
+                        { name: "CURSO O ENCUESTA 1 (OPINIÓN)", url: "#" },
+                        { name: "CURSO O ENCUESTA 2 (OPINIÓN)", url: "#" }
+                    ]
+                }
+            ],
+            eficacia: [
+                {
+                    periodo: "Encuestas de Enero 2025",
+                    surveys: [
+                        { name: "CURSO O ENCUESTA 1 (EFICACIA)", url: "#" },
+                        { name: "CURSO O ENCUESTA 2 (EFICACIA)", url: "#" }
+                    ]
+                },
+                {
+                    periodo: "Encuestas de Junio 2025",
+                    surveys: [
+                        { name: "CURSO O ENCUESTA 1 (EFICACIA)", url: "#" },
+                        { name: "CURSO O ENCUESTA 2 (EFICACIA)", url: "#" }
+                    ]
+                },
+                {
+                    periodo: "Encuestas de Agosto 2025",
+                    surveys: [
+                        { name: "CURSO O ENCUESTA 1 (EFICACIA)", url: "#" },
+                        { name: "CURSO O ENCUESTA 2 (EFICACIA)", url: "#" }
+                    ]
+                }
+            ]
+        };
+
+        // =============================================================================
+        // COMPONENTE PARA RENDERIZAR UN GRUPO DE ENCUESTAS
+        // =============================================================================
+        const SurveyGroup = ({ title, description, icon, surveys, animationDelay }) => (
+            <div className="mb-12 animate-fadeIn" style={{ animationDelay: `${animationDelay}ms`, opacity: 0 }}>
+                <div className="text-center mb-6">
+                    <div className="text-6xl mb-4">{icon}</div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">{title}</h2>
+                    <p className="text-gray-600 mt-2 max-w-2xl mx-auto">{description}</p>
+                </div>
+                
+                <div className="space-y-8">
+                    {surveys.map((group, index) => (
+                        <div key={index}>
+                            <h3 className="text-xl font-bold text-gray-700 border-b-2 border-indigo-200 pb-2 mb-4">
+                                {group.periodo}
+                            </h3>
+                            <div className="space-y-3">
+                                {group.surveys.map((survey, sIndex) => (
+                                    <a
+                                        key={sIndex}
+                                        href={survey.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="survey-link w-full text-left p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-indigo-400 hover:bg-indigo-50 flex justify-between items-center"
+                                    >
+                                        <span className="font-semibold text-indigo-800">{survey.name}</span>
+                                        <span className="text-xl text-indigo-400">🔗</span>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
 
         // =============================================================================
         // COMPONENTE PRINCIPAL DE LA APLICACIÓN
@@ -115,42 +173,30 @@
             return (
                 <div className="container mx-auto px-4 py-8 sm:py-12">
                     <div className="max-w-3xl mx-auto">
-                        <a href="index.html" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-6">
+                        <a href="index.html" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-8">
                             ← Volver al Portal Principal
                         </a>
                         
-                        <div className="bg-white rounded-lg shadow-md p-6 sm:p-8 animate-fadeIn">
-                            <div className="text-center mb-8">
-                                <div className="text-6xl mb-4">📊</div>
-                                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Evaluación de Cursos</h2>
-                                <p className="text-gray-600 mt-2">
-                                    Seleccione la encuesta que desea responder. Su opinión es muy valiosa para nosotros.
-                                </p>
-                            </div>
+                        <div className="bg-white rounded-lg shadow-md p-6 sm:p-8">
                             
-                            <div className="space-y-8">
-                                {SURVEY_DATA.map((group, index) => (
-                                    <div key={index} className="animate-fadeIn" style={{ animationDelay: `${index * 100}ms`, opacity: 0 }}>
-                                        <h3 className="text-xl font-bold text-gray-700 border-b-2 border-indigo-200 pb-2 mb-4">
-                                            {group.periodo}
-                                        </h3>
-                                        <div className="space-y-3">
-                                            {group.surveys.map((survey, sIndex) => (
-                                                <a
-                                                    key={sIndex}
-                                                    href={survey.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="survey-link w-full text-left p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-indigo-400 hover:bg-indigo-50 flex justify-between items-center"
-                                                >
-                                                    <span className="font-semibold text-indigo-800">{survey.name}</span>
-                                                    <span className="text-xl text-indigo-400">🔗</span>
-                                                </a>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                            <SurveyGroup
+                                title="Encuestas de Opinión"
+                                description="Estas encuestas se aplican al finalizar un curso para evaluar la experiencia inmediata de aprendizaje."
+                                icon="💬"
+                                surveys={SURVEY_DEFINITIONS.opinion}
+                                animationDelay={0}
+                            />
+
+                            <hr className="my-12 border-t-2 border-dashed border-gray-300" />
+
+                            <SurveyGroup
+                                title="Encuestas de Eficacia en el Puesto de Trabajo"
+                                description="Estas encuestas se aplican 4 meses después de haber tomado el curso para medir el impacto real y la aplicación de los conocimientos en sus actividades docentes."
+                                icon="📈"
+                                surveys={SURVEY_DEFINITIONS.eficacia}
+                                animationDelay={200}
+                            />
+                            
                         </div>
                     </div>
                 </div>
