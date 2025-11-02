@@ -15,7 +15,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
+    <script async src="https://www.google.com/gtag/js?id=G-JH1X2720VL"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -38,6 +38,17 @@
         .survey-link:hover {
             transform: translateY(-4px) scale(1.02);
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+            }
+        }
+        .animate-pulse-glow {
+            animation: pulse-glow 2s infinite;
         }
     </style>
 </head>
@@ -90,59 +101,28 @@
     <script type="text/babel">
         // =============================================================================
         // CONFIGURACIÓN DE ENCUESTAS
-        // Para agregar o cambiar, edite las listas 'opinion' o 'eficacia'.
         // =============================================================================
         const SURVEY_DEFINITIONS = {
             opinion: [
                 {
-                    periodo: "Encuestas de Enero 2025",
+                    periodo: "Encuestas de Agosto 2024",
                     surveys: [
                         { name: "CURSO O ENCUESTA 1 (OPINIÓN)", url: "#" },
                         { name: "CURSO O ENCUESTA 2 (OPINIÓN)", url: "#" }
                     ]
                 },
                 {
-                    periodo: "Encuestas de Junio 2025",
+                    periodo: "Encuestas de Enero 2024",
                     surveys: [
                         { name: "CURSO O ENCUESTA 1 (OPINIÓN)", url: "#" },
                         { name: "CURSO O ENCUESTA 2 (OPINIÓN)", url: "#" }
-                    ]
-                },
-                {
-                    periodo: "Encuestas de Agosto 2025",
-                    surveys: [
-                        { name: "CURSO O ENCUESTA 1 (OPINIÓN)", url: "#" },
-                        { name: "CURSO O ENCUESTA 2 (OPINIÓN)", url: "#" }
-                    ]
-                }
-            ],
-            eficacia: [
-                {
-                    periodo: "Encuestas de Enero 2025",
-                    surveys: [
-                        { name: "CURSO O ENCUESTA 1 (EFICACIA)", url: "#" },
-                        { name: "CURSO O ENCUESTA 2 (EFICACIA)", url: "#" }
-                    ]
-                },
-                {
-                    periodo: "Encuestas de Junio 2025",
-                    surveys: [
-                        { name: "CURSO O ENCUESTA 1 (EFICACIA)", url: "#" },
-                        { name: "CURSO O ENCUESTA 2 (EFICACIA)", url: "#" }
-                    ]
-                },
-                {
-                    periodo: "Encuestas de Agosto 2025",
-                    surveys: [
-                        { name: "CURSO O ENCUESTA 1 (EFICACIA)", url: "#" },
-                        { name: "CURSO O ENCUESTA 2 (EFICACIA)", url: "#" }
                     ]
                 }
             ]
         };
 
         // =============================================================================
-        // COMPONENTE PARA RENDERIZAR UN GRUPO DE ENCUESTAS
+        // COMPONENTES
         // =============================================================================
         const SurveyGroup = ({ title, description, icon, surveys, animationDelay }) => (
             <div className="mb-12 animate-fadeIn" style={{ animationDelay: `${animationDelay}ms` }}>
@@ -159,7 +139,7 @@
                                 {group.periodo}
                             </h3>
                             <div className="space-y-3">
-                                {group.surveys.map((survey, sIndex) => (
+                                {group.surveys.length > 0 ? group.surveys.map((survey, sIndex) => (
                                     <a
                                         key={sIndex}
                                         href={survey.url}
@@ -170,45 +150,66 @@
                                         <span className="font-semibold text-indigo-800">{survey.name}</span>
                                         <span className="text-xl text-indigo-400">🔗</span>
                                     </a>
-                                ))}
+                                )) : <p className="text-center text-gray-500 italic py-4">No hay encuestas de opinión disponibles para este periodo.</p>}
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
         );
+        
+        const EfficacySection = ({ animationDelay }) => (
+            <div className="animate-fadeIn" style={{ animationDelay: `${animationDelay}ms` }}>
+                <div className="text-center mb-6">
+                    <div className="text-6xl mb-4">📈</div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Encuestas de Eficacia</h2>
+                    <p className="text-gray-600 mt-2 max-w-2xl mx-auto">
+                        Estas encuestas se aplican 4 meses después de un curso para medir su impacto real.
+                        <strong> Es un requisito contestarlas para poder inscribirse al siguiente periodo de cursos.</strong>
+                    </p>
+                </div>
+                <div className="bg-white border-2 border-indigo-200 rounded-lg p-6 sm:p-8 text-center shadow-lg">
+                    <h3 className="text-lg sm:text-xl font-bold text-indigo-900">
+                        ¿Listo para inscribirte a los cursos de Enero 2025?
+                    </h3>
+                    <p className="text-sm text-gray-700 my-4">
+                        Primero, ayúdanos a mejorar evaluando los cursos que tomaste en el periodo anterior.
+                        Tu retroalimentación es anónima y muy valiosa.
+                    </p>
+                    <a
+                        href="inscripciones.html"
+                        className="inline-block bg-indigo-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-indigo-700 transition-colors shadow-md animate-pulse-glow"
+                    >
+                        Evaluar y Continuar a Inscripción →
+                    </a>
+                </div>
+            </div>
+        );
 
         // =============================================================================
-        // COMPONENTE PRINCIPAL DE LA APLICACIÓN
+        // COMPONENTE PRINCIPAL
         // =============================================================================
         const SurveyApp = () => {
             return (
                 <div className="container mx-auto px-4 py-8 sm:py-12">
-                    <div className="max-w-3xl mx-auto">
+                    <div className="max-w-4xl mx-auto">
                         <a href="index.html" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-8">
                             ← Volver al Portal Principal
                         </a>
                         
                         <div className="bg-white rounded-lg shadow-md p-6 sm:p-8">
                             
-                            <SurveyGroup
-                                title="Encuestas de Opinión"
-                                description="Estas encuestas se aplican al finalizar un curso para evaluar la experiencia inmediata de aprendizaje."
-                                icon="💬"
-                                surveys={SURVEY_DEFINITIONS.opinion}
-                                animationDelay={0}
-                            />
+                            <EfficacySection animationDelay={0} />
 
                             <hr className="my-12 border-t-2 border-dashed border-gray-300" />
-
+                            
                             <SurveyGroup
-                                title="Encuestas de Eficacia en el Puesto de Trabajo"
-                                description="Estas encuestas se aplican 4 meses después de haber tomado el curso para medir el impacto real y la aplicación de los conocimientos en sus actividades docentes."
-                                icon="📈"
-                                surveys={SURVEY_DEFINITIONS.eficacia}
+                                title="Encuestas de Opinión"
+                                description="Estas encuestas se aplican al finalizar un curso para evaluar la experiencia inmediata de aprendizaje. Su participación es voluntaria pero muy apreciada."
+                                icon="💬"
+                                surveys={SURVEY_DEFINITIONS.opinion}
                                 animationDelay={200}
                             />
-                            
                         </div>
                     </div>
                 </div>
@@ -216,7 +217,7 @@
         };
         
         // =============================================================================
-        // RENDERIZADO DE LA APLICACIÓN
+        // RENDER
         // =============================================================================
         window.addEventListener('load', () => {
             const rootElement = document.getElementById('root');
