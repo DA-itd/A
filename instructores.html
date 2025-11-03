@@ -575,19 +575,19 @@
             }, {});
 
             const handleProposalTeacherSelect = (teacher) => {
-                setProposalForm(prev => ({
-                    ...prev,
+                setProposalForm({
+                    ...proposalForm,
                     instructorName: teacher.nombreCompleto.toUpperCase(),
                     instructorEmail: (teacher.email || '').toLowerCase()
-                }));
+                });
             };
             
             const handleEvidenceTeacherSelect = (teacher) => {
-                setEvidenceForm(prev => ({
-                    ...prev,
+                setEvidenceForm({
+                    ...evidenceForm,
                     instructorName: teacher.nombreCompleto.toUpperCase(),
                     instructorEmail: (teacher.email || '').toLowerCase()
-                }));
+                });
             };
 
             const handleProposalSubmit = async (e) => {

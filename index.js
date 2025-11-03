@@ -1,6 +1,6 @@
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
-// Versión: 2.2.0 - Encuesta por Nombre de Docente
+// Versión: 2.0.0 - UI/UX Mejorada
 // Última actualización: Enero 2024
 // =============================================================================
 
@@ -10,13 +10,8 @@
 
 const COURSES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv';
 const TEACHERS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv';
-const EFFICACY_SURVEY_PARTICIPANTS_URL = 'https://raw.githubusercontent.com/DA-itd/A/main/encuesta%20eficacia.xlsx';
 
 const CURP_REGEX = /^[A-Z]{4}\d{6}[HM][A-Z]{5}[0-9A-Z]\d$/;
-
-// Periodos anteriores que requieren encuesta de eficacia para la inscripción actual
-const PREVIOUS_PERIODS_FOR_SURVEY = ["PERIODO_1", "PERIODO_2_AGOSTO_2024"];
-
 
 const MOCK_DEPARTMENTS = [
     "DEPARTAMENTO DE SISTEMAS Y COMPUTACION",
@@ -79,96 +74,6 @@ const cleanCSVValue = (val) => {
 // =============================================================================
 // == API SERVICE
 // =============================================================================
-const submitSurveyRecord = async (submission) => {
-    const APPS_SCRIPT_URL = window.CONFIG?.APPS_SCRIPT_URL;
-    if (!APPS_SCRIPT_URL) throw new Error("URL de configuración no disponible");
-
-    try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'cors',
-            redirect: 'follow',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ ...submission, action: 'submitSurveyRecord' })
-        });
-
-        const result = await response.json();
-        if (result?.success) {
-            return result;
-        } else {
-            throw new Error(result.message || 'Error en el servidor al registrar encuesta');
-        }
-    } catch (error) {
-        console.error("Error al registrar encuesta:", error);
-        throw error;
-    }
-};
-
-const submitEfficacySurvey = async (submission) => {
-    const APPS_SCRIPT_URL = window.CONFIG?.APPS_SCRIPT_URL;
-    if (!APPS_SCRIPT_URL) throw new Error("URL de configuración no disponible");
-
-    try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'cors',
-            redirect: 'follow',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ ...submission, action: 'submitEfficacySurvey' })
-        });
-
-        const result = await response.json();
-        if (result?.success) {
-            return result;
-        } else {
-            throw new Error(result.message || 'Error en el servidor al guardar encuesta');
-        }
-    } catch (error) {
-        console.error("Error al guardar encuesta:", error);
-        throw error;
-    }
-};
-
-const getSurveyParticipants = async () => {
-    try {
-        const response = await fetch(`${EFFICACY_SURVEY_PARTICIPANTS_URL}?_=${Date.now()}`);
-        if (!response.ok) throw new Error('Error al cargar participantes de encuesta');
-        
-        const arrayBuffer = await response.arrayBuffer();
-        
-        if (typeof XLSX === 'undefined') {
-            throw new Error('La librería XLSX no está cargada.');
-        }
-
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-        if (jsonData.length === 0) return [];
-        
-        const firstRow = jsonData[0];
-        const headers = Object.keys(firstRow);
-        
-        const nameHeader = headers.find(h => removeAccents(h.toLowerCase()).includes('nombre completo del docente'));
-        const courseHeader = headers.find(h => removeAccents(h.toLowerCase()).includes('curso en el que participo'));
-
-        if (!nameHeader || !courseHeader) {
-            console.error('No se encontraron las columnas "NOMBRE COMPLETO DEL DOCENTE" o "CURSO EN EL QUE PARTICIPO" en el archivo de encuestas.');
-            return [];
-        }
-
-        return jsonData.map(row => ({
-            teacherName: row[nameHeader] ? String(row[nameHeader]).trim() : '',
-            courseName: row[courseHeader] ? String(row[courseHeader]).trim() : '',
-        })).filter(p => p.teacherName && p.courseName);
-
-    } catch (error) {
-        console.error("Error al obtener participantes de encuesta:", error);
-        throw error;
-    }
-};
-
 
 const getTeachers = async () => {
     try {
@@ -322,7 +227,7 @@ const cancelSingleCourse = async (payload) => {
 const App = () => {
     const { useState, useEffect } = React;
     
-    const [currentStep, setCurrentStep] = useState(0); // Iniciar en el paso 0 (encuesta)
+    const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState({
         fullName: '',
         curp: '',
@@ -335,7 +240,6 @@ const App = () => {
     const [allCourses, setAllCourses] = useState([]);
     const [teachers, setTeachers] = useState([]);
     const [departments, setDepartments] = useState([]);
-    const [surveyParticipants, setSurveyParticipants] = useState([]);
     const [selectedCourses, setSelectedCourses] = useState([]);
     const [originalSelectedCourses, setOriginalSelectedCourses] = useState([]);
     const [registrationResult, setRegistrationResult] = useState([]);
@@ -349,18 +253,16 @@ const App = () => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const [coursesData, teachersData, departmentsData, surveyParticipantsData] = await Promise.all([
+                const [coursesData, teachersData, departmentsData] = await Promise.all([
                     getCourses(),
                     getTeachers(),
-                    getDepartments(),
-                    getSurveyParticipants()
+                    getDepartments()
                 ]);
                 setAllCourses(coursesData);
                 setTeachers(teachersData);
                 setDepartments(departmentsData);
-                setSurveyParticipants(surveyParticipantsData);
             } catch (err) {
-                setError("No se pudieron cargar los datos iniciales. Verifique las URLs de los archivos o su conexión a internet.");
+                setError("No se pudieron cargar los datos.");
             } finally {
                 setIsLoading(false);
             }
@@ -368,12 +270,12 @@ const App = () => {
         fetchData();
     }, []);
     
-    const studentSteps = ["Encuesta", "Información", "Cursos", "Confirmar", "Finalizado"];
+    const studentSteps = ["Información", "Cursos", "Confirmar", "Finalizado"];
     
-    const handleNext = () => setCurrentStep(prev => prev < 5 ? prev + 1 : prev);
-    const handleBack = () => setCurrentStep(prev => prev > 0 ? prev - 1 : prev);
+    const handleNext = () => setCurrentStep(prev => prev < 4 ? prev + 1 : prev);
+    const handleBack = () => setCurrentStep(prev => prev > 1 ? prev - 1 : prev);
     const goToStep = (step) => {
-        if (step >= 0 && step <= studentSteps.length) setCurrentStep(step);
+        if (step > 0 && step <= studentSteps.length) setCurrentStep(step);
     };
 
     const handleSubmit = async () => {
@@ -420,7 +322,7 @@ const App = () => {
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "Error desconocido";
             setError(errorMessage);
-            setCurrentStep(4); // Ir a confirmación para mostrar error
+            setCurrentStep(3);
         }
     };
     
@@ -431,7 +333,7 @@ const App = () => {
             );
         }
         
-        if (error && currentStep !== 4) {
+        if (error && currentStep !== 3) {
             return React.createElement('div', { 
                 className: 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mx-auto max-w-4xl', 
                 role: 'alert' 
@@ -442,14 +344,10 @@ const App = () => {
         }
 
         switch (currentStep) {
-            case 0:
-                return React.createElement(SurveyGate, {
-                    formData, setFormData, onNext, surveyParticipants, teachers
-                });
             case 1:
                 return React.createElement(Step1PersonalInfo, {
                     formData, setFormData, departments, teachers, allCourses,
-                    setSelectedCourses, setOriginalSelectedCourses, onNext: handleNext, onGoToStep: goToStep, onBack: handleBack
+                    setSelectedCourses, setOriginalSelectedCourses, onNext: handleNext, onGoToStep: goToStep
                 });
             case 2:
                 return React.createElement(Step2CourseSelection, {
@@ -477,7 +375,7 @@ const App = () => {
 
     return React.createElement('div', { className: 'flex flex-col min-h-screen bg-gray-100' },
         React.createElement('main', { className: 'flex-grow' },
-            React.createElement(Stepper, { currentStep: currentStep + 1, steps: studentSteps }), // Ajustar currentStep para el stepper visual
+            React.createElement(Stepper, { currentStep, steps: studentSteps }),
             React.createElement('div', { className: 'container mx-auto px-4 sm:px-6 lg:px-8 pb-8' },
                 error && currentStep === 3 && React.createElement('div', {
                     className: 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md w-full max-w-4xl mx-auto',
@@ -506,7 +404,7 @@ const Stepper = ({ currentStep, steps }) => {
                 return React.createElement(React.Fragment, { key: index },
                     React.createElement('div', {
                         'aria-current': isActive ? 'step' : undefined,
-                        className: `flex flex-col items-center text-center w-1/${steps.length} min-w-[70px]`
+                        className: `flex flex-col items-center text-center w-1/4 min-w-[70px]`
                     },
                         React.createElement('div', { className: 'relative flex items-center justify-center' },
                             React.createElement('div', {
@@ -694,257 +592,10 @@ const AutocompleteInput = ({ teachers, onSelect, value, onChange, name, placehol
 };
 
 // =============================================================================
-// == STEP 0: ENCUESTA DE EFICACIA
-// =============================================================================
-const EFFICACY_SURVEY_QUESTIONS = [
-    'Le ayudaron a su función como docente.',
-    'Te proporcionaron herramientas que permitieron enriquecer tu labor como docente.',
-    'Han servido para tu desarrollo personal.',
-    'Te sirvió para fomentar la colaboración con tus compañeros (as) de trabajo.',
-    'Le ayudaron a comprender mejor los procesos de Instituto de acuerdo a su rol como docente.',
-    'Le sirvió para integrarse con sus compañeros de trabajo.',
-    'Han servido para su desarrollo profesional.',
-    'Generaron un mayor dominio de los conceptos académicos aplicables en la materia que imparte.'
-];
-
-const EFFICACY_SURVEY_SCALE = [
-    { value: 1, label: 'Totalmente en desacuerdo' },
-    { value: 2, label: 'Parcialmente en desacuerdo' },
-    { value: 3, label: 'Indiferente' },
-    { value: 4, label: 'Parcialmente de acuerdo' },
-    { value: 5, label: 'Totalmente de acuerdo' }
-];
-
-const EfficacySurveyForm = ({ course, onSubmit, isSubmitting }) => {
-    const { useState } = React;
-    const initialAnswers = EFFICACY_SURVEY_QUESTIONS.reduce((acc, _, index) => ({ ...acc, [`q${index + 1}`]: null }), { suggestions: '' });
-    const [answers, setAnswers] = useState(initialAnswers);
-    const [formError, setFormError] = useState(null);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setAnswers(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const unansweredQuestions = EFFICACY_SURVEY_QUESTIONS.some((_, index) => answers[`q${index + 1}`] === null);
-        if (unansweredQuestions) {
-            setFormError('Por favor, responda todas las preguntas de la escala.');
-            return;
-        }
-        setFormError(null);
-        onSubmit(answers);
-    };
-
-    return React.createElement('form', { onSubmit: handleSubmit, className: 'space-y-6 animate-fadeIn' },
-        React.createElement('div', { className: 'p-4 bg-indigo-50 border border-indigo-200 rounded-lg' },
-            React.createElement('h3', { className: 'text-lg font-bold text-indigo-800' }, 'Evaluando el curso:'),
-            React.createElement('p', { className: 'text-md font-semibold text-indigo-900' }, course.name)
-        ),
-        EFFICACY_SURVEY_QUESTIONS.map((question, index) =>
-            React.createElement('div', { key: index, className: 'p-3 border rounded-md bg-white' },
-                React.createElement('p', { className: 'text-sm font-medium text-gray-800 mb-3' }, `${index + 1}. ${question}`),
-                React.createElement('div', { className: 'flex flex-wrap justify-center gap-x-4 gap-y-2' },
-                    EFFICACY_SURVEY_SCALE.map(option =>
-                        React.createElement('label', { key: option.value, className: 'flex flex-col items-center space-y-1 cursor-pointer' },
-                            React.createElement('span', { className: 'text-xs text-center' }, option.value),
-                            React.createElement('input', {
-                                type: 'radio',
-                                name: `q${index + 1}`,
-                                value: option.value,
-                                checked: answers[`q${index + 1}`] == option.value,
-                                onChange: handleChange,
-                                className: 'form-radio h-4 w-4 text-indigo-600'
-                            }),
-                            React.createElement('span', { className: 'text-xs text-center hidden sm:block' }, option.label.split(' ')[0])
-                        )
-                    )
-                )
-            )
-        ),
-        React.createElement('div', null,
-            React.createElement('label', { htmlFor: 'suggestions', className: 'block text-sm font-medium text-gray-700' }, 'Sugerencias para mejorar los cursos ofrecidos:'),
-            React.createElement('textarea', {
-                id: 'suggestions',
-                name: 'suggestions',
-                rows: 4,
-                value: answers.suggestions,
-                onChange: handleChange,
-                className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500'
-            })
-        ),
-        formError && React.createElement('p', { className: 'text-red-500 text-sm' }, formError),
-        React.createElement('button', {
-            type: 'submit',
-            disabled: isSubmitting,
-            className: 'w-full bg-blue-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-800 disabled:opacity-50 flex items-center justify-center'
-        },
-            isSubmitting && React.createElement('div', { className: 'animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2' }),
-            isSubmitting ? 'Enviando...' : 'Enviar Encuesta'
-        )
-    );
-};
-
-const SurveyGate = ({ formData, setFormData, onNext, surveyParticipants, teachers }) => {
-    const { useState, useMemo } = React;
-    const [teacherName, setTeacherName] = useState('');
-    const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [coursesToSurvey, setCoursesToSurvey] = useState([]);
-    const [teacherData, setTeacherData] = useState(null);
-    const [currentSurveyIndex, setCurrentSurveyIndex] = useState(0);
-
-    const surveyTeacherNames = useMemo(() => {
-        if (!surveyParticipants) return [];
-        const names = surveyParticipants.map(p => p.teacherName);
-        return [...new Set(names)].map(name => ({ nombreCompleto: name, curp: name })); // Use name as key
-    }, [surveyParticipants]);
-
-    const handleTeacherSelect = (teacher) => {
-        setTeacherName(teacher.nombreCompleto);
-    };
-
-    const handleNameChange = (e) => {
-        setTeacherName(e.target.value);
-    };
-
-    const handleSubmitName = async (e) => {
-        e.preventDefault();
-        if (!teacherName) {
-            setError('Por favor, ingrese su nombre.');
-            return;
-        }
-        setError(null);
-        setIsLoading(true);
-
-        try {
-            const coursesForTeacher = surveyParticipants.filter(p => 
-                removeAccents(p.teacherName.toLowerCase()) === removeAccents(teacherName.toLowerCase())
-            );
-            
-            const foundTeacher = teachers.find(t => removeAccents(t.nombreCompleto.toLowerCase()) === removeAccents(teacherName.toLowerCase()));
-            setTeacherData(foundTeacher || { nombreCompleto: teacherName });
-
-            if (coursesForTeacher.length > 0) {
-                setCoursesToSurvey(coursesForTeacher.map(c => ({ name: c.courseName, id: c.courseName })));
-            } else {
-                await handleCompletion(foundTeacher || { nombreCompleto: teacherName });
-            }
-        } catch (err) {
-            setError('Error al verificar su historial de cursos.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    
-    const handleSurveySubmit = async (answers) => {
-        setIsSubmitting(true);
-        const currentCourse = coursesToSurvey[currentSurveyIndex];
-        try {
-            await submitEfficacySurvey({
-                timestamp: new Date().toISOString(),
-                teacherName: teacherData.nombreCompleto,
-                courseId: currentCourse.id,
-                courseName: currentCourse.name,
-                answers,
-            });
-            
-            const nextIndex = currentSurveyIndex + 1;
-            if (nextIndex >= coursesToSurvey.length) {
-                await handleCompletion(teacherData);
-            } else {
-                setCurrentSurveyIndex(nextIndex);
-            }
-        } catch (err) {
-            setError('No se pudo guardar la encuesta. Intente de nuevo.');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-    
-    const handleCompletion = async (currentTeacherData) => {
-        setIsSubmitting(true);
-        try {
-            await submitSurveyRecord({
-                timestamp: new Date().toISOString(),
-                teacherName: currentTeacherData?.nombreCompleto || 'No encontrado',
-                email: currentTeacherData?.email || 'No encontrado',
-                department: formData.department || 'No especificado',
-                courses: coursesToSurvey,
-            });
-            
-            setFormData(prev => ({
-                ...prev,
-                fullName: (currentTeacherData?.nombreCompleto || '').toUpperCase(),
-                email: (currentTeacherData?.email || '').toLowerCase()
-            }));
-            onNext();
-        } catch (err) {
-            setError('No se pudo registrar la finalización del proceso. Intente de nuevo.');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const renderContent = () => {
-        if (coursesToSurvey.length === 0) {
-            return React.createElement('form', { onSubmit: handleSubmitName },
-                React.createElement('label', { htmlFor: 'teacher-name-survey', className: 'block text-sm font-medium text-gray-700' }, 'Ingresa tu nombre completo *'),
-                React.createElement('div', { className: 'mt-1 flex flex-col sm:flex-row gap-2' },
-                    React.createElement('div', {className: 'flex-grow'}, 
-                        React.createElement(AutocompleteInput, {
-                            teachers: surveyTeacherNames,
-                            onSelect: handleTeacherSelect,
-                            value: teacherName,
-                            onChange: handleNameChange,
-                            name: 'teacherName',
-                            placeholder: 'Busque por su nombre...',
-                            required: true
-                        })
-                    ),
-                    React.createElement('button', {
-                        type: 'submit', disabled: isLoading,
-                        className: 'w-full sm:w-auto bg-gray-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center'
-                    }, 
-                        isLoading && React.createElement('div', { className: 'animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2' }),
-                        'Verificar'
-                    )
-                )
-            );
-        }
-        
-        return React.createElement('div', null,
-            React.createElement('p', { className: 'text-center text-sm text-gray-600 mb-4' }, 
-                `Encuesta ${currentSurveyIndex + 1} de ${coursesToSurvey.length}`
-            ),
-            React.createElement(EfficacySurveyForm, {
-                course: coursesToSurvey[currentSurveyIndex],
-                onSubmit: handleSurveySubmit,
-                isSubmitting: isSubmitting,
-            })
-        );
-    };
-
-    return React.createElement('div', { className: 'bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md w-full max-w-2xl mx-auto' },
-        React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold mb-2 text-gray-800' }, 
-            'Paso 1: Encuesta de Eficacia'
-        ),
-        React.createElement('p', { className: 'text-sm text-gray-600 mb-6' }, 
-            'Como requisito para la inscripción, por favor completa la encuesta de eficacia para los cursos del periodo anterior.'
-        ),
-        renderContent(),
-        error && React.createElement('p', { className: 'text-red-500 text-xs mt-2' }, error)
-    );
-};
-
-
-// =============================================================================
 // == STEP 1: INFORMACIÓN PERSONAL
 // =============================================================================
 
-const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCourses, setSelectedCourses, setOriginalSelectedCourses, onNext, onGoToStep, onBack }) => {
+const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCourses, setSelectedCourses, setOriginalSelectedCourses, onNext, onGoToStep }) => {
     const { useState, useEffect, useRef } = React;
     const [errors, setErrors] = useState({});
     const [isCheckingCurp, setIsCheckingCurp] = useState(false);
@@ -995,13 +646,13 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
         setSelectedCourses(existingCourses);
         setOriginalSelectedCourses(existingCourses);
         setIsModalOpen(false);
-        goToStep(2);
+        onNext();
     };
     const handleCancelAllRegistration = () => {
         setSelectedCourses([]);
         setOriginalSelectedCourses(existingCourses);
         setIsModalOpen(false);
-        goToStep(3);
+        onGoToStep(3);
     };
     
     const handleDeleteCourse = async (courseIdToDelete) => {
@@ -1090,16 +741,15 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
             const genderChar = upperCurp.charAt(10).toUpperCase();
             if (genderChar === 'H') inferredGender = 'Hombre';
             else if (genderChar === 'M') inferredGender = 'Mujer';
-            else inferredGender = 'Otro';
         }
 
-        setFormData(prev => ({
-            ...prev,
+        setFormData({
+            ...formData,
             fullName: (nombreCompleto || '').toUpperCase(),
             curp: upperCurp,
             email: (email || '').toLowerCase(),
             gender: inferredGender,
-        }));
+        });
     };
 
     return React.createElement(React.Fragment, null,
@@ -1194,11 +844,7 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                         )
                     )
                 ),
-                React.createElement('div', { className: 'mt-8 flex justify-between' },
-                    React.createElement('button', {
-                        type: 'button', onClick: onBack,
-                        className: 'w-full sm:w-auto bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-400'
-                    }, 'Regresar'),
+                React.createElement('div', { className: 'mt-8 flex justify-end' },
                     React.createElement('button', {
                         type: 'submit',
                         className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800'
