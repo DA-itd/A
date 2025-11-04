@@ -269,18 +269,20 @@
                 </main>
             );
         };
-
-        const rootElement = document.getElementById('root');
-        if (rootElement) {
-            const root = ReactDOM.createRoot(rootElement);
-            root.render(
-                <React.StrictMode>
-                    <FormatosApp />
-                </React.StrictMode>
-            );
-        } else {
-            console.error('No se encontró el elemento root');
-        }
+        
+        window.addEventListener('load', () => {
+            const rootElement = document.getElementById('root');
+            if (rootElement) {
+                const root = ReactDOM.createRoot(rootElement);
+                root.render(
+                    <React.StrictMode>
+                        <FormatosApp />
+                    </React.StrictMode>
+                );
+            } else {
+                console.error('No se encontró el elemento root');
+            }
+        });
     </script>
 </body>
 </html>
