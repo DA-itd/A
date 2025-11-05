@@ -24,8 +24,14 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
                 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            cursor: none; /* Oculta el cursor por defecto en el cuerpo */
         }
         
+        /* Oculta el cursor por defecto en elementos interactivos */
+        a, button {
+            cursor: none;
+        }
+
         .card-portal {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
@@ -74,7 +80,6 @@
         .delay-500 { animation-delay: 0.5s; opacity: 0; }
         .delay-600 { animation-delay: 0.6s; opacity: 0; }
         .delay-700 { animation-delay: 0.7s; opacity: 0; }
-        .delay-800 { animation-delay: 0.8s; opacity: 0; }
         
         @keyframes pulse-slow {
             0%, 100% { transform: scale(1); }
@@ -111,12 +116,32 @@
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
             border-left: 3px solid rgba(99, 102, 241, 0.5);
         }
+        
+        /* Estilos para el cursor personalizado */
+        #cursor-dot {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background-color: rgba(99, 102, 241, 0.5); /* Color índigo semitransparente */
+            border-radius: 50%;
+            pointer-events: none; /* Muy importante para que no interfiera con los clics */
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease, transform 0.1s linear;
+        }
+
+        #cursor-dot.active {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(99, 102, 241, 0.2); /* Más grande y más transparente */
+        }
     </style>
 <script type="importmap">
 {
   "imports": {
     "vite": "https://aistudiocdn.com/vite@^7.1.12",
-    "path": "https://aistudiocdn.com/path@^0.12.7"
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "process": "https://aistudiocdn.com/process@^0.11.10"
   }
 }
 </script>
@@ -124,6 +149,9 @@
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
     
+    <!-- Elemento del cursor personalizado -->
+    <div id="cursor-dot"></div>
+
     <!-- Header -->
     <header class="bg-white shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-6">
@@ -206,6 +234,13 @@
     <!-- Contenido Principal -->
     <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
         
+        <!-- Frase Inspiracional -->
+        <section class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
+            <div id="quote-container" class="quote-container rounded-lg p-6 text-center transition-opacity duration-500 ease-in-out">
+                <!-- Quote will be injected here -->
+            </div>
+        </section>
+        
         <!-- Mensaje de Bienvenida -->
         <section class="max-w-4xl mx-auto mb-12 animate-fadeInUp">
             <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-indigo-500">
@@ -229,12 +264,14 @@
 
         <!-- Banner de Bienvenida -->
         <div id="servicios" class="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32">
-            <div class="inline-block mb-4 animate-pulse-slow">
-                <div class="text-6xl sm:text-7xl md:text-8xl">🎓</div>
+            <div class="flex items-baseline justify-center gap-4 sm:gap-6 mb-4">
+                <div class="inline-block animate-pulse-slow">
+                    <div class="text-6xl sm:text-7xl md:text-8xl">🎓</div>
+                </div>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800">
+                    Servicios Disponibles
+                </h2>
             </div>
-            <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
-                Servicios Disponibles
-            </h2>
             <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
                 Seleccione la opción que necesite para acceder a los diferentes servicios
             </p>
@@ -350,24 +387,6 @@
                 </div>
             </a>
 
-            <!-- Opción 8: SGI -->
-            <a href="https://www.itdurango.edu.mx/sgi/"
-               target="_blank" rel="noopener noreferrer"
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-800">
-                <div class="h-10 sm:h-12 flex justify-center items-center mb-4">
-                    <img src="https://cdn.jsdelivr.net/gh/DA-itd/A@main/SGI.jpg" alt="Logo SGI" class="max-h-full object-contain transform transition-transform hover:scale-110">
-                </div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">
-                    Sistema de Gestión Integrado
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Acceder al portal del SGI del ITD.
-                </p>
-                <div class="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
-            </a>
-
         </div>
 
         <!-- Panel de Información -->
@@ -419,11 +438,11 @@
         <div id="enlaces" class="max-w-4xl mx-auto scroll-mt-32">
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
                 <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <a href="https://www.itdurango.edu.mx" 
                        target="_blank"
                        rel="noopener noreferrer"
-                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
+                       class="bg-sky-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
                         <div class="text-3xl mb-2">🏛️</div>
                         <p class="font-semibold text-sm">ITD</p>
                         <p class="text-xs opacity-90">Portal Principal</p>
@@ -431,7 +450,7 @@
                     <a href="https://www.tecnm.mx" 
                        target="_blank"
                        rel="noopener noreferrer"
-                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
+                       class="bg-emerald-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
                         <div class="text-3xl mb-2">🎓</div>
                         <p class="font-semibold text-sm">TecNM</p>
                         <p class="text-xs opacity-90">Sitio Nacional</p>
@@ -439,29 +458,39 @@
                     <a href="https://mooc.tecnm.mx/portal/" 
                        target="_blank"
                        rel="noopener noreferrer"
-                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
+                       class="bg-purple-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
                         <div class="text-3xl mb-2">💻</div>
                         <p class="font-semibold text-sm">MOOC</p>
                         <p class="text-xs opacity-90">Cursos en Línea</p>
+                    </a>
+                    <a href="https://www.itdurango.edu.mx/sgi/" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-rose-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
+                        <div class="text-3xl mb-2">📂</div>
+                        <p class="font-semibold text-sm">SGI</p>
+                        <p class="text-xs opacity-90">Gestión Integrado</p>
                     </a>
                 </div>
             </div>
         </div>
 
         <!-- Ayuda y Soporte -->
-        <div id="contacto" class="max-w-2xl mx-auto mt-8 scroll-mt-32">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 sm:p-8 text-white text-center">
-                <div class="text-4xl mb-4">💬</div>
-                <h3 class="text-xl sm:text-2xl font-bold mb-2">
-                    ¿Necesitas Ayuda?
-                </h3>
-                <p class="text-sm sm:text-base mb-4 opacity-90">
-                    Contacta a la Coordinación de Actualización Docente
-                </p>
-                <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
-                   class="inline-block bg-white text-blue-600 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
-                    📧 Enviar Email
-                </a>
+        <div id="contacto" class="max-w-4xl mx-auto mt-8 scroll-mt-32">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+                    <div class="flex items-center gap-4">
+                        <div class="text-4xl hidden sm:block">💬</div>
+                        <div>
+                            <h3 class="text-lg font-bold">¿Necesitas Ayuda?</h3>
+                            <p class="text-sm opacity-90">Contacta a la Coordinación de Actualización Docente.</p>
+                        </div>
+                    </div>
+                    <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
+                       class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md">
+                        <span class="mr-2">📧</span> Enviar Email
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -500,6 +529,29 @@
     </div>
 
     <script>
+        // =============================================================================
+        // LÓGICA DEL CURSOR PERSONALIZADO
+        // =============================================================================
+        const cursorDot = document.getElementById('cursor-dot');
+        
+        window.addEventListener('mousemove', e => {
+            const { clientX, clientY } = e;
+            
+            // Usamos requestAnimationFrame para un rendimiento más suave
+            requestAnimationFrame(() => {
+                cursorDot.style.left = `${clientX}px`;
+                cursorDot.style.top = `${clientY}px`;
+            });
+            
+            const target = e.target;
+            // Verifica si el elemento es un enlace, botón o tiene un rol de botón o es una tarjeta del portal
+            if (target.matches('a, button, [role="button"], .card-portal')) {
+                cursorDot.classList.add('active');
+            } else {
+                cursorDot.classList.remove('active');
+            }
+        });
+
         // =============================================================================
         // LÓGICA DEL MENÚ MÓVIL
         // =============================================================================
@@ -663,18 +715,25 @@
         }
 
         // =============================================================================
-        // FRASES INSPIRACIONALES (Solo se muestra una al cargar)
+        // FRASES INSPIRACIONALES (ROTATIVAS)
         // =============================================================================
-        function showRandomQuote() {
+        function rotateQuotes() {
+            const quoteContainer = document.getElementById('quote-container');
+            if (!quoteContainer) return;
+
             const randomIndex = Math.floor(Math.random() * inspirationalQuotes.length);
             const quote = inspirationalQuotes[randomIndex];
-            
-            const quoteElement = document.getElementById('inspirationalQuote');
-            if(quoteElement) {
-                quoteElement.parentElement.innerHTML = `
+
+            // Fade out
+            quoteContainer.style.opacity = 0;
+
+            setTimeout(() => {
+                quoteContainer.innerHTML = `
                     <p class="text-base sm:text-lg italic text-gray-700 leading-relaxed">"${quote.quote}"</p>
                     <p class="text-sm sm:text-base text-gray-600 text-right mt-2">- ${quote.author}</p>`;
-            }
+                // Fade in
+                quoteContainer.style.opacity = 1;
+            }, 500);
         }
         
         // =============================================================================
@@ -699,7 +758,8 @@
             startClock();
             updateDate();
             updateWeather();
-            showRandomQuote();
+            rotateQuotes(); // Initial quote
+            setInterval(rotateQuotes, 30000); // Change quote every 30 seconds
             updateCalendarYear();
             
             console.log('%c Portal ITD - Listo ', 
