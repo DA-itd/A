@@ -120,6 +120,7 @@
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
@@ -257,20 +258,19 @@
                     ✓ Disponible
                 </div>
             </a>
-
-            <!-- Opción 2: Historial de Cursos -->
-            <a href="#" onclick="event.preventDefault(); showComingSoon('Historial de Cursos')"
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-400 cursor-pointer animate-fadeInUp delay-200">
-                <span class="badge-soon">Próximamente</span>
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
+            
+            <!-- NUEVA OPCIÓN: Asistente de IA -->
+            <a href="asistente-ia.html" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-200">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">🤖</div>
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
-                    Historial de Cursos
+                    Asistente de Planeación IA
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Ver mi historial de actualización docente
+                    Generar ideas y estructuras para tus clases
                 </p>
-                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
-                    En desarrollo
+                <div class="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ¡Nuevo!
                 </div>
             </a>
 
@@ -334,16 +334,16 @@
                 </div>
             </a>
             
-            <!-- Opción 7: Estadísticas -->
-            <a href="#" onclick="event.preventDefault(); showComingSoon('Estadísticas')"
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 cursor-pointer animate-fadeInUp delay-700">
+            <!-- Opción 7: Historial de Cursos -->
+            <a href="#" onclick="event.preventDefault(); showComingSoon('Historial de Cursos')"
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-400 cursor-pointer animate-fadeInUp delay-700">
                 <span class="badge-soon">Próximamente</span>
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📈</div>
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
-                    Estadísticas
+                    Historial de Cursos
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Análisis y resultados de encuestas
+                    Ver mi historial de actualización docente
                 </p>
                 <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
                     En desarrollo
@@ -353,7 +353,7 @@
             <!-- Opción 8: SGI -->
             <a href="https://www.itdurango.edu.mx/sgi/"
                target="_blank" rel="noopener noreferrer"
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-800">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-gray-400 animate-fadeInUp delay-800">
                 <div class="h-10 sm:h-12 flex justify-center items-center mb-4">
                     <img src="https://cdn.jsdelivr.net/gh/DA-itd/A@main/SGI.jpg" alt="Logo SGI" class="max-h-full object-contain transform transition-transform hover:scale-110">
                 </div>
@@ -363,7 +363,7 @@
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Acceder al portal del SGI del ITD.
                 </p>
-                <div class="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full">
+                <div class="inline-block bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1 rounded-full">
                     ✓ Disponible
                 </div>
             </a>
@@ -418,7 +418,7 @@
         <!-- Enlaces Institucionales -->
         <div id="enlaces" class="max-w-4xl mx-auto scroll-mt-32">
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
-                <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
+                <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales y Contacto</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <a href="https://www.itdurango.edu.mx" 
                        target="_blank"
@@ -436,32 +436,13 @@
                         <p class="font-semibold text-sm">TecNM</p>
                         <p class="text-xs opacity-90">Sitio Nacional</p>
                     </a>
-                    <a href="https://mooc.tecnm.mx/portal/" 
-                       target="_blank"
-                       rel="noopener noreferrer"
+                    <a href="mailto:desarrollo.academico@itdurango.edu.mx"
                        class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
-                        <div class="text-3xl mb-2">💻</div>
-                        <p class="font-semibold text-sm">MOOC</p>
-                        <p class="text-xs opacity-90">Cursos en Línea</p>
+                        <div class="text-3xl mb-2">📧</div>
+                        <p class="font-semibold text-sm">Contacto</p>
+                        <p class="text-xs opacity-90">Enviar Email</p>
                     </a>
                 </div>
-            </div>
-        </div>
-
-        <!-- Ayuda y Soporte -->
-        <div id="contacto" class="max-w-2xl mx-auto mt-8 scroll-mt-32">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 sm:p-8 text-white text-center">
-                <div class="text-4xl mb-4">💬</div>
-                <h3 class="text-xl sm:text-2xl font-bold mb-2">
-                    ¿Necesitas Ayuda?
-                </h3>
-                <p class="text-sm sm:text-base mb-4 opacity-90">
-                    Contacta a la Coordinación de Actualización Docente
-                </p>
-                <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
-                   class="inline-block bg-white text-blue-600 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
-                    📧 Enviar Email
-                </a>
             </div>
         </div>
 
@@ -516,52 +497,6 @@
                 mobileMenu.classList.add('hidden');
             });
         });
-
-        // =============================================================================
-        // FRASES INSPIRACIONALES SOBRE EDUCACIÓN Y CIENCIA
-        // =============================================================================
-        const inspirationalQuotes = [
-            {
-                quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.",
-                author: "Nelson Mandela"
-            },
-            {
-                quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.",
-                author: "Carl Sagan"
-            },
-            {
-                quote: "La educación no es preparación para la vida; la educación es la vida misma.",
-                author: "John Dewey"
-            },
-            {
-                quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.",
-                author: "Albert Einstein"
-            },
-            {
-                quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.",
-                author: "Platón"
-            },
-            {
-                quote: "La ciencia no conoce fronteras, porque el conocimiento pertenece a la humanidad.",
-                author: "Louis Pasteur"
-            },
-            {
-                quote: "Educación es lo que queda después de olvidar lo que se ha aprendido en la escuela.",
-                author: "Albert Einstein"
-            },
-            {
-                quote: "La investigación es ver lo que todos han visto y pensar lo que nadie ha pensado.",
-                author: "Albert Szent-Györgyi"
-            },
-            {
-                quote: "Un maestro afecta la eternidad; nunca se sabe dónde termina su influencia.",
-                author: "Henry Adams"
-            },
-            {
-                quote: "La mejor forma de predecir el futuro es inventándolo.",
-                author: "Alan Kay"
-            }
-        ];
 
         // =============================================================================
         // CLIMA LOCAL
@@ -661,21 +596,6 @@
                 calendarElement.textContent = `Calendario Institucional ${currentYear}`;
             }
         }
-
-        // =============================================================================
-        // FRASES INSPIRACIONALES (Solo se muestra una al cargar)
-        // =============================================================================
-        function showRandomQuote() {
-            const randomIndex = Math.floor(Math.random() * inspirationalQuotes.length);
-            const quote = inspirationalQuotes[randomIndex];
-            
-            const quoteElement = document.getElementById('inspirationalQuote');
-            if(quoteElement) {
-                quoteElement.parentElement.innerHTML = `
-                    <p class="text-base sm:text-lg italic text-gray-700 leading-relaxed">"${quote.quote}"</p>
-                    <p class="text-sm sm:text-base text-gray-600 text-right mt-2">- ${quote.author}</p>`;
-            }
-        }
         
         // =============================================================================
         // MODALES
@@ -699,7 +619,6 @@
             startClock();
             updateDate();
             updateWeather();
-            showRandomQuote();
             updateCalendarYear();
             
             console.log('%c Portal ITD - Listo ', 
@@ -708,5 +627,6 @@
         });
     </script>
 
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>

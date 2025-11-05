@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente de Planeación IA - ITD</title>
+    <meta name="description" content="Herramienta de IA para ayudar a los docentes del ITD a crear planeaciones didácticas innovadoras y efectivas para sus clases.">
+    
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JH1X2720VL');
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        .prose-styles ul { list-style-type: disc; margin-left: 1.5rem; }
+        .prose-styles ol { list-style-type: decimal; margin-left: 1.5rem; }
+        .prose-styles h3 { font-size: 1.25rem; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .prose-styles p { margin-bottom: 0.75rem; }
+        .prose-styles strong { font-weight: bold; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-xl sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 sm:py-6">
+            <div class="flex items-center justify-between gap-4">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
+                <div class="text-center flex-1 px-2 sm:px-4">
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">
+                        ASISTENTE DE PLANEACIÓN CON IA
+                    </h1>
+                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">
+                        Desarrollo Académico
+                    </p>
+                </div>
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
+            </div>
+        </div>
+    </header>
+
+    <div id="root"></div>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <p class="font-semibold text-sm sm:text-base mb-2">
+                © Coordinación de Actualización Docente
+            </p>
+        </div>
+    </footer>
+
+    <script type="text/babel">
+        const { useState } = React;
+        const { GoogleGenerativeAI } = AIStudio;
+
+        const AsistenteApp = () => {
+            const [materia, setMateria] = useState('');
+            const [tema, setTema] = useState('');
+            const [objetivo, setObjetivo] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+            const [result, setResult] = useState('');
+            const [error, setError] = useState(null);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                if (!materia || !tema || !objetivo) {
+                    setError('Por favor, complete todos los campos.');
+                    return;
+                }
+                
+                setIsLoading(true);
+                setResult('');
+                setError(null);
+
+                try {
+                    const ai = new GoogleGenerativeAI({ apiKey: process.env.API_KEY });
+                    const model = ai.getGenerativeModel({ model: 'gemini-2.5-pro' });
+                    
+                    const systemInstruction = "Actúas como un experto en diseño instruccional y pedagogía, especializado en educación superior tecnológica. Tu objetivo es ayudar a los docentes del Instituto Tecnológico de Durango a crear planeaciones didácticas innovadoras, prácticas y bien estructuradas. Utiliza un tono profesional, claro y de apoyo. Formatea tu respuesta siempre en Markdown.";
+
+                    const prompt = `
+                        Materia: ${materia}
+                        Tema Específico: ${tema}
+                        Objetivo o Actividad Deseada: ${objetivo}
+
+                        Genera una propuesta de planeación didáctica detallada en formato Markdown. La planeación debe ser adecuada para una sesión de clase de 90 minutos y debe incluir, como mínimo, las siguientes secciones bien definidas:
+
+                        - **### Objetivos de Aprendizaje:** (Define 2-3 objetivos claros y medibles que el estudiante deberá alcanzar al final de la sesión).
+                        - **### Actividades de Inicio (10 minutos):** (Propón una actividad corta y dinámica para captar la atención de los estudiantes y conectar con conocimientos previos. Puede ser una pregunta detonadora, un video corto, un problema rápido, etc.).
+                        - **### Actividades de Desarrollo (60 minutos):** (Este es el núcleo de la clase. Detalla la actividad principal. Si es una exposición, sugiere puntos clave y ejemplos. Si es una actividad práctica, describe los pasos a seguir. Conecta la teoría con aplicaciones prácticas, especialmente si se relaciona con la ingeniería o la tecnología).
+                        - **### Actividades de Cierre (20 minutos):** (Sugiere una actividad para resumir los puntos clave, consolidar el aprendizaje y resolver dudas. Puede ser un pequeño quiz, una discusión en grupo o la presentación de conclusiones).
+                        - **### Recursos Necesarios:** (Lista los materiales, software, equipo de laboratorio o cualquier otro recurso requerido para la sesión).
+                        - **### Sugerencia de Evaluación:** (Describe brevemente cómo se podría evaluar el aprendizaje de los estudiantes en esta sesión. Ej: participación, resolución de un problema, entrega de un mapa conceptual, etc.).
+                    `;
+
+                    const response = await model.generateContent({
+                      contents: [{role: "user", parts:[{text: prompt}]}],
+                      generationConfig: {
+                          systemInstruction: systemInstruction,
+                      }
+                    });
+
+                    setResult(response.response.text());
+                } catch (err) {
+                    console.error("Error al generar planeación:", err);
+                    setError("Hubo un error al comunicarse con el asistente de IA. Por favor, intente de nuevo más tarde.");
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            
+            const handleNewPlan = () => {
+                setMateria('');
+                setTema('');
+                setObjetivo('');
+                setResult('');
+                setError(null);
+            };
+
+            return (
+                <main className="container mx-auto px-4 py-8 sm:py-12">
+                    <div className="max-w-4xl mx-auto">
+                        <a href="index.html" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-6">
+                            ← Volver al Portal Principal
+                        </a>
+
+                        <div className="bg-white rounded-lg shadow-md p-6 sm:p-8">
+                            {!result && (
+                                <form onSubmit={handleSubmit}>
+                                    <div className="text-center mb-6 animate-fadeIn">
+                                        <div className="text-6xl mb-4">🤖</div>
+                                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Asistente de Planeación Didáctica</h2>
+                                        <p className="text-gray-600 mt-2 max-w-2xl mx-auto">
+                                            Introduce los detalles de tu clase y deja que la IA te ayude a estructurar una sesión de aprendizaje efectiva y creativa.
+                                        </p>
+                                    </div>
+
+                                    {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">{error}</div>}
+
+                                    <div className="space-y-6">
+                                        <div>
+                                            <label htmlFor="materia" className="block text-sm font-medium text-gray-700 mb-1">Materia</label>
+                                            <input type="text" id="materia" value={materia} onChange={e => setMateria(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: Cálculo Diferencial, Termodinámica, Contabilidad de Costos" required />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="tema" className="block text-sm font-medium text-gray-700 mb-1">Tema Específico</label>
+                                            <input type="text" id="tema" value={tema} onChange={e => setTema(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: Límites y Continuidad, Ciclo de Carnot, Estado de Resultados" required />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="objetivo" className="block text-sm font-medium text-gray-700 mb-1">Objetivo o Actividad Deseada</label>
+                                            <textarea id="objetivo" value={objetivo} onChange={e => setObjetivo(e.target.value)} rows="3" className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ej: Crear un problema práctico para ingenieros civiles, explicar el tema con una analogía deportiva, diseñar un debate..." required></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-8 flex justify-end">
+                                        <button type="submit" disabled={isLoading} className="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2">
+                                            {isLoading && <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>}
+                                            {isLoading ? 'Generando...' : 'Generar Planeación'}
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+
+                            {isLoading && !result && (
+                                <div className="text-center py-12">
+                                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-800 mx-auto mb-4"></div>
+                                    <p className="text-indigo-800 font-semibold">Analizando los mejores enfoques pedagógicos...</p>
+                                </div>
+                            )}
+
+                            {result && (
+                                <div className="animate-fadeIn">
+                                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 border-b pb-2">Propuesta de Planeación Didáctica</h2>
+                                    <div className="prose-styles" dangerouslySetInnerHTML={{ __html: marked.parse(result) }}></div>
+                                    <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                                        <button onClick={handleNewPlan} className="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700">
+                                            Crear Nueva Planeación
+                                        </button>
+                                        <button onClick={() => navigator.clipboard.writeText(result)} className="w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-300">
+                                            Copiar Resultado (Markdown)
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </main>
+            );
+        };
+
+        window.addEventListener('load', () => {
+            const rootElement = document.getElementById('root');
+            if (rootElement) {
+                const root = ReactDOM.createRoot(rootElement);
+                root.render(
+                    <React.StrictMode>
+                        <AsistenteApp />
+                    </React.StrictMode>
+                );
+            } else {
+                console.error('No se encontró el elemento root');
+            }
+        });
+    </script>
+</body>
+</html>
