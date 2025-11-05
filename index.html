@@ -120,7 +120,6 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
@@ -158,9 +157,8 @@
                     <div class="hidden md:flex space-x-4">
                         <a href="#inicio" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Inicio</a>
                         <a href="#servicios" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Servicios</a>
-                        <a href="#enlaces" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Enlaces</a>
                         <a href="#informacion" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Información</a>
-                        <a href="#contacto" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Contacto</a>
+                        <a href="#enlaces" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Enlaces y Contacto</a>
                     </div>
                     <!-- Botón Menú Móvil -->
                     <div class="md:hidden flex items-center w-full">
@@ -174,9 +172,8 @@
             <div id="mobile-menu" class="hidden md:hidden">
                 <a href="#inicio" class="block px-4 py-3 text-sm hover:bg-blue-700">Inicio</a>
                 <a href="#servicios" class="block px-4 py-3 text-sm hover:bg-blue-700">Servicios</a>
-                <a href="#enlaces" class="block px-4 py-3 text-sm hover:bg-blue-700">Enlaces</a>
                 <a href="#informacion" class="block px-4 py-3 text-sm hover:bg-blue-700">Información</a>
-                <a href="#contacto" class="block px-4 py-3 text-sm hover:bg-blue-700">Contacto</a>
+                <a href="#enlaces" class="block px-4 py-3 text-sm hover:bg-blue-700">Enlaces y Contacto</a>
             </div>
         </nav>
     </header>
@@ -373,41 +370,8 @@
 
         </div>
 
-        <!-- Enlaces Institucionales -->
-        <div id="enlaces" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
-                <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <a href="https://www.itdurango.edu.mx" 
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
-                        <div class="text-3xl mb-2">🏛️</div>
-                        <p class="font-semibold text-sm">ITD</p>
-                        <p class="text-xs opacity-90">Portal Principal</p>
-                    </a>
-                    <a href="https://www.tecnm.mx" 
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
-                        <div class="text-3xl mb-2">🎓</div>
-                        <p class="font-semibold text-sm">TecNM</p>
-                        <p class="text-xs opacity-90">Sitio Nacional</p>
-                    </a>
-                    <a href="https://mooc.tecnm.mx/portal/" 
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
-                        <div class="text-3xl mb-2">💻</div>
-                        <p class="font-semibold text-sm">MOOC</p>
-                        <p class="text-xs opacity-90">Cursos en Línea</p>
-                    </a>
-                </div>
-            </div>
-        </div>
-
         <!-- Panel de Información -->
-        <div id="informacion" class="max-w-4xl mx-auto scroll-mt-32">
+        <div id="informacion" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
             <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="text-3xl sm:text-4xl">ℹ️</div>
@@ -447,6 +411,39 @@
                         <p class="text-sm font-semibold text-gray-800">Nota Importante</p>
                         <p class="text-xs text-gray-600 mt-1">Estos cursos están dirigidos al personal docente con plaza.</p>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enlaces Institucionales -->
+        <div id="enlaces" class="max-w-4xl mx-auto scroll-mt-32">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
+                <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <a href="https://www.itdurango.edu.mx" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
+                        <div class="text-3xl mb-2">🏛️</div>
+                        <p class="font-semibold text-sm">ITD</p>
+                        <p class="text-xs opacity-90">Portal Principal</p>
+                    </a>
+                    <a href="https://www.tecnm.mx" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
+                        <div class="text-3xl mb-2">🎓</div>
+                        <p class="font-semibold text-sm">TecNM</p>
+                        <p class="text-xs opacity-90">Sitio Nacional</p>
+                    </a>
+                    <a href="https://mooc.tecnm.mx/portal/" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
+                        <div class="text-3xl mb-2">💻</div>
+                        <p class="font-semibold text-sm">MOOC</p>
+                        <p class="text-xs opacity-90">Cursos en Línea</p>
+                    </a>
                 </div>
             </div>
         </div>
@@ -711,6 +708,5 @@
         });
     </script>
 
-<script type="module" src="/index.tsx"></script>
 </body>
 </html>
