@@ -1,478 +1,716 @@
-// =============================================================================
-// GOOGLE APPS SCRIPT - SISTEMA COMPLETO ITD
-// Versión: 11.0.0 - Extracción Directa de ID de Curso
-// =============================================================================
-
-// ===== CONFIGURACIÓN =====
-const SPREADSHEET_ID = '1KLPdMw1AzDdNSqYRRUZnvkyHLQnL2TWQ0Sk0282CN-A';
-
-// =============================================================================
-// FUNCIÓN PRINCIPAL - MANEJA TODAS LAS PETICIONES POST
-// =============================================================================
-function doPost(e) {
-  try {
-    const data = JSON.parse(e.postData.contents);
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Actualización Docente - ITD</title>
+    <meta name="description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango. Accede a inscripciones, formatos, calendario y más.">
+    <meta name="keywords" content="ITD, Tecnológico de Durango, actualización docente, cursos para maestros, desarrollo académico, portal docente">
     
-    if (data.action === 'submitSurveyRecord') {
-      return ContentService.createTextOutput(JSON.stringify(submitSurveyRecord(data))).setMimeType(ContentService.MimeType.JSON);
-    }
-    if (data.action === 'enrollStudent') {
-      // La acción 'enrollStudent' ahora llama a la nueva función
-      return ContentService.createTextOutput(JSON.stringify(processEnrollment_v11(data))).setMimeType(ContentService.MimeType.JSON);
-    }
-    if (data.action === 'cancelSingle') {
-      return ContentService.createTextOutput(JSON.stringify(cancelSingleCourse(data))).setMimeType(ContentService.MimeType.JSON);
-    }
-    if (data.action === 'submitInstructorProposal') {
-      return ContentService.createTextOutput(JSON.stringify(submitInstructorProposal(data))).setMimeType(ContentService.MimeType.JSON);
-    }
-    if (data.action === 'submitInstructorEvidence') {
-      return ContentService.createTextOutput(JSON.stringify(submitInstructorEvidence(data))).setMimeType(ContentService.MimeType.JSON);
-    }
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
     
-    return ContentService.createTextOutput(JSON.stringify({ success: false, message: 'Acción no reconocida' })).setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    Logger.log('❌ Error en doPost: ' + error.toString());
-    return ContentService.createTextOutput(JSON.stringify({ success: false, message: error.toString() })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
+    <script src="https://cdn.tailwindcss.com"></script>
 
-// =============================================================================
-// FUNCIÓN PARA PETICIONES GET (Buscar por CURP)
-// =============================================================================
-function doGet(e) {
-  try {
-    if (e.parameter.action === 'lookupByCurp' && e.parameter.curp) {
-      return ContentService.createTextOutput(JSON.stringify(lookupByCurp(e.parameter.curp))).setMimeType(ContentService.MimeType.JSON);
-    }
-    return ContentService.createTextOutput(JSON.stringify({ success: false, message: 'Parámetros inválidos' })).setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    Logger.log('❌ Error en doGet: ' + error.toString());
-    return ContentService.createTextOutput(JSON.stringify({ success: false, message: error.toString() })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-// =============================================================================
-// FUNCIÓN: REGISTRAR ENCUESTA
-// =============================================================================
-function submitSurveyRecord(data) {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    let sheet = ss.getSheetByName('Encuestas');
-    if (!sheet) {
-      sheet = ss.insertSheet('Encuestas');
-      sheet.appendRow(['Timestamp', 'Nombre Docente', 'Email', 'Departamento', 'ID Curso', 'Nombre Curso', 'URL Encuesta', 'Estado']);
-      sheet.getRange(1, 1, 1, 8).setBackground('#1e3a8a').setFontColor('#ffffff').setFontWeight('bold').setHorizontalAlignment('center');
-    }
-    sheet.appendRow([
-      data.timestamp || new Date().toISOString(), 
-      data.teacherName || '', 
-      data.teacherEmail || '',
-      data.department || '', 
-      data.courseId || '', 
-      data.courseName || '', 
-      data.surveyUrl || '', 
-      'Pendiente'
-    ]);
-    sheet.autoResizeColumns(1, 8);
-    return { success: true, message: 'Registro de encuesta guardado exitosamente' };
-  } catch (error) {
-    Logger.log('❌ Error en submitSurveyRecord: ' + error.toString());
-    return { success: false, message: 'Error al guardar registro: ' + error.toString() };
-  }
-}
-
-
-// =============================================================================
-// FUNCIÓN PRINCIPAL DE INSCRIPCIÓN - VERSIÓN 11.0.0 (Extracción Directa)
-// =============================================================================
-function processEnrollment_v11(data) {
-  Logger.log('🚀 Ejecutando processEnrollment_v11 con extracción directa de ID...');
-  
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    let sheet = ss.getSheetByName('Inscripciones');
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JH1X2720VL');
+    </script>
     
-    if (!sheet) {
-      sheet = ss.insertSheet('Inscripciones');
-      sheet.appendRow(['Folio', 'Timestamp', 'Nombre Completo', 'CURP', 'Email', 'Género', 'Departamento', 'ID Curso', 'Nombre Curso', 'Fechas', 'Ubicación', 'Horario', 'Estado']);
-      sheet.getRange(1, 1, 1, 13).setBackground('#be123c').setFontColor('#ffffff').setFontWeight('bold').setHorizontalAlignment('center');
-    }
-    
-    const results = [];
-    const timestampISO = new Date().toISOString();
-    const previousIds = (data.previousRegistrationIds || []).map(id => String(id).trim());
-    
-    // PASO 1: Cancelar cursos que ya no están seleccionados
-    if (previousIds.length > 0) {
-      const inscripcionesData = sheet.getDataRange().getValues();
-      for (let i = 1; i < inscripcionesData.length; i++) {
-        const rowCurp = inscripcionesData[i][3];
-        const rowCourseId = String(inscripcionesData[i][7]).trim();
-        const estado = inscripcionesData[i][12];
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
         
-        if (rowCurp === data.curp && estado === 'Activo' && previousIds.includes(rowCourseId)) {
-          if (!data.selectedCourses.some(c => String(c.id).trim() === rowCourseId)) {
-            sheet.getRange(i + 1, 13).setValue('Cancelado');
-          }
+        .card-portal {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
-      }
-      SpreadsheetApp.flush();
-    }
-    
-    // PASO 2: Iterar sobre la selección ORIGINAL del usuario
-    const newCoursesToEnroll = data.selectedCourses.filter(
-        course => !previousIds.includes(String(course.id).trim())
-    );
-
-    for (let i = 0; i < newCoursesToEnroll.length; i++) {
-        const currentCourse = newCoursesToEnroll[i];
-        const courseIdToProcess = String(currentCourse.id).trim();
-
-        const lock = LockService.getScriptLock();
-        lock.waitLock(30000);
-
-        try {
-            const inscripcionesData = sheet.getDataRange().getValues();
-            let enrollments = 0;
-
-            Logger.log(`\n--- [v11] Iteración ${i} ---`);
-            Logger.log(`[v11] Procesando Curso NUEVO: ${currentCourse.name} (ID: ${courseIdToProcess})`);
-
-            for (let j = 1; j < inscripcionesData.length; j++) {
-                if (String(inscripcionesData[j][7]).trim() === courseIdToProcess && inscripcionesData[j][12] === 'Activo') {
-                    enrollments++;
-                }
+        
+        .card-portal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .card-portal:hover::before {
+            left: 100%;
+        }
+        
+        .card-portal:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
             }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .delay-100 { animation-delay: 0.1s; opacity: 0; }
+        .delay-200 { animation-delay: 0.2s; opacity: 0; }
+        .delay-300 { animation-delay: 0.3s; opacity: 0; }
+        .delay-400 { animation-delay: 0.4s; opacity: 0; }
+        .delay-500 { animation-delay: 0.5s; opacity: 0; }
+        .delay-600 { animation-delay: 0.6s; opacity: 0; }
+        .delay-700 { animation-delay: 0.7s; opacity: 0; }
+        .delay-800 { animation-delay: 0.8s; opacity: 0; }
+        
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
+        
+        .badge-soon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
 
-            Logger.log(`[v11] Inscripciones para ${courseIdToProcess}: ${enrollments}`);
+        .weather-icon {
+            animation: float 3s ease-in-out infinite;
+        }
 
-            if (enrollments >= 30) {
-                results.push({
-                    registrationId: courseIdToProcess,
-                    courseName: currentCourse.name,
-                    folio: null,
-                    error: 'El curso ya ha alcanzado su capacidad máxima (30 participantes)'
-                });
-            } else {
-                // ============================================================
-                // LÓGICA DE GENERACIÓN DE FOLIO v11 - EXTRACCIÓN DIRECTA
-                // ============================================================
-                const prefix = "TNM-054";
-                const year = new Date().getFullYear().toString();
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
 
-                const idParts = courseIdToProcess.split('-'); // ["TNM", "054", "02", "2026"]
+        .quote-container {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-left: 3px solid rgba(99, 102, 241, 0.5);
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "vite": "https://aistudiocdn.com/vite@^7.1.12",
+    "path": "https://aistudiocdn.com/path@^0.12.7"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    
+    <!-- Header -->
+    <header class="bg-white shadow-xl sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 sm:py-6">
+            <div class="flex items-center justify-between gap-4">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" 
+                     alt="TecNM" 
+                     class="h-12 sm:h-16 md:h-20 object-contain">
                 
-                let courseIdPart = "XX"; // Fallback
-                if (idParts.length >= 3) {
-                    courseIdPart = idParts[2]; // Extrae "02"
-                }
+                <div class="text-center flex-1 px-2 sm:px-4">
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">
+                        ACTUALIZACIÓN DOCENTE
+                    </h1>
+                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">
+                        Desarrollo Académico
+                    </p>
+                    <p class="text-xs sm:text-sm text-blue-600">
+                        TecNM - Instituto Tecnológico de Durango
+                    </p>
+                </div>
+                
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" 
+                     alt="ITD" 
+                     class="h-12 sm:h-16 md:h-20 object-contain">
+            </div>
+        </div>
+         <!-- Menú de Navegación -->
+        <nav class="bg-blue-800 text-white shadow-md">
+            <div class="container mx-auto px-4">
+                <div class="flex justify-between items-center">
+                    <!-- Menú Desktop -->
+                    <div class="hidden md:flex space-x-4">
+                        <a href="#inicio" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Inicio</a>
+                        <a href="#servicios" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Servicios</a>
+                        <a href="#enlaces" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Enlaces</a>
+                        <a href="#informacion" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Información</a>
+                        <a href="#contacto" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Contacto</a>
+                    </div>
+                    <!-- Botón Menú Móvil -->
+                    <div class="md:hidden flex items-center w-full">
+                         <button id="mobile-menu-button" class="text-white focus:outline-none p-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                         </button>
+                    </div>
+                </div>
+            </div>
+             <!-- Menú Desplegable Móvil -->
+            <div id="mobile-menu" class="hidden md:hidden">
+                <a href="#inicio" class="block px-4 py-3 text-sm hover:bg-blue-700">Inicio</a>
+                <a href="#servicios" class="block px-4 py-3 text-sm hover:bg-blue-700">Servicios</a>
+                <a href="#enlaces" class="block px-4 py-3 text-sm hover:bg-blue-700">Enlaces</a>
+                <a href="#informacion" class="block px-4 py-3 text-sm hover:bg-blue-700">Información</a>
+                <a href="#contacto" class="block px-4 py-3 text-sm hover:bg-blue-700">Contacto</a>
+            </div>
+        </nav>
+    </header>
 
-                const nextEnrollment = enrollments + 1;
-                const paddedConsecutive = "00" + String(nextEnrollment);
-                const consecutivePart = paddedConsecutive.substring(paddedConsecutive.length - 2);
+    <!-- Barra de Información: Clima y Hora -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 text-sm">
+                <!-- Fecha -->
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📅</span>
+                    <span id="currentDate" class="font-semibold">Cargando...</span>
+                </div>
+                
+                <!-- Clima -->
+                <div id="weatherInfo" class="flex items-center gap-2">
+                    <span class="text-2xl weather-icon">🌤️</span>
+                    <span class="font-semibold">Durango, Dgo.</span>
+                </div>
+                
+                <!-- Hora -->
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🕒</span>
+                    <span id="clock" class="font-mono font-bold text-lg">--:--:--</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                const finalFolio = [prefix, courseIdPart, year, consecutivePart].join('-');
+    <!-- Contenido Principal -->
+    <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
+        
+        <!-- Mensaje de Bienvenida -->
+        <section class="max-w-4xl mx-auto mb-12 animate-fadeInUp">
+            <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-indigo-500">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="text-5xl">🧠</div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">
+                        ¡Bienvenidas y bienvenidos al Portal de Actualización Docente!
+                    </h2>
+                </div>
+                <div class="text-gray-700 space-y-4 leading-relaxed">
+                    <p>
+                        En un mundo en constante evolución, la capacitación continua es la clave para no solo mantenernos relevantes, sino para liderar el cambio. Este espacio está diseñado para ustedes, el pilar del <strong class="text-blue-800">Instituto Tecnológico de Durango</strong>, con el objetivo de brindarles las herramientas y conocimientos necesarios para enfrentar los retos tecnológicos y pedagógicos del futuro.
+                    </p>
+                    <p>
+                        Invertir en su desarrollo es invertir directamente en el bienestar y la excelencia de nuestros estudiantes, preparándolos para ser los líderes que nuestra sociedad necesita.
+                    </p>
+                </div>
+            </div>
+        </section>
 
-                Logger.log(`[v11] ID para Folio: "${courseIdToProcess}" -> Parte extraída: "${courseIdPart}"`);
-                Logger.log(`[v11] Folio Final Generado: ${finalFolio}`);
 
-                sheet.appendRow([
-                    finalFolio, timestampISO, data.fullName, data.curp, data.email,
-                    data.gender, data.DepartamentoSeleccionado, courseIdToProcess,
-                    currentCourse.name, currentCourse.dates, currentCourse.location, currentCourse.schedule, 'Activo'
-                ]);
+        <!-- Banner de Bienvenida -->
+        <div id="servicios" class="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32">
+            <div class="inline-block mb-4 animate-pulse-slow">
+                <div class="text-6xl sm:text-7xl md:text-8xl">🎓</div>
+            </div>
+            <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
+                Servicios Disponibles
+            </h2>
+            <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+                Seleccione la opción que necesite para acceder a los diferentes servicios
+            </p>
+        </div>
 
-                SpreadsheetApp.flush();
+        <!-- Grid de Opciones -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
+            
+            <!-- Opción 1: Inscripción a Cursos -->
+            <a href="inscripciones.html" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp delay-100">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📝</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    Inscripción a Cursos
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Registrarse en cursos de actualización
+                </p>
+                <div class="inline-block bg-rose-100 text-rose-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
+            </a>
 
-                results.push({
-                    registrationId: courseIdToProcess,
-                    courseName: currentCourse.name,
-                    folio: finalFolio
-                });
-            }
-        } catch (innerError) {
-            Logger.log(`[v11] ❌ Error procesando curso ${currentCourse.id}: ${innerError.toString()}`);
-            results.push({
-                registrationId: courseIdToProcess,
-                courseName: currentCourse.name,
-                folio: null,
-                error: innerError.toString()
-            });
-        } finally {
-            lock.releaseLock();
-        }
-    }
-    
-    // Agregar cursos existentes a los resultados para el email
-    const existingCoursesInSelection = data.selectedCourses.filter(
-        course => previousIds.includes(String(course.id).trim())
-    );
+            <!-- Opción 2: Historial de Cursos -->
+            <a href="#" onclick="event.preventDefault(); showComingSoon('Historial de Cursos')"
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-400 cursor-pointer animate-fadeInUp delay-200">
+                <span class="badge-soon">Próximamente</span>
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    Historial de Cursos
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Ver mi historial de actualización docente
+                </p>
+                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
+                    En desarrollo
+                </div>
+            </a>
 
-    existingCoursesInSelection.forEach(course => {
-        results.push({
-            registrationId: String(course.id).trim(),
-            courseName: course.name,
-            folio: "EXISTENTE"
+            <!-- Opción 3: Formatos Oficiales -->
+            <a href="formatos.html" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-300">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📋</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    Formatos Oficiales
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Descargar formatos y documentos
+                </p>
+                <div class="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
+            </a>
+
+            <!-- Opción 4: Validación de Constancias -->
+            <a href="verificador.html" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-400">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">✅</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    Validación de Constancias
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Verificar la autenticidad de documentos.
+                </p>
+                <div class="inline-block bg-cyan-100 text-cyan-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
+            </a>
+
+            <!-- Opción 5: Área para Instructores -->
+            <a href="instructores.html" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-500">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    Área para Instructores
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Subir propuestas y evidencias
+                </p>
+                <div class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
+            </a>
+
+            <!-- Opción 6: Encuestas de Opinión -->
+            <a href="encuestas.html" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 animate-fadeInUp delay-600">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📊</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    Encuestas de Opinión
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Evaluación de cursos y servicios
+                </p>
+                <div class="inline-block bg-yellow-100 text-yellow-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
+            </a>
+            
+            <!-- Opción 7: Estadísticas -->
+            <a href="#" onclick="event.preventDefault(); showComingSoon('Estadísticas')"
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 cursor-pointer animate-fadeInUp delay-700">
+                <span class="badge-soon">Próximamente</span>
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📈</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    Estadísticas
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Análisis y resultados de encuestas
+                </p>
+                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
+                    En desarrollo
+                </div>
+            </a>
+
+            <!-- Opción 8: SGI -->
+            <a href="https://www.itdurango.edu.mx/sgi/"
+               target="_blank" rel="noopener noreferrer"
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-800">
+                <div class="h-10 sm:h-12 flex justify-center items-center mb-4">
+                    <img src="https://cdn.jsdelivr.net/gh/DA-itd/A@main/SGI.jpg" alt="Logo SGI" class="max-h-full object-contain transform transition-transform hover:scale-110">
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    Sistema de Gestión Integrado
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Acceder al portal del SGI del ITD.
+                </p>
+                <div class="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
+            </a>
+
+        </div>
+
+        <!-- Enlaces Institucionales -->
+        <div id="enlaces" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
+                <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <a href="https://www.itdurango.edu.mx" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
+                        <div class="text-3xl mb-2">🏛️</div>
+                        <p class="font-semibold text-sm">ITD</p>
+                        <p class="text-xs opacity-90">Portal Principal</p>
+                    </a>
+                    <a href="https://www.tecnm.mx" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
+                        <div class="text-3xl mb-2">🎓</div>
+                        <p class="font-semibold text-sm">TecNM</p>
+                        <p class="text-xs opacity-90">Sitio Nacional</p>
+                    </a>
+                    <a href="https://mooc.tecnm.mx/portal/" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-center transition-all transform hover:scale-105">
+                        <div class="text-3xl mb-2">💻</div>
+                        <p class="font-semibold text-sm">MOOC</p>
+                        <p class="text-xs opacity-90">Cursos en Línea</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Información -->
+        <div id="informacion" class="max-w-4xl mx-auto scroll-mt-32">
+            <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="text-3xl sm:text-4xl">ℹ️</div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800">
+                        Información Importante
+                    </h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex items-start gap-3 bg-green-50 p-4 rounded-lg">
+                        <div class="text-2xl flex-shrink-0">📚</div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Límite de cursos</p>
+                            <p class="text-xs text-gray-600 mt-1">Puedes tomar hasta 3 cursos por periodo sin empalme de horarios</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 bg-purple-50 p-4 rounded-lg">
+                        <div class="text-2xl flex-shrink-0">📝</div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Formatos</p>
+                            <p class="text-xs text-gray-600 mt-1">Los formatos que se envían (CVU y Ficha técnica) serán en PDF, los demás se entregarán debidamente firmados y sellados en la oficina de Coordinación y actualización docente</p>
+                        </div>
+                    </div>
+                    
+                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-red-50 p-4 rounded-lg hover:bg-red-100 transition-colors">
+                        <div class="text-2xl flex-shrink-0">🗓️</div>
+                        <div>
+                            <p id="calendar-year-text" class="text-sm font-semibold text-gray-800">Calendario Institucional</p>
+                            <p class="text-xs text-gray-600 mt-1">Consulte las fechas importantes del ciclo escolar.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="mt-4 flex items-start gap-3 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                    <div class="text-2xl flex-shrink-0">🧑‍💼</div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800">Nota Importante</p>
+                        <p class="text-xs text-gray-600 mt-1">Estos cursos están dirigidos al personal docente con plaza.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ayuda y Soporte -->
+        <div id="contacto" class="max-w-2xl mx-auto mt-8 scroll-mt-32">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 sm:p-8 text-white text-center">
+                <div class="text-4xl mb-4">💬</div>
+                <h3 class="text-xl sm:text-2xl font-bold mb-2">
+                    ¿Necesitas Ayuda?
+                </h3>
+                <p class="text-sm sm:text-base mb-4 opacity-90">
+                    Contacta a la Coordinación de Actualización Docente
+                </p>
+                <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
+                   class="inline-block bg-white text-blue-600 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
+                    📧 Enviar Email
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-8">
+        <div class="container mx-auto px-4">
+            <p class="font-semibold text-sm sm:text-base mb-2">
+                © Coordinación de Actualización Docente
+            </p>
+            <p class="text-xs sm:text-sm opacity-90">
+                M.C. Alejandro Calderón Rentería
+            </p>
+            <p class="text-xs sm:text-sm opacity-75 mt-1">
+                Todos los derechos reservados 2024
+            </p>
+        </div>
+    </footer>
+
+    <!-- Modal "Próximamente" -->
+    <div id="comingSoonModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center transform transition-all animate-fadeInUp">
+            <div class="text-6xl mb-4">🚧</div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2" id="modalTitle">
+                Próximamente
+            </h3>
+            <p class="text-gray-600 mb-6">
+                Esta sección está en desarrollo y estará disponible pronto.
+            </p>
+            <button onclick="closeModal()" 
+                    class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // =============================================================================
+        // LÓGICA DEL MENÚ MÓVIL
+        // =============================================================================
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
         });
-    });
 
-    sheet.autoResizeColumns(1, 13);
-    
-    let emailSent = false;
-    let emailError = null;
-    
-    if (results.length > 0) {
-      try {
-        sendEnrollmentEmail(data, results);
-        emailSent = true;
-      } catch (e) {
-        emailError = 'No se pudo enviar el email: ' + e.toString();
-      }
-    }
-    
-    return { 
-      success: true, 
-      data: { 
-        results: results, 
-        emailSent: emailSent, 
-        emailError: emailError 
-      } 
-    };
-    
-  } catch (error) {
-    Logger.log('❌ ERROR CRÍTICO en processEnrollment_v11: ' + error.toString());
-    Logger.log('📚 Stack trace: ' + error.stack);
-    return { 
-      success: false, 
-      message: 'Error al inscribir: ' + error.toString() 
-    };
-  }
-}
+        // Cerrar menú al hacer clic en un enlace
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
 
-// =============================================================================
-// FUNCIÓN: BUSCAR INSCRIPCIONES POR CURP
-// =============================================================================
-function lookupByCurp(curp) {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Inscripciones');
-    if (!sheet) return { success: true, data: { registeredCourses: [] } };
-    const data = sheet.getDataRange().getValues();
-    const registeredCourses = [];
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][3] === curp && data[i][12] === 'Activo') {
-        registeredCourses.push(String(data[i][7]).trim());
-      }
-    }
-    return { success: true, data: { registeredCourses: registeredCourses } };
-  } catch (error) {
-    Logger.log('❌ Error en lookupByCurp: ' + error.toString());
-    return { success: false, message: error.toString() };
-  }
-}
+        // =============================================================================
+        // FRASES INSPIRACIONALES SOBRE EDUCACIÓN Y CIENCIA
+        // =============================================================================
+        const inspirationalQuotes = [
+            {
+                quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.",
+                author: "Nelson Mandela"
+            },
+            {
+                quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.",
+                author: "Carl Sagan"
+            },
+            {
+                quote: "La educación no es preparación para la vida; la educación es la vida misma.",
+                author: "John Dewey"
+            },
+            {
+                quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.",
+                author: "Albert Einstein"
+            },
+            {
+                quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.",
+                author: "Platón"
+            },
+            {
+                quote: "La ciencia no conoce fronteras, porque el conocimiento pertenece a la humanidad.",
+                author: "Louis Pasteur"
+            },
+            {
+                quote: "Educación es lo que queda después de olvidar lo que se ha aprendido en la escuela.",
+                author: "Albert Einstein"
+            },
+            {
+                quote: "La investigación es ver lo que todos han visto y pensar lo que nadie ha pensado.",
+                author: "Albert Szent-Györgyi"
+            },
+            {
+                quote: "Un maestro afecta la eternidad; nunca se sabe dónde termina su influencia.",
+                author: "Henry Adams"
+            },
+            {
+                quote: "La mejor forma de predecir el futuro es inventándolo.",
+                author: "Alan Kay"
+            }
+        ];
 
-// =============================================================================
-// FUNCIÓN: CANCELAR UN SOLO CURSO
-// =============================================================================
-function cancelSingleCourse(data) {
-  try {
-    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Inscripciones');
-    if (!sheet) throw new Error('Hoja de inscripciones no encontrada');
-    const sheetData = sheet.getDataRange().getValues();
-    let cancelled = false;
-    const normalizedCourseId = String(data.courseToCancel.id).trim();
-    for (let i = sheetData.length - 1; i > 0; i--) {
-      const rowCurp = sheetData[i][3];
-      const rowCourseId = String(sheetData[i][7]).trim();
-      const estado = sheetData[i][12];
-      if (rowCurp === data.curp && rowCourseId === normalizedCourseId && estado === 'Activo') {
-        sheet.getRange(i + 1, 13).setValue('Cancelado');
-        cancelled = true;
-        break;
-      }
-    }
-    if (!cancelled) {
-      throw new Error('No se encontró un registro activo para cancelar.');
-    }
-    return { success: true, message: 'Curso cancelado exitosamente' };
-  } catch (error) {
-    Logger.log('❌ Error en cancelSingleCourse: ' + error.toString());
-    return { success: false, message: error.toString() };
-  }
-}
+        // =============================================================================
+        // CLIMA LOCAL
+        // =============================================================================
+        function updateWeather() {
+            const weatherElement = document.getElementById('weatherInfo');
+            if (!weatherElement) return;
 
-// =============================================================================
-// FUNCIÓN: ENVIAR PROPUESTA DE INSTRUCTOR
-// =============================================================================
-function submitInstructorProposal(data) {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    let sheet = ss.getSheetByName('Propuestas_Instructores');
-    if (!sheet) {
-      sheet = ss.insertSheet('Propuestas_Instructores');
-      sheet.appendRow(['Timestamp', 'Nombre Instructor', 'Email', 'ID Curso', 'Nombre Curso', 'CVU', 'Ficha Técnica', 'Estado']);
-      sheet.getRange(1, 1, 1, 8).setBackground('#4338ca').setFontColor('#ffffff').setFontWeight('bold').setHorizontalAlignment('center');
-    }
-    const folderId = createInstructorFolder(data.instructorName);
-    const cvuFileId = saveBase64File(data.cvuFile, 'CVU_' + data.instructorName + '.pdf', folderId);
-    const fichaFileId = saveBase64File(data.fichaFile, 'Ficha_' + data.courseName + '.pdf', folderId);
-    sheet.appendRow([
-      new Date().toISOString(), data.instructorName, data.instructorEmail, data.courseId, data.courseName,
-      'https://drive.google.com/file/d/' + cvuFileId + '/view', 'https://drive.google.com/file/d/' + fichaFileId + '/view', 'Pendiente Revisión'
-    ]);
-    sheet.autoResizeColumns(1, 8);
-    return { success: true, message: 'Propuesta enviada exitosamente' };
-  } catch (error) {
-    Logger.log('❌ Error en submitInstructorProposal: ' + error.toString());
-    return { success: false, message: 'Error al enviar propuesta: ' + error.toString() };
-  }
-}
+            const getWeatherIcon = (code) => {
+                if (code === 0) return '☀️';
+                if ([1, 2, 3].includes(code)) return '⛅';
+                if ([45, 48].includes(code)) return '🌫️';
+                if ([51, 53, 55].includes(code)) return '🌦️';
+                if ([61, 63, 65].includes(code)) return '🌧️';
+                if ([71, 73, 75, 77].includes(code)) return '🌨️';
+                if ([80, 81, 82].includes(code)) return '⛈️';
+                if ([95, 96, 99].includes(code)) return '🌩️';
+                return '🌤️';
+            };
 
-// =============================================================================
-// FUNCIÓN: ENVIAR EVIDENCIAS DE INSTRUCTOR
-// =============================================================================
-function submitInstructorEvidence(data) {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    let sheet = ss.getSheetByName('Evidencias_Instructores');
-    if (!sheet) {
-      sheet = ss.insertSheet('Evidencias_Instructores');
-      sheet.appendRow(['Timestamp', 'Nombre Instructor', 'Email', 'Nombre Curso', 'Número de Archivos', 'Enlaces Drive', 'Estado']);
-      sheet.getRange(1, 1, 1, 7).setBackground('#4338ca').setFontColor('#ffffff').setFontWeight('bold').setHorizontalAlignment('center');
-    }
-    const folderId = createInstructorFolder(data.instructorName + '_Evidencias');
-    const fileLinks = [];
-    for (let i = 0; i < data.evidenceFiles.length; i++) {
-      const fileId = saveBase64File(data.evidenceFiles[i], 'Evidencia_' + (i + 1) + '_' + data.courseName, folderId);
-      fileLinks.push('https://drive.google.com/file/d/' + fileId + '/view');
-    }
-    sheet.appendRow([
-      new Date().toISOString(), data.instructorName, data.instructorEmail,
-      data.courseName, data.evidenceFiles.length, fileLinks.join('\n'), 'Recibido'
-    ]);
-    sheet.autoResizeColumns(1, 7);
-    return { success: true, message: 'Evidencias enviadas exitosamente' };
-  } catch (error) {
-    Logger.log('❌ Error en submitInstructorEvidence: ' + error.toString());
-    return { success: false, message: 'Error al enviar evidencias: ' + error.toString() };
-  }
-}
+            const showWeather = (lat, lon) => {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Weather response not ok');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data && data.current_weather) {
+                            const temp = Math.round(data.current_weather.temperature);
+                            const icon = getWeatherIcon(data.current_weather.weathercode);
+                            weatherElement.innerHTML = `
+                                <span class="text-2xl weather-icon">${icon}</span>
+                                <span class="font-semibold">Durango, Dgo. ${temp}°C</span>`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching weather:", error);
+                    });
+            };
 
-// =============================================================================
-// FUNCIONES AUXILIARES - GOOGLE DRIVE
-// =============================================================================
-function createInstructorFolder(folderName) {
-  const parentFolderName = 'Instructores_Documentacion_ITD';
-  let parentFolder;
-  const folders = DriveApp.getFoldersByName(parentFolderName);
-  if (folders.hasNext()) {
-    parentFolder = folders.next();
-  } else {
-    parentFolder = DriveApp.createFolder(parentFolderName);
-  }
-  let subFolder;
-  const subFolders = parentFolder.getFoldersByName(folderName);
-  if (subFolders.hasNext()) {
-    subFolder = subFolders.next();
-  } else {
-    subFolder = parentFolder.createFolder(folderName);
-  }
-  return subFolder.getId();
-}
+            const durangoLat = 24.0277;
+            const durangoLon = -104.653;
 
-function saveBase64File(base64Data, fileName, folderId) {
-  const splitData = base64Data.split(',');
-  const contentType = splitData[0].split(';')[0].replace('data:', '');
-  const bytes = Utilities.base64Decode(splitData[1]);
-  const blob = Utilities.newBlob(bytes, contentType, fileName);
-  const folder = DriveApp.getFolderById(folderId);
-  const file = folder.createFile(blob);
-  return file.getId();
-}
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        showWeather(position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                        console.warn(`Geolocation error (${error.code}): ${error.message}`);
+                        showWeather(durangoLat, durangoLon); 
+                    }
+                );
+            } else {
+                showWeather(durangoLat, durangoLon); 
+            }
+        }
 
-// =============================================================================
-// FUNCIÓN AUXILIAR - ENVÍO DE EMAIL
-// =============================================================================
-function sendEnrollmentEmail(data, results) {
-  const recipient = data.email;
-  const subject = 'Confirmación de Inscripción a Cursos - ITD';
-  let courseDetailsHtml = '';
-  let hasErrors = false;
-  results.forEach(result => {
-    if (result.error) {
-      hasErrors = true;
-      courseDetailsHtml += `
-        <div style="padding: 12px; border: 1px solid #fecaca; background-color: #fef2f2; border-radius: 8px; margin-bottom: 12px;">
-          <p style="margin: 0; font-weight: bold; color: #b91c1c;">${result.courseName}</p>
-          <p style="margin: 4px 0 0; color: #991b1b; font-size: 14px;"><strong>Error:</strong> ${result.error}</p>
-        </div>`;
-    } else if (result.folio === "EXISTENTE") {
-      courseDetailsHtml += `
-        <div style="padding: 12px; border: 1px solid #bfdbfe; background-color: #eff6ff; border-radius: 8px; margin-bottom: 12px;">
-          <p style="margin: 0; font-weight: bold; color: #1e40af;">${result.courseName}</p>
-          <p style="margin: 4px 0 0; color: #1e3a8a; font-size: 14px;">
-            <strong>Estado:</strong> Ya estabas inscrito en este curso
-          </p>
-        </div>`;
-    } else {
-      courseDetailsHtml += `
-        <div style="padding: 12px; border: 1px solid #bbf7d0; background-color: #f0fdf4; border-radius: 8px; margin-bottom: 12px;">
-          <p style="margin: 0; font-weight: bold; color: #166534;">${result.courseName}</p>
-          <p style="margin: 4px 0 0; color: #15803d; font-size: 14px;">
-            <strong>Folio de Registro:</strong> 
-            <span style="font-family: 'Courier New', monospace; background-color: #dcfce7; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${result.folio}</span>
-          </p>
-        </div>`;
-    }
-  });
-  const mainMessage = hasErrors ? 
-    'Hubo un problema con la inscripción de algunos cursos. Por favor, revise los detalles a continuación:' :
-    'Hemos recibido y procesado exitosamente tu solicitud de inscripción. A continuación, encontrarás los detalles y folios de registro:';
-  const htmlBody = `
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f3f4f6; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; padding: 0; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-        .header { text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #0c2f68 0%, #1e40af 100%); }
-        .header img { height: 60px; margin-bottom: 15px; }
-        .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; }
-        .content { padding: 30px 20px; }
-        .content p { margin: 0 0 15px 0; }
-        .footer { text-align: center; padding: 20px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; }
-        .footer p { margin: 5px 0; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="Logo ITD">
-          <h1>Confirmación de Inscripción</h1>
-        </div>
-        <div class="content">
-          <p>Hola <strong>${data.fullName}</strong>,</p>
-          <p>${mainMessage}</p>
-          ${courseDetailsHtml}
-          <p style="margin-top: 20px;"><strong>📌 Importante:</strong> Guarda este correo como comprobante de tu inscripción.</p>
-          <p>Si tienes alguna duda, por favor contacta a la Coordinación de Actualización Docente.</p>
-          <p style="margin-top: 20px;">¡Te esperamos en los cursos!</p>
-        </div>
-        <div class="footer">
-          <p><strong>Coordinación de Actualización Docente</strong></p>
-          <p>Instituto Tecnológico de Durango</p>
-          <p style="margin-top: 10px; font-size: 11px;">Este es un correo electrónico generado automáticamente, por favor no respondas a este mensaje.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-  MailApp.sendEmail({
-    to: recipient,
-    subject: subject,
-    htmlBody: htmlBody,
-    name: 'Portal de Actualización Docente ITD'
-  });
-}
+        // =============================================================================
+        // RELOJ EN TIEMPO REAL
+        // =============================================================================
+        function startClock() {
+            function updateClock() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+
+        // =============================================================================
+        // FECHA ACTUAL
+        // =============================================================================
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateString = now.toLocaleDateString('es-MX', options);
+            document.getElementById('currentDate').textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+        }
+
+        // =============================================================================
+        // AÑO DEL CALENDARIO
+        // =============================================================================
+        function updateCalendarYear() {
+            const calendarElement = document.getElementById('calendar-year-text');
+            if (calendarElement) {
+                const currentYear = new Date().getFullYear();
+                calendarElement.textContent = `Calendario Institucional ${currentYear}`;
+            }
+        }
+
+        // =============================================================================
+        // FRASES INSPIRACIONALES (Solo se muestra una al cargar)
+        // =============================================================================
+        function showRandomQuote() {
+            const randomIndex = Math.floor(Math.random() * inspirationalQuotes.length);
+            const quote = inspirationalQuotes[randomIndex];
+            
+            const quoteElement = document.getElementById('inspirationalQuote');
+            if(quoteElement) {
+                quoteElement.parentElement.innerHTML = `
+                    <p class="text-base sm:text-lg italic text-gray-700 leading-relaxed">"${quote.quote}"</p>
+                    <p class="text-sm sm:text-base text-gray-600 text-right mt-2">- ${quote.author}</p>`;
+            }
+        }
+        
+        // =============================================================================
+        // MODALES
+        // =============================================================================
+        function showComingSoon(sectionName) {
+            document.getElementById('modalTitle').textContent = sectionName;
+            document.getElementById('comingSoonModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('comingSoonModal').classList.add('hidden');
+        }
+        
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+        document.getElementById('comingSoonModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+
+        // =============================================================================
+        // INICIALIZACIÓN
+        // =============================================================================
+        window.addEventListener('load', function() {
+            startClock();
+            updateDate();
+            updateWeather();
+            showRandomQuote();
+            updateCalendarYear();
+            
+            console.log('%c Portal ITD - Listo ', 
+                'background: #1e3a8a; color: white; font-size: 16px; padding: 8px; border-radius: 4px;'
+            );
+        });
+    </script>
+
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
