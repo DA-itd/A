@@ -317,12 +317,12 @@
         };
         
         const SurveyListStep = ({ teacherData, courses, onLogout }) => {
-            const [loggingClick, setLoggingClick] = useState(null);
+            const [loggingClicks, setLoggingClicks] = useState([]); // <- Cambiado a un array
             const [registeredClicks, setRegisteredClicks] = useState([]);
 
-            const handleParticipationChange = (uniqueId) => {
+            const handleParticipationChange = useCallback((uniqueId) => {
                 setRegisteredClicks(prev => [...prev, uniqueId]);
-            };
+            }, []);
 
             const generateOpinionSurveyUrl = (courseName) => {
                 const config = SURVEY_CONFIG.opinion;
@@ -337,23 +337,26 @@
             
             const handleRecordOpinionClick = useCallback(async (course) => {
                 const uniqueId = `opinion-${course.id}`;
-                if (loggingClick || registeredClicks.includes(uniqueId)) return;
+                if (loggingClicks.includes(uniqueId) || registeredClicks.includes(uniqueId)) return;
                 
-                setLoggingClick(uniqueId);
-                const success = await recordSurveyClick({
-                    teacherName: teacherData.fullName,
-                    teacherEmail: teacherData.email,
-                    department: teacherData.department,
-                    courseId: course.id,
-                    courseName: course.name,
-                    surveyType: 'Opinion'
-                });
+                setLoggingClicks(prev => [...prev, uniqueId]);
+                try {
+                    const success = await recordSurveyClick({
+                        teacherName: teacherData.fullName,
+                        teacherEmail: teacherData.email,
+                        department: teacherData.department,
+                        courseId: course.id,
+                        courseName: course.name,
+                        surveyType: 'Opinion'
+                    });
 
-                if (success) {
-                    handleParticipationChange(uniqueId);
+                    if (success) {
+                        handleParticipationChange(uniqueId);
+                    }
+                } finally {
+                    setLoggingClicks(prev => prev.filter(id => id !== uniqueId));
                 }
-                setLoggingClick(null);
-            }, [loggingClick, registeredClicks, teacherData]);
+            }, [loggingClicks, registeredClicks, teacherData, handleParticipationChange]);
 
             return (
                 <div className="animate-fadeIn">
@@ -376,6 +379,8 @@
                             {courses.map(course => {
                                 const opinionId = `opinion-${course.id}`;
                                 const isOpinionRegistered = registeredClicks.includes(opinionId);
+                                const isOpinionLogging = loggingClicks.includes(opinionId);
+                                const isOpinionDisabled = isOpinionRegistered || isOpinionLogging;
 
                                 return (
                                 <div key={course.id} className="bg-white p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-indigo-500">
@@ -387,12 +392,12 @@
                                             rel="noopener noreferrer"
                                             onClick={() => handleRecordOpinionClick(course)}
                                             className={`w-full text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
-                                                isOpinionRegistered || loggingClick
+                                                isOpinionDisabled
                                                     ? 'bg-gray-300 text-gray-600 cursor-default pointer-events-none' 
                                                     : 'bg-blue-600 hover:bg-blue-700 text-white'
-                                            } ${loggingClick === opinionId ? 'opacity-75' : ''}`}
+                                            } ${isOpinionLogging ? 'opacity-75' : ''}`}
                                         >
-                                            {loggingClick === opinionId && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
+                                            {isOpinionLogging && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
                                             {isOpinionRegistered ? '✔️ Participación Registrada' : '💬 Responder Encuesta de Opinión'}
                                         </a>
                                     </div>
