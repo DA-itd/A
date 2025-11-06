@@ -11,7 +11,7 @@
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -72,7 +72,7 @@
     </footer>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useCallback, useRef } = React;
         
         // =============================================================================
         // CONFIGURACIÓN DE ENCUESTAS
@@ -146,23 +146,31 @@
         // COMPONENTES DE LA UI
         // =============================================================================
 
-        const LoginStep = ({ onLogin, error, attempts }) => {
+        const LoginStep = ({ onLogin, error, attempts, promptOnLoad }) => {
             const MAX_ATTEMPTS = 3;
+            const initialized = useRef(false);
 
             useEffect(() => {
-                if (window.google && attempts < MAX_ATTEMPTS) {
+                if (window.google && !initialized.current) {
+                    initialized.current = true;
+                    
                     google.accounts.id.initialize({
                         client_id: SURVEY_CONFIG.GOOGLE_CLIENT_ID,
                         callback: onLogin,
-                        login_uri: window.location.origin
+                        login_uri: window.location.origin,
+                        auto_select: true
                     });
+                    
                     google.accounts.id.renderButton(
                         document.getElementById("google-signin-button"),
                         { theme: "outline", size: "large", text: "signin_with", shape: "rectangular" }
                     );
-                    google.accounts.id.prompt();
+
+                    if (promptOnLoad) {
+                         google.accounts.id.prompt();
+                    }
                 }
-            }, [onLogin, attempts]);
+            }, [onLogin, promptOnLoad]);
             
             return (
                 <div className="animate-fadeIn text-center">
@@ -215,23 +223,24 @@
             };
 
             const handleSurveyLinkClick = (event, surveyType, course) => {
-                event.preventDefault();
                 const uniqueId = `${surveyType}-${course.id}`;
                 const surveyUrl = generateSurveyUrl(surveyType, course.name);
-
-                if (loggingClick || registeredClicks.includes(uniqueId)) {
-                    if (registeredClicks.includes(uniqueId)) {
-                        window.open(surveyUrl, '_blank', 'noopener,noreferrer');
-                    }
-                    return;
-                }
                 
+                // Abrir la ventana de inmediato, de forma síncrona
                 const newWindow = window.open(surveyUrl, '_blank', 'noopener,noreferrer');
                 
                 if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                    // Si falla, el navegador lo bloqueó. El evento no se previene y se muestra alerta.
+                    event.preventDefault();
                     alert('Parece que su navegador bloqueó la ventana emergente. Por favor, permita las ventanas emergentes para este sitio e intente de nuevo.');
                     return;
                 }
+                
+                // Si la ventana se abrió, prevenir la navegación por defecto y registrar en segundo plano.
+                event.preventDefault();
+
+                // Evitar registros duplicados por doble clic rápido
+                if (loggingClick || registeredClicks.includes(uniqueId)) return;
                 
                 const registerInBackground = async () => {
                     setLoggingClick(uniqueId);
@@ -330,30 +339,9 @@
             const [teacherData, setTeacherData] = useState(null);
             const [pendingCourses, setPendingCourses] = useState([]);
             const [loginAttempts, setLoginAttempts] = useState(0);
+            const [shouldPromptOnLoad, setShouldPromptOnLoad] = useState(true);
 
-            const handleLogin = async (response) => {
-                if (window.google) {
-                    google.accounts.id.cancel(); 
-                }
-
-                const decodedToken = jwt_decode(response.credential);
-                if (!decodedToken || !decodedToken.email) {
-                    setError("No se pudo obtener el correo del usuario.");
-                    setLoginAttempts(prev => prev + 1);
-                    return;
-                }
-
-                if (!decodedToken.email.endsWith('@itdurango.edu.mx')) {
-                    setError("Por favor, inicie sesión con una cuenta institucional (@itdurango.edu.mx).");
-                    if (window.google) google.accounts.id.disableAutoSelect();
-                    setLoginAttempts(prev => prev + 1);
-                    return;
-                }
-
-                handleEmailSubmit(decodedToken.email);
-            };
-
-            const handleEmailSubmit = async (email) => {
+            const handleEmailSubmit = useCallback(async (email) => {
                 setIsLoading(true);
                 setError(null);
 
@@ -376,14 +364,37 @@
                 } finally {
                     setIsLoading(false);
                 }
-            };
-            
+            }, []);
+
+            const handleLogin = useCallback(async (response) => {
+                if (window.google) {
+                    google.accounts.id.cancel(); 
+                }
+
+                const decodedToken = jwt_decode(response.credential);
+                if (!decodedToken || !decodedToken.email) {
+                    setError("No se pudo obtener el correo del usuario.");
+                    setLoginAttempts(prev => prev + 1);
+                    return;
+                }
+
+                if (!decodedToken.email.endsWith('@itdurango.edu.mx')) {
+                    setError("Por favor, inicie sesión con una cuenta institucional (@itdurango.edu.mx).");
+                    if (window.google) google.accounts.id.disableAutoSelect();
+                    setLoginAttempts(prev => prev + 1);
+                    return;
+                }
+
+                handleEmailSubmit(decodedToken.email);
+            }, [handleEmailSubmit]);
+
             const handleLogout = () => {
                 setStep('login');
                 setError(null);
                 setTeacherData(null);
                 setPendingCourses([]);
                 setLoginAttempts(0);
+                setShouldPromptOnLoad(false); // No mostrar el pop-up de nuevo
                 if (window.google) {
                     google.accounts.id.disableAutoSelect();
                 }
@@ -400,11 +411,11 @@
                 
                 switch (step) {
                     case 'login':
-                        return <LoginStep onLogin={handleLogin} error={error} attempts={loginAttempts} />;
+                        return <LoginStep onLogin={handleLogin} error={error} attempts={loginAttempts} promptOnLoad={shouldPromptOnLoad} />;
                     case 'list':
                         return <SurveyListStep teacherData={teacherData} courses={pendingCourses} onLogout={handleLogout} />;
                     default:
-                        return <LoginStep onLogin={handleLogin} error={error} attempts={loginAttempts} />;
+                        return <LoginStep onLogin={handleLogin} error={error} attempts={loginAttempts} promptOnLoad={shouldPromptOnLoad} />;
                 }
             };
 
