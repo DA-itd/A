@@ -138,7 +138,6 @@
                  return true;
             } catch (error) {
                 console.warn("Advertencia: No se pudo registrar el clic de la encuesta.", error);
-                // No lanzamos un error fatal, pero devolvemos false para que la UI lo sepa.
                 return false;
             }
         };
@@ -202,7 +201,7 @@
         
         const SurveyListStep = ({ teacherData, courses, onLogout }) => {
             const [loggingClick, setLoggingClick] = useState(null);
-            const [registeredClicks, setRegisteredClicks] = useState([]); // Nuevo estado para rastrear clics
+            const [registeredClicks, setRegisteredClicks] = useState([]);
 
             const generateSurveyUrl = (type, courseName) => {
                 const config = SURVEY_CONFIG[type];
@@ -215,19 +214,18 @@
                 return url.toString();
             };
 
-            const handleSurveyLinkClick = async (event, surveyType, course) => {
+            const handleSurveyLinkClick = (event, surveyType, course) => {
                 event.preventDefault();
                 const uniqueId = `${surveyType}-${course.id}`;
+                const surveyUrl = generateSurveyUrl(surveyType, course.name);
 
-                // Si ya se está procesando un clic, o si ya se registró, no hacer nada más que abrir
                 if (loggingClick || registeredClicks.includes(uniqueId)) {
-                    const surveyUrl = generateSurveyUrl(surveyType, course.name);
-                    window.open(surveyUrl, '_blank', 'noopener,noreferrer');
+                    if (registeredClicks.includes(uniqueId)) {
+                        window.open(surveyUrl, '_blank', 'noopener,noreferrer');
+                    }
                     return;
                 }
                 
-                // 1. ABRIR LA PESTAÑA INMEDIATAMENTE para evitar bloqueadores de pop-ups
-                const surveyUrl = generateSurveyUrl(surveyType, course.name);
                 const newWindow = window.open(surveyUrl, '_blank', 'noopener,noreferrer');
                 
                 if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
@@ -235,21 +233,24 @@
                     return;
                 }
                 
-                // 2. REGISTRAR EN SEGUNDO PLANO
-                setLoggingClick(uniqueId);
-                const success = await recordSurveyClick({
-                    teacherName: teacherData.fullName,
-                    teacherEmail: teacherData.email,
-                    department: teacherData.department,
-                    courseId: course.id,
-                    courseName: course.name,
-                    surveyType: surveyType.charAt(0).toUpperCase() + surveyType.slice(1)
-                });
+                const registerInBackground = async () => {
+                    setLoggingClick(uniqueId);
+                    const success = await recordSurveyClick({
+                        teacherName: teacherData.fullName,
+                        teacherEmail: teacherData.email,
+                        department: teacherData.department,
+                        courseId: course.id,
+                        courseName: course.name,
+                        surveyType: surveyType.charAt(0).toUpperCase() + surveyType.slice(1)
+                    });
 
-                if (success) {
-                    setRegisteredClicks(prev => [...prev, uniqueId]);
-                }
-                setLoggingClick(null);
+                    if (success) {
+                        setRegisteredClicks(prev => [...prev, uniqueId]);
+                    }
+                    setLoggingClick(null);
+                };
+
+                registerInBackground();
             };
 
             return (
@@ -283,11 +284,10 @@
                                             href={generateSurveyUrl('opinion', course.name)}
                                             onClick={(e) => handleSurveyLinkClick(e, 'opinion', course)}
                                             className={`flex-1 text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
-                                                isOpinionRegistered 
-                                                    ? 'bg-gray-300 text-gray-600 cursor-default' 
+                                                isOpinionRegistered || loggingClick
+                                                    ? 'bg-gray-300 text-gray-600 cursor-default pointer-events-none' 
                                                     : 'bg-blue-600 hover:bg-blue-700 text-white'
-                                            } ${loggingClick === opinionId ? 'opacity-75 cursor-wait' : ''}`}
-                                            disabled={isOpinionRegistered || loggingClick}
+                                            } ${loggingClick === opinionId ? 'opacity-75' : ''}`}
                                         >
                                             {loggingClick === opinionId && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
                                             {isOpinionRegistered ? '✔️ Participación Registrada' : '💬 Responder Encuesta de Opinión'}
@@ -296,11 +296,10 @@
                                             href={generateSurveyUrl('eficacia', course.name)}
                                             onClick={(e) => handleSurveyLinkClick(e, 'eficacia', course)}
                                             className={`flex-1 text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
-                                                isEficaciaRegistered 
-                                                    ? 'bg-gray-300 text-gray-600 cursor-default' 
+                                                isEficaciaRegistered || loggingClick
+                                                    ? 'bg-gray-300 text-gray-600 cursor-default pointer-events-none' 
                                                     : 'bg-green-600 hover:bg-green-700 text-white'
-                                            } ${loggingClick === eficaciaId ? 'opacity-75 cursor-wait' : ''}`}
-                                            disabled={isEficaciaRegistered || loggingClick}
+                                            } ${loggingClick === eficaciaId ? 'opacity-75' : ''}`}
                                         >
                                             {loggingClick === eficaciaId && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
                                             {isEficaciaRegistered ? '✔️ Participación Registrada' : '📈 Responder Encuesta de Eficacia'}
@@ -334,7 +333,7 @@
 
             const handleLogin = async (response) => {
                 if (window.google) {
-                    google.accounts.id.cancel(); // Detiene el prompt para evitar bucles.
+                    google.accounts.id.cancel(); 
                 }
 
                 const decodedToken = jwt_decode(response.credential);
