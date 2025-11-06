@@ -72,7 +72,7 @@
     </footer>
 
     <script type="text/babel">
-        const { useState, useEffect, useCallback, useRef } = React;
+        const { useState, useEffect, useCallback, useRef, useMemo } = React;
         
         // =============================================================================
         // == 📝 CONFIGURACIÓN DE ENCUESTAS 📝 ==
@@ -95,25 +95,19 @@
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
 
-            // --- ENCUESTA DE OPINIÓN ---
+            // --- ENCUESTA DE OPINIÓN (POR CURSO) ---
             opinion: {
-                // 👇 REEMPLAZA ESTA URL CON EL ENLACE DE TU NUEVA ENCUESTA DE OPINIÓN
                 url: 'https://forms.gle/BBLvYmwzQDbFESXF7',
-                
-                // IDs de las preguntas (obtenidos con "Obtener enlace pre-rellenado")
                 courseNameEntryId: 'entry.152060533',
                 departmentEntryId: 'entry.1854497676'
             },
 
-            // --- ENCUESTA DE EFICACIA ---
+            // --- ENCUESTA DE EFICACIA (GENERAL, POR PERIODO) ---
             eficacia: {
-                // 👇 REEMPLAZA ESTA URL CUANDO LA ENCUESTA DE EFICACIA ESTÉ LISTA
-                //    (Actualmente deshabilitada con '#')
-                url: '#', 
-                
-                // Reemplaza estos IDs cuando tengas el formulario de eficacia
-                courseNameEntryId: 'entry.XXXXXXXXX',
-                departmentEntryId: 'entry.XXXXXXXXX'
+                url: 'https://forms.gle/G1HUp2thYPbvy7t49', 
+                // Esta encuesta solo pide nombre completo y departamento.
+                fullNameEntryId: 'entry.198393507',
+                departmentEntryId: 'entry.864708779'
             }
         };
 
@@ -127,6 +121,27 @@
                 return null;
             }
         };
+        
+        const getEficaciaSurveyPeriod = () => {
+            const now = new Date();
+            const month = now.getMonth(); // 0 = Enero, 4 = Mayo, 6 = Julio, 10 = Noviembre
+            const day = now.getDate();
+            const year = now.getFullYear();
+
+            // Periodo 1: 15 de Mayo a 14 de Julio
+            const isPeriod1 = (month === 4 && day >= 15) || (month === 5) || (month === 6 && day <= 14);
+            // Periodo 2: 15 de Noviembre a 14 de Enero del siguiente año
+            const isPeriod2 = (month === 10 && day >= 15) || (month === 11) || (month === 0 && day <= 14);
+
+            if (isPeriod1) return { active: true, id: `EFICACIA_${year}_PERIODO_1`, name: `Periodo Mayo-Julio ${year}` };
+            if (isPeriod2) {
+                const periodYear = month === 11 ? year : year - 1;
+                return { active: true, id: `EFICACIA_${periodYear}_PERIODO_2`, name: `Periodo Noviembre ${periodYear} - Enero ${periodYear + 1}` };
+            }
+            
+            return { active: false, id: null, name: null };
+        };
+
 
         // =============================================================================
         // API SERVICE
@@ -189,12 +204,15 @@
                             { theme: "outline", size: "large", text: "signin_with", shape: "rectangular" }
                         );
                     }
-                    google.accounts.id.prompt();
+                    google.accounts.id.prompt((notification) => {
+                      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                        // El prompt no se mostró, así que podemos manejarlo si es necesario
+                      }
+                    });
                 }
             }, [onLogin]);
 
             useEffect(() => {
-                // The Google library is loaded asynchronously
                 const checkGoogle = setInterval(() => {
                     if (window.google) {
                         clearInterval(checkGoogle);
@@ -234,12 +252,80 @@
             );
         };
         
+        const EficaciaSurveyCard = ({ teacherData, onParticipationChange }) => {
+            const [loggingClick, setLoggingClick] = useState(false);
+            const [isRegistered, setIsRegistered] = useState(false);
+            const periodInfo = useMemo(() => getEficaciaSurveyPeriod(), []);
+
+            if (!periodInfo.active) {
+                return null;
+            }
+
+            const generateSurveyUrl = () => {
+                const config = SURVEY_CONFIG.eficacia;
+                if (!config.url || config.url === '#') return '#';
+
+                const url = new URL(config.url);
+                url.searchParams.set(config.fullNameEntryId, teacherData.fullName);
+                url.searchParams.set(config.departmentEntryId, teacherData.department);
+                
+                return url.toString();
+            };
+
+            const handleSurveyClick = async () => {
+                if (loggingClick || isRegistered) return;
+                
+                setLoggingClick(true);
+                const success = await recordSurveyClick({
+                    teacherName: teacherData.fullName,
+                    teacherEmail: teacherData.email,
+                    department: teacherData.department,
+                    courseId: periodInfo.id,
+                    courseName: `Encuesta General de Eficacia (${periodInfo.name})`,
+                    surveyType: 'Eficacia'
+                });
+
+                if (success) {
+                    setIsRegistered(true);
+                    onParticipationChange(periodInfo.id);
+                }
+                setLoggingClick(false);
+            };
+
+            return (
+                <div className="animate-fadeIn bg-gradient-to-r from-green-50 to-teal-50 p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-green-500 mb-6">
+                    <h3 className="text-lg font-bold text-green-900 mb-2">Encuesta General de Eficacia</h3>
+                    <p className="text-sm text-gray-700 mb-4">
+                        Esta encuesta evalúa el impacto de los cursos tomados durante el periodo <strong>{periodInfo.name}</strong>. Solo necesita responderla una vez.
+                    </p>
+                    <a
+                        href={generateSurveyUrl()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleSurveyClick}
+                        className={`w-full text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
+                            isRegistered || loggingClick
+                                ? 'bg-gray-300 text-gray-600 cursor-default pointer-events-none' 
+                                : 'bg-green-600 hover:bg-green-700 text-white'
+                        } ${loggingClick ? 'opacity-75' : ''}`}
+                    >
+                        {loggingClick && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
+                        {isRegistered ? '✔️ Participación Registrada' : '📈 Responder Encuesta de Eficacia'}
+                    </a>
+                </div>
+            );
+        };
+        
         const SurveyListStep = ({ teacherData, courses, onLogout }) => {
             const [loggingClick, setLoggingClick] = useState(null);
             const [registeredClicks, setRegisteredClicks] = useState([]);
 
-            const generateSurveyUrl = (type, courseName) => {
-                const config = SURVEY_CONFIG[type];
+            const handleParticipationChange = (uniqueId) => {
+                setRegisteredClicks(prev => [...prev, uniqueId]);
+            };
+
+            const generateOpinionSurveyUrl = (courseName) => {
+                const config = SURVEY_CONFIG.opinion;
                 if (!config.url || config.url === '#') return '#';
 
                 const url = new URL(config.url);
@@ -249,8 +335,8 @@
                 return url.toString();
             };
             
-            const handleRecordParticipation = useCallback(async (surveyType, course) => {
-                const uniqueId = `${surveyType}-${course.id}`;
+            const handleRecordOpinionClick = useCallback(async (course) => {
+                const uniqueId = `opinion-${course.id}`;
                 if (loggingClick || registeredClicks.includes(uniqueId)) return;
                 
                 setLoggingClick(uniqueId);
@@ -260,20 +346,14 @@
                     department: teacherData.department,
                     courseId: course.id,
                     courseName: course.name,
-                    surveyType: surveyType.charAt(0).toUpperCase() + surveyType.slice(1)
+                    surveyType: 'Opinion'
                 });
 
                 if (success) {
-                    setRegisteredClicks(prev => [...prev, uniqueId]);
+                    handleParticipationChange(uniqueId);
                 }
                 setLoggingClick(null);
             }, [loggingClick, registeredClicks, teacherData]);
-            
-            const handleSurveyClick = (surveyType, course) => {
-                 // The actual link opening is handled by the <a> tag's href.
-                 // This function only handles the background recording.
-                 handleRecordParticipation(surveyType, course);
-            };
 
             return (
                 <div className="animate-fadeIn">
@@ -289,25 +369,24 @@
                         </button>
                     </div>
 
+                    <EficaciaSurveyCard teacherData={teacherData} onParticipationChange={handleParticipationChange} />
+                    
                     {courses.length > 0 ? (
                         <div className="space-y-6">
                             {courses.map(course => {
                                 const opinionId = `opinion-${course.id}`;
-                                const eficaciaId = `eficacia-${course.id}`;
-                                
                                 const isOpinionRegistered = registeredClicks.includes(opinionId);
-                                const isEficaciaRegistered = registeredClicks.includes(eficaciaId);
 
                                 return (
                                 <div key={course.id} className="bg-white p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-indigo-500">
                                     <h3 className="text-lg font-bold text-indigo-900 mb-3">{course.name}</h3>
                                     <div className="flex flex-col sm:flex-row gap-3">
                                         <a
-                                            href={generateSurveyUrl('opinion', course.name)}
+                                            href={generateOpinionSurveyUrl(course.name)}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            onClick={() => handleSurveyClick('opinion', course)}
-                                            className={`flex-1 text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
+                                            onClick={() => handleRecordOpinionClick(course)}
+                                            className={`w-full text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
                                                 isOpinionRegistered || loggingClick
                                                     ? 'bg-gray-300 text-gray-600 cursor-default pointer-events-none' 
                                                     : 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -316,30 +395,16 @@
                                             {loggingClick === opinionId && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
                                             {isOpinionRegistered ? '✔️ Participación Registrada' : '💬 Responder Encuesta de Opinión'}
                                         </a>
-                                        <a
-                                            href={generateSurveyUrl('eficacia', course.name)}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            onClick={() => handleSurveyClick('eficacia', course)}
-                                            className={`flex-1 text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
-                                                isEficaciaRegistered || loggingClick || SURVEY_CONFIG.eficacia.url === '#'
-                                                    ? 'bg-gray-300 text-gray-600 cursor-default pointer-events-none' 
-                                                    : 'bg-green-600 hover:bg-green-700 text-white'
-                                            } ${loggingClick === eficaciaId ? 'opacity-75' : ''}`}
-                                        >
-                                            {loggingClick === eficaciaId && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
-                                            {isEficaciaRegistered ? '✔️ Participación Registrada' : '📈 Responder Encuesta de Eficacia'}
-                                        </a>
                                     </div>
                                 </div>
                                 );
                             })}
                         </div>
                     ) : (
-                         <div className="text-center bg-green-50 text-green-800 p-6 rounded-lg">
-                            <div className="text-5xl mb-3">🎉</div>
-                            <p className="font-semibold">¡Felicidades!</p>
-                            <p>No tienes encuestas pendientes en este momento.</p>
+                         <div className="text-center bg-blue-50 text-blue-800 p-6 rounded-lg">
+                            <div className="text-5xl mb-3">👍</div>
+                            <p className="font-semibold">No tienes encuestas de opinión pendientes.</p>
+                            <p>¡Gracias por mantenerte al día!</p>
                          </div>
                     )}
                 </div>
@@ -350,7 +415,7 @@
         // COMPONENTE PRINCIPAL DE LA APLICACIÓN
         // =============================================================================
         const SurveyApp = () => {
-            const [step, setStep] = useState('login'); // 'login' o 'list'
+            const [step, setStep] = useState('login');
             const [isLoading, setIsLoading] = useState(false);
             const [error, setError] = useState(null);
             const [teacherData, setTeacherData] = useState(null);
@@ -379,7 +444,6 @@
             }, []);
 
             const handleLogin = useCallback(async (response) => {
-                // Once we have a credential, we don't need the prompt anymore.
                 if (window.google) {
                     google.accounts.id.cancel(); 
                 }
@@ -409,7 +473,6 @@
                 if (window.google) {
                     google.accounts.id.disableAutoSelect();
                 }
-                // Recargar la página para una limpieza completa y reinicialización de Google Sign-in
                 window.location.reload();
             };
             
