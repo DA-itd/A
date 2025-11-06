@@ -75,18 +75,43 @@
         const { useState, useEffect, useCallback, useRef } = React;
         
         // =============================================================================
-        // CONFIGURACIÓN DE ENCUESTAS
+        // == 📝 CONFIGURACIÓN DE ENCUESTAS 📝 ==
         // =============================================================================
+        //
+        // 👇 ¡ATENCIÓN! AQUÍ PUEDES CAMBIAR LAS URLS DE TUS ENCUESTAS CADA PERIODO.
+        //    Solo necesitas reemplazar el valor dentro de las comillas '...' por el nuevo
+        //    enlace de tu formulario de Google.
+        //
+        //    IMPORTANTE: También necesitarás los IDs de las preguntas. Para obtenerlos:
+        //    1. Abre tu formulario de Google y haz clic en los 3 puntos (⋮).
+        //    2. Selecciona "Obtener enlace pre-rellenado".
+        //    3. Llena los campos de ejemplo (ej: "Curso Demo", "Departamento Demo").
+        //    4. Haz clic en "Obtener enlace".
+        //    5. El enlace se verá así: ...&entry.12345=Curso+Demo&entry.67890=Departamento...
+        //       - 'entry.12345' es el courseNameEntryId
+        //       - 'entry.67890' es el departmentEntryId
+        //
         const SURVEY_CONFIG = {
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
+
+            // --- ENCUESTA DE OPINIÓN ---
             opinion: {
+                // 👇 REEMPLAZA ESTA URL CON EL ENLACE DE TU NUEVA ENCUESTA DE OPINIÓN
                 url: 'https://forms.gle/BBLvYmwzQDbFESXF7',
+                
+                // IDs de las preguntas (obtenidos con "Obtener enlace pre-rellenado")
                 courseNameEntryId: 'entry.152060533',
                 departmentEntryId: 'entry.1854497676'
             },
+
+            // --- ENCUESTA DE EFICACIA ---
             eficacia: {
+                // 👇 REEMPLAZA ESTA URL CUANDO LA ENCUESTA DE EFICACIA ESTÉ LISTA
+                //    (Actualmente deshabilitada con '#')
                 url: '#', 
+                
+                // Reemplaza estos IDs cuando tengas el formulario de eficacia
                 courseNameEntryId: 'entry.XXXXXXXXX',
                 departmentEntryId: 'entry.XXXXXXXXX'
             }
@@ -146,14 +171,11 @@
         // COMPONENTES DE LA UI
         // =============================================================================
 
-        const LoginStep = ({ onLogin, error, attempts }) => {
+        const LoginStep = ({ onLogin, error }) => {
             const googleButtonRef = useRef(null);
-            const googleInitialized = useRef(false);
 
-            useEffect(() => {
-                if (window.google && !googleInitialized.current) {
-                    googleInitialized.current = true;
-                    
+            const initializeGoogleSignIn = useCallback(() => {
+                if (window.google) {
                     google.accounts.id.initialize({
                         client_id: SURVEY_CONFIG.GOOGLE_CLIENT_ID,
                         callback: onLogin,
@@ -161,16 +183,27 @@
                         auto_select: true
                     });
                     
-                    if (googleButtonRef.current) {
+                    if (googleButtonRef.current && !googleButtonRef.current.hasChildNodes()) {
                         google.accounts.id.renderButton(
                             googleButtonRef.current,
                             { theme: "outline", size: "large", text: "signin_with", shape: "rectangular" }
                         );
                     }
-                    
                     google.accounts.id.prompt();
                 }
             }, [onLogin]);
+
+            useEffect(() => {
+                // The Google library is loaded asynchronously
+                const checkGoogle = setInterval(() => {
+                    if (window.google) {
+                        clearInterval(checkGoogle);
+                        initializeGoogleSignIn();
+                    }
+                }, 100);
+
+                return () => clearInterval(checkGoogle);
+            }, [initializeGoogleSignIn]);
             
             return (
                 <div className="animate-fadeIn text-center">
@@ -235,6 +268,12 @@
                 }
                 setLoggingClick(null);
             }, [loggingClick, registeredClicks, teacherData]);
+            
+            const handleSurveyClick = (surveyType, course) => {
+                 // The actual link opening is handled by the <a> tag's href.
+                 // This function only handles the background recording.
+                 handleRecordParticipation(surveyType, course);
+            };
 
             return (
                 <div className="animate-fadeIn">
@@ -267,7 +306,7 @@
                                             href={generateSurveyUrl('opinion', course.name)}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            onClick={() => handleRecordParticipation('opinion', course)}
+                                            onClick={() => handleSurveyClick('opinion', course)}
                                             className={`flex-1 text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
                                                 isOpinionRegistered || loggingClick
                                                     ? 'bg-gray-300 text-gray-600 cursor-default pointer-events-none' 
@@ -281,9 +320,9 @@
                                             href={generateSurveyUrl('eficacia', course.name)}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            onClick={() => handleRecordParticipation('eficacia', course)}
+                                            onClick={() => handleSurveyClick('eficacia', course)}
                                             className={`flex-1 text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
-                                                isEficaciaRegistered || loggingClick
+                                                isEficaciaRegistered || loggingClick || SURVEY_CONFIG.eficacia.url === '#'
                                                     ? 'bg-gray-300 text-gray-600 cursor-default pointer-events-none' 
                                                     : 'bg-green-600 hover:bg-green-700 text-white'
                                             } ${loggingClick === eficaciaId ? 'opacity-75' : ''}`}
@@ -340,6 +379,7 @@
             }, []);
 
             const handleLogin = useCallback(async (response) => {
+                // Once we have a credential, we don't need the prompt anymore.
                 if (window.google) {
                     google.accounts.id.cancel(); 
                 }
