@@ -121,6 +121,25 @@
                 throw new Error(result.message || 'No se pudieron cargar los datos.');
             }
         };
+        
+        const recordSurveyClick = async (data) => {
+            try {
+                const response = await fetch(SURVEY_CONFIG.APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'submitSurveyRecord', ...data })
+                });
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || 'Error al registrar la participación.');
+                }
+            } catch (error) {
+                console.warn("Advertencia: No se pudo registrar el clic de la encuesta.", error);
+                // No lanzamos un error fatal para que el usuario pueda continuar a la encuesta.
+            }
+        };
 
         // =============================================================================
         // COMPONENTES DE LA UI
@@ -180,6 +199,8 @@
         };
         
         const SurveyListStep = ({ teacherData, courses, onLogout }) => {
+            const [loggingClick, setLoggingClick] = useState(null); // 'opinion-ID' or 'eficacia-ID'
+
             const generateSurveyUrl = (type, courseName) => {
                 const config = SURVEY_CONFIG[type];
                 if (!config.url || config.url === '#') return '#';
@@ -189,6 +210,28 @@
                 url.searchParams.set(config.departmentEntryId, teacherData.department);
                 
                 return url.toString();
+            };
+
+            const handleSurveyLinkClick = async (event, surveyType, course) => {
+                event.preventDefault();
+                const uniqueId = `${surveyType}-${course.id}`;
+                if (loggingClick) return;
+
+                setLoggingClick(uniqueId);
+                
+                const surveyUrl = generateSurveyUrl(surveyType, course.name);
+
+                await recordSurveyClick({
+                    teacherName: teacherData.fullName,
+                    teacherEmail: teacherData.email,
+                    department: teacherData.department,
+                    courseId: course.id,
+                    courseName: course.name,
+                    surveyType: surveyType.charAt(0).toUpperCase() + surveyType.slice(1)
+                });
+
+                window.open(surveyUrl, '_blank', 'noopener,noreferrer');
+                setLoggingClick(null);
             };
 
             return (
@@ -213,18 +256,18 @@
                                     <div className="flex flex-col sm:flex-row gap-3">
                                         <a
                                             href={generateSurveyUrl('opinion', course.name)}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors"
+                                            onClick={(e) => handleSurveyLinkClick(e, 'opinion', course)}
+                                            className={`flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${loggingClick === `opinion-${course.id}` ? 'opacity-75 cursor-wait' : ''}`}
                                         >
+                                            {loggingClick === `opinion-${course.id}` && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
                                             💬 Responder Encuesta de Opinión
                                         </a>
                                         <a
                                             href={generateSurveyUrl('eficacia', course.name)}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex-1 text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors"
+                                            onClick={(e) => handleSurveyLinkClick(e, 'eficacia', course)}
+                                            className={`flex-1 text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${loggingClick === `eficacia-${course.id}` ? 'opacity-75 cursor-wait' : ''}`}
                                         >
+                                            {loggingClick === `eficacia-${course.id}` && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
                                             📈 Responder Encuesta de Eficacia
                                         </a>
                                     </div>
@@ -254,6 +297,10 @@
             const [loginAttempts, setLoginAttempts] = useState(0);
 
             const handleLogin = async (response) => {
+                if (window.google) {
+                    google.accounts.id.cancel(); // Detiene el prompt para evitar bucles.
+                }
+
                 const decodedToken = jwt_decode(response.credential);
                 if (!decodedToken || !decodedToken.email) {
                     setError("No se pudo obtener el correo del usuario.");
@@ -278,10 +325,10 @@
                 try {
                     const data = await getCoursesByEmail(email);
                     if (data.courses && data.teacherData) {
-                        setTeacherData(data.teacherData);
+                        setTeacherData({ ...data.teacherData, email });
                         setPendingCourses(data.courses);
                         setStep('list');
-                        setLoginAttempts(0); // Reiniciar intentos en caso de éxito
+                        setLoginAttempts(0);
                     } else {
                         setError('No se encontraron cursos activos para su cuenta. Si cree que esto es un error, contacte a la coordinación.');
                         setStep('login');
