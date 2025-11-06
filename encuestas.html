@@ -78,14 +78,10 @@
         // CONFIGURACIÓN DE ENCUESTAS
         // =============================================================================
         const SURVEY_CONFIG = {
-            // =========================================================================
-            // IMPORTANTE: REEMPLACE CON SU GOOGLE CLIENT ID
-            // =========================================================================
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
-            // =========================================================================
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
             opinion: {
-                url: 'https://docs.google.com/forms/d/e/1FAIpQLSdc2Y4o4vE-Oq-Q1Fm4iNqPz9m1G7U_x3pT9o2W0k_y8Y5h9w/viewform',
+                url: 'https://forms.gle/BBLvYmwzQDbFESXF7',
                 courseNameEntryId: 'entry.152060533',
                 departmentEntryId: 'entry.1854497676'
             },
@@ -130,9 +126,11 @@
         // COMPONENTES DE LA UI
         // =============================================================================
 
-        const LoginStep = ({ onLogin, error }) => {
+        const LoginStep = ({ onLogin, error, attempts }) => {
+            const MAX_ATTEMPTS = 3;
+
             useEffect(() => {
-                if (window.google) {
+                if (window.google && attempts < MAX_ATTEMPTS) {
                     google.accounts.id.initialize({
                         client_id: SURVEY_CONFIG.GOOGLE_CLIENT_ID,
                         callback: onLogin,
@@ -144,7 +142,7 @@
                     );
                     google.accounts.id.prompt();
                 }
-            }, [onLogin]);
+            }, [onLogin, attempts]);
             
             return (
                 <div className="animate-fadeIn text-center">
@@ -153,14 +151,24 @@
                     <p className="text-gray-600 mt-2 max-w-2xl mx-auto">
                         Por favor, inicie sesión con su cuenta institucional para acceder a sus encuestas pendientes.
                     </p>
+                    
+                    {attempts >= MAX_ATTEMPTS && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative my-6 text-left" role="alert">
+                            <strong className="font-bold">Error de Autenticación Múltiple</strong>
+                            <span className="block sm:inline ml-2">No se pudo verificar su cuenta después de varios intentos. Esto puede deberse a un problema con el servicio de encuestas. Por favor, intente de nuevo más tarde o contacte a la coordinación.</span>
+                        </div>
+                    )}
+
                     {error && (
                         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative my-4" role="alert">
                             {error}
                         </div>
                     )}
+                    
                     <div className="mt-8 flex justify-center">
-                        <div id="google-signin-button"></div>
+                        <div id="google-signin-button" className={attempts >= MAX_ATTEMPTS ? 'hidden' : ''}></div>
                     </div>
+
                     <div className="mt-6 bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded-md text-left max-w-lg mx-auto">
                         <h4 className="font-bold">🔒 Su Privacidad es Importante</h4>
                         <p className="text-sm mt-1">
@@ -243,17 +251,20 @@
             const [error, setError] = useState(null);
             const [teacherData, setTeacherData] = useState(null);
             const [pendingCourses, setPendingCourses] = useState([]);
+            const [loginAttempts, setLoginAttempts] = useState(0);
 
             const handleLogin = async (response) => {
                 const decodedToken = jwt_decode(response.credential);
                 if (!decodedToken || !decodedToken.email) {
                     setError("No se pudo obtener el correo del usuario.");
+                    setLoginAttempts(prev => prev + 1);
                     return;
                 }
 
                 if (!decodedToken.email.endsWith('@itdurango.edu.mx')) {
                     setError("Por favor, inicie sesión con una cuenta institucional (@itdurango.edu.mx).");
-                    google.accounts.id.disableAutoSelect();
+                    if (window.google) google.accounts.id.disableAutoSelect();
+                    setLoginAttempts(prev => prev + 1);
                     return;
                 }
 
@@ -270,13 +281,16 @@
                         setTeacherData(data.teacherData);
                         setPendingCourses(data.courses);
                         setStep('list');
+                        setLoginAttempts(0); // Reiniciar intentos en caso de éxito
                     } else {
                         setError('No se encontraron cursos activos para su cuenta. Si cree que esto es un error, contacte a la coordinación.');
-                        setStep('login'); // Mantener en la pantalla de login para mostrar el error
+                        setStep('login');
+                        setLoginAttempts(prev => prev + 1);
                     }
                 } catch (err) {
                     setError(err.message || 'Ocurrió un error al buscar. Intente de nuevo.');
                     setStep('login');
+                    setLoginAttempts(prev => prev + 1);
                 } finally {
                     setIsLoading(false);
                 }
@@ -287,6 +301,7 @@
                 setError(null);
                 setTeacherData(null);
                 setPendingCourses([]);
+                setLoginAttempts(0);
                 if (window.google) {
                     google.accounts.id.disableAutoSelect();
                 }
@@ -303,11 +318,11 @@
                 
                 switch (step) {
                     case 'login':
-                        return <LoginStep onLogin={handleLogin} error={error} />;
+                        return <LoginStep onLogin={handleLogin} error={error} attempts={loginAttempts} />;
                     case 'list':
                         return <SurveyListStep teacherData={teacherData} courses={pendingCourses} onLogout={handleLogout} />;
                     default:
-                        return <LoginStep onLogin={handleLogin} error={error} />;
+                        return <LoginStep onLogin={handleLogin} error={error} attempts={loginAttempts} />;
                 }
             };
 
