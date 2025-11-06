@@ -146,13 +146,13 @@
         // COMPONENTES DE LA UI
         // =============================================================================
 
-        const LoginStep = ({ onLogin, error, attempts, promptOnLoad }) => {
-            const MAX_ATTEMPTS = 3;
-            const initialized = useRef(false);
+        const LoginStep = ({ onLogin, error, attempts }) => {
+            const googleButtonRef = useRef(null);
+            const googleInitialized = useRef(false);
 
             useEffect(() => {
-                if (window.google && !initialized.current) {
-                    initialized.current = true;
+                if (window.google && !googleInitialized.current) {
+                    googleInitialized.current = true;
                     
                     google.accounts.id.initialize({
                         client_id: SURVEY_CONFIG.GOOGLE_CLIENT_ID,
@@ -161,16 +161,16 @@
                         auto_select: true
                     });
                     
-                    google.accounts.id.renderButton(
-                        document.getElementById("google-signin-button"),
-                        { theme: "outline", size: "large", text: "signin_with", shape: "rectangular" }
-                    );
-
-                    if (promptOnLoad) {
-                         google.accounts.id.prompt();
+                    if (googleButtonRef.current) {
+                        google.accounts.id.renderButton(
+                            googleButtonRef.current,
+                            { theme: "outline", size: "large", text: "signin_with", shape: "rectangular" }
+                        );
                     }
+                    
+                    google.accounts.id.prompt();
                 }
-            }, [onLogin, promptOnLoad]);
+            }, [onLogin]);
             
             return (
                 <div className="animate-fadeIn text-center">
@@ -180,21 +180,15 @@
                         Por favor, inicie sesión con su cuenta institucional para acceder a sus encuestas pendientes.
                     </p>
                     
-                    {attempts >= MAX_ATTEMPTS && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative my-6 text-left" role="alert">
-                            <strong className="font-bold">Error de Autenticación Múltiple</strong>
-                            <span className="block sm:inline ml-2">No se pudo verificar su cuenta después de varios intentos. Esto puede deberse a un problema con el servicio de encuestas. Por favor, intente de nuevo más tarde o contacte a la coordinación.</span>
-                        </div>
-                    )}
-
                     {error && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative my-4" role="alert">
-                            {error}
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative my-6 text-left" role="alert">
+                            <strong className="font-bold">Error de Autenticación</strong>
+                            <span className="block sm:inline ml-2">{error}</span>
                         </div>
                     )}
                     
                     <div className="mt-8 flex justify-center">
-                        <div id="google-signin-button" className={attempts >= MAX_ATTEMPTS ? 'hidden' : ''}></div>
+                        <div ref={googleButtonRef}></div>
                     </div>
 
                     <div className="mt-6 bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded-md text-left max-w-lg mx-auto">
@@ -221,46 +215,26 @@
                 
                 return url.toString();
             };
-
-            const handleSurveyLinkClick = (event, surveyType, course) => {
+            
+            const handleRecordParticipation = useCallback(async (surveyType, course) => {
                 const uniqueId = `${surveyType}-${course.id}`;
-                const surveyUrl = generateSurveyUrl(surveyType, course.name);
-                
-                // Abrir la ventana de inmediato, de forma síncrona
-                const newWindow = window.open(surveyUrl, '_blank', 'noopener,noreferrer');
-                
-                if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-                    // Si falla, el navegador lo bloqueó. El evento no se previene y se muestra alerta.
-                    event.preventDefault();
-                    alert('Parece que su navegador bloqueó la ventana emergente. Por favor, permita las ventanas emergentes para este sitio e intente de nuevo.');
-                    return;
-                }
-                
-                // Si la ventana se abrió, prevenir la navegación por defecto y registrar en segundo plano.
-                event.preventDefault();
-
-                // Evitar registros duplicados por doble clic rápido
                 if (loggingClick || registeredClicks.includes(uniqueId)) return;
                 
-                const registerInBackground = async () => {
-                    setLoggingClick(uniqueId);
-                    const success = await recordSurveyClick({
-                        teacherName: teacherData.fullName,
-                        teacherEmail: teacherData.email,
-                        department: teacherData.department,
-                        courseId: course.id,
-                        courseName: course.name,
-                        surveyType: surveyType.charAt(0).toUpperCase() + surveyType.slice(1)
-                    });
+                setLoggingClick(uniqueId);
+                const success = await recordSurveyClick({
+                    teacherName: teacherData.fullName,
+                    teacherEmail: teacherData.email,
+                    department: teacherData.department,
+                    courseId: course.id,
+                    courseName: course.name,
+                    surveyType: surveyType.charAt(0).toUpperCase() + surveyType.slice(1)
+                });
 
-                    if (success) {
-                        setRegisteredClicks(prev => [...prev, uniqueId]);
-                    }
-                    setLoggingClick(null);
-                };
-
-                registerInBackground();
-            };
+                if (success) {
+                    setRegisteredClicks(prev => [...prev, uniqueId]);
+                }
+                setLoggingClick(null);
+            }, [loggingClick, registeredClicks, teacherData]);
 
             return (
                 <div className="animate-fadeIn">
@@ -291,7 +265,9 @@
                                     <div className="flex flex-col sm:flex-row gap-3">
                                         <a
                                             href={generateSurveyUrl('opinion', course.name)}
-                                            onClick={(e) => handleSurveyLinkClick(e, 'opinion', course)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={() => handleRecordParticipation('opinion', course)}
                                             className={`flex-1 text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
                                                 isOpinionRegistered || loggingClick
                                                     ? 'bg-gray-300 text-gray-600 cursor-default pointer-events-none' 
@@ -303,7 +279,9 @@
                                         </a>
                                         <a
                                             href={generateSurveyUrl('eficacia', course.name)}
-                                            onClick={(e) => handleSurveyLinkClick(e, 'eficacia', course)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={() => handleRecordParticipation('eficacia', course)}
                                             className={`flex-1 text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
                                                 isEficaciaRegistered || loggingClick
                                                     ? 'bg-gray-300 text-gray-600 cursor-default pointer-events-none' 
@@ -338,9 +316,7 @@
             const [error, setError] = useState(null);
             const [teacherData, setTeacherData] = useState(null);
             const [pendingCourses, setPendingCourses] = useState([]);
-            const [loginAttempts, setLoginAttempts] = useState(0);
-            const [shouldPromptOnLoad, setShouldPromptOnLoad] = useState(true);
-
+            
             const handleEmailSubmit = useCallback(async (email) => {
                 setIsLoading(true);
                 setError(null);
@@ -351,16 +327,13 @@
                         setTeacherData({ ...data.teacherData, email });
                         setPendingCourses(data.courses);
                         setStep('list');
-                        setLoginAttempts(0);
                     } else {
                         setError('No se encontraron cursos activos para su cuenta. Si cree que esto es un error, contacte a la coordinación.');
                         setStep('login');
-                        setLoginAttempts(prev => prev + 1);
                     }
                 } catch (err) {
                     setError(err.message || 'Ocurrió un error al buscar. Intente de nuevo.');
                     setStep('login');
-                    setLoginAttempts(prev => prev + 1);
                 } finally {
                     setIsLoading(false);
                 }
@@ -374,14 +347,14 @@
                 const decodedToken = jwt_decode(response.credential);
                 if (!decodedToken || !decodedToken.email) {
                     setError("No se pudo obtener el correo del usuario.");
-                    setLoginAttempts(prev => prev + 1);
+                    setStep('login');
                     return;
                 }
 
                 if (!decodedToken.email.endsWith('@itdurango.edu.mx')) {
                     setError("Por favor, inicie sesión con una cuenta institucional (@itdurango.edu.mx).");
+                    setStep('login');
                     if (window.google) google.accounts.id.disableAutoSelect();
-                    setLoginAttempts(prev => prev + 1);
                     return;
                 }
 
@@ -393,11 +366,11 @@
                 setError(null);
                 setTeacherData(null);
                 setPendingCourses([]);
-                setLoginAttempts(0);
-                setShouldPromptOnLoad(false); // No mostrar el pop-up de nuevo
                 if (window.google) {
                     google.accounts.id.disableAutoSelect();
                 }
+                // Recargar la página para una limpieza completa y reinicialización de Google Sign-in
+                window.location.reload();
             };
             
             const renderContent = () => {
@@ -411,11 +384,11 @@
                 
                 switch (step) {
                     case 'login':
-                        return <LoginStep onLogin={handleLogin} error={error} attempts={loginAttempts} promptOnLoad={shouldPromptOnLoad} />;
+                        return <LoginStep onLogin={handleLogin} error={error} />;
                     case 'list':
                         return <SurveyListStep teacherData={teacherData} courses={pendingCourses} onLogout={handleLogout} />;
                     default:
-                        return <LoginStep onLogin={handleLogin} error={error} attempts={loginAttempts} promptOnLoad={shouldPromptOnLoad} />;
+                        return <LoginStep onLogin={handleLogin} error={error} />;
                 }
             };
 
