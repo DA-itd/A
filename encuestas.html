@@ -113,7 +113,27 @@
         };
 
         const getEficaciaSurveyPeriod = () => {
-            return { active: true, id: `EFICACIA_TEST`, name: `Periodo de Prueba` };
+             const isTestMode = true; 
+             if (isTestMode) {
+                return { active: true, id: `EFICACIA_TEST`, name: `Periodo de Prueba` };
+            }
+
+            const now = new Date();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+            const year = now.getFullYear();
+
+            if ((month === 5 && day >= 15) || month === 6 || (month === 7 && day < 15)) {
+                return { active: true, id: `EFICACIA_${year}_1`, name: `Mayo-Julio ${year}` };
+            }
+            if ((month === 11 && day >= 15) || month === 12) {
+                return { active: true, id: `EFICACIA_${year}_2`, name: `Nov-Ene ${year}` };
+            }
+            if (month === 1 && day < 15) {
+                return { active: true, id: `EFICACIA_${year-1}_2`, name: `Nov-Ene ${year-1}` };
+            }
+            
+            return { active: false, id: null, name: null };
         };
 
         const getCoursesByEmail = async (email) => {
@@ -147,19 +167,38 @@
              return true;
         };
 
+        const RedirectingOverlay = () => {
+            return (
+                <div className="fixed inset-0 bg-gray-800 bg-opacity-75 z-50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg shadow-xl p-8 text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                        <p className="text-lg font-semibold text-gray-700">Registrando tu participación y redirigiendo a la encuesta...</p>
+                    </div>
+                </div>
+            );
+        };
+
         const LoginStep = ({ onLogin, error }) => {
-            const handleManualLogin = () => {
+            useEffect(() => {
                 if (window.google) {
                     google.accounts.id.initialize({
                         client_id: SURVEY_CONFIG.GOOGLE_CLIENT_ID,
                         callback: onLogin,
                     });
+                    google.accounts.id.prompt((notification) => {
+                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                             console.log('Google prompt no se mostró.');
+                        }
+                    });
+                }
+            }, [onLogin]);
+            
+            const handleManualLogin = () => {
+                if (window.google) {
                     google.accounts.id.prompt();
-                } else {
-                    alert("La librería de Google no ha cargado. Por favor, refresque la página.");
                 }
             };
-
+            
             return (
                 <div className="animate-fadeIn text-center">
                     <div className="text-6xl mb-4">✍️</div>
@@ -176,7 +215,7 @@
                     )}
                     
                     <div className="mt-8">
-                        <button onClick={handleManualLogin} className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 mx-auto">
+                         <button onClick={handleManualLogin} className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 mx-auto">
                            <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.022,35.244,44,30.036,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
                            Acceder con Google
                         </button>
@@ -194,7 +233,7 @@
             );
         };
         
-        const SurveyCard = ({ survey, teacherData, onParticipationChange, registered, logging }) => {
+        const SurveyCard = ({ survey, teacherData, onParticipationChange, registered, onSurveyClick }) => {
             const { type, course, periodInfo } = survey;
 
             const generateSurveyUrl = () => {
@@ -213,7 +252,7 @@
             };
 
             const handleSurveyClick = async () => {
-                if (logging || registered) return;
+                if (registered) return;
                 
                 const recordData = {
                     teacherName: teacherData.fullName,
@@ -224,16 +263,8 @@
                     surveyType: type === 'opinion' ? 'opinion' : 'eficacia'
                 };
                 
-                onParticipationChange(recordData, true);
-                try {
-                    await recordSurveyClick(recordData);
-                    window.location.href = generateSurveyUrl();
-                } catch (error) {
-                    console.error("Error al registrar y redirigir:", error);
-                    alert("No se pudo registrar su participación. Por favor, intente de nuevo.");
-                } finally {
-                    onParticipationChange(recordData, false);
-                }
+                const surveyUrl = generateSurveyUrl();
+                onSurveyClick(recordData, surveyUrl);
             };
             
             const buttonText = type === 'opinion' ? '💬 Responder Encuesta de Opinión' : '📈 Responder Encuesta de Eficacia';
@@ -249,32 +280,21 @@
                     )}
                     <button
                         onClick={handleSurveyClick}
-                        disabled={registered || logging}
+                        disabled={registered}
                         className={`w-full text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 text-white ${
-                            registered || logging
+                            registered
                                 ? 'bg-gray-400 cursor-not-allowed' 
                                 : buttonBg
-                        } ${logging ? 'opacity-75' : ''}`}
+                        }`}
                     >
-                        {logging && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
                         {registered ? '✔️ Participación Registrada' : buttonText}
                     </button>
                 </div>
             );
         };
 
-        const SurveyListStep = ({ teacherData, courses, initialCompleted, onLogout }) => {
-            const [loggingClicks, setLoggingClicks] = useState({});
-            const [registeredClicks, setRegisteredClicks] = useState(() => new Set(initialCompleted));
-
-            const handleParticipationChange = useCallback((recordData, isLogging) => {
-                const uniqueId = `${recordData.surveyType.toLowerCase()}-${recordData.courseId}`;
-                setLoggingClicks(prev => ({ ...prev, [uniqueId]: isLogging }));
-                if (!isLogging) {
-                    setRegisteredClicks(prev => new Set(prev).add(uniqueId));
-                }
-            }, []);
-
+        const SurveyListStep = ({ teacherData, courses, initialCompleted, onLogout, onSurveyClick }) => {
+            const registeredClicks = useMemo(() => new Set(initialCompleted), [initialCompleted]);
             const periodInfo = useMemo(() => getEficaciaSurveyPeriod(), []);
             
             return (
@@ -296,9 +316,8 @@
                             <SurveyCard
                                 survey={{ type: 'eficacia', periodInfo }}
                                 teacherData={teacherData}
-                                onParticipationChange={handleParticipationChange}
+                                onSurveyClick={onSurveyClick}
                                 registered={registeredClicks.has(`eficacia-${periodInfo.id}`)}
-                                logging={loggingClicks[`eficacia-${periodInfo.id}`]}
                             />
                         )}
                     
@@ -309,9 +328,8 @@
                                     key={course.id}
                                     survey={{ type: 'opinion', course }}
                                     teacherData={teacherData}
-                                    onParticipationChange={handleParticipationChange}
+                                    onSurveyClick={onSurveyClick}
                                     registered={registeredClicks.has(uniqueId)}
-                                    logging={loggingClicks[uniqueId]}
                                 />
                             );
                         }) : (
@@ -329,6 +347,7 @@
         const SurveyApp = () => {
             const [step, setStep] = useState('loading');
             const [error, setError] = useState(null);
+            const [isRedirecting, setIsRedirecting] = useState(false);
             const [appData, setAppData] = useState({
                 teacherData: null,
                 courses: [],
@@ -336,23 +355,26 @@
             });
             
             const handleLogin = useCallback(async (response) => {
-                const decodedToken = JSON.parse(atob(response.credential.split('.')[1]));
-                if (!decodedToken || !decodedToken.email) {
-                    setError("No se pudo obtener el correo del usuario.");
-                    setStep('login');
-                    return;
-                }
+                if (window.google && response.credential) {
+                    google.accounts.id.cancel();
+                    const decodedToken = JSON.parse(atob(response.credential.split('.')[1]));
+                    if (!decodedToken || !decodedToken.email) {
+                        setError("No se pudo obtener el correo del usuario.");
+                        setStep('login');
+                        return;
+                    }
 
-                if (!decodedToken.email.endsWith('@itdurango.edu.mx')) {
-                    setError("Por favor, inicie sesión con una cuenta institucional (@itdurango.edu.mx).");
-                    setStep('login');
-                    if (window.google) google.accounts.id.disableAutoSelect();
-                    return;
-                }
-                
-                const teacherData = await fetchCourseData(decodedToken.email);
-                if (teacherData) {
-                    sessionManager.save({ ...teacherData, email: decodedToken.email });
+                    if (!decodedToken.email.endsWith('@itdurango.edu.mx')) {
+                        setError("Por favor, inicie sesión con una cuenta institucional (@itdurango.edu.mx).");
+                        setStep('login');
+                        if (window.google) google.accounts.id.disableAutoSelect();
+                        return;
+                    }
+                    
+                    const teacherData = await fetchCourseData(decodedToken.email);
+                    if (teacherData) {
+                        sessionManager.save({ ...teacherData, email: decodedToken.email });
+                    }
                 }
             }, []);
 
@@ -388,37 +410,24 @@
                 }
             }, [fetchCourseData]);
 
-            useEffect(() => {
-                if (step === 'login') {
-                    const initializeGsi = () => {
-                        if (window.google) {
-                            google.accounts.id.initialize({
-                                client_id: SURVEY_CONFIG.GOOGLE_CLIENT_ID,
-                                callback: handleLogin,
-                            });
-                            google.accounts.id.prompt((notification) => {
-                                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                                    console.log('Google prompt was not displayed.');
-                                }
-                            });
-                        }
-                    };
-                    
-                    if (window.google) {
-                        initializeGsi();
-                    } else {
-                        const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
-                        script.onload = initializeGsi;
-                    }
-                }
-            }, [step, handleLogin]);
-
             const handleLogout = () => {
                 sessionManager.clear();
                 if (window.google) {
                     google.accounts.id.disableAutoSelect();
                 }
                 window.location.reload();
+            };
+            
+            const handleSurveyClick = async (recordData, surveyUrl) => {
+                setIsRedirecting(true);
+                try {
+                    await recordSurveyClick(recordData);
+                    window.location.href = surveyUrl;
+                } catch (error) {
+                    console.error("Error al registrar y redirigir:", error);
+                    alert("No se pudo registrar su participación. Por favor, intente de nuevo.");
+                    setIsRedirecting(false);
+                }
             };
             
             const renderContent = () => {
@@ -440,6 +449,7 @@
                                 courses={appData.courses} 
                                 initialCompleted={appData.completedSurveys}
                                 onLogout={handleLogout} 
+                                onSurveyClick={handleSurveyClick}
                             />;
                 }
 
@@ -447,16 +457,19 @@
             };
 
             return (
-                <main className="container mx-auto px-4 py-8 sm:py-12">
-                    <div className="max-w-3xl mx-auto">
-                        <a href="index.html" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-8">
-                            ← Volver al Portal Principal
-                        </a>
-                        <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8">
-                           {renderContent()}
+                <React.Fragment>
+                    {isRedirecting && <RedirectingOverlay />}
+                    <main className="container mx-auto px-4 py-8 sm:py-12">
+                        <div className="max-w-3xl mx-auto">
+                            <a href="index.html" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-8">
+                                ← Volver al Portal Principal
+                            </a>
+                            <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8">
+                               {renderContent()}
+                            </div>
                         </div>
-                    </div>
-                </main>
+                    </main>
+                </React.Fragment>
             );
         };
         
