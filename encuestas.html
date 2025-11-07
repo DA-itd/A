@@ -149,8 +149,13 @@
         };
 
         const LoginStep = ({ onLogin, error }) => {
-            const googleButtonRef = useRef(null);
             const promptShown = useRef(false);
+
+            const handleLoginClick = () => {
+                if (window.google) {
+                    google.accounts.id.prompt();
+                }
+            };
 
             useEffect(() => {
                 const initializeGoogleSignIn = () => {
@@ -160,13 +165,6 @@
                             callback: onLogin,
                             auto_select: true
                         });
-                        
-                        if (googleButtonRef.current && !googleButtonRef.current.hasChildNodes()) {
-                            google.accounts.id.renderButton(
-                                googleButtonRef.current,
-                                { theme: "outline", size: "large", text: "signin_with", shape: "rectangular" }
-                            );
-                        }
                         
                         if (!promptShown.current) {
                             google.accounts.id.prompt();
@@ -198,8 +196,14 @@
                         </div>
                     )}
                     
-                    <div className="mt-8 flex justify-center">
-                        <div ref={googleButtonRef}></div>
+                    <div className="mt-8">
+                        <button 
+                            onClick={handleLoginClick}
+                            className="bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 mx-auto shadow-sm"
+                        >
+                            <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_24dp.png" alt="Google logo" className="h-5 w-5" />
+                            Acceder con Google
+                        </button>
                     </div>
 
                     <div className="mt-6 bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded-md text-left max-w-lg mx-auto">
@@ -386,9 +390,6 @@
             }, [fetchCourseData]);
 
             const handleLogin = useCallback(async (response) => {
-                if (window.google) {
-                    google.accounts.id.cancel();
-                }
                 const decodedToken = JSON.parse(atob(response.credential.split('.')[1]));
                 if (!decodedToken || !decodedToken.email) {
                     setError("No se pudo obtener el correo del usuario.");
