@@ -69,7 +69,7 @@
     </footer>
 
     <script type="text/babel">
-        const { useState, useEffect, useCallback, useRef, useMemo } = React;
+        const { useState, useEffect, useCallback, useMemo } = React;
         
         const SURVEY_CONFIG = {
             GOOGLE_CLIENT_ID: '524996215715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
@@ -113,8 +113,21 @@
         };
 
         const getEficaciaSurveyPeriod = () => {
-            const year = new Date().getFullYear();
-            return { active: true, id: `EFICACIA_${year}_PERIODO_PRUEBA`, name: `Periodo de Prueba ${year}` };
+            const currentYear = new Date().getFullYear();
+            const currentDate = new Date();
+            
+            const may15 = new Date(currentYear, 4, 15);
+            const jul15 = new Date(currentYear, 6, 15);
+            const nov15 = new Date(currentYear, 10, 15);
+            const jan15 = new Date(currentYear + 1, 0, 15);
+
+            if ((currentDate >= may15 && currentDate < jul15)) {
+                 return { active: true, id: `EFICACIA_${currentYear}_P1`, name: `Periodo Mayo-Julio ${currentYear}` };
+            }
+            if ((currentDate >= nov15 && currentDate < jan15)) {
+                 return { active: true, id: `EFICACIA_${currentYear}_P2`, name: `Periodo Nov-Ene ${currentYear}` };
+            }
+            return { active: false, id: null, name: null };
         };
 
         const getCoursesByEmail = async (email) => {
@@ -149,8 +162,6 @@
         };
 
         const LoginStep = ({ onLogin, error }) => {
-            const promptShown = useRef(false);
-
             const handleLoginClick = () => {
                 if (window.google) {
                     google.accounts.id.prompt();
@@ -165,11 +176,6 @@
                             callback: onLogin,
                             auto_select: true
                         });
-                        
-                        if (!promptShown.current) {
-                            google.accounts.id.prompt();
-                            promptShown.current = true;
-                        }
                     }
                 };
                 
@@ -243,7 +249,7 @@
                     department: teacherData.department,
                     courseId: type === 'opinion' ? course.id : periodInfo.id,
                     courseName: type === 'opinion' ? course.name : `Encuesta General de Eficacia (${periodInfo.name})`,
-                    surveyType: type === 'opinion' ? 'Opinion' : 'Eficacia'
+                    surveyType: type === 'opinion' ? 'opinion' : 'eficacia'
                 };
                 
                 onParticipationChange(recordData, true);
