@@ -69,10 +69,10 @@
     </footer>
 
     <script type="text/babel">
-        const { useState, useEffect, useCallback, useMemo } = React;
+        const { useState, useEffect, useCallback, useMemo, useRef } = React;
         
         const SURVEY_CONFIG = {
-            GOOGLE_CLIENT_ID: '524996215715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
+            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
             SESSION_TIMEOUT_MINUTES: 30,
             opinion: {
@@ -120,14 +120,8 @@
             const jul15 = new Date(currentYear, 6, 15);
             const nov15 = new Date(currentYear, 10, 15);
             const jan15 = new Date(currentYear + 1, 0, 15);
-
-            if ((currentDate >= may15 && currentDate < jul15)) {
-                 return { active: true, id: `EFICACIA_${currentYear}_P1`, name: `Periodo Mayo-Julio ${currentYear}` };
-            }
-            if ((currentDate >= nov15 && currentDate < jan15)) {
-                 return { active: true, id: `EFICACIA_${currentYear}_P2`, name: `Periodo Nov-Ene ${currentYear}` };
-            }
-            return { active: false, id: null, name: null };
+            
+            return { active: true, id: `EFICACIA_${currentYear}_P_TEST`, name: `Periodo de Prueba ${currentYear}` };
         };
 
         const getCoursesByEmail = async (email) => {
@@ -162,28 +156,27 @@
         };
 
         const LoginStep = ({ onLogin, error }) => {
-            const handleLoginClick = () => {
-                if (window.google) {
-                    google.accounts.id.prompt();
-                }
-            };
-
+            const googleButtonRef = useRef(null);
+            
             useEffect(() => {
-                const initializeGoogleSignIn = () => {
-                    if (window.google) {
+                const initializeAndRender = () => {
+                    if (window.google && googleButtonRef.current) {
                         google.accounts.id.initialize({
                             client_id: SURVEY_CONFIG.GOOGLE_CLIENT_ID,
                             callback: onLogin,
-                            auto_select: true
                         });
+                        google.accounts.id.renderButton(
+                            googleButtonRef.current,
+                            { theme: "outline", size: "large", text: "continue_with", shape: "rectangular", logo_alignment: "left" } 
+                        );
                     }
                 };
-                
+
                 if (typeof window.google !== 'undefined') {
-                    initializeGoogleSignIn();
+                    initializeAndRender();
                 } else {
                     const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
-                    script.onload = initializeGoogleSignIn;
+                    script.onload = initializeAndRender;
                 }
             }, [onLogin]);
             
@@ -202,14 +195,8 @@
                         </div>
                     )}
                     
-                    <div className="mt-8">
-                        <button 
-                            onClick={handleLoginClick}
-                            className="bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 mx-auto shadow-sm"
-                        >
-                            <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_24dp.png" alt="Google logo" className="h-5 w-5" />
-                            Acceder con Google
-                        </button>
+                    <div className="mt-8 flex justify-center">
+                        <div ref={googleButtonRef}></div>
                     </div>
 
                     <div className="mt-6 bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded-md text-left max-w-lg mx-auto">
