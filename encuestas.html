@@ -300,7 +300,6 @@
                     </p>
                     <a
                         href={generateSurveyUrl()}
-                        target="_blank"
                         rel="noopener noreferrer"
                         onClick={handleSurveyClick}
                         className={`w-full text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
@@ -317,7 +316,7 @@
         };
         
         const SurveyListStep = ({ teacherData, courses, onLogout }) => {
-            const [loggingClicks, setLoggingClicks] = useState([]); // <- Cambiado a un array
+            const [loggingClicks, setLoggingClicks] = useState({}); // Cambiado a un objeto
             const [registeredClicks, setRegisteredClicks] = useState([]);
 
             const handleParticipationChange = useCallback((uniqueId) => {
@@ -337,9 +336,9 @@
             
             const handleRecordOpinionClick = useCallback(async (course) => {
                 const uniqueId = `opinion-${course.id}`;
-                if (loggingClicks.includes(uniqueId) || registeredClicks.includes(uniqueId)) return;
+                if (loggingClicks[uniqueId] || registeredClicks.includes(uniqueId)) return;
                 
-                setLoggingClicks(prev => [...prev, uniqueId]);
+                setLoggingClicks(prev => ({ ...prev, [uniqueId]: true }));
                 try {
                     const success = await recordSurveyClick({
                         teacherName: teacherData.fullName,
@@ -354,7 +353,7 @@
                         handleParticipationChange(uniqueId);
                     }
                 } finally {
-                    setLoggingClicks(prev => prev.filter(id => id !== uniqueId));
+                    setLoggingClicks(prev => ({ ...prev, [uniqueId]: false }));
                 }
             }, [loggingClicks, registeredClicks, teacherData, handleParticipationChange]);
 
@@ -379,7 +378,7 @@
                             {courses.map(course => {
                                 const opinionId = `opinion-${course.id}`;
                                 const isOpinionRegistered = registeredClicks.includes(opinionId);
-                                const isOpinionLogging = loggingClicks.includes(opinionId);
+                                const isOpinionLogging = loggingClicks[opinionId];
                                 const isOpinionDisabled = isOpinionRegistered || isOpinionLogging;
 
                                 return (
@@ -388,7 +387,6 @@
                                     <div className="flex flex-col sm:flex-row gap-3">
                                         <a
                                             href={generateOpinionSurveyUrl(course.name)}
-                                            target="_blank"
                                             rel="noopener noreferrer"
                                             onClick={() => handleRecordOpinionClick(course)}
                                             className={`w-full text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 ${
