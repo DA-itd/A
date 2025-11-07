@@ -15,7 +15,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -36,7 +35,6 @@
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
 
-    <!-- Header -->
     <header class="bg-white shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
@@ -62,7 +60,6 @@
 
     <div id="root"></div>
 
-    <!-- Footer -->
     <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
         <div class="container mx-auto px-4">
             <p class="font-semibold text-sm sm:text-base mb-2">
@@ -74,14 +71,10 @@
     <script type="text/babel">
         const { useState, useEffect, useCallback, useRef, useMemo } = React;
         
-        // =============================================================================
-        // == 📝 CONFIGURACIÓN DE ENCUESTAS 📝 ==
-        // =============================================================================
         const SURVEY_CONFIG = {
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
             SESSION_TIMEOUT_MINUTES: 30,
-
             opinion: {
                 url: 'https://forms.gle/BBLvYmwzQDbFESXF7',
                 courseNameEntryId: 'entry.152060533',
@@ -94,9 +87,6 @@
             }
         };
 
-        // =============================================================================
-        // UTILIDADES Y GESTIÓN DE SESIÓN
-        // =============================================================================
         const sessionManager = {
             save: (data) => {
                 const sessionData = {
@@ -123,11 +113,17 @@
         };
 
         const getEficaciaSurveyPeriod = () => {
+            // MODO DE PRUEBA: La encuesta de eficacia siempre está activa para pruebas.
+            // Para reactivar las fechas, comente la siguiente línea y descomente el bloque "BLOQUE ORIGINAL".
+            const year = new Date().getFullYear();
+            return { active: true, id: `EFICACIA_${year}_PERIODO_PRUEBA`, name: `Periodo de Prueba ${year}` };
+
+            /*
+            // --- BLOQUE ORIGINAL CON RESTRICCIÓN DE FECHAS ---
             const now = new Date();
             const month = now.getMonth();
             const day = now.getDate();
             const year = now.getFullYear();
-
             const isPeriod1 = (month === 4 && day >= 15) || (month === 5) || (month === 6 && day <= 14);
             const isPeriod2 = (month === 10 && day >= 15) || (month === 11) || (month === 0 && day <= 14);
 
@@ -136,13 +132,10 @@
                 const periodYear = month === 11 ? year : year - 1;
                 return { active: true, id: `EFICACIA_${periodYear}_PERIODO_2`, name: `Periodo Noviembre ${periodYear} - Enero ${periodYear + 1}` };
             }
-            
             return { active: false, id: null, name: null };
+            */
         };
 
-        // =============================================================================
-        // API SERVICE
-        // =============================================================================
         const getCoursesByEmail = async (email) => {
             const url = new URL(SURVEY_CONFIG.APPS_SCRIPT_URL);
             url.searchParams.append('action', 'getCoursesForSurveyByEmail');
@@ -174,9 +167,6 @@
              return true;
         };
 
-        // =============================================================================
-        // COMPONENTES DE LA UI
-        // =============================================================================
         const LoginStep = ({ onLogin, error }) => {
             const googleButtonRef = useRef(null);
 
@@ -268,7 +258,7 @@
                     surveyType: type === 'opinion' ? 'Opinion' : 'Eficacia'
                 };
                 
-                onParticipationChange(recordData, true); // Inicia el logging
+                onParticipationChange(recordData, true);
                 try {
                     await recordSurveyClick(recordData);
                     window.location.href = generateSurveyUrl();
@@ -276,7 +266,7 @@
                     console.error("Error al registrar y redirigir:", error);
                     alert("No se pudo registrar su participación. Por favor, intente de nuevo.");
                 } finally {
-                    onParticipationChange(recordData, false); // Finaliza el logging
+                    onParticipationChange(recordData, false);
                 }
             };
             
