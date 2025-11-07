@@ -72,7 +72,7 @@
         const { useState, useEffect, useCallback, useRef, useMemo } = React;
         
         const SURVEY_CONFIG = {
-            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
+            GOOGLE_CLIENT_ID: '524996215715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
             SESSION_TIMEOUT_MINUTES: 30,
             opinion: {
@@ -113,27 +113,8 @@
         };
 
         const getEficaciaSurveyPeriod = () => {
-            // MODO DE PRUEBA: La encuesta de eficacia siempre está activa para pruebas.
-            // Para reactivar las fechas, comente la siguiente línea y descomente el bloque "BLOQUE ORIGINAL".
             const year = new Date().getFullYear();
             return { active: true, id: `EFICACIA_${year}_PERIODO_PRUEBA`, name: `Periodo de Prueba ${year}` };
-
-            /*
-            // --- BLOQUE ORIGINAL CON RESTRICCIÓN DE FECHAS ---
-            const now = new Date();
-            const month = now.getMonth();
-            const day = now.getDate();
-            const year = now.getFullYear();
-            const isPeriod1 = (month === 4 && day >= 15) || (month === 5) || (month === 6 && day <= 14);
-            const isPeriod2 = (month === 10 && day >= 15) || (month === 11) || (month === 0 && day <= 14);
-
-            if (isPeriod1) return { active: true, id: `EFICACIA_${year}_PERIODO_1`, name: `Periodo Mayo-Julio ${year}` };
-            if (isPeriod2) {
-                const periodYear = month === 11 ? year : year - 1;
-                return { active: true, id: `EFICACIA_${periodYear}_PERIODO_2`, name: `Periodo Noviembre ${periodYear} - Enero ${periodYear + 1}` };
-            }
-            return { active: false, id: null, name: null };
-            */
         };
 
         const getCoursesByEmail = async (email) => {
@@ -169,6 +150,7 @@
 
         const LoginStep = ({ onLogin, error }) => {
             const googleButtonRef = useRef(null);
+            const promptShown = useRef(false);
 
             useEffect(() => {
                 const initializeGoogleSignIn = () => {
@@ -185,18 +167,20 @@
                                 { theme: "outline", size: "large", text: "signin_with", shape: "rectangular" }
                             );
                         }
-                        google.accounts.id.prompt();
+                        
+                        if (!promptShown.current) {
+                            google.accounts.id.prompt();
+                            promptShown.current = true;
+                        }
                     }
                 };
                 
-                const checkInterval = setInterval(() => {
-                    if (window.google) {
-                        clearInterval(checkInterval);
-                        initializeGoogleSignIn();
-                    }
-                }, 100);
-
-                return () => clearInterval(checkInterval);
+                if (typeof window.google !== 'undefined') {
+                    initializeGoogleSignIn();
+                } else {
+                    const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+                    script.onload = initializeGoogleSignIn;
+                }
             }, [onLogin]);
             
             return (
@@ -402,6 +386,9 @@
             }, [fetchCourseData]);
 
             const handleLogin = useCallback(async (response) => {
+                if (window.google) {
+                    google.accounts.id.cancel();
+                }
                 const decodedToken = JSON.parse(atob(response.credential.split('.')[1]));
                 if (!decodedToken || !decodedToken.email) {
                     setError("No se pudo obtener el correo del usuario.");
