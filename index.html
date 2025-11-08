@@ -11,7 +11,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -24,10 +23,9 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
                 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-            cursor: none; /* Oculta el cursor por defecto en el cuerpo */
+            cursor: none;
         }
         
-        /* Oculta el cursor por defecto en elementos interactivos */
         a, button {
             cursor: none;
         }
@@ -117,14 +115,13 @@
             border-left: 3px solid rgba(99, 102, 241, 0.5);
         }
         
-        /* Estilos para el cursor personalizado */
         #cursor-dot {
             position: fixed;
             width: 12px;
             height: 12px;
-            background-color: rgba(99, 102, 241, 0.5); /* Color índigo semitransparente */
+            background-color: rgba(99, 102, 241, 0.5);
             border-radius: 50%;
-            pointer-events: none; /* Muy importante para que no interfiera con los clics */
+            pointer-events: none;
             transform: translate(-50%, -50%);
             z-index: 9999;
             transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease, transform 0.1s linear;
@@ -133,7 +130,7 @@
         #cursor-dot.active {
             width: 40px;
             height: 40px;
-            background-color: rgba(99, 102, 241, 0.2); /* Más grande y más transparente */
+            background-color: rgba(99, 102, 241, 0.2);
         }
     </style>
 <script type="importmap">
@@ -149,10 +146,8 @@
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
     
-    <!-- Elemento del cursor personalizado -->
     <div id="cursor-dot"></div>
 
-    <!-- Header -->
     <header class="bg-white shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
@@ -177,18 +172,15 @@
                      class="h-12 sm:h-16 md:h-20 object-contain">
             </div>
         </div>
-         <!-- Menú de Navegación -->
         <nav class="bg-blue-800 text-white shadow-md">
             <div class="container mx-auto px-4">
                 <div class="flex justify-between items-center">
-                    <!-- Menú Desktop -->
                     <div class="hidden md:flex space-x-4">
                         <a href="#inicio" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Inicio</a>
                         <a href="#servicios" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Servicios</a>
                         <a href="#informacion" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Información</a>
                         <a href="#enlaces" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Enlaces y Contacto</a>
                     </div>
-                    <!-- Botón Menú Móvil -->
                     <div class="md:hidden flex items-center w-full">
                          <button id="mobile-menu-button" class="text-white focus:outline-none p-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
@@ -196,7 +188,6 @@
                     </div>
                 </div>
             </div>
-             <!-- Menú Desplegable Móvil -->
             <div id="mobile-menu" class="hidden md:hidden">
                 <a href="#inicio" class="block px-4 py-3 text-sm hover:bg-blue-700">Inicio</a>
                 <a href="#servicios" class="block px-4 py-3 text-sm hover:bg-blue-700">Servicios</a>
@@ -206,23 +197,19 @@
         </nav>
     </header>
 
-    <!-- Barra de Información: Clima y Hora -->
     <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
         <div class="container mx-auto px-4 py-3">
             <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 text-sm">
-                <!-- Fecha -->
                 <div class="flex items-center gap-2">
                     <span class="text-xl">📅</span>
                     <span id="currentDate" class="font-semibold">Cargando...</span>
                 </div>
                 
-                <!-- Clima -->
                 <div id="weatherInfo" class="flex items-center gap-2">
                     <span class="text-2xl weather-icon">🌤️</span>
                     <span class="font-semibold">Durango, Dgo.</span>
                 </div>
                 
-                <!-- Hora -->
                 <div class="flex items-center gap-2">
                     <span class="text-xl">🕒</span>
                     <span id="clock" class="font-mono font-bold text-lg">--:--:--</span>
@@ -231,17 +218,13 @@
         </div>
     </div>
 
-    <!-- Contenido Principal -->
     <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
         
-        <!-- Frase Inspiracional -->
         <section class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
             <div id="quote-container" class="quote-container rounded-lg p-6 text-center transition-opacity duration-500 ease-in-out">
-                <!-- Quote will be injected here -->
             </div>
         </section>
         
-        <!-- Mensaje de Bienvenida -->
         <section class="max-w-4xl mx-auto mb-12 animate-fadeInUp">
             <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-indigo-500">
                 <div class="flex items-center gap-4 mb-4">
@@ -261,8 +244,6 @@
             </div>
         </section>
 
-
-        <!-- Banner de Bienvenida -->
         <div id="servicios" class="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32">
             <div class="flex items-baseline justify-center gap-4 sm:gap-6 mb-4">
                 <div class="inline-block animate-pulse-slow">
@@ -277,10 +258,8 @@
             </p>
         </div>
 
-        <!-- Grid de Opciones -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
             
-            <!-- Opción 1: Inscripción a Cursos -->
             <a href="inscripciones.html" 
                class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp delay-100">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📝</div>
@@ -295,7 +274,6 @@
                 </div>
             </a>
 
-            <!-- Opción 2: Historial de Cursos -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('Historial de Cursos')"
                class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-400 cursor-pointer animate-fadeInUp delay-200">
                 <span class="badge-soon">Próximamente</span>
@@ -311,7 +289,6 @@
                 </div>
             </a>
 
-            <!-- Opción 3: Formatos Oficiales -->
             <a href="formatos.html" 
                class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-300">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📋</div>
@@ -326,7 +303,6 @@
                 </div>
             </a>
 
-            <!-- Opción 4: Validación de Constancias -->
             <a href="verificador.html" 
                class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-400">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">✅</div>
@@ -341,7 +317,6 @@
                 </div>
             </a>
 
-            <!-- Opción 5: Área para Instructores -->
             <a href="instructores.html" 
                class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-500">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
@@ -356,7 +331,6 @@
                 </div>
             </a>
 
-            <!-- Opción 6: Encuestas de Opinión -->
             <a href="encuestas.html" 
                class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 animate-fadeInUp delay-600">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📊</div>
@@ -371,7 +345,6 @@
                 </div>
             </a>
             
-            <!-- Opción 7: Estadísticas -->
             <a href="#" onclick="event.preventDefault(); showComingSoon('Estadísticas')"
                class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 cursor-pointer animate-fadeInUp delay-700">
                 <span class="badge-soon">Próximamente</span>
@@ -389,7 +362,6 @@
 
         </div>
 
-        <!-- Panel de Información -->
         <div id="informacion" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
             <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600">
                 <div class="flex items-center gap-3 mb-4">
@@ -434,11 +406,10 @@
             </div>
         </div>
 
-        <!-- Enlaces Institucionales -->
         <div id="enlaces" class="max-w-4xl mx-auto scroll-mt-32">
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
                 <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                     <a href="https://www.itdurango.edu.mx" 
                        target="_blank"
                        rel="noopener noreferrer"
@@ -471,11 +442,18 @@
                         <p class="font-semibold text-sm">SGI</p>
                         <p class="text-xs opacity-90">Gestión Integrado</p>
                     </a>
+                    <a href="https://www.epc.gob.mx" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-amber-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
+                        <div class="text-3xl mb-2">⌨️</div>
+                        <p class="font-semibold text-sm">EPC</p>
+                        <p class="text-xs opacity-90">Escuela Pública de Código</p>
+                    </a>
                 </div>
             </div>
         </div>
 
-        <!-- Ayuda y Soporte -->
         <div id="contacto" class="max-w-4xl mx-auto mt-8 scroll-mt-32">
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
@@ -496,7 +474,6 @@
 
     </main>
 
-    <!-- Footer -->
     <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-8">
         <div class="container mx-auto px-4">
             <p class="font-semibold text-sm sm:text-base mb-2">
@@ -506,12 +483,11 @@
                 M.C. Alejandro Calderón Rentería
             </p>
             <p class="text-xs sm:text-sm opacity-75 mt-1">
-                Todos los derechos reservados 2025
+                Todos los derechos reservados 2024
             </p>
         </div>
     </footer>
 
-    <!-- Modal "Próximamente" -->
     <div id="comingSoonModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center transform transition-all animate-fadeInUp">
             <div class="text-6xl mb-4">🚧</div>
@@ -529,22 +505,17 @@
     </div>
 
     <script>
-        // =============================================================================
-        // LÓGICA DEL CURSOR PERSONALIZADO
-        // =============================================================================
         const cursorDot = document.getElementById('cursor-dot');
         
         window.addEventListener('mousemove', e => {
             const { clientX, clientY } = e;
             
-            // Usamos requestAnimationFrame para un rendimiento más suave
             requestAnimationFrame(() => {
                 cursorDot.style.left = `${clientX}px`;
                 cursorDot.style.top = `${clientY}px`;
             });
             
             const target = e.target;
-            // Verifica si el elemento es un enlace, botón o tiene un rol de botón o es una tarjeta del portal
             if (target.matches('a, button, [role="button"], .card-portal')) {
                 cursorDot.classList.add('active');
             } else {
@@ -552,9 +523,6 @@
             }
         });
 
-        // =============================================================================
-        // LÓGICA DEL MENÚ MÓVIL
-        // =============================================================================
         const menuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         
@@ -562,62 +530,25 @@
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Cerrar menú al hacer clic en un enlace
         mobileMenu.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu.classList.add('hidden');
             });
         });
 
-        // =============================================================================
-        // FRASES INSPIRACIONALES SOBRE EDUCACIÓN Y CIENCIA
-        // =============================================================================
         const inspirationalQuotes = [
-            {
-                quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.",
-                author: "Nelson Mandela"
-            },
-            {
-                quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.",
-                author: "Carl Sagan"
-            },
-            {
-                quote: "La educación no es preparación para la vida; la educación es la vida misma.",
-                author: "John Dewey"
-            },
-            {
-                quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.",
-                author: "Albert Einstein"
-            },
-            {
-                quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.",
-                author: "Platón"
-            },
-            {
-                quote: "La ciencia no conoce fronteras, porque el conocimiento pertenece a la humanidad.",
-                author: "Louis Pasteur"
-            },
-            {
-                quote: "Educación es lo que queda después de olvidar lo que se ha aprendido en la escuela.",
-                author: "Albert Einstein"
-            },
-            {
-                quote: "La investigación es ver lo que todos han visto y pensar lo que nadie ha pensado.",
-                author: "Albert Szent-Györgyi"
-            },
-            {
-                quote: "Un maestro afecta la eternidad; nunca se sabe dónde termina su influencia.",
-                author: "Henry Adams"
-            },
-            {
-                quote: "La mejor forma de predecir el futuro es inventándolo.",
-                author: "Alan Kay"
-            }
+            { quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.", author: "Nelson Mandela" },
+            { quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.", author: "Carl Sagan" },
+            { quote: "La educación no es preparación para la vida; la educación es la vida misma.", author: "John Dewey" },
+            { quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.", author: "Albert Einstein" },
+            { quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.", author: "Platón" },
+            { quote: "La ciencia no conoce fronteras, porque el conocimiento pertenece a la humanidad.", author: "Louis Pasteur" },
+            { quote: "Educación es lo que queda después de olvidar lo que se ha aprendido en la escuela.", author: "Albert Einstein" },
+            { quote: "La investigación es ver lo que todos han visto y pensar lo que nadie ha pensado.", author: "Albert Szent-Györgyi" },
+            { quote: "Un maestro afecta la eternidad; nunca se sabe dónde termina su influencia.", author: "Henry Adams" },
+            { quote: "La mejor forma de predecir el futuro es inventándolo.", author: "Alan Kay" }
         ];
 
-        // =============================================================================
-        // CLIMA LOCAL
-        // =============================================================================
         function updateWeather() {
             const weatherElement = document.getElementById('weatherInfo');
             if (!weatherElement) return;
@@ -645,9 +576,7 @@
                         if (data && data.current_weather) {
                             const temp = Math.round(data.current_weather.temperature);
                             const icon = getWeatherIcon(data.current_weather.weathercode);
-                            weatherElement.innerHTML = `
-                                <span class="text-2xl weather-icon">${icon}</span>
-                                <span class="font-semibold">Durango, Dgo. ${temp}°C</span>`;
+                            weatherElement.innerHTML = `<span class="text-2xl weather-icon">${icon}</span><span class="font-semibold">Durango, Dgo. ${temp}°C</span>`;
                         }
                     })
                     .catch(error => {
@@ -660,9 +589,7 @@
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        showWeather(position.coords.latitude, position.coords.longitude);
-                    },
+                    (position) => showWeather(position.coords.latitude, position.coords.longitude),
                     (error) => {
                         console.warn(`Geolocation error (${error.code}): ${error.message}`);
                         showWeather(durangoLat, durangoLon); 
@@ -673,9 +600,6 @@
             }
         }
 
-        // =============================================================================
-        // RELOJ EN TIEMPO REAL
-        // =============================================================================
         function startClock() {
             function updateClock() {
                 const now = new Date();
@@ -688,24 +612,13 @@
             setInterval(updateClock, 1000);
         }
 
-        // =============================================================================
-        // FECHA ACTUAL
-        // =============================================================================
         function updateDate() {
             const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            };
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateString = now.toLocaleDateString('es-MX', options);
             document.getElementById('currentDate').textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
         }
 
-        // =============================================================================
-        // AÑO DEL CALENDARIO
-        // =============================================================================
         function updateCalendarYear() {
             const calendarElement = document.getElementById('calendar-year-text');
             if (calendarElement) {
@@ -714,9 +627,6 @@
             }
         }
 
-        // =============================================================================
-        // FRASES INSPIRACIONALES (ROTATIVAS)
-        // =============================================================================
         function rotateQuotes() {
             const quoteContainer = document.getElementById('quote-container');
             if (!quoteContainer) return;
@@ -724,21 +634,15 @@
             const randomIndex = Math.floor(Math.random() * inspirationalQuotes.length);
             const quote = inspirationalQuotes[randomIndex];
 
-            // Fade out
             quoteContainer.style.opacity = 0;
-
             setTimeout(() => {
                 quoteContainer.innerHTML = `
                     <p class="text-base sm:text-lg italic text-gray-700 leading-relaxed">"${quote.quote}"</p>
                     <p class="text-sm sm:text-base text-gray-600 text-right mt-2">- ${quote.author}</p>`;
-                // Fade in
                 quoteContainer.style.opacity = 1;
             }, 500);
         }
         
-        // =============================================================================
-        // MODALES
-        // =============================================================================
         function showComingSoon(sectionName) {
             document.getElementById('modalTitle').textContent = sectionName;
             document.getElementById('comingSoonModal').classList.remove('hidden');
@@ -751,20 +655,13 @@
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
         document.getElementById('comingSoonModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 
-        // =============================================================================
-        // INICIALIZACIÓN
-        // =============================================================================
         window.addEventListener('load', function() {
             startClock();
             updateDate();
             updateWeather();
-            rotateQuotes(); // Initial quote
-            setInterval(rotateQuotes, 30000); // Change quote every 30 seconds
+            rotateQuotes();
+            setInterval(rotateQuotes, 30000);
             updateCalendarYear();
-            
-            console.log('%c Portal ITD - Listo ', 
-                'background: #1e3a8a; color: white; font-size: 16px; padding: 8px; border-radius: 4px;'
-            );
         });
     </script>
 
