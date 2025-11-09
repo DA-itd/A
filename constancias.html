@@ -47,6 +47,8 @@
     </footer>
 
     <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
         // ============================================================================
         // === CONFIGURACIÓN ==========================================================
         // ============================================================================
@@ -91,7 +93,7 @@
         // === COMPONENTES ============================================================
         // ============================================================================
         const LoginStep = ({ onLogin, error }) => {
-            React.useEffect(() => {
+            useEffect(() => {
                 if (window.google) {
                     window.google.accounts.id.initialize({
                         client_id: CONFIG.GOOGLE_CLIENT_ID,
@@ -156,13 +158,13 @@
                 switch(status) {
                     case 'loading': 
                         return (
-                            <>
+                            <React.Fragment>
                                 <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
                                 Generando...
-                            </>
+                            </React.Fragment>
                         );
                     case 'success': return '✅ Enviada al correo';
                     case 'error': return '❌ Error, reintentar';
@@ -250,12 +252,12 @@
         // === COMPONENTE PRINCIPAL ===================================================
         // ============================================================================
         const ConstanciasApp = () => {
-            const [step, setStep] = React.useState('loading');
-            const [error, setError] = React.useState(null);
-            const [appData, setAppData] = React.useState({ teacherData: null, eligibleCourses: [] });
-            const [courseStatuses, setCourseStatuses] = React.useState({});
+            const [step, setStep] = useState('loading');
+            const [error, setError] = useState(null);
+            const [appData, setAppData] = useState({ teacherData: null, eligibleCourses: [] });
+            const [courseStatuses, setCourseStatuses] = useState({});
 
-            const fetchEligibleCourses = React.useCallback(async (email) => {
+            const fetchEligibleCourses = useCallback(async (email) => {
                 setError(null);
                 
                 try {
@@ -283,7 +285,7 @@
                 }
             }, []);
 
-            const handleLogin = React.useCallback(async (response) => {
+            const handleLogin = useCallback(async (response) => {
                 if (!window.google || !response.credential) {
                     setError("Error de autenticación con Google");
                     setStep('login');
@@ -310,7 +312,7 @@
                 }
             }, [fetchEligibleCourses]);
 
-            React.useEffect(() => {
+            useEffect(() => {
                 const session = sessionManager.load();
                 if (session?.email) {
                     fetchEligibleCourses(session.email);
