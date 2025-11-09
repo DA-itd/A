@@ -14,7 +14,6 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -25,7 +24,6 @@
 </head>
 <body class="bg-gray-100">
 
-    <!-- Header -->
     <header class="bg-white shadow-md">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between gap-4 py-4 min-h-[100px]">
@@ -47,29 +45,19 @@
         </div>
     </header>
 
-    <div id="root"></div>
+    <div id="root" data-app="inscripciones"></div>
 
-    <!-- Footer -->
     <footer class="bg-blue-800 text-white text-center p-4 mt-auto">
         <p class="font-semibold text-sm sm:text-base">© Coordinación de actualización docente - M.C. Alejandro Calderón Rentería.</p>
-        <p class="text-xs sm:text-sm">Todos los derechos reservados 2025.</p>
+        <p class="text-xs sm:text-sm">Todos los derechos reservados 2024.</p>
     </footer>
 
-    <!-- ========================================================================== -->
-    <!-- CONFIGURACIÓN: Coloque aquí la URL de su Google Apps Script              -->
-    <!-- ========================================================================== -->
     <script>
         window.CONFIG = {
-            // 👇 REEMPLACE ESTA URL CON LA URL DE SU GOOGLE APPS SCRIPT
-            // IMPORTANTE: Después de actualizar el código en Google Apps Script,
-            // debe ir a "Implementar" > "Nueva implementación" para que los
-            // cambios se apliquen. Copie la nueva URL que se genera y péguela aquí.
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz2hpmaNoCj0Zy0mzl8mvYU978u7llspIFMyNuqt7VRu7Xi3yK3vkkOFNDWyokPVl5ODw/exec'
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec'
         };
     </script>
-    <!-- ========================================================================== -->
-
-    <!-- Carga el archivo index.js que contiene toda la lógica -->
+    
     <script src="index.js"></script>
 
 </body>
