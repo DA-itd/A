@@ -1,292 +1,419 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Constancias - ITD</title>
-    <meta name="description" content="Genera y recibe por correo electrónico tus constancias de los cursos de actualización docente del ITD.">
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+import React, { useState, useEffect, useCallback } from 'react';
+
+// ============================================================================
+// === CONFIGURACIÓN ==========================================================
+// ============================================================================
+
+const CONFIG = {
+    GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
+    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
+    SESSION_KEY: 'certificate_session',
+    SESSION_TIMEOUT_MINUTES: 60,
+    INSTITUTIONAL_DOMAIN: '@itdurango.edu.mx'
+};
+
+// ============================================================================
+// === UTILIDADES =============================================================
+// ============================================================================
+
+const sessionManager = {
+    save: (data) => {
+        try {
+            const sessionData = {
+                ...data,
+                timestamp: new Date().getTime()
+            };
+            localStorage.setItem(CONFIG.SESSION_KEY, JSON.stringify(sessionData));
+        } catch (error) {
+            console.error('Error al guardar sesión:', error);
+        }
+    },
     
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+    load: () => {
+        try {
+            const stored = localStorage.getItem(CONFIG.SESSION_KEY);
+            if (!stored) return null;
+            
+            const sessionData = JSON.parse(stored);
+            const timeElapsed = (new Date().getTime() - sessionData.timestamp) / (1000 * 60);
+            
+            if (timeElapsed > CONFIG.SESSION_TIMEOUT_MINUTES) {
+                sessionManager.clear();
+                return null;
+            }
+            
+            return sessionData;
+        } catch (error) {
+            console.error('Error al cargar sesión:', error);
+            return null;
         }
-        .animate-fadeIn {
-            animation: fadeIn 0.5s ease-out forwards;
+    },
+    
+    clear: () => {
+        try {
+            localStorage.removeItem(CONFIG.SESSION_KEY);
+        } catch (error) {
+            console.error('Error al limpiar sesión:', error);
         }
-    </style>
-</head>
-<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    }
+};
 
-    <header class="bg-white shadow-xl sticky top-0 z-40">
-        <div class="container mx-auto px-4 py-4 sm:py-6">
-            <div class="flex items-center justify-between gap-4">
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
-                <div class="text-center flex-1 px-2 sm:px-4">
-                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">GENERADOR DE CONSTANCIAS</h1>
-                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">Desarrollo Académico</p>
+// ============================================================================
+// === COMPONENTES ============================================================
+// ============================================================================
+
+const LoginStep = ({ onLogin, error }) => {
+    useEffect(() => {
+        if (window.google) {
+            window.google.accounts.id.initialize({
+                client_id: CONFIG.GOOGLE_CLIENT_ID,
+                callback: onLogin
+            });
+            window.google.accounts.id.prompt();
+        }
+    }, [onLogin]);
+
+    return (
+        <div className="text-center">
+            <div className="text-6xl mb-4">📜</div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                Generador de Constancias
+            </h2>
+            <p className="text-gray-600 mt-2 max-w-2xl mx-auto">
+                Inicia sesión con tu cuenta institucional para ver y generar las constancias 
+                de los cursos finalizados.
+            </p>
+            
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded my-6 text-left" 
+                     role="alert">
+                    <strong className="font-bold">Error: </strong>
+                    <span className="block sm:inline">{error}</span>
                 </div>
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
+            )}
+            
+            <div className="mt-8">
+                <button 
+                    onClick={() => window.google?.accounts.id.prompt()}
+                    className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 
+                             transition-colors flex items-center justify-center gap-2 mx-auto shadow-lg">
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Acceder con Google
+                </button>
             </div>
         </div>
-    </header>
+    );
+};
 
-    <div id="root"></div>
-
-    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
-        <div class="container mx-auto px-4">
-            <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
+const CertificateCard = ({ course, onGenerate, courseStatuses, setCourseStatuses }) => {
+    const status = courseStatuses[course.id] || course.status || 'idle';
+    
+    const handleGenerate = async () => {
+        setCourseStatuses(prev => ({ ...prev, [course.id]: 'loading' }));
+        
+        try {
+            await onGenerate(course.id);
+            setCourseStatuses(prev => ({ ...prev, [course.id]: 'success' }));
+        } catch (error) {
+            console.error('Error al generar constancia:', error);
+            setCourseStatuses(prev => ({ ...prev, [course.id]: 'error' }));
+        }
+    };
+    
+    const getButtonContent = () => {
+        switch(status) {
+            case 'loading': 
+                return (
+                    <>
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generando...
+                    </>
+                );
+            case 'success': 
+                return '✅ Enviada al correo';
+            case 'error': 
+                return '❌ Error, reintentar';
+            case 'issued': 
+                return '✓ Ya generada';
+            default: 
+                return 'Generar y Enviar Constancia';
+        }
+    };
+    
+    const getButtonClasses = () => {
+        const baseClasses = 'w-full text-center font-semibold py-3 px-4 rounded-md transition-colors flex items-center justify-center gap-2 text-white';
+        
+        switch(status) {
+            case 'loading': 
+                return `${baseClasses} bg-gray-400 cursor-not-allowed`;
+            case 'success': 
+                return `${baseClasses} bg-green-600`;
+            case 'error': 
+                return `${baseClasses} bg-red-600 hover:bg-red-700 cursor-pointer`;
+            case 'issued': 
+                return `${baseClasses} bg-gray-500 cursor-not-allowed`;
+            default: 
+                return `${baseClasses} bg-indigo-600 hover:bg-indigo-700 cursor-pointer shadow-md`;
+        }
+    };
+    
+    const isDisabled = status === 'loading' || status === 'success' || status === 'issued';
+    
+    return (
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-amber-500 hover:shadow-lg transition-shadow">
+            <h3 className="text-lg font-bold text-gray-900 mb-3">
+                {course.name}
+            </h3>
+            
+            {course.completedDate && (
+                <p className="text-sm text-gray-600 mb-3">
+                    Completado: {new Date(course.completedDate).toLocaleDateString('es-MX')}
+                </p>
+            )}
+            
+            <button 
+                onClick={handleGenerate}
+                disabled={isDisabled}
+                className={getButtonClasses()}>
+                {getButtonContent()}
+            </button>
         </div>
-    </footer>
+    );
+};
 
-    <script type="text/babel">
-        const { useState, useEffect, useCallback } = React;
+const CertificateListStep = ({ teacherData, eligibleCourses, onLogout, onGenerate, courseStatuses, setCourseStatuses }) => (
+    <div>
+        <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                    Constancias Disponibles
+                </h2>
+                <p className="text-gray-600 mt-1">
+                    Hola, <strong>{teacherData.fullName}</strong>
+                </p>
+            </div>
+            <button 
+                onClick={onLogout}
+                className="text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold 
+                         py-2 px-4 rounded-lg transition-colors">
+                Cerrar Sesión
+            </button>
+        </div>
 
-        const CONFIG = {
-            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
-            SESSION_TIMEOUT_MINUTES: 60,
-        };
+        <div className="space-y-4">
+            {eligibleCourses.length > 0 ? (
+                eligibleCourses.map(course => (
+                    <CertificateCard 
+                        key={course.id} 
+                        course={course} 
+                        onGenerate={onGenerate}
+                        courseStatuses={courseStatuses}
+                        setCourseStatuses={setCourseStatuses}
+                    />
+                ))
+            ) : (
+                <div className="text-center bg-blue-50 text-blue-800 p-8 rounded-lg">
+                    <div className="text-5xl mb-3">👍</div>
+                    <p className="font-semibold text-lg">
+                        No tienes constancias pendientes por generar.
+                    </p>
+                    <p className="mt-2 text-sm">
+                        Asegúrate de haber contestado la encuesta de opinión del curso correspondiente.
+                    </p>
+                </div>
+            )}
+        </div>
+    </div>
+);
 
-        const sessionManager = {
-            save: (data) => {
-                const sessionData = { ...data, timestamp: new Date().getTime() };
-                localStorage.setItem('certificate_session', JSON.stringify(sessionData));
-            },
-            load: () => {
-                const stored = localStorage.getItem('certificate_session');
-                if (!stored) return null;
-                const sessionData = JSON.parse(stored);
-                const elapsed = (new Date().getTime() - sessionData.timestamp) / (1000 * 60);
-                if (elapsed > CONFIG.SESSION_TIMEOUT_MINUTES) {
-                    localStorage.removeItem('certificate_session');
-                    return null;
-                }
-                return sessionData;
-            },
-            clear: () => localStorage.removeItem('certificate_session'),
-        };
+// ============================================================================
+// === COMPONENTE PRINCIPAL ===================================================
+// ============================================================================
 
-        const fetchEligibleCourses = async (email) => {
+const ConstanciasApp = () => {
+    const [step, setStep] = useState('loading');
+    const [error, setError] = useState(null);
+    const [appData, setAppData] = useState({ teacherData: null, eligibleCourses: [] });
+    const [courseStatuses, setCourseStatuses] = useState({});
+
+    const fetchEligibleCourses = useCallback(async (email) => {
+        setError(null);
+        
+        try {
             const url = new URL(CONFIG.APPS_SCRIPT_URL);
             url.searchParams.append('action', 'getEligibleCoursesForCertificate');
             url.searchParams.append('email', email);
-            url.searchParams.append('_', Date.now().toString());
-
-            const response = await fetch(url.toString(), { method: 'GET', mode: 'cors' });
+            
+            const response = await fetch(url.toString());
+            
+            if (!response.ok) {
+                throw new Error(`Error del servidor: ${response.status}`);
+            }
+            
             const result = await response.json();
 
             if (result.success && result.data) {
-                return result.data;
+                setAppData(result.data);
+                setStep('list');
+                return result.data.teacherData;
+            } else {
+                throw new Error(result.message || 'No se pudieron cargar los datos.');
             }
-            throw new Error(result.message || 'No se pudieron cargar los datos.');
-        };
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+            setError(errorMessage);
+            sessionManager.clear();
+            setStep('login');
+            return null;
+        }
+    }, []);
 
-        const generateCertificateApi = async (email, courseId) => {
+    const handleLogin = useCallback(async (response) => {
+        if (!window.google || !response.credential) {
+            setError("Error de autenticación con Google");
+            setStep('login');
+            return;
+        }
+        
+        try {
+            const decodedToken = JSON.parse(atob(response.credential.split('.')[1]));
+            
+            if (!decodedToken?.email) {
+                throw new Error("No se pudo obtener el correo electrónico");
+            }
+            
+            if (!decodedToken.email.endsWith(CONFIG.INSTITUTIONAL_DOMAIN)) {
+                setError(`Por favor, inicie sesión con una cuenta institucional (${CONFIG.INSTITUTIONAL_DOMAIN})`);
+                setStep('login');
+                return;
+            }
+            
+            const teacherData = await fetchEligibleCourses(decodedToken.email);
+            
+            if (teacherData) {
+                sessionManager.save({ 
+                    ...teacherData, 
+                    email: decodedToken.email 
+                });
+            }
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Error al procesar login';
+            setError(errorMessage);
+            setStep('login');
+        }
+    }, [fetchEligibleCourses]);
+
+    useEffect(() => {
+        const session = sessionManager.load();
+        
+        if (session?.email) {
+            fetchEligibleCourses(session.email);
+        } else {
+            setStep('login');
+        }
+    }, [fetchEligibleCourses]);
+
+    const handleLogout = () => {
+        sessionManager.clear();
+        window.google?.accounts.id.disableAutoSelect();
+        window.location.reload();
+    };
+
+    const handleGenerate = async (courseId) => {
+        const session = sessionManager.load();
+        
+        if (!session?.email) {
+            throw new Error("No hay sesión activa.");
+        }
+        
+        try {
             const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'generateAndEmailCertificate', email, courseId })
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'generateAndEmailCertificate',
+                    email: session.email,
+                    courseId
+                })
             });
-            const result = await response.json();
-            if (!result.success) {
-                throw new Error(result.message || 'Error en el servidor al generar la constancia.');
+            
+            if (!response.ok) {
+                throw new Error(`Error del servidor: ${response.status}`);
             }
-        };
-
-        const Spinner = () => <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-800 mx-auto"></div>;
-
-        const LoginStep = ({ onLogin, error }) => {
-            useEffect(() => {
-                if (window.google) {
-                    window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
-                    window.google.accounts.id.prompt();
-                }
-            }, [onLogin]);
             
-            return (
-                <div className="text-center animate-fadeIn">
-                    <div className="text-6xl mb-4">📜</div>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Generador de Constancias</h2>
-                    <p className="text-gray-600 mt-2 max-w-2xl mx-auto">Inicia sesión con tu cuenta institucional para ver y generar las constancias de los cursos donde ya completaste la encuesta de opinión.</p>
-                    {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-700 p-4 my-6 rounded text-left" role="alert">{error}</div>}
-                    <div className="mt-8">
-                        <button onClick={() => window.google?.accounts.id.prompt()} className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700">
-                            Acceder con Google
-                        </button>
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.message || 'Error al generar constancia');
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error en handleGenerate:', error);
+            throw error;
+        }
+    };
+    
+    const renderContent = () => {
+        switch(step) {
+            case 'loading':
+                return (
+                    <div className="text-center p-8">
+                        <svg className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p className="text-gray-600">Cargando...</p>
                     </div>
-                </div>
-            );
-        };
+                );
+                
+            case 'login':
+                return <LoginStep onLogin={handleLogin} error={error} />;
+                
+            case 'list':
+                return (
+                    <CertificateListStep 
+                        teacherData={appData.teacherData}
+                        eligibleCourses={appData.eligibleCourses}
+                        onLogout={handleLogout}
+                        onGenerate={handleGenerate}
+                        courseStatuses={courseStatuses}
+                        setCourseStatuses={setCourseStatuses}
+                    />
+                );
+                
+            default:
+                return <LoginStep onLogin={handleLogin} error="Ocurrió un error inesperado." />;
+        }
+    };
 
-        const CertificateCard = ({ course, onGenerate }) => {
-            const [status, setStatus] = useState(course.status);
-            const [errorMessage, setErrorMessage] = useState('');
-
-            const handleGenerate = async () => {
-                setStatus('loading');
-                setErrorMessage('');
-                try {
-                    await onGenerate(course.id);
-                    setStatus('success');
-                } catch (e) {
-                    setStatus('error');
-                    setErrorMessage(e.message || 'Ocurrió un error.');
-                }
-            };
-            
-            const ButtonContent = () => {
-                switch(status) {
-                    case 'loading': return <>⏳ Generando...</>;
-                    case 'success': return <>✔️ Enviada al correo</>;
-                    case 'error': return <>❌ Error, reintentar</>;
-                    case 'issued': return <>✅ Ya generada</>;
-                    default: return <>📧 Generar y Enviar</>;
-                }
-            };
-            
-            const buttonClasses = {
-                loading: 'bg-gray-400 cursor-not-allowed',
-                success: 'bg-green-600 cursor-default',
-                error: 'bg-red-600 hover:bg-red-700',
-                issued: 'bg-gray-500 cursor-default',
-                idle: 'bg-indigo-600 hover:bg-indigo-700',
-            }[status];
-            
-            return (
-                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-amber-500">
-                    <h3 className="text-lg font-bold text-gray-900 mb-3">{course.name}</h3>
-                    <button onClick={handleGenerate} disabled={status !== 'idle' && status !== 'error'}
-                        className={`w-full text-center font-semibold py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 text-white ${buttonClasses}`}>
-                        <ButtonContent />
-                    </button>
-                    {status === 'error' && <p className="text-xs text-red-600 mt-2 text-center">{errorMessage}</p>}
-                </div>
-            );
-        };
-
-        const CertificateListStep = ({ teacherData, courses, onLogout, onGenerate }) => (
-            <div className="animate-fadeIn">
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Constancias Disponibles</h2>
-                        <p className="text-gray-600 mt-1">Hola, <strong>{teacherData.fullName}</strong>.</p>
-                    </div>
-                    <button onClick={onLogout} className="text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg">Cerrar Sesión</button>
-                </div>
-
-                <div className="space-y-6">
-                    {courses.length > 0 ? (
-                        courses.map(course => <CertificateCard key={course.id} course={course} onGenerate={onGenerate} />)
-                    ) : (
-                        <div className="text-center bg-blue-50 text-blue-800 p-6 rounded-lg">
-                            <div className="text-5xl mb-3">👍</div>
-                            <p className="font-semibold">No tienes constancias pendientes por generar.</p>
-                            <p className="mt-1">Recuerda que para poder generar una constancia, primero debes contestar la <strong>encuesta de opinión</strong> del curso correspondiente.</p>
-                        </div>
-                    )}
+    return (
+        <main className="container mx-auto px-4 py-8 sm:py-12">
+            <div className="max-w-3xl mx-auto">
+                <a 
+                    href="index.html"
+                    className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 
+                             hover:underline mb-8 transition-colors">
+                    ← Volver al Portal Principal
+                </a>
+                
+                <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8">
+                    {renderContent()}
                 </div>
             </div>
-        );
+        </main>
+    );
+};
 
-        const ConstanciasApp = () => {
-            const [step, setStep] = useState('loading');
-            const [error, setError] = useState(null);
-            const [teacherData, setTeacherData] = useState(null);
-            const [courses, setCourses] = useState([]);
-            const [userEmail, setUserEmail] = useState(null);
-
-            const loadUserData = useCallback(async (email) => {
-                setStep('loading');
-                setError(null);
-                try {
-                    const data = await fetchEligibleCourses(email);
-                    setTeacherData(data.teacherData);
-                    setCourses(data.eligibleCourses);
-                    setUserEmail(email);
-                    setStep('list');
-                    return data.teacherData;
-                } catch (err) {
-                    setError(err.message);
-                    sessionManager.clear();
-                    setStep('login');
-                }
-            }, []);
-            
-            const handleLogin = useCallback(async (response) => {
-                if (response.credential) {
-                    const decodedToken = JSON.parse(atob(response.credential.split('.')[1]));
-                    if (!decodedToken?.email?.endsWith('@itdurango.edu.mx')) {
-                        setError("Por favor, inicie sesión con una cuenta institucional (@itdurango.edu.mx).");
-                        sessionManager.clear();
-                        window.google?.accounts.id.disableAutoSelect();
-                        return;
-                    }
-                    const teacherInfo = await loadUserData(decodedToken.email);
-                    if(teacherInfo) {
-                        sessionManager.save({ fullName: teacherInfo.fullName, email: decodedToken.email });
-                    }
-                }
-            }, [loadUserData]);
-
-            useEffect(() => {
-                const session = sessionManager.load();
-                if (session?.email) {
-                    loadUserData(session.email);
-                } else {
-                    setStep('login');
-                }
-            }, [loadUserData]);
-
-            const handleLogout = () => {
-                sessionManager.clear();
-                window.google?.accounts.id.disableAutoSelect();
-                window.location.reload();
-            };
-
-            const handleGenerate = async (courseId) => {
-                if (!userEmail) throw new Error("No hay sesión de usuario activa.");
-                await generateCertificateApi(userEmail, courseId);
-                setCourses(prevCourses => prevCourses.map(c => 
-                    c.id === courseId ? { ...c, status: 'success' } : c
-                ));
-            };
-            
-            const renderContent = () => {
-                switch(step) {
-                    case 'loading': return <Spinner />;
-                    case 'login': return <LoginStep onLogin={handleLogin} error={error} />;
-                    case 'list': 
-                        if (!teacherData) return <Spinner />;
-                        return <CertificateListStep teacherData={teacherData} courses={courses} onLogout={handleLogout} onGenerate={handleGenerate} />;
-                    default: return <LoginStep onLogin={handleLogin} error={"Ocurrió un error inesperado."} />;
-                }
-            };
-
-            return (
-                <main className="container mx-auto px-4 py-8 sm:py-12">
-                    <div className="max-w-3xl mx-auto">
-                        <a href="index.html" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-8">← Volver al Portal Principal</a>
-                        <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8 min-h-[300px] flex items-center justify-center">
-                            {renderContent()}
-                        </div>
-                    </div>
-                </main>
-            );
-        };
-
-        window.addEventListener('load', () => {
-            const root = ReactDOM.createRoot(document.getElementById('root'));
-            root.render(<ConstanciasApp />);
-        });
-    </script>
-</body>
-</html>
+export default ConstanciasApp;
