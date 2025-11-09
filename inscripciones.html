@@ -4,25 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscripción a Cursos - ITD</title>
-    <meta name="description" content="Inscríbete a los cursos de actualización docente del ITD. Consulta la oferta disponible y asegura tu lugar.">
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+    <meta name="description" content="Inscríbete a los cursos de actualización docente del Instituto Tecnológico de Durango. Consulta la oferta disponible y asegura tu lugar.">
+    
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JH1X2720VL');
+    </script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
 
     <header class="bg-white shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
                 <div class="text-center flex-1 px-2 sm:px-4">
                     <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">INSCRIPCIÓN A CURSOS</h1>
                     <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">Desarrollo Académico</p>
                 </div>
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
             </div>
         </div>
     </header>
@@ -36,12 +45,38 @@
     </footer>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo, useCallback } = React;
+        const { useState, useEffect, useCallback, useMemo } = React;
 
         // ============================================================================
-        // === COMPONENTES AUXILIARES ===============================================
+        // === CONFIGURACIÓN Y SERVICIOS =============================================
         // ============================================================================
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec';
 
+        const fetchData = async (action) => {
+            const url = new URL(APPS_SCRIPT_URL);
+            url.searchParams.append('action', action);
+            url.searchParams.append('_', new Date().getTime()); // Cache busting
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Error de red: ${response.status}`);
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message || 'Error al cargar datos.');
+            return result.data;
+        };
+        
+        const postData = async (data) => {
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error(`Error de red: ${response.status}`);
+            return await response.json();
+        };
+
+        // ============================================================================
+        // === COMPONENTES ============================================================
+        // ============================================================================
         const Spinner = () => (
             <div className="flex justify-center items-center h-64">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-800"></div>
@@ -55,174 +90,142 @@
                     const isActive = stepNumber === currentStep;
                     const isCompleted = stepNumber < currentStep;
                     return (
-                        <div key={label} className="flex items-center">
+                        <div key={label} className="flex flex-col items-center text-center">
                             <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-white ${isCompleted ? 'bg-green-500' : isActive ? 'bg-blue-600' : 'bg-gray-300'}`}>
                                 {isCompleted ? '✓' : stepNumber}
                             </div>
-                            <span className={`ml-2 text-xs sm:text-sm ${isActive ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>{label}</span>
+                            <span className={`mt-2 text-xs sm:text-sm ${isActive ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>{label}</span>
                         </div>
                     );
                 })}
             </div>
         );
 
-        const Step1PersonalInfo = ({ formData, setFormData, onNext }) => {
-            const [errors, setErrors] = useState({});
-            
-            const handleChange = (e) => {
-                const { name, value } = e.target;
-                setFormData(prev => ({ ...prev, [name]: value }));
-                if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
-            };
-
-            const validate = () => {
-                const newErrors = {};
-                if (!formData.nombreCompleto) newErrors.nombreCompleto = 'El nombre es requerido.';
-                if (!formData.curp || formData.curp.length !== 18) newErrors.curp = 'El CURP debe tener 18 caracteres.';
-                if (!formData.email || !formData.email.endsWith('@itdurango.edu.mx')) newErrors.email = 'Debe ser un correo institucional.';
-                if (!formData.departamento) newErrors.departamento = 'Seleccione un departamento.';
-                if (!formData.genero) newErrors.genero = 'Seleccione un género.';
-                setErrors(newErrors);
-                return Object.keys(newErrors).length === 0;
-            };
-            
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                if (validate()) onNext();
+        const Step1PersonalInfo = ({ onNext, formData, setFormData, teachers }) => {
+            const handleTeacherSelect = (e) => {
+                const selectedEmail = e.target.value;
+                const selectedTeacher = teachers.find(t => t.email === selectedEmail);
+                setFormData(prev => ({
+                    ...prev,
+                    email: selectedEmail,
+                    nombreCompleto: selectedTeacher ? selectedTeacher.nombreCompleto : '',
+                }));
             };
 
             return (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <h3 className="text-xl font-bold text-gray-800">Información Personal</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Información Personal</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-                            <label htmlFor="nombreCompleto" className="block text-sm font-medium text-gray-700">Nombre Completo *</label>
-                            <input type="text" name="nombreCompleto" value={formData.nombreCompleto} onChange={handleChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required />
-                            {errors.nombreCompleto && <p className="text-red-500 text-xs mt-1">{errors.nombreCompleto}</p>}
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Institucional</label>
+                            <select id="email" value={formData.email} onChange={handleTeacherSelect} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" required>
+                                <option value="">Seleccione su correo...</option>
+                                {teachers.map(teacher => <option key={teacher.email} value={teacher.email}>{teacher.email}</option>)}
+                            </select>
                         </div>
                         <div>
-                            <label htmlFor="curp" className="block text-sm font-medium text-gray-700">CURP *</label>
-                            <input type="text" name="curp" value={formData.curp} onChange={handleChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" maxLength="18" required />
-                            {errors.curp && <p className="text-red-500 text-xs mt-1">{errors.curp}</p>}
+                            <label htmlFor="nombreCompleto" className="block text-sm font-medium text-gray-700">Nombre Completo</label>
+                            <input type="text" id="nombreCompleto" value={formData.nombreCompleto} readOnly className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm sm:text-sm" />
                         </div>
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Institucional *</label>
-                            <input type="email" name="email" value={formData.email} onChange={handleChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required />
-                            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                            <label htmlFor="curp" className="block text-sm font-medium text-gray-700">CURP</label>
+                            <input type="text" id="curp" value={formData.curp} onChange={e => setFormData(p => ({ ...p, curp: e.target.value.toUpperCase() }))} maxLength="18" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" required />
                         </div>
                         <div>
-                            <label htmlFor="genero" className="block text-sm font-medium text-gray-700">Género *</label>
-                            <select name="genero" value={formData.genero} onChange={handleChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <label htmlFor="genero" className="block text-sm font-medium text-gray-700">Género</label>
+                            <select id="genero" value={formData.genero} onChange={e => setFormData(p => ({ ...p, genero: e.target.value }))} className="mt-1 block w-full pl-3 pr-10 py-2 border-gray-300 rounded-md" required>
                                 <option value="">Seleccione...</option>
-                                <option value="Mujer">Mujer</option>
                                 <option value="Hombre">Hombre</option>
+                                <option value="Mujer">Mujer</option>
                             </select>
-                            {errors.genero && <p className="text-red-500 text-xs mt-1">{errors.genero}</p>}
                         </div>
-                        <div className="md:col-span-2">
-                            <label htmlFor="departamento" className="block text-sm font-medium text-gray-700">Departamento *</label>
-                            <select name="departamento" value={formData.departamento} onChange={handleChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
-                                <option value="">Seleccione un departamento</option>
-                                {[
-                                    "DEPARTAMENTO DE APOYO A LA DIVISIÓN DE ESTUDIOS DE POSGRADO E INVESTIGACIÓN", "DEPARTAMENTO DE CIENCIAS BÁSICAS", "DEPARTAMENTO DE CIENCIAS DE LA TIERRA",
-                                    "DEPARTAMENTO DE CIENCIAS ECONÓMICO-ADMINISTRATIVAS", "DEPARTAMENTO DE COMUNICACIÓN Y DIFUSIÓN", "DEPARTAMENTO DE DESARROLLO ACADÉMICO",
-                                    "DEPARTAMENTO DE INGENIERÍA ELÉCTRICA Y ELECTRÓNICA", "DEPARTAMENTO DE INGENIERÍA INDUSTRIAL", "DEPARTAMENTO DE INGENIERÍA MECÁNICA Y MECATRÓNICA",
-                                    "DEPARTAMENTO DE INGENIERÍA QUÍMICA Y BIOQUÍMICA", "DEPARTAMENTO DE INGENIERÍA EN SISTEMAS Y COMPUTACIÓN", "DEPARTAMENTO DE MANTENIMIENTO DE EQUIPO",
-                                    "DEPARTAMENTO DE RECURSOS FINANCIEROS", "DEPARTAMENTO DE RECURSOS HUMANOS", "DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS",
-                                    "DEPARTAMENTO DE SISTEMAS Y COMPUTACIÓN A DISTANCIA", "DEPARTAMENTO DE SERVICIOS ESCOLARES", "DIVISIÓN DE ESTUDIOS DE POSGRADO E INVESTIGACIÓN",
-                                    "DIVISIÓN DE ESTUDIOS PROFESIONALES", "SUBDIRECCIÓN ACADÉMICA", "SUBDIRECCIÓN DE PLANEACIÓN Y VINCULACIÓN", "SUBDIRECCIÓN DE SERVICIOS ADMINISTRATIVOS", "DIRECCIÓN"
-                                ].sort().map(dept => <option key={dept} value={dept}>{dept}</option>)}
-                            </select>
-                            {errors.departamento && <p className="text-red-500 text-xs mt-1">{errors.departamento}</p>}
+                        <div className="sm:col-span-2">
+                            <label htmlFor="departamento" className="block text-sm font-medium text-gray-700">Departamento</label>
+                            <input type="text" id="departamento" value={formData.departamento} onChange={e => setFormData(p => ({ ...p, departamento: e.target.value }))} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" required />
                         </div>
                     </div>
-                    <div className="flex justify-end">
-                        <button type="submit" className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">Continuar</button>
+                    <div className="mt-8 flex justify-end">
+                        <button onClick={onNext} disabled={!formData.email || !formData.curp || !formData.genero || !formData.departamento} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50">Siguiente</button>
                     </div>
-                </form>
+                </div>
             );
         };
         
-        const Step2CourseSelection = ({ formData, setFormData, onNext, onBack, availableCourses }) => {
-            const [filter, setFilter] = useState('');
-            
-            const handleCourseSelection = (courseId) => {
-                setFormData(prev => ({
-                    ...prev,
-                    selectedCourses: prev.selectedCourses.includes(courseId)
-                        ? prev.selectedCourses.filter(id => id !== courseId)
-                        : [...prev.selectedCourses, courseId].slice(0, 3)
-                }));
+        const Step2CourseSelection = ({ onBack, onNext, formData, setFormData, courses }) => {
+            const handleCourseChange = (e, index) => {
+                const { value } = e.target;
+                const newSelection = [...formData.selectedCourses];
+                newSelection[index] = value;
+                setFormData(p => ({ ...p, selectedCourses: newSelection.filter(c => c) }));
             };
-            
-            const filteredCourses = useMemo(() => {
-                return availableCourses.filter(course => 
-                    course.nombre_curso.toLowerCase().includes(filter.toLowerCase())
-                );
-            }, [availableCourses, filter]);
-            
+            const addCourseSelector = () => {
+                if (formData.selectedCourses.length < 3) {
+                    setFormData(p => ({ ...p, selectedCourses: [...p.selectedCourses, ''] }));
+                }
+            };
+            const availableCourses = courses.filter(course => !formData.selectedCourses.includes(course.id_curso));
+
             return (
                 <div>
                     <h3 className="text-xl font-bold text-gray-800 mb-4">Selección de Cursos</h3>
-                    <input type="text" value={filter} onChange={e => setFilter(e.target.value)} placeholder="Buscar curso..." className="w-full mb-4 p-2 border rounded-md" />
-                    <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                        {filteredCourses.map(course => (
-                            <div key={course.id_curso} className={`p-4 border rounded-lg cursor-pointer ${formData.selectedCourses.includes(course.id_curso) ? 'bg-blue-100 border-blue-500' : 'bg-white'}`}
-                                 onClick={() => handleCourseSelection(course.id_curso)}>
-                                <p className="font-bold">{course.nombre_curso}</p>
-                                <p className="text-sm text-gray-600">{course.fecha_curso}</p>
+                    <div className="space-y-4">
+                        {formData.selectedCourses.map((selected, index) => (
+                            <div key={index}>
+                                <label className="block text-sm font-medium text-gray-700">Curso {index + 1}</label>
+                                <select value={selected} onChange={e => handleCourseChange(e, index)} className="mt-1 block w-full pl-3 pr-10 py-2 border-gray-300 rounded-md">
+                                    <option value="">Seleccione un curso...</option>
+                                    {selected && <option value={selected}>{(courses.find(c => c.id_curso === selected) || {}).nombre_curso}</option>}
+                                    {availableCourses.map(course => <option key={course.id_curso} value={course.id_curso}>{course.nombre_curso}</option>)}
+                                </select>
                             </div>
                         ))}
                     </div>
-                    <div className="mt-6 flex justify-between">
+                    {formData.selectedCourses.length < 3 && (
+                        <button onClick={addCourseSelector} className="mt-4 text-sm text-blue-600 hover:underline">+ Agregar otro curso</button>
+                    )}
+                    <div className="mt-8 flex justify-between">
                         <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
-                        <button onClick={onNext} disabled={formData.selectedCourses.length === 0} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-400">Continuar</button>
+                        <button onClick={onNext} disabled={formData.selectedCourses.length === 0} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50">Siguiente</button>
                     </div>
                 </div>
             );
         };
 
-        const Step3Confirm = ({ formData, onBack, onSubmit, availableCourses }) => {
-            const selectedCourseDetails = useMemo(() => {
-                return formData.selectedCourses.map(id => 
-                    availableCourses.find(course => course.id_curso === id)
-                ).filter(Boolean);
-            }, [formData.selectedCourses, availableCourses]);
-            
+        const Step3Confirm = ({ onBack, onSubmit, formData, courses }) => {
+            const selectedCourseDetails = formData.selectedCourses.map(id => courses.find(c => c.id_curso === id)).filter(Boolean);
             return (
-                <div className="space-y-6">
-                    <h3 className="text-xl font-bold text-gray-800">Confirmar Inscripción</h3>
-                    <div>
-                        <h4 className="font-bold">Información Personal</h4>
-                        <p><strong>Nombre:</strong> {formData.nombreCompleto}</p>
-                        <p><strong>Email:</strong> {formData.email}</p>
-                        <p><strong>Departamento:</strong> {formData.departamento}</p>
+                <div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Confirmar Inscripción</h3>
+                    <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+                        <div>
+                            <h4 className="font-semibold">Información Personal</h4>
+                            <p><strong>Nombre:</strong> {formData.nombreCompleto}</p>
+                            <p><strong>Email:</strong> {formData.email}</p>
+                            <p><strong>CURP:</strong> {formData.curp}</p>
+                            <p><strong>Departamento:</strong> {formData.departamento}</p>
+                        </div>
+                        <div>
+                            <h4 className="font-semibold">Cursos Seleccionados</h4>
+                            <ul className="list-disc pl-5">
+                                {selectedCourseDetails.map(course => <li key={course.id_curso}>{course.nombre_curso} ({course.fecha_curso})</li>)}
+                            </ul>
+                        </div>
                     </div>
-                    <div>
-                        <h4 className="font-bold">Cursos Seleccionados</h4>
-                        <ul className="list-disc list-inside">
-                            {selectedCourseDetails.map(course => (
-                                <li key={course.id_curso}>{course.nombre_curso}</li>
-                            ))}
-                        </ul>
-                    </div>
-                    <div className="mt-6 flex justify-between">
+                    <div className="mt-8 flex justify-between">
                         <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
-                        <button onClick={onSubmit} className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg">Confirmar e Inscribir</button>
+                        <button onClick={onSubmit} className="bg-green-600 text-white font-bold py-2 px-6 rounded-lg">Confirmar y Enviar</button>
                     </div>
                 </div>
             );
         };
 
-        const Step4Final = ({ results, onReset }) => (
-            <div className="text-center space-y-4">
-                <h3 className="text-2xl font-bold text-green-600">Proceso Finalizado</h3>
-                <p>A continuación se muestra el resultado de sus solicitudes de inscripción:</p>
-                <div className="space-y-3 text-left max-w-lg mx-auto">
+        const Step4Final = ({ results, onReset, courses }) => (
+            <div className="text-center">
+                <h3 className="text-2xl font-bold text-green-600 mb-4">Resultados de la Inscripción</h3>
+                <div className="space-y-4 text-left">
                     {results.map(result => {
-                        const course = result.course;
-                        // CORRECCIÓN: Se eliminó el optional chaining `?.` para compatibilidad
-                        const courseName = course && course.nombre_curso ? course.nombre_curso : 'Curso Desconocido';
+                        const course = courses.find(c => c.id_curso === result.courseId);
+                        const courseName = course ? course.nombre_curso : 'Curso Desconocido';
                         return (
                             <div key={result.courseId} className={`p-4 border-l-4 rounded-r-lg ${result.success ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
                                 <h3 className="font-bold">{courseName}</h3>
@@ -231,7 +234,7 @@
                         );
                     })}
                 </div>
-                <button onClick={onReset} className="mt-6 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">Realizar otra inscripción</button>
+                <button onClick={onReset} className="mt-8 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg">Realizar otra inscripción</button>
             </div>
         );
 
@@ -240,42 +243,24 @@
         // ============================================================================
         const InscripcionesApp = () => {
             const [step, setStep] = useState(1);
+            const [formData, setFormData] = useState({
+                nombreCompleto: '', email: '', curp: '', genero: '', departamento: '', selectedCourses: ['']
+            });
             const [loading, setLoading] = useState(true);
             const [error, setError] = useState(null);
-            const [availableCourses, setAvailableCourses] = useState([]);
-            const [formData, setFormData] = useState({
-                nombreCompleto: '', curp: '', email: '', departamento: '', genero: '',
-                selectedCourses: []
-            });
-            const [results, setResults] = useState([]);
-
-            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec';
-
-            const fetchData = async (action) => {
-                const url = new URL(APPS_SCRIPT_URL);
-                url.searchParams.append('action', action);
-                const response = await fetch(url);
-                const result = await response.json();
-                if (!result.success) throw new Error(result.message || 'Error al cargar datos.');
-                return result.data;
-            };
-
-            const submitRegistration = async (formData) => {
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({ action: 'registerCourse', ...formData })
-                });
-                const result = await response.json();
-                if (!result.success) throw new Error(result.message || 'Error al registrar.');
-                return result;
-            };
+            const [courses, setCourses] = useState([]);
+            const [teachers, setTeachers] = useState([]);
+            const [submissionResults, setSubmissionResults] = useState([]);
 
             useEffect(() => {
                 const loadInitialData = async () => {
                     try {
-                        setAvailableCourses(await fetchData('getCoursesList'));
+                        const [coursesData, teachersData] = await Promise.all([
+                            fetchData('getCoursesList'),
+                            fetchData('getTeachersList')
+                        ]);
+                        setCourses(coursesData);
+                        setTeachers(teachersData);
                     } catch (err) {
                         setError(err.message);
                     } finally {
@@ -287,45 +272,37 @@
 
             const handleNext = () => setStep(prev => prev + 1);
             const handleBack = () => setStep(prev => prev - 1);
-            
             const handleReset = () => {
-                setFormData({
-                    nombreCompleto: '', curp: '', email: '', departamento: '', genero: '',
-                    selectedCourses: []
-                });
-                setResults([]);
+                setFormData({ nombreCompleto: '', email: '', curp: '', genero: '', departamento: '', selectedCourses: [''] });
                 setStep(1);
             };
 
             const handleSubmit = async () => {
+                setStep(4); // Mover a la pantalla de resultados inmediatamente
                 setLoading(true);
-                setStep(4);
-                const registrationPromises = formData.selectedCourses.map(courseId => 
-                    submitRegistration({ ...formData, id_curso: courseId })
-                        .then(res => ({ ...res, success: true, courseId }))
-                        .catch(err => ({ message: err.message, success: false, courseId }))
-                );
-                
-                const registrationResults = await Promise.all(registrationPromises);
-                
-                const finalResults = registrationResults.map(result => ({
-                    ...result,
-                    course: availableCourses.find(c => c.id_curso === result.courseId)
-                }));
-                
-                setResults(finalResults);
+                const results = [];
+                for (const courseId of formData.selectedCourses) {
+                    if (!courseId) continue;
+                    try {
+                        const response = await postData({ action: 'registerCourse', ...formData, id_curso: courseId });
+                        results.push({ courseId, success: response.success, message: response.message });
+                    } catch (err) {
+                        results.push({ courseId, success: false, message: err.message });
+                    }
+                }
+                setSubmissionResults(results);
                 setLoading(false);
             };
-
-            const renderStep = () => {
+            
+            const renderContent = () => {
                 if (loading && step !== 4) return <Spinner />;
-                if (error) return <p className="text-red-500 text-center">{error}</p>;
+                if (error) return <div className="text-red-600 text-center p-8">{error}</div>;
 
-                switch (step) {
-                    case 1: return <Step1PersonalInfo formData={formData} setFormData={setFormData} onNext={handleNext} />;
-                    case 2: return <Step2CourseSelection formData={formData} setFormData={setFormData} onNext={handleNext} onBack={handleBack} availableCourses={availableCourses} />;
-                    case 3: return <Step3Confirm formData={formData} onBack={handleBack} onSubmit={handleSubmit} availableCourses={availableCourses} />;
-                    case 4: return loading ? <Spinner /> : <Step4Final results={results} onReset={handleReset} />;
+                switch(step) {
+                    case 1: return <Step1PersonalInfo onNext={handleNext} formData={formData} setFormData={setFormData} teachers={teachers} />;
+                    case 2: return <Step2CourseSelection onBack={handleBack} onNext={handleNext} formData={formData} setFormData={setFormData} courses={courses} />;
+                    case 3: return <Step3Confirm onBack={handleBack} onSubmit={handleSubmit} formData={formData} courses={courses} />;
+                    case 4: return loading ? <Spinner /> : <Step4Final results={submissionResults} onReset={handleReset} courses={courses} />;
                     default: return <p>Paso desconocido</p>;
                 }
             };
@@ -336,7 +313,7 @@
                         <a href="index.html" className="text-blue-600 hover:underline mb-4 inline-block">← Volver al Portal</a>
                         <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8">
                             <StepIndicator currentStep={step} />
-                            {renderStep()}
+                            {renderContent()}
                         </div>
                     </div>
                 </main>
@@ -347,7 +324,7 @@
             const root = ReactDOM.createRoot(document.getElementById('root'));
             root.render(<InscripcionesApp />);
         });
-
     </script>
+
 </body>
 </html>
