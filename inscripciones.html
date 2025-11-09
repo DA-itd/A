@@ -3,22 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscripción a Cursos - ITD</title>
-    <meta name="description" content="Inscríbete a los cursos de actualización docente del Instituto Tecnológico de Durango. Consulta la oferta disponible y asegura tu lugar.">
+    <title>Área de Instructores - ITD</title>
+    <meta name="description" content="Portal para instructores del ITD. Registra propuestas de cursos, sube evidencias y gestiona tus actividades de actualización docente.">
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-JH1X2720VL');
-    </script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
 
@@ -27,7 +19,7 @@
             <div class="flex items-center justify-between gap-4">
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
                 <div class="text-center flex-1 px-2 sm:px-4">
-                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">INSCRIPCIÓN A CURSOS</h1>
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">ÁREA PARA INSTRUCTORES</h1>
                     <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">Desarrollo Académico</p>
                 </div>
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
@@ -46,297 +38,131 @@
     <script type="text/babel">
         const { useState, useEffect, useCallback, useMemo } = React;
 
-        const CONFIG = {
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
-        };
+        // ============================================================================
+        // === CONFIGURACIÓN Y SERVICIOS =============================================
+        // ============================================================================
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec';
 
         const fetchData = async (action) => {
-            const url = new URL(CONFIG.APPS_SCRIPT_URL);
+            const url = new URL(APPS_SCRIPT_URL);
             url.searchParams.append('action', action);
-            url.searchParams.append('_', Date.now()); 
             const response = await fetch(url);
-            if (!response.ok) throw new Error(`Error fetching ${action}`);
             const result = await response.json();
-            if (result.success) return result.data;
-            throw new Error(result.message || `Failed to fetch ${action}`);
+            if (!result.success) throw new Error(result.message || 'Error al cargar datos.');
+            return result.data;
         };
         
-        const AutocompleteInput = ({ teachers, onSelect, value, onChange }) => {
-            const [suggestions, setSuggestions] = useState([]);
-            const [showSuggestions, setShowSuggestions] = useState(false);
+        // ============================================================================
+        // === COMPONENTES ============================================================
+        // ============================================================================
+        const Spinner = () => (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-800"></div>
+            </div>
+        );
 
-            const handleInputChange = (e) => {
-                const currentValue = e.target.value;
-                onChange(e);
-                if (currentValue) {
-                    const filtered = teachers.filter(t => 
-                        t.nombreCompleto.toLowerCase().includes(currentValue.toLowerCase())
-                    ).slice(0, 5);
-                    setSuggestions(filtered);
-                    setShowSuggestions(true);
-                } else {
-                    setShowSuggestions(false);
-                }
-            };
-            
-            const handleSelect = (teacher) => {
-                onSelect(teacher);
-                setShowSuggestions(false);
-            };
-
-            return (
-                <div className="relative">
-                    <input
-                        type="text"
-                        name="nombreCompleto"
-                        value={value}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                        required
-                    />
-                    {showSuggestions && (
-                        <ul className="absolute z-10 w-full bg-white border mt-1 rounded-md shadow-lg">
-                            {suggestions.map((teacher, index) => (
-                                <li key={index} onClick={() => handleSelect(teacher)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                                    {teacher.nombreCompleto}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
-            );
-        };
-
-        const Step1Form = ({ formData, setFormData, setStep, teachers, handleTeacherSelect }) => {
-            const handleChange = (e) => {
-                const { name, value } = e.target;
-                setFormData(prev => ({ ...prev, [name]: value }));
-            };
-
-            const allFieldsFilled = formData.nombreCompleto && formData.curp && formData.email && formData.genero && formData.departamento;
-
-            return (
-                <div>
-                    <h2 className="text-2xl font-bold mb-4">Información Personal</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Nombre Completo *</label>
-                            <AutocompleteInput teachers={teachers} onSelect={handleTeacherSelect} value={formData.nombreCompleto} onChange={handleChange} />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">CURP *</label>
-                            <input type="text" name="curp" value={formData.curp} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" required />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Email Institucional *</label>
-                            <input type="email" name="email" value={formData.email} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" required />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Género *</label>
-                            <select name="genero" value={formData.genero} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" required>
-                                <option value="">Seleccione</option>
-                                <option>Mujer</option>
-                                <option>Hombre</option>
-                            </select>
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700">Departamento *</label>
-                            <select name="departamento" value={formData.departamento} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" required>
-                                <option value="">Seleccione un departamento</option>
-                                {[
-                                    'DEPARTAMENTO DE CIENCIAS BASICAS', 'DEPARTAMENTO DE METALURGIA', 'DEPARTAMENTO DE INGENIERIA INDUSTRIAL',
-                                    'DEPARTAMENTO DE INGENIERIA QUIMICA Y BIOQUIMICA', 'DEPARTAMENTO DE INGENIERIA ELECTRICA Y ELECTRONICA',
-                                    'DEPARTAMENTO DE INGENIERIA MECANICA Y MECATRONICA', 'DEPARTAMENTO DE SISTEMAS Y COMPUTACION',
-                                    'DEPARTAMENTO DE CIENCIAS ECONOMICO-ADMINISTRATIVAS', 'DEPARTAMENTO DE ARQUITECTURA', 'DEPARTAMENTO DE ESTUDIOS DE POSGRADO E INVESTIGACION',
-                                    'COORDINACION DE LENGUAS EXTRANJERAS', 'DEPARTAMENTO DE DESARROLLO ACADEMICO', 'SUBDIRECCION DE SERVICIOS ADMINISTRATIVOS',
-                                    'SUBDIRECCION ACADEMICA', 'SUBDIRECCION DE PLANEACION Y VINCULACION', 'DIRECCION'
-                                ].sort().map(dept => <option key={dept} value={dept}>{dept}</option>)}
-                            </select>
-                        </div>
-                    </div>
-                    <div className="mt-6 text-right">
-                        <button onClick={() => setStep(2)} disabled={!allFieldsFilled} className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
-                            Continuar
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-
-        const Step2CourseSelection = ({ formData, setFormData, setStep, courses, handleSubmit }) => {
-            const handleCourseSelection = (courseId) => {
-                setFormData(prev => {
-                    const newSelection = prev.cursosSeleccionados.includes(courseId)
-                        ? prev.cursosSeleccionados.filter(id => id !== courseId)
-                        : [...prev.cursosSeleccionados, courseId];
-                    return { ...prev, cursosSeleccionados: newSelection };
-                });
-            };
-
-            const isSelectionDisabled = formData.cursosSeleccionados.length >= 3;
-
-            return (
-                <div>
-                    <h2 className="text-2xl font-bold mb-4">Selección de Cursos</h2>
-                    <p className="mb-4 text-sm text-gray-600">Puedes seleccionar hasta 3 cursos.</p>
-                    <div className="space-y-4">
-                        {courses.map(course => (
-                            <div key={course.id_curso} className="p-4 border rounded-lg flex items-center justify-between">
-                                <div>
-                                    <h3 className="font-bold">{course.nombre_curso}</h3>
-                                    <p className="text-sm text-gray-500">{course.fecha_curso}</p>
-                                </div>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.cursosSeleccionados.includes(course.id_curso)}
-                                    onChange={() => handleCourseSelection(course.id_curso)}
-                                    disabled={!formData.cursosSeleccionados.includes(course.id_curso) && isSelectionDisabled}
-                                    className="h-5 w-5 rounded"
-                                />
+        const StepIndicator = ({ currentStep }) => (
+            <div className="flex justify-center items-center space-x-4 sm:space-x-8 mb-8">
+                {['Propuesta', 'Evidencias', 'Finalizado'].map((label, index) => {
+                    const stepNumber = index + 1;
+                    const isActive = stepNumber === currentStep;
+                    const isCompleted = stepNumber < currentStep;
+                    return (
+                        <div key={label} className="flex items-center">
+                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-white ${isCompleted ? 'bg-green-500' : isActive ? 'bg-blue-600' : 'bg-gray-300'}`}>
+                                {isCompleted ? '✓' : stepNumber}
                             </div>
-                        ))}
-                    </div>
-                    <div className="mt-6 flex justify-between">
-                        <button onClick={() => setStep(1)} className="bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300">
-                            Atrás
-                        </button>
-                        <button onClick={handleSubmit} disabled={formData.cursosSeleccionados.length === 0} className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
-                            Confirmar Inscripción
-                        </button>
-                    </div>
-                </div>
-            );
-        };
+                            <span className={`ml-2 text-xs sm:text-sm ${isActive ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>{label}</span>
+                        </div>
+                    );
+                })}
+            </div>
+        );
 
-        const Step3Confirmation = ({ submissionStatus, courses, formData }) => {
-            if (submissionStatus.state === 'loading') {
-                return <div className="text-center p-8">Procesando inscripciones...</div>;
-            }
-
+        const Step1CourseProposal = ({ onNext }) => {
+            const GOOGLE_FORM_URL = "https://forms.gle/q5X5Z9E9wH2c3v4t5";
             return (
-                <div>
-                    <h2 className="text-2xl font-bold mb-4">Resultados de la Inscripción</h2>
-                    <p className="mb-4">Hola <strong>{formData.nombreCompleto}</strong>, aquí están los resultados:</p>
-                    <div className="space-y-4">
-                        {submissionStatus.results.map(result => {
-                            const course = courses.find(c => c.id_curso === result.courseId);
-                            return (
-                                <div key={result.courseId} className={`p-4 border-l-4 rounded-r-lg ${result.success ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
-                                    <h3 className="font-bold">{course?.nombre_curso || 'Curso Desconocido'}</h3>
-                                    <p className={`text-sm ${result.success ? 'text-green-800' : 'text-red-800'}`}>{result.message}</p>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <div className="mt-6 text-center">
-                        <a href="index.html" className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">
-                            Volver al Portal
-                        </a>
+                <div className="text-center">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Paso 1: Propuesta de Curso</h3>
+                    <p className="mb-6 text-gray-600">Para proponer un nuevo curso de actualización docente, por favor complete el siguiente formulario de Google Forms. Asegúrese de tener a la mano el CVU y la Ficha Técnica del curso.</p>
+                    <a href={GOOGLE_FORM_URL} target="_blank" rel="noopener noreferrer" className="inline-block bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors">
+                        Ir al Formulario de Propuesta
+                    </a>
+                    <div className="mt-8 flex justify-end">
+                        <button onClick={onNext} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">
+                            Siguiente: Subir Evidencias
+                        </button>
                     </div>
                 </div>
             );
         };
 
-        const InscriptionApp = () => {
+        const Step2EvidenceUpload = ({ onBack, onNext }) => {
+            const GOOGLE_FORM_URL = "https://forms.gle/cJTg9i9n5Yp8m2vY7";
+             return (
+                <div className="text-center">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Paso 2: Subir Evidencias del Curso</h3>
+                    <p className="mb-6 text-gray-600">Una vez que el curso ha sido impartido, utilice este formulario para subir las evidencias correspondientes (lista de asistencia, reporte final, etc.).</p>
+                    <a href={GOOGLE_FORM_URL} target="_blank" rel="noopener noreferrer" className="inline-block bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition-colors">
+                        Ir al Formulario de Evidencias
+                    </a>
+                    <div className="mt-8 flex justify-between">
+                         <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
+                         <button onClick={onNext} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">Finalizar</button>
+                    </div>
+                </div>
+            );
+        };
+        
+        const Step3Final = ({ onReset }) => {
+            return (
+                <div className="text-center">
+                    <div className="text-6xl mb-4">🎉</div>
+                    <h3 className="text-2xl font-bold text-green-600">Proceso Completado</h3>
+                    <p className="text-gray-600 mt-2">Gracias por su colaboración. La información ha sido enviada para su revisión.</p>
+                    <button onClick={onReset} className="mt-8 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors">
+                        Volver al Inicio
+                    </button>
+                </div>
+            );
+        };
+        
+        // ============================================================================
+        // === COMPONENTE PRINCIPAL ===================================================
+        // ============================================================================
+        const InstructoresApp = () => {
             const [step, setStep] = useState(1);
-            const [formData, setFormData] = useState({
-                nombreCompleto: '',
-                curp: '',
-                email: '',
-                genero: '',
-                departamento: '',
-                cursosSeleccionados: [],
-            });
-            const [courses, setCourses] = useState([]);
-            const [teachers, setTeachers] = useState([]);
-            const [isLoading, setIsLoading] = useState(true);
-            const [error, setError] = useState(null);
-            const [submissionStatus, setSubmissionStatus] = useState({ state: 'idle', results: [] });
+            
+            const handleNext = () => setStep(prev => prev + 1);
+            const handleBack = () => setStep(prev => prev - 1);
+            const handleReset = () => setStep(1);
 
-            useEffect(() => {
-                const loadInitialData = async () => {
-                    try {
-                        const [coursesData, teachersData] = await Promise.all([
-                            fetchData('getCoursesList'),
-                            fetchData('getTeachersList'),
-                        ]);
-                        setCourses(coursesData);
-                        setTeachers(teachersData);
-                    } catch (err) {
-                        setError('No se pudieron cargar los datos iniciales. Por favor, recargue la página.');
-                    } finally {
-                        setIsLoading(false);
-                    }
-                };
-                loadInitialData();
-            }, []);
-
-            const handleTeacherSelect = useCallback((teacher) => {
-                setFormData(prev => ({
-                    ...prev,
-                    nombreCompleto: teacher.nombreCompleto || '',
-                    email: teacher.email || '',
-                }));
-            }, []);
-
-            const handleSubmit = async () => {
-                if (formData.cursosSeleccionados.length === 0) {
-                    setError("Debe seleccionar al menos un curso.");
-                    return;
+            const renderStep = () => {
+                switch(step) {
+                    case 1: return <Step1CourseProposal onNext={handleNext} />;
+                    case 2: return <Step2EvidenceUpload onBack={handleBack} onNext={handleNext} />;
+                    case 3: return <Step3Final onReset={handleReset} />;
+                    default: return <p>Paso desconocido</p>;
                 }
-                setError(null);
-                setSubmissionStatus({ state: 'loading', results: [] });
-                setStep(3);
-
-                const results = [];
-                for (const courseId of formData.cursosSeleccionados) {
-                    try {
-                        const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
-                            method: 'POST',
-                            mode: 'cors',
-                            headers: { 'Content-Type': 'text/plain' },
-                            body: JSON.stringify({
-                                action: 'registerCourse',
-                                ...formData,
-                                id_curso: courseId,
-                            }),
-                        });
-                        const result = await response.json();
-                        results.push({ courseId, success: result.success, message: result.message });
-                    } catch (err) {
-                        results.push({ courseId, success: false, message: 'Error de conexión al registrar.' });
-                    }
-                }
-                setSubmissionStatus({ state: 'finished', results });
             };
             
-            if (isLoading) {
-                return <div className="text-center p-8">Cargando datos...</div>;
-            }
-            
-            if (error) {
-                 return <div className="text-center p-8 text-red-600">{error}</div>;
-            }
-
             return (
                 <main className="container mx-auto px-4 py-8 sm:py-12">
-                    <div className="max-w-4xl mx-auto">
+                    <div className="max-w-3xl mx-auto">
                         <a href="index.html" className="text-blue-600 hover:underline mb-4 inline-block">← Volver al Portal</a>
                         <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8">
-                            {step === 1 && <Step1Form {...{ formData, setFormData, setStep, teachers, handleTeacherSelect }} />}
-                            {step === 2 && <Step2CourseSelection {...{ formData, setFormData, setStep, courses, handleSubmit }} />}
-                            {step === 3 && <Step3Confirmation {...{ submissionStatus, courses, formData }} />}
+                            <StepIndicator currentStep={step} />
+                            {renderStep()}
                         </div>
                     </div>
                 </main>
             );
         };
-        
+
         window.addEventListener('load', () => {
             const root = ReactDOM.createRoot(document.getElementById('root'));
-            root.render(<InscriptionApp />);
+            root.render(<InstructoresApp />);
         });
-
     </script>
 </body>
 </html>
