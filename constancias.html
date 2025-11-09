@@ -40,7 +40,7 @@
         const { useState, useEffect, useCallback } = React;
 
         const CONFIG = {
-            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi4nc19rfgotdrfo2seq1.apps.googleusercontent.com',
+            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
             SESSION_KEY: 'certificate_session',
             SESSION_TIMEOUT_MINUTES: 60,
@@ -281,9 +281,11 @@
                 </main>
             );
         };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<ConstanciasApp />);
+        
+        window.addEventListener('load', () => {
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<ConstanciasApp />);
+        });
     </script>
 </body>
 </html>
