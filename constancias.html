@@ -194,7 +194,6 @@
                 }
                 try {
                     const decodedToken = JSON.parse(atob(response.credential.split('.')[1]));
-                    // CORRECCIÓN: Se eliminó el optional chaining `?.` para compatibilidad
                     if (!decodedToken || !decodedToken.email) throw new Error("No se pudo obtener el correo.");
                     if (!decodedToken.email.endsWith(CONFIG.INSTITUTIONAL_DOMAIN)) {
                         setError(`Use una cuenta institucional (${CONFIG.INSTITUTIONAL_DOMAIN})`);
@@ -213,7 +212,6 @@
 
             useEffect(() => {
                 const session = sessionManager.load();
-                // CORRECCIÓN: Se eliminó el optional chaining `?.` para compatibilidad
                 if (session && session.email) {
                     fetchEligibleCourses(session.email);
                 } else {
@@ -267,7 +265,14 @@
                 switch (step) {
                     case 'loading': return <div className="text-center p-8">Cargando...</div>;
                     case 'login': return <LoginStep onLogin={handleLogin} error={error} />;
-                    case 'list': return <CertificateListStep {...{ ...appData, onLogout, onGenerate, courseStatuses, setCourseStatuses }} />;
+                    case 'list': return <CertificateListStep 
+                                            teacherData={appData.teacherData}
+                                            eligibleCourses={appData.eligibleCourses}
+                                            onLogout={handleLogout} 
+                                            onGenerate={handleGenerate} 
+                                            courseStatuses={courseStatuses} 
+                                            setCourseStatuses={setCourseStatuses} 
+                                        />;
                     default: return <LoginStep onLogin={handleLogin} error="Ocurrió un error inesperado." />;
                 }
             };
