@@ -5,25 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de Constancias - ITD</title>
     <meta name="description" content="Genera y recibe por correo electrónico tus constancias de los cursos de actualización docente del ITD.">
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JH1X2720VL');
+    </script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
 
     <header class="bg-white shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
                 <div class="text-center flex-1 px-2 sm:px-4">
                     <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">GENERADOR DE CONSTANCIAS</h1>
                     <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">Desarrollo Académico</p>
                 </div>
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
             </div>
         </div>
     </header>
@@ -39,6 +47,9 @@
     <script type="text/babel">
         const { useState, useEffect, useCallback } = React;
 
+        // ============================================================================
+        // === CONFIGURACIÓN ==========================================================
+        // ============================================================================
         const CONFIG = {
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
@@ -47,6 +58,9 @@
             INSTITUTIONAL_DOMAIN: '@itdurango.edu.mx'
         };
 
+        // ============================================================================
+        // === UTILIDADES =============================================================
+        // ============================================================================
         const sessionManager = {
             save: (data) => {
                 const sessionData = { ...data, timestamp: new Date().getTime() };
@@ -58,38 +72,40 @@
                 const sessionData = JSON.parse(stored);
                 const elapsed = (new Date().getTime() - sessionData.timestamp) / (1000 * 60);
                 if (elapsed > CONFIG.SESSION_TIMEOUT_MINUTES) {
-                    localStorage.removeItem(CONFIG.SESSION_KEY);
+                    sessionManager.clear();
                     return null;
                 }
                 return sessionData;
             },
-            clear: () => localStorage.removeItem(CONFIG.SESSION_KEY)
+            clear: () => {
+                localStorage.removeItem(CONFIG.SESSION_KEY);
+            }
         };
 
+        // ============================================================================
+        // === COMPONENTES ============================================================
+        // ============================================================================
         const LoginStep = ({ onLogin, error }) => {
             useEffect(() => {
                 if (window.google) {
-                    window.google.accounts.id.initialize({
-                        client_id: CONFIG.GOOGLE_CLIENT_ID,
-                        callback: onLogin
-                    });
-                    window.google.accounts.id.prompt();
+                    google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
+                    google.accounts.id.prompt();
                 }
             }, [onLogin]);
-            
-            const handleManualLogin = () => {
-                if (window.google) {
-                    window.google.accounts.id.prompt();
-                }
-            };
 
             return (
                 <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-800">Generador de Constancias</h2>
-                    <p className="text-gray-600 mt-2">Inicia sesión para ver tus constancias disponibles.</p>
-                    {error && <div className="bg-red-100 text-red-700 p-3 rounded my-4">{error}</div>}
-                    <div className="mt-6">
-                        <button onClick={handleManualLogin} className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
+                    <div className="text-6xl mb-4">📜</div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Generador de Constancias</h2>
+                    <p className="text-gray-600 mt-2 max-w-2xl mx-auto">Inicia sesión con tu cuenta institucional para ver y generar las constancias.</p>
+                    {error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded my-6 text-left" role="alert">
+                            <strong className="font-bold">Error: </strong>
+                            <span className="block sm:inline">{error}</span>
+                        </div>
+                    )}
+                    <div className="mt-8">
+                        <button onClick={() => window.google && window.google.accounts.id.prompt()} className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 mx-auto shadow-lg">
                             Acceder con Google
                         </button>
                     </div>
@@ -97,28 +113,47 @@
             );
         };
 
-        const CertificateCard = ({ course, onGenerate, status }) => {
-            const handleGenerate = () => onGenerate(course.id);
+        const CertificateCard = ({ course, onGenerate, courseStatuses, setCourseStatuses }) => {
+            const currentStatus = courseStatuses[course.id] || 'idle';
+            const isApproved = course.status === 'approved';
+
+            const handleGenerate = () => {
+                if (!isApproved) return;
+                setCourseStatuses(prev => ({ ...prev, [course.id]: 'loading' }));
+
+                onGenerate(course.id)
+                    .then(() => setCourseStatuses(prev => ({ ...prev, [course.id]: 'success' })))
+                    .catch((err) => {
+                        console.error('Error al generar:', err);
+                        const isConcurrencyError = err.message.includes("Servidor ocupado");
+                        setCourseStatuses(prev => ({ ...prev, [course.id]: isConcurrencyError ? 'busy' : 'error' }));
+                        
+                        if (isConcurrencyError) {
+                            setTimeout(() => {
+                                setCourseStatuses(prev => ({ ...prev, [course.id]: 'idle' }));
+                            }, 5000);
+                        }
+                    });
+            };
             
             const getButtonInfo = () => {
-                if (course.status === 'pending') {
-                    return { text: '⏳ Pendiente de Validación', disabled: true, classes: 'bg-yellow-500 text-white cursor-not-allowed' };
-                }
-                switch (status) {
-                    case 'loading': return { text: 'Enviando...', disabled: true, classes: 'bg-gray-400 cursor-wait' };
-                    case 'success': return { text: '✅ Enviada a tu Correo', disabled: true, classes: 'bg-green-600' };
-                    case 'error': return { text: '❌ Error, Reintentar', disabled: false, classes: 'bg-red-600 hover:bg-red-700' };
-                    case 'busy': return { text: '⏳ Servidor ocupado, reintentando...', disabled: true, classes: 'bg-gray-400 cursor-wait' };
-                    default: return { text: '✉️ Enviar a mi Correo', disabled: false, classes: 'bg-indigo-600 hover:bg-indigo-700' };
+                if (!isApproved) return { text: '⏳ Pendiente de Validación', classes: 'bg-gray-400 cursor-not-allowed', disabled: true };
+                
+                switch(currentStatus) {
+                    case 'loading': return { text: 'Enviando...', classes: 'bg-gray-400 cursor-not-allowed', disabled: true };
+                    case 'success': return { text: '✅ Enviada a tu Correo', classes: 'bg-green-600', disabled: true };
+                    case 'busy': return { text: '⏳ Servidor ocupado, reintentando...', classes: 'bg-yellow-500 cursor-not-allowed', disabled: true };
+                    case 'error': return { text: '❌ Error, Reintentar', classes: 'bg-red-600 hover:bg-red-700', disabled: false };
+                    default: return { text: '✉️ Enviar a mi Correo', classes: 'bg-indigo-600 hover:bg-indigo-700', disabled: false };
                 }
             };
-
-            const { text, disabled, classes } = getButtonInfo();
-
+            
+            const { text, classes, disabled } = getButtonInfo();
+            
             return (
-                <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-amber-500">
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-amber-500">
                     <h3 className="text-lg font-bold text-gray-900 mb-3">{course.name}</h3>
-                    <button onClick={handleGenerate} disabled={disabled} className={`w-full text-center font-semibold py-3 px-4 rounded-md text-white transition-colors ${classes}`}>
+                    <button onClick={handleGenerate} disabled={disabled} className={`w-full text-center font-semibold py-3 px-4 rounded-md transition-colors text-white ${classes}`}>
                         {text}
                     </button>
                 </div>
@@ -127,35 +162,33 @@
 
         const CertificateListStep = ({ teacherData, eligibleCourses, onLogout, onGenerate, courseStatuses, setCourseStatuses }) => (
             <div>
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-800">Constancias Disponibles</h2>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Constancias Disponibles</h2>
                         <p className="text-gray-600 mt-1">Hola, <strong>{teacherData.fullName}</strong></p>
                     </div>
-                    <button onClick={onLogout} className="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg">
+                    <button onClick={onLogout} className="text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg">
                         Cerrar Sesión
                     </button>
                 </div>
                 <div className="space-y-4">
                     {eligibleCourses.length > 0 ? (
                         eligibleCourses.map(course => (
-                            <CertificateCard
-                                key={course.id}
-                                course={course}
-                                onGenerate={onGenerate}
-                                status={courseStatuses[course.id] || 'idle'}
-                            />
+                            <CertificateCard key={course.id} course={course} onGenerate={onGenerate} courseStatuses={courseStatuses} setCourseStatuses={setCourseStatuses}/>
                         ))
                     ) : (
                         <div className="text-center bg-blue-50 text-blue-800 p-8 rounded-lg">
-                            <p className="font-semibold">No tienes constancias disponibles por ahora.</p>
-                            <p className="text-sm mt-1">Asegúrate de haber contestado la encuesta de opinión del curso.</p>
+                            <p className="font-semibold text-lg">No tienes constancias disponibles por ahora.</p>
+                            <p className="mt-2 text-sm">Asegúrate de haber contestado la encuesta de opinión del curso correspondiente.</p>
                         </div>
                     )}
                 </div>
             </div>
         );
 
+        // ============================================================================
+        // === COMPONENTE PRINCIPAL ===================================================
+        // ============================================================================
         const ConstanciasApp = () => {
             const [step, setStep] = useState('loading');
             const [error, setError] = useState(null);
@@ -168,7 +201,9 @@
                     const url = new URL(CONFIG.APPS_SCRIPT_URL);
                     url.searchParams.append('action', 'getEligibleCoursesForCertificate');
                     url.searchParams.append('email', email);
-                    const response = await fetch(url);
+                    url.searchParams.append('_', new Date().getTime()); // Cache busting
+                    
+                    const response = await fetch(url.toString());
                     if (!response.ok) throw new Error(`Error del servidor: ${response.status}`);
                     const result = await response.json();
                     if (result.success && result.data) {
@@ -227,60 +262,50 @@
 
             const handleGenerate = async (courseId) => {
                 const session = sessionManager.load();
-                if (!session || !session.email) {
-                    setCourseStatuses(prev => ({ ...prev, [courseId]: 'error' }));
-                    return;
-                }
-
-                setCourseStatuses(prev => ({ ...prev, [courseId]: 'loading' }));
+                if (!session || !session.email) throw new Error("No hay sesión activa.");
+                
                 try {
                     const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'cors',
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify({
-                            action: 'emailStoredCertificate',
-                            email: session.email,
-                            courseId
-                        })
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'emailStoredCertificate', email: session.email, courseId: courseId })
                     });
+                    
                     if (!response.ok) {
-                         if (response.status >= 500) {
-                            setCourseStatuses(prev => ({ ...prev, [courseId]: 'busy' }));
-                            setTimeout(() => setCourseStatuses(prev => ({ ...prev, [courseId]: 'idle' })), 5000);
-                            return;
-                        }
-                        throw new Error(`Error del servidor: ${response.status}`);
+                         if (response.status >= 500) throw new Error("Servidor ocupado, intente de nuevo.");
+                         throw new Error(`Error del servidor: ${response.status}`);
                     }
+                    
                     const result = await response.json();
-                    if (!result.success) throw new Error(result.message);
-                    setCourseStatuses(prev => ({ ...prev, [courseId]: 'success' }));
+                    if (!result.success) throw new Error(result.message || 'Error al generar');
+                    return true;
+
                 } catch (error) {
                     console.error('Error en handleGenerate:', error);
-                    setCourseStatuses(prev => ({ ...prev, [courseId]: 'error' }));
+                    throw error;
                 }
             };
-
+            
             const renderContent = () => {
-                switch (step) {
-                    case 'loading': return <div className="text-center p-8">Cargando...</div>;
-                    case 'login': return <LoginStep onLogin={handleLogin} error={error} />;
-                    case 'list': return <CertificateListStep 
-                                            teacherData={appData.teacherData}
-                                            eligibleCourses={appData.eligibleCourses}
-                                            onLogout={handleLogout} 
-                                            onGenerate={handleGenerate} 
-                                            courseStatuses={courseStatuses} 
-                                            setCourseStatuses={setCourseStatuses} 
-                                        />;
-                    default: return <LoginStep onLogin={handleLogin} error="Ocurrió un error inesperado." />;
+                switch(step) {
+                    case 'loading':
+                        return <div className="text-center p-8"><p className="text-gray-600">Cargando...</p></div>;
+                    case 'login':
+                        return <LoginStep onLogin={handleLogin} error={error} />;
+                    case 'list':
+                        return <CertificateListStep teacherData={appData.teacherData} eligibleCourses={appData.eligibleCourses} onLogout={handleLogout} onGenerate={handleGenerate} courseStatuses={courseStatuses} setCourseStatuses={setCourseStatuses}/>;
+                    default:
+                        return <LoginStep onLogin={handleLogin} error="Ocurrió un error inesperado." />;
                 }
             };
 
             return (
                 <main className="container mx-auto px-4 py-8 sm:py-12">
                     <div className="max-w-3xl mx-auto">
-                         <a href="index.html" className="text-blue-600 hover:underline mb-4 inline-block">← Volver al Portal</a>
+                        <a href="index.html" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-8">
+                            ← Volver al Portal Principal
+                        </a>
                         <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8">
                             {renderContent()}
                         </div>
@@ -288,7 +313,7 @@
                 </main>
             );
         };
-        
+
         window.addEventListener('load', () => {
             const root = ReactDOM.createRoot(document.getElementById('root'));
             root.render(<ConstanciasApp />);
