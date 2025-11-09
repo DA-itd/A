@@ -199,14 +199,38 @@
             };
 
             const handleGenerate = async (courseId) => {
-                const session = sessionManager.load(); if (!session?.email) throw new Error("No hay sesión activa.");
+                const session = sessionManager.load(); 
+                if (!session?.email) {
+                    throw new Error("No hay sesión activa.");
+                }
                 try {
-                    const response = await fetch(CONFIG.APPS_SCRIPT_URL, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'generateAndEmailCertificate', email: session.email, courseId }) });
-                    if (!response.ok) throw new Error(`Error del servidor: ${response.status}`);
+                    const response = await fetch(CONFIG.APPS_SCRIPT_URL, { 
+                        method: 'POST', 
+                        mode: 'cors',
+                        redirect: 'follow',
+                        headers: { 
+                            'Content-Type': 'text/plain;charset=utf-8' 
+                        }, 
+                        body: JSON.stringify({ 
+                            action: 'generateAndEmailCertificate', 
+                            email: session.email, 
+                            courseId: courseId 
+                        }) 
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error("Server response was not OK:", response.status, errorText);
+                        throw new Error(`Error del servidor: ${response.status}.`);
+                    }
                     const result = await response.json();
-                    if (!result.success) throw new Error(result.message || 'Error al generar constancia');
+                    if (!result.success) {
+                        throw new Error(result.message || 'Error al generar constancia');
+                    }
                     return true;
-                } catch (error) { console.error('Error en handleGenerate:', error); throw error; }
+                } catch (error) { 
+                    console.error('Error en handleGenerate:', error); 
+                    throw error; 
+                }
             };
             
             const renderContent = () => {
