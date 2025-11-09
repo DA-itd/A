@@ -47,9 +47,6 @@
     <script type="text/babel">
         const { useState, useEffect, useCallback } = React;
 
-        // ============================================================================
-        // === CONFIGURACIÓN ==========================================================
-        // ============================================================================
         const CONFIG = {
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
@@ -58,9 +55,6 @@
             INSTITUTIONAL_DOMAIN: '@itdurango.edu.mx'
         };
 
-        // ============================================================================
-        // === UTILIDADES =============================================================
-        // ============================================================================
         const sessionManager = {
             save: (data) => {
                 const sessionData = { ...data, timestamp: new Date().getTime() };
@@ -77,14 +71,9 @@
                 }
                 return sessionData;
             },
-            clear: () => {
-                localStorage.removeItem(CONFIG.SESSION_KEY);
-            }
+            clear: () => localStorage.removeItem(CONFIG.SESSION_KEY)
         };
 
-        // ============================================================================
-        // === COMPONENTES ============================================================
-        // ============================================================================
         const LoginStep = ({ onLogin, error }) => {
             useEffect(() => {
                 if (window.google) {
@@ -186,9 +175,6 @@
             </div>
         );
 
-        // ============================================================================
-        // === COMPONENTE PRINCIPAL ===================================================
-        // ============================================================================
         const ConstanciasApp = () => {
             const [step, setStep] = useState('loading');
             const [error, setError] = useState(null);
@@ -201,10 +187,10 @@
                     const url = new URL(CONFIG.APPS_SCRIPT_URL);
                     url.searchParams.append('action', 'getEligibleCoursesForCertificate');
                     url.searchParams.append('email', email);
-                    url.searchParams.append('_', new Date().getTime()); // Cache busting
                     
-                    const response = await fetch(url.toString());
+                    const response = await fetch(url.toString(), { cache: 'no-store' }); // FORZAR DATOS FRESCOS
                     if (!response.ok) throw new Error(`Error del servidor: ${response.status}`);
+                    
                     const result = await response.json();
                     if (result.success && result.data) {
                         setAppData(result.data);
