@@ -194,7 +194,8 @@
                 }
                 try {
                     const decodedToken = JSON.parse(atob(response.credential.split('.')[1]));
-                    if (!decodedToken?.email) throw new Error("No se pudo obtener el correo.");
+                    // CORRECCIÓN: Se eliminó el optional chaining `?.` para compatibilidad
+                    if (!decodedToken || !decodedToken.email) throw new Error("No se pudo obtener el correo.");
                     if (!decodedToken.email.endsWith(CONFIG.INSTITUTIONAL_DOMAIN)) {
                         setError(`Use una cuenta institucional (${CONFIG.INSTITUTIONAL_DOMAIN})`);
                         setStep('login');
@@ -212,7 +213,8 @@
 
             useEffect(() => {
                 const session = sessionManager.load();
-                if (session?.email) {
+                // CORRECCIÓN: Se eliminó el optional chaining `?.` para compatibilidad
+                if (session && session.email) {
                     fetchEligibleCourses(session.email);
                 } else {
                     setStep('login');
@@ -227,7 +229,7 @@
 
             const handleGenerate = async (courseId) => {
                 const session = sessionManager.load();
-                if (!session?.email) {
+                if (!session || !session.email) {
                     setCourseStatuses(prev => ({ ...prev, [courseId]: 'error' }));
                     return;
                 }
