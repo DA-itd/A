@@ -167,12 +167,26 @@
              return true;
         };
 
-        const RedirectingOverlay = () => {
+        const RedirectingOverlay = ({ onRedirect }) => {
             return (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-75 z-50 flex items-center justify-center">
-                    <div className="bg-white rounded-lg shadow-xl p-8 text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                        <p className="text-lg font-semibold text-gray-700">Registrando tu participación y redirigiendo a la encuesta...</p>
+                <div className="fixed inset-0 bg-gray-800 bg-opacity-85 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg shadow-xl p-8 text-center max-w-lg animate-fadeIn">
+                        <div className="text-6xl mb-4">✅</div>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-3">¡Participación Registrada!</h2>
+                        <p className="text-gray-600 mb-4">
+                            Gracias por tu retroalimentación. Tu constancia se está procesando.
+                        </p>
+                        <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md text-left text-sm">
+                            <p>
+                                Estará disponible para su envío por correo en los próximos días desde el <strong>Portal de Constancias</strong>, una vez que se valide tu asistencia al curso.
+                            </p>
+                        </div>
+                        <button 
+                            onClick={onRedirect}
+                            className="mt-6 w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors"
+                        >
+                            Continuar a la Encuesta
+                        </button>
                     </div>
                 </div>
             );
@@ -233,23 +247,8 @@
             );
         };
         
-        const SurveyCard = ({ survey, teacherData, onParticipationChange, registered, onSurveyClick }) => {
+        const SurveyCard = ({ survey, teacherData, registered, onSurveyClick }) => {
             const { type, course, periodInfo } = survey;
-
-            const generateSurveyUrl = () => {
-                const config = SURVEY_CONFIG[type];
-                if (!config.url || config.url === '#') return '#';
-                const url = new URL(config.url);
-
-                if (type === 'opinion') {
-                    url.searchParams.set(config.courseNameEntryId, course.name);
-                    url.searchParams.set(config.departmentEntryId, teacherData.department);
-                } else if (type === 'eficacia') {
-                    url.searchParams.set(config.fullNameEntryId, teacherData.fullName);
-                    url.searchParams.set(config.departmentEntryId, teacherData.department);
-                }
-                return url.toString();
-            };
 
             const handleSurveyClick = async () => {
                 if (registered) return;
@@ -260,11 +259,20 @@
                     department: teacherData.department,
                     courseId: type === 'opinion' ? course.id : periodInfo.id,
                     courseName: type === 'opinion' ? course.name : `Encuesta General de Eficacia (${periodInfo.name})`,
-                    surveyType: type === 'opinion' ? 'opinion' : 'eficacia'
+                    surveyType: type
                 };
                 
-                const surveyUrl = generateSurveyUrl();
-                onSurveyClick(recordData, surveyUrl);
+                const config = SURVEY_CONFIG[type];
+                const url = new URL(config.url);
+                if (type === 'opinion') {
+                    url.searchParams.set(config.courseNameEntryId, course.name);
+                    url.searchParams.set(config.departmentEntryId, teacherData.department);
+                } else if (type === 'eficacia') {
+                    url.searchParams.set(config.fullNameEntryId, teacherData.fullName);
+                    url.searchParams.set(config.departmentEntryId, teacherData.department);
+                }
+                
+                onSurveyClick(recordData, url.toString());
             };
             
             const buttonText = type === 'opinion' ? '💬 Responder Encuesta de Opinión' : '📈 Responder Encuesta de Eficacia';
@@ -293,8 +301,7 @@
             );
         };
 
-        const SurveyListStep = ({ teacherData, courses, initialCompleted, onLogout, onSurveyClick }) => {
-            const registeredClicks = useMemo(() => new Set(initialCompleted), [initialCompleted]);
+        const SurveyListStep = ({ teacherData, courses, onLogout, onSurveyClick }) => {
             const periodInfo = useMemo(() => getEficaciaSurveyPeriod(), []);
             
             return (
@@ -312,32 +319,21 @@
                     </div>
 
                     <div className="space-y-6">
-                        {periodInfo.active && (
-                            <SurveyCard
-                                survey={{ type: 'eficacia', periodInfo }}
-                                teacherData={teacherData}
-                                onSurveyClick={onSurveyClick}
-                                registered={registeredClicks.has(`eficacia-${periodInfo.id}`)}
-                            />
-                        )}
-                    
-                        {courses.length > 0 ? courses.map(course => {
-                            const uniqueId = `opinion-${course.id}`;
-                            return (
-                                <SurveyCard
-                                    key={course.id}
-                                    survey={{ type: 'opinion', course }}
-                                    teacherData={teacherData}
-                                    onSurveyClick={onSurveyClick}
-                                    registered={registeredClicks.has(uniqueId)}
-                                />
-                            );
-                        }) : (
+                        {courses.length === 0 ? (
                              <div className="text-center bg-blue-50 text-blue-800 p-6 rounded-lg">
                                 <div className="text-5xl mb-3">👍</div>
                                 <p className="font-semibold">No tienes encuestas de opinión pendientes.</p>
                                 <p>¡Gracias por mantenerte al día!</p>
                              </div>
+                        ) : courses.map(course => (
+                                <SurveyCard
+                                    key={course.id}
+                                    survey={{ type: 'opinion', course }}
+                                    teacherData={teacherData}
+                                    onSurveyClick={onSurveyClick}
+                                    registered={false} 
+                                />
+                            )
                         )}
                     </div>
                 </div>
@@ -348,10 +344,10 @@
             const [step, setStep] = useState('loading');
             const [error, setError] = useState(null);
             const [isRedirecting, setIsRedirecting] = useState(false);
+            const [redirectUrl, setRedirectUrl] = useState('');
             const [appData, setAppData] = useState({
                 teacherData: null,
                 courses: [],
-                completedSurveys: []
             });
             
             const handleLogin = useCallback(async (response) => {
@@ -386,12 +382,11 @@
                         setAppData({
                             teacherData: { ...data.teacherData, email },
                             courses: data.courses || [],
-                            completedSurveys: data.completedSurveys || []
                         });
                         setStep('list');
                         return data.teacherData;
                     } else {
-                        throw new Error('No se encontraron cursos activos para su cuenta.');
+                        throw new Error('No se encontraron datos para su cuenta.');
                     }
                 } catch (err) {
                     setError(err.message || 'Ocurrió un error al buscar. Intente de nuevo.');
@@ -399,7 +394,7 @@
                     setStep('login');
                     return null;
                 }
-            }, [handleLogin]);
+            }, []);
 
             useEffect(() => {
                 const session = sessionManager.load();
@@ -419,12 +414,12 @@
             };
             
             const handleSurveyClick = async (recordData, surveyUrl) => {
+                setRedirectUrl(surveyUrl);
                 setIsRedirecting(true);
                 try {
                     await recordSurveyClick(recordData);
-                    window.location.href = surveyUrl;
                 } catch (error) {
-                    console.error("Error al registrar y redirigir:", error);
+                    console.error("Error al registrar:", error);
                     alert("No se pudo registrar su participación. Por favor, intente de nuevo.");
                     setIsRedirecting(false);
                 }
@@ -447,7 +442,6 @@
                     return <SurveyListStep 
                                 teacherData={appData.teacherData} 
                                 courses={appData.courses} 
-                                initialCompleted={appData.completedSurveys}
                                 onLogout={handleLogout} 
                                 onSurveyClick={handleSurveyClick}
                             />;
@@ -458,7 +452,7 @@
 
             return (
                 <React.Fragment>
-                    {isRedirecting && <RedirectingOverlay />}
+                    {isRedirecting && <RedirectingOverlay onRedirect={() => window.location.href = redirectUrl} />}
                     <main className="container mx-auto px-4 py-8 sm:py-12">
                         <div className="max-w-3xl mx-auto">
                             <a href="index.html" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-8">
