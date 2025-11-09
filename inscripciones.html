@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Área de Instructores - ITD</title>
-    <meta name="description" content="Portal para instructores del ITD. Registra propuestas de cursos, sube evidencias y gestiona tus actividades de actualización docente.">
+    <title>Inscripción a Cursos - ITD</title>
+    <meta name="description" content="Inscríbete a los cursos de actualización docente del ITD. Consulta la oferta disponible y asegura tu lugar.">
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -19,7 +19,7 @@
             <div class="flex items-center justify-between gap-4">
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
                 <div class="text-center flex-1 px-2 sm:px-4">
-                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">ÁREA PARA INSTRUCTORES</h1>
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">INSCRIPCIÓN A CURSOS</h1>
                     <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">Desarrollo Académico</p>
                 </div>
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
@@ -36,25 +36,12 @@
     </footer>
 
     <script type="text/babel">
-        const { useState, useEffect, useCallback, useMemo } = React;
+        const { useState, useEffect, useMemo, useCallback } = React;
 
         // ============================================================================
-        // === CONFIGURACIÓN Y SERVICIOS =============================================
+        // === COMPONENTES AUXILIARES ===============================================
         // ============================================================================
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec';
 
-        const fetchData = async (action) => {
-            const url = new URL(APPS_SCRIPT_URL);
-            url.searchParams.append('action', action);
-            const response = await fetch(url);
-            const result = await response.json();
-            if (!result.success) throw new Error(result.message || 'Error al cargar datos.');
-            return result.data;
-        };
-        
-        // ============================================================================
-        // === COMPONENTES ============================================================
-        // ============================================================================
         const Spinner = () => (
             <div className="flex justify-center items-center h-64">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-800"></div>
@@ -63,7 +50,7 @@
 
         const StepIndicator = ({ currentStep }) => (
             <div className="flex justify-center items-center space-x-4 sm:space-x-8 mb-8">
-                {['Propuesta', 'Evidencias', 'Finalizado'].map((label, index) => {
+                {['Información', 'Cursos', 'Confirmar', 'Finalizado'].map((label, index) => {
                     const stepNumber = index + 1;
                     const isActive = stepNumber === currentStep;
                     const isCompleted = stepNumber < currentStep;
@@ -79,73 +66,270 @@
             </div>
         );
 
-        const Step1CourseProposal = ({ onNext }) => {
-            const GOOGLE_FORM_URL = "https://forms.gle/q5X5Z9E9wH2c3v4t5";
+        const Step1PersonalInfo = ({ formData, setFormData, onNext }) => {
+            const [errors, setErrors] = useState({});
+            
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+                if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
+            };
+
+            const validate = () => {
+                const newErrors = {};
+                if (!formData.nombreCompleto) newErrors.nombreCompleto = 'El nombre es requerido.';
+                if (!formData.curp || formData.curp.length !== 18) newErrors.curp = 'El CURP debe tener 18 caracteres.';
+                if (!formData.email || !formData.email.endsWith('@itdurango.edu.mx')) newErrors.email = 'Debe ser un correo institucional.';
+                if (!formData.departamento) newErrors.departamento = 'Seleccione un departamento.';
+                if (!formData.genero) newErrors.genero = 'Seleccione un género.';
+                setErrors(newErrors);
+                return Object.keys(newErrors).length === 0;
+            };
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (validate()) onNext();
+            };
+
             return (
-                <div className="text-center">
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Paso 1: Propuesta de Curso</h3>
-                    <p className="mb-6 text-gray-600">Para proponer un nuevo curso de actualización docente, por favor complete el siguiente formulario de Google Forms. Asegúrese de tener a la mano el CVU y la Ficha Técnica del curso.</p>
-                    <a href={GOOGLE_FORM_URL} target="_blank" rel="noopener noreferrer" className="inline-block bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors">
-                        Ir al Formulario de Propuesta
-                    </a>
-                    <div className="mt-8 flex justify-end">
-                        <button onClick={onNext} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">
-                            Siguiente: Subir Evidencias
-                        </button>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <h3 className="text-xl font-bold text-gray-800">Información Personal</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label htmlFor="nombreCompleto" className="block text-sm font-medium text-gray-700">Nombre Completo *</label>
+                            <input type="text" name="nombreCompleto" value={formData.nombreCompleto} onChange={handleChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required />
+                            {errors.nombreCompleto && <p className="text-red-500 text-xs mt-1">{errors.nombreCompleto}</p>}
+                        </div>
+                        <div>
+                            <label htmlFor="curp" className="block text-sm font-medium text-gray-700">CURP *</label>
+                            <input type="text" name="curp" value={formData.curp} onChange={handleChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" maxLength="18" required />
+                            {errors.curp && <p className="text-red-500 text-xs mt-1">{errors.curp}</p>}
+                        </div>
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Institucional *</label>
+                            <input type="email" name="email" value={formData.email} onChange={handleChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required />
+                            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                        </div>
+                        <div>
+                            <label htmlFor="genero" className="block text-sm font-medium text-gray-700">Género *</label>
+                            <select name="genero" value={formData.genero} onChange={handleChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                                <option value="">Seleccione...</option>
+                                <option value="Mujer">Mujer</option>
+                                <option value="Hombre">Hombre</option>
+                            </select>
+                            {errors.genero && <p className="text-red-500 text-xs mt-1">{errors.genero}</p>}
+                        </div>
+                        <div className="md:col-span-2">
+                            <label htmlFor="departamento" className="block text-sm font-medium text-gray-700">Departamento *</label>
+                            <select name="departamento" value={formData.departamento} onChange={handleChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                                <option value="">Seleccione un departamento</option>
+                                {[
+                                    "DEPARTAMENTO DE APOYO A LA DIVISIÓN DE ESTUDIOS DE POSGRADO E INVESTIGACIÓN", "DEPARTAMENTO DE CIENCIAS BÁSICAS", "DEPARTAMENTO DE CIENCIAS DE LA TIERRA",
+                                    "DEPARTAMENTO DE CIENCIAS ECONÓMICO-ADMINISTRATIVAS", "DEPARTAMENTO DE COMUNICACIÓN Y DIFUSIÓN", "DEPARTAMENTO DE DESARROLLO ACADÉMICO",
+                                    "DEPARTAMENTO DE INGENIERÍA ELÉCTRICA Y ELECTRÓNICA", "DEPARTAMENTO DE INGENIERÍA INDUSTRIAL", "DEPARTAMENTO DE INGENIERÍA MECÁNICA Y MECATRÓNICA",
+                                    "DEPARTAMENTO DE INGENIERÍA QUÍMICA Y BIOQUÍMICA", "DEPARTAMENTO DE INGENIERÍA EN SISTEMAS Y COMPUTACIÓN", "DEPARTAMENTO DE MANTENIMIENTO DE EQUIPO",
+                                    "DEPARTAMENTO DE RECURSOS FINANCIEROS", "DEPARTAMENTO DE RECURSOS HUMANOS", "DEPARTAMENTO DE RECURSOS MATERIALES Y SERVICIOS",
+                                    "DEPARTAMENTO DE SISTEMAS Y COMPUTACIÓN A DISTANCIA", "DEPARTAMENTO DE SERVICIOS ESCOLARES", "DIVISIÓN DE ESTUDIOS DE POSGRADO E INVESTIGACIÓN",
+                                    "DIVISIÓN DE ESTUDIOS PROFESIONALES", "SUBDIRECCIÓN ACADÉMICA", "SUBDIRECCIÓN DE PLANEACIÓN Y VINCULACIÓN", "SUBDIRECCIÓN DE SERVICIOS ADMINISTRATIVOS", "DIRECCIÓN"
+                                ].sort().map(dept => <option key={dept} value={dept}>{dept}</option>)}
+                            </select>
+                            {errors.departamento && <p className="text-red-500 text-xs mt-1">{errors.departamento}</p>}
+                        </div>
+                    </div>
+                    <div className="flex justify-end">
+                        <button type="submit" className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">Continuar</button>
+                    </div>
+                </form>
+            );
+        };
+        
+        const Step2CourseSelection = ({ formData, setFormData, onNext, onBack, availableCourses }) => {
+            const [filter, setFilter] = useState('');
+            
+            const handleCourseSelection = (courseId) => {
+                setFormData(prev => ({
+                    ...prev,
+                    selectedCourses: prev.selectedCourses.includes(courseId)
+                        ? prev.selectedCourses.filter(id => id !== courseId)
+                        : [...prev.selectedCourses, courseId].slice(0, 3)
+                }));
+            };
+            
+            const filteredCourses = useMemo(() => {
+                return availableCourses.filter(course => 
+                    course.nombre_curso.toLowerCase().includes(filter.toLowerCase())
+                );
+            }, [availableCourses, filter]);
+            
+            return (
+                <div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Selección de Cursos</h3>
+                    <input type="text" value={filter} onChange={e => setFilter(e.target.value)} placeholder="Buscar curso..." className="w-full mb-4 p-2 border rounded-md" />
+                    <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                        {filteredCourses.map(course => (
+                            <div key={course.id_curso} className={`p-4 border rounded-lg cursor-pointer ${formData.selectedCourses.includes(course.id_curso) ? 'bg-blue-100 border-blue-500' : 'bg-white'}`}
+                                 onClick={() => handleCourseSelection(course.id_curso)}>
+                                <p className="font-bold">{course.nombre_curso}</p>
+                                <p className="text-sm text-gray-600">{course.fecha_curso}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mt-6 flex justify-between">
+                        <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
+                        <button onClick={onNext} disabled={formData.selectedCourses.length === 0} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-400">Continuar</button>
                     </div>
                 </div>
             );
         };
 
-        const Step2EvidenceUpload = ({ onBack, onNext }) => {
-            const GOOGLE_FORM_URL = "https://forms.gle/cJTg9i9n5Yp8m2vY7";
-             return (
-                <div className="text-center">
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Paso 2: Subir Evidencias del Curso</h3>
-                    <p className="mb-6 text-gray-600">Una vez que el curso ha sido impartido, utilice este formulario para subir las evidencias correspondientes (lista de asistencia, reporte final, etc.).</p>
-                    <a href={GOOGLE_FORM_URL} target="_blank" rel="noopener noreferrer" className="inline-block bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition-colors">
-                        Ir al Formulario de Evidencias
-                    </a>
-                    <div className="mt-8 flex justify-between">
-                         <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
-                         <button onClick={onNext} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">Finalizar</button>
+        const Step3Confirm = ({ formData, onBack, onSubmit, availableCourses }) => {
+            const selectedCourseDetails = useMemo(() => {
+                return formData.selectedCourses.map(id => 
+                    availableCourses.find(course => course.id_curso === id)
+                ).filter(Boolean);
+            }, [formData.selectedCourses, availableCourses]);
+            
+            return (
+                <div className="space-y-6">
+                    <h3 className="text-xl font-bold text-gray-800">Confirmar Inscripción</h3>
+                    <div>
+                        <h4 className="font-bold">Información Personal</h4>
+                        <p><strong>Nombre:</strong> {formData.nombreCompleto}</p>
+                        <p><strong>Email:</strong> {formData.email}</p>
+                        <p><strong>Departamento:</strong> {formData.departamento}</p>
+                    </div>
+                    <div>
+                        <h4 className="font-bold">Cursos Seleccionados</h4>
+                        <ul className="list-disc list-inside">
+                            {selectedCourseDetails.map(course => (
+                                <li key={course.id_curso}>{course.nombre_curso}</li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="mt-6 flex justify-between">
+                        <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
+                        <button onClick={onSubmit} className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg">Confirmar e Inscribir</button>
                     </div>
                 </div>
             );
         };
-        
-        const Step3Final = ({ onReset }) => {
-            return (
-                <div className="text-center">
-                    <div className="text-6xl mb-4">🎉</div>
-                    <h3 className="text-2xl font-bold text-green-600">Proceso Completado</h3>
-                    <p className="text-gray-600 mt-2">Gracias por su colaboración. La información ha sido enviada para su revisión.</p>
-                    <button onClick={onReset} className="mt-8 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors">
-                        Volver al Inicio
-                    </button>
+
+        const Step4Final = ({ results, onReset }) => (
+            <div className="text-center space-y-4">
+                <h3 className="text-2xl font-bold text-green-600">Proceso Finalizado</h3>
+                <p>A continuación se muestra el resultado de sus solicitudes de inscripción:</p>
+                <div className="space-y-3 text-left max-w-lg mx-auto">
+                    {results.map(result => {
+                        const course = result.course;
+                        // CORRECCIÓN: Se eliminó el optional chaining `?.` para compatibilidad
+                        const courseName = course && course.nombre_curso ? course.nombre_curso : 'Curso Desconocido';
+                        return (
+                            <div key={result.courseId} className={`p-4 border-l-4 rounded-r-lg ${result.success ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
+                                <h3 className="font-bold">{courseName}</h3>
+                                <p className={`text-sm ${result.success ? 'text-green-800' : 'text-red-800'}`}>{result.message}</p>
+                            </div>
+                        );
+                    })}
                 </div>
-            );
-        };
-        
+                <button onClick={onReset} className="mt-6 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">Realizar otra inscripción</button>
+            </div>
+        );
+
         // ============================================================================
         // === COMPONENTE PRINCIPAL ===================================================
         // ============================================================================
-        const InstructoresApp = () => {
+        const InscripcionesApp = () => {
             const [step, setStep] = useState(1);
-            
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(null);
+            const [availableCourses, setAvailableCourses] = useState([]);
+            const [formData, setFormData] = useState({
+                nombreCompleto: '', curp: '', email: '', departamento: '', genero: '',
+                selectedCourses: []
+            });
+            const [results, setResults] = useState([]);
+
+            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec';
+
+            const fetchData = async (action) => {
+                const url = new URL(APPS_SCRIPT_URL);
+                url.searchParams.append('action', action);
+                const response = await fetch(url);
+                const result = await response.json();
+                if (!result.success) throw new Error(result.message || 'Error al cargar datos.');
+                return result.data;
+            };
+
+            const submitRegistration = async (formData) => {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ action: 'registerCourse', ...formData })
+                });
+                const result = await response.json();
+                if (!result.success) throw new Error(result.message || 'Error al registrar.');
+                return result;
+            };
+
+            useEffect(() => {
+                const loadInitialData = async () => {
+                    try {
+                        setAvailableCourses(await fetchData('getCoursesList'));
+                    } catch (err) {
+                        setError(err.message);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                loadInitialData();
+            }, []);
+
             const handleNext = () => setStep(prev => prev + 1);
             const handleBack = () => setStep(prev => prev - 1);
-            const handleReset = () => setStep(1);
+            
+            const handleReset = () => {
+                setFormData({
+                    nombreCompleto: '', curp: '', email: '', departamento: '', genero: '',
+                    selectedCourses: []
+                });
+                setResults([]);
+                setStep(1);
+            };
+
+            const handleSubmit = async () => {
+                setLoading(true);
+                setStep(4);
+                const registrationPromises = formData.selectedCourses.map(courseId => 
+                    submitRegistration({ ...formData, id_curso: courseId })
+                        .then(res => ({ ...res, success: true, courseId }))
+                        .catch(err => ({ message: err.message, success: false, courseId }))
+                );
+                
+                const registrationResults = await Promise.all(registrationPromises);
+                
+                const finalResults = registrationResults.map(result => ({
+                    ...result,
+                    course: availableCourses.find(c => c.id_curso === result.courseId)
+                }));
+                
+                setResults(finalResults);
+                setLoading(false);
+            };
 
             const renderStep = () => {
-                switch(step) {
-                    case 1: return <Step1CourseProposal onNext={handleNext} />;
-                    case 2: return <Step2EvidenceUpload onBack={handleBack} onNext={handleNext} />;
-                    case 3: return <Step3Final onReset={handleReset} />;
+                if (loading && step !== 4) return <Spinner />;
+                if (error) return <p className="text-red-500 text-center">{error}</p>;
+
+                switch (step) {
+                    case 1: return <Step1PersonalInfo formData={formData} setFormData={setFormData} onNext={handleNext} />;
+                    case 2: return <Step2CourseSelection formData={formData} setFormData={setFormData} onNext={handleNext} onBack={handleBack} availableCourses={availableCourses} />;
+                    case 3: return <Step3Confirm formData={formData} onBack={handleBack} onSubmit={handleSubmit} availableCourses={availableCourses} />;
+                    case 4: return loading ? <Spinner /> : <Step4Final results={results} onReset={handleReset} />;
                     default: return <p>Paso desconocido</p>;
                 }
             };
-            
+
             return (
                 <main className="container mx-auto px-4 py-8 sm:py-12">
                     <div className="max-w-3xl mx-auto">
@@ -158,11 +342,12 @@
                 </main>
             );
         };
-
+        
         window.addEventListener('load', () => {
             const root = ReactDOM.createRoot(document.getElementById('root'));
-            root.render(<InstructoresApp />);
+            root.render(<InscripcionesApp />);
         });
+
     </script>
 </body>
 </html>
