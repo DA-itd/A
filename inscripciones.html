@@ -50,21 +50,35 @@
         // ============================================================================
         // === CONFIGURACIÓN Y SERVICIOS =============================================
         // ============================================================================
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec';
+        const CONFIG = {
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
+            // **IMPORTANTE**: Reemplaza estas URLs con las URLs de TUS hojas publicadas como CSV
+            COURSES_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ.../pub?gid=...&single=true&output=csv',
+            TEACHERS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ.../pub?gid=...&single=true&output=csv'
+        };
 
-        const fetchData = async (action) => {
-            const url = new URL(APPS_SCRIPT_URL);
-            url.searchParams.append('action', action);
-            url.searchParams.append('_', new Date().getTime()); // Cache busting
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Error de red: ${response.status}`);
-            const result = await response.json();
-            if (!result.success) throw new Error(result.message || 'Error al cargar datos.');
-            return result.data;
+        const parseCSV = (text) => {
+            const rows = text.split(/\r?\n/).map(row => row.split(','));
+            const headers = rows[0].map(h => h.trim());
+            return rows.slice(1).map(row => {
+                const obj = {};
+                headers.forEach((header, i) => {
+                    obj[header] = row[i] ? row[i].trim() : '';
+                });
+                return obj;
+            });
+        };
+
+        const fetchDataFromCSV = async (url) => {
+            const cacheBustingUrl = `${url}&_=${new Date().getTime()}`;
+            const response = await fetch(cacheBustingUrl);
+            if (!response.ok) throw new Error(`No se pudo cargar: ${url}`);
+            const text = await response.text();
+            return parseCSV(text);
         };
         
         const postData = async (data) => {
-            const response = await fetch(APPS_SCRIPT_URL, {
+            const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'cors',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -75,7 +89,7 @@
         };
 
         // ============================================================================
-        // === COMPONENTES ============================================================
+        // === COMPONENTES (Definidos antes de usarse) ===============================
         // ============================================================================
         const Spinner = () => (
             <div className="flex justify-center items-center h-64">
@@ -100,7 +114,7 @@
                 })}
             </div>
         );
-
+        
         const Step1PersonalInfo = ({ onNext, formData, setFormData, teachers }) => {
             const handleTeacherSelect = (e) => {
                 const selectedEmail = e.target.value;
@@ -108,7 +122,8 @@
                 setFormData(prev => ({
                     ...prev,
                     email: selectedEmail,
-                    nombreCompleto: selectedTeacher ? selectedTeacher.nombreCompleto : '',
+                    nombreCompleto: selectedTeacher ? selectedTeacher.nombre_completo : '',
+                    departamento: selectedTeacher ? selectedTeacher.departamento : '',
                 }));
             };
 
@@ -117,7 +132,7 @@
                     <h3 className="text-xl font-bold text-gray-800 mb-4">Información Personal</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Institucional</label>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Institucional *</label>
                             <select id="email" value={formData.email} onChange={handleTeacherSelect} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" required>
                                 <option value="">Seleccione su correo...</option>
                                 {teachers.map(teacher => <option key={teacher.email} value={teacher.email}>{teacher.email}</option>)}
@@ -128,11 +143,11 @@
                             <input type="text" id="nombreCompleto" value={formData.nombreCompleto} readOnly className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm sm:text-sm" />
                         </div>
                         <div>
-                            <label htmlFor="curp" className="block text-sm font-medium text-gray-700">CURP</label>
+                            <label htmlFor="curp" className="block text-sm font-medium text-gray-700">CURP *</label>
                             <input type="text" id="curp" value={formData.curp} onChange={e => setFormData(p => ({ ...p, curp: e.target.value.toUpperCase() }))} maxLength="18" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" required />
                         </div>
                         <div>
-                            <label htmlFor="genero" className="block text-sm font-medium text-gray-700">Género</label>
+                            <label htmlFor="genero" className="block text-sm font-medium text-gray-700">Género *</label>
                             <select id="genero" value={formData.genero} onChange={e => setFormData(p => ({ ...p, genero: e.target.value }))} className="mt-1 block w-full pl-3 pr-10 py-2 border-gray-300 rounded-md" required>
                                 <option value="">Seleccione...</option>
                                 <option value="Hombre">Hombre</option>
@@ -141,11 +156,11 @@
                         </div>
                         <div className="sm:col-span-2">
                             <label htmlFor="departamento" className="block text-sm font-medium text-gray-700">Departamento</label>
-                            <input type="text" id="departamento" value={formData.departamento} onChange={e => setFormData(p => ({ ...p, departamento: e.target.value }))} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" required />
+                            <input type="text" id="departamento" value={formData.departamento} readOnly className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md" />
                         </div>
                     </div>
                     <div className="mt-8 flex justify-end">
-                        <button onClick={onNext} disabled={!formData.email || !formData.curp || !formData.genero || !formData.departamento} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50">Siguiente</button>
+                        <button onClick={onNext} disabled={!formData.email || !formData.curp || !formData.genero} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50">Siguiente</button>
                     </div>
                 </div>
             );
@@ -163,7 +178,7 @@
                     setFormData(p => ({ ...p, selectedCourses: [...p.selectedCourses, ''] }));
                 }
             };
-            const availableCourses = courses.filter(course => !formData.selectedCourses.includes(course.id_curso));
+            const availableCourses = courses.filter(course => !formData.selectedCourses.includes(course['ID Curso']));
 
             return (
                 <div>
@@ -174,8 +189,8 @@
                                 <label className="block text-sm font-medium text-gray-700">Curso {index + 1}</label>
                                 <select value={selected} onChange={e => handleCourseChange(e, index)} className="mt-1 block w-full pl-3 pr-10 py-2 border-gray-300 rounded-md">
                                     <option value="">Seleccione un curso...</option>
-                                    {selected && <option value={selected}>{(courses.find(c => c.id_curso === selected) || {}).nombre_curso}</option>}
-                                    {availableCourses.map(course => <option key={course.id_curso} value={course.id_curso}>{course.nombre_curso}</option>)}
+                                    {selected && <option value={selected}>{(courses.find(c => c['ID Curso'] === selected) || {})['Nombre Curso']}</option>}
+                                    {availableCourses.map(course => <option key={course['ID Curso']} value={course['ID Curso']}>{course['Nombre Curso']}</option>)}
                                 </select>
                             </div>
                         ))}
@@ -192,7 +207,7 @@
         };
 
         const Step3Confirm = ({ onBack, onSubmit, formData, courses }) => {
-            const selectedCourseDetails = formData.selectedCourses.map(id => courses.find(c => c.id_curso === id)).filter(Boolean);
+            const selectedCourseDetails = formData.selectedCourses.map(id => courses.find(c => c['ID Curso'] === id)).filter(Boolean);
             return (
                 <div>
                     <h3 className="text-xl font-bold text-gray-800 mb-4">Confirmar Inscripción</h3>
@@ -207,7 +222,7 @@
                         <div>
                             <h4 className="font-semibold">Cursos Seleccionados</h4>
                             <ul className="list-disc pl-5">
-                                {selectedCourseDetails.map(course => <li key={course.id_curso}>{course.nombre_curso} ({course.fecha_curso})</li>)}
+                                {selectedCourseDetails.map(course => <li key={course['ID Curso']}>{course['Nombre Curso']} ({course.FechaCurso})</li>)}
                             </ul>
                         </div>
                     </div>
@@ -224,8 +239,8 @@
                 <h3 className="text-2xl font-bold text-green-600 mb-4">Resultados de la Inscripción</h3>
                 <div className="space-y-4 text-left">
                     {results.map(result => {
-                        const course = courses.find(c => c.id_curso === result.courseId);
-                        const courseName = course ? course.nombre_curso : 'Curso Desconocido';
+                        const course = courses.find(c => c['ID Curso'] === result.courseId);
+                        const courseName = course ? course['Nombre Curso'] : 'Curso Desconocido';
                         return (
                             <div key={result.courseId} className={`p-4 border-l-4 rounded-r-lg ${result.success ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
                                 <h3 className="font-bold">{courseName}</h3>
@@ -256,13 +271,13 @@
                 const loadInitialData = async () => {
                     try {
                         const [coursesData, teachersData] = await Promise.all([
-                            fetchData('getCoursesList'),
-                            fetchData('getTeachersList')
+                            fetchDataFromCSV(CONFIG.COURSES_CSV_URL),
+                            fetchDataFromCSV(CONFIG.TEACHERS_CSV_URL)
                         ]);
-                        setCourses(coursesData);
+                        setCourses(coursesData.filter(c => c.Estado === 'Activo'));
                         setTeachers(teachersData);
                     } catch (err) {
-                        setError(err.message);
+                        setError("Error al cargar datos. Asegúrese de que las URLs en el código son correctas y las hojas están publicadas como CSV.");
                     } finally {
                         setLoading(false);
                     }
@@ -278,7 +293,7 @@
             };
 
             const handleSubmit = async () => {
-                setStep(4); // Mover a la pantalla de resultados inmediatamente
+                setStep(4);
                 setLoading(true);
                 const results = [];
                 for (const courseId of formData.selectedCourses) {
