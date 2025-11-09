@@ -60,97 +60,6 @@
             if (result.success) return result.data;
             throw new Error(result.message || `Failed to fetch ${action}`);
         };
-
-        const InscriptionApp = () => {
-            const [step, setStep] = useState(1);
-            const [formData, setFormData] = useState({
-                nombreCompleto: '',
-                curp: '',
-                email: '',
-                genero: '',
-                departamento: '',
-                cursosSeleccionados: [],
-            });
-            const [courses, setCourses] = useState([]);
-            const [teachers, setTeachers] = useState([]);
-            const [isLoading, setIsLoading] = useState(true);
-            const [error, setError] = useState(null);
-            const [submissionStatus, setSubmissionStatus] = useState({ state: 'idle', results: [] });
-
-            useEffect(() => {
-                const loadInitialData = async () => {
-                    try {
-                        const [coursesData, teachersData] = await Promise.all([
-                            fetchData('getCoursesList'),
-                            fetchData('getTeachersList'),
-                        ]);
-                        setCourses(coursesData);
-                        setTeachers(teachersData);
-                    } catch (err) {
-                        setError('No se pudieron cargar los datos iniciales. Por favor, recargue la página.');
-                    } finally {
-                        setIsLoading(false);
-                    }
-                };
-                loadInitialData();
-            }, []);
-
-            const handleTeacherSelect = useCallback((teacher) => {
-                setFormData(prev => ({
-                    ...prev,
-                    nombreCompleto: teacher.nombreCompleto || '',
-                    email: teacher.email || '',
-                }));
-            }, []);
-
-            const handleSubmit = async () => {
-                if (formData.cursosSeleccionados.length === 0) {
-                    setError("Debe seleccionar al menos un curso.");
-                    return;
-                }
-                setError(null);
-                setSubmissionStatus({ state: 'loading', results: [] });
-                setStep(3);
-
-                const results = [];
-                for (const courseId of formData.cursosSeleccionados) {
-                    try {
-                        const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
-                            method: 'POST',
-                            mode: 'cors',
-                            headers: { 'Content-Type': 'text/plain' },
-                            body: JSON.stringify({
-                                action: 'registerCourse',
-                                ...formData,
-                                id_curso: courseId,
-                            }),
-                        });
-                        const result = await response.json();
-                        results.push({ courseId, success: result.success, message: result.message });
-                    } catch (err) {
-                        results.push({ courseId, success: false, message: 'Error de conexión al registrar.' });
-                    }
-                }
-                setSubmissionStatus({ state: 'finished', results });
-            };
-            
-            if (isLoading) {
-                return <div className="text-center p-8">Cargando datos...</div>;
-            }
-
-            return (
-                <main className="container mx-auto px-4 py-8 sm:py-12">
-                    <div className="max-w-4xl mx-auto">
-                        <a href="index.html" className="text-blue-600 hover:underline mb-4 inline-block">← Volver al Portal</a>
-                        <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8">
-                            {step === 1 && <Step1Form {...{ formData, setFormData, setStep, teachers, handleTeacherSelect }} />}
-                            {step === 2 && <Step2CourseSelection {...{ formData, setFormData, setStep, courses, handleSubmit }} />}
-                            {step === 3 && <Step3Confirmation {...{ submissionStatus, courses, formData }} />}
-                        </div>
-                    </div>
-                </main>
-            );
-        };
         
         const AutocompleteInput = ({ teachers, onSelect, value, onChange }) => {
             const [suggestions, setSuggestions] = useState([]);
@@ -327,9 +236,106 @@
                 </div>
             );
         };
+
+        const InscriptionApp = () => {
+            const [step, setStep] = useState(1);
+            const [formData, setFormData] = useState({
+                nombreCompleto: '',
+                curp: '',
+                email: '',
+                genero: '',
+                departamento: '',
+                cursosSeleccionados: [],
+            });
+            const [courses, setCourses] = useState([]);
+            const [teachers, setTeachers] = useState([]);
+            const [isLoading, setIsLoading] = useState(true);
+            const [error, setError] = useState(null);
+            const [submissionStatus, setSubmissionStatus] = useState({ state: 'idle', results: [] });
+
+            useEffect(() => {
+                const loadInitialData = async () => {
+                    try {
+                        const [coursesData, teachersData] = await Promise.all([
+                            fetchData('getCoursesList'),
+                            fetchData('getTeachersList'),
+                        ]);
+                        setCourses(coursesData);
+                        setTeachers(teachersData);
+                    } catch (err) {
+                        setError('No se pudieron cargar los datos iniciales. Por favor, recargue la página.');
+                    } finally {
+                        setIsLoading(false);
+                    }
+                };
+                loadInitialData();
+            }, []);
+
+            const handleTeacherSelect = useCallback((teacher) => {
+                setFormData(prev => ({
+                    ...prev,
+                    nombreCompleto: teacher.nombreCompleto || '',
+                    email: teacher.email || '',
+                }));
+            }, []);
+
+            const handleSubmit = async () => {
+                if (formData.cursosSeleccionados.length === 0) {
+                    setError("Debe seleccionar al menos un curso.");
+                    return;
+                }
+                setError(null);
+                setSubmissionStatus({ state: 'loading', results: [] });
+                setStep(3);
+
+                const results = [];
+                for (const courseId of formData.cursosSeleccionados) {
+                    try {
+                        const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
+                            method: 'POST',
+                            mode: 'cors',
+                            headers: { 'Content-Type': 'text/plain' },
+                            body: JSON.stringify({
+                                action: 'registerCourse',
+                                ...formData,
+                                id_curso: courseId,
+                            }),
+                        });
+                        const result = await response.json();
+                        results.push({ courseId, success: result.success, message: result.message });
+                    } catch (err) {
+                        results.push({ courseId, success: false, message: 'Error de conexión al registrar.' });
+                    }
+                }
+                setSubmissionStatus({ state: 'finished', results });
+            };
+            
+            if (isLoading) {
+                return <div className="text-center p-8">Cargando datos...</div>;
+            }
+            
+            if (error) {
+                 return <div className="text-center p-8 text-red-600">{error}</div>;
+            }
+
+            return (
+                <main className="container mx-auto px-4 py-8 sm:py-12">
+                    <div className="max-w-4xl mx-auto">
+                        <a href="index.html" className="text-blue-600 hover:underline mb-4 inline-block">← Volver al Portal</a>
+                        <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8">
+                            {step === 1 && <Step1Form {...{ formData, setFormData, setStep, teachers, handleTeacherSelect }} />}
+                            {step === 2 && <Step2CourseSelection {...{ formData, setFormData, setStep, courses, handleSubmit }} />}
+                            {step === 3 && <Step3Confirmation {...{ submissionStatus, courses, formData }} />}
+                        </div>
+                    </div>
+                </main>
+            );
+        };
         
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<InscriptionApp />);
+        window.addEventListener('load', () => {
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<InscriptionApp />);
+        });
 
     </script>
 </body>
