@@ -588,10 +588,16 @@ const InscripcionesApp = () => {
                         <div className='mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-gray-50 p-4 rounded-lg'>
                             <input type='text' placeholder='🔍 Buscar por nombre...' className='sm:col-span-3 lg:col-span-1 w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm' value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                             <select className='w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm' value={filterPeriod} onChange={e => setFilterPeriod(e.target.value)}>
-                                <option value='all'>Todos los Periodos</option>{availablePeriods.map(p => <option key={p} value={p}>{p.replace(/_/g, ' ')}</option>)}
+                                <option value='all'>Todos los Periodos</option>{
+                                    // Fix: Explicitly convert mapped period to string to handle 'unknown' type and allow string operations.
+                                    availablePeriods.map(p => <option key={String(p)} value={String(p)}>{String(p).replace(/_/g, ' ')}</option>)
+                                }
                             </select>
                             <select className='w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm' value={filterType} onChange={e => setFilterType(e.target.value)}>
-                                <option value='all'>Todos los Tipos</option>{availableTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                                <option value='all'>Todos los Tipos</option>{
+                                    // Fix: Explicitly convert mapped type to string to handle 'unknown' type.
+                                    availableTypes.map(t => <option key={String(t)} value={String(t)}>{String(t)}</option>)
+                                }
                             </select>
                         </div>
                         {error && <div className='bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md' role='alert'><p className='text-sm sm:text-base'>{error}</p></div>}
@@ -801,14 +807,16 @@ const InscripcionesApp = () => {
 const rootElement = document.getElementById('root');
 if (rootElement) {
     const root = ReactDOM.createRoot(rootElement);
-    const path = window.location.pathname;
+    const appType = rootElement.dataset.app;
 
-    if (path.endsWith('constancias.html') || path.endsWith('constancias')) {
+    if (appType === 'constancias') {
         root.render(<React.StrictMode><ConstanciasApp /></React.StrictMode>);
-    } else if (path.endsWith('inscripciones.html') || path.endsWith('inscripciones')) {
+    } else if (appType === 'inscripciones') {
         root.render(<React.StrictMode><InscripcionesApp /></React.StrictMode>);
     } else {
-        // Fallback for the main index.html or other pages that might have a root element
-        // For now, we render nothing, but you could render the main portal page here if it were a React app.
+        const isAppPage = window.location.pathname.includes('inscripciones.html') || window.location.pathname.includes('constancias.html');
+        if (isAppPage) {
+            console.error(`Root element found, but 'data-app' attribute is missing or invalid. Found: ${appType}`);
+        }
     }
 }
