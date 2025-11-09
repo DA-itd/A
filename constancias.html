@@ -102,6 +102,12 @@
                     window.google.accounts.id.prompt();
                 }
             }, [onLogin]);
+            
+            const handleManualLogin = () => {
+                if (window.google && window.google.accounts && window.google.accounts.id) {
+                    window.google.accounts.id.prompt();
+                }
+            };
 
             return (
                 <div className="text-center animate-fadeIn">
@@ -123,7 +129,7 @@
                     
                     <div className="mt-8">
                         <button 
-                            onClick={() => window.google?.accounts.id.prompt()}
+                            onClick={handleManualLogin}
                             className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 
                                      transition-colors flex items-center justify-center gap-2 mx-auto shadow-lg">
                             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -323,7 +329,9 @@
 
             const handleLogout = () => {
                 sessionManager.clear();
-                window.google?.accounts.id.disableAutoSelect();
+                if (window.google && window.google.accounts && window.google.accounts.id) {
+                    window.google.accounts.id.disableAutoSelect();
+                }
                 window.location.reload();
             };
 
