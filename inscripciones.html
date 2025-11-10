@@ -48,7 +48,7 @@
 
     <div id="root"></div>
 
-    <footer class="bg-blue-800 text-white text-center p-4 mt-auto border-t-8 border-b-8 border-red-900">
+    <footer class="bg-blue-800 text-white text-center p-4 mt-auto">
         <p class="font-semibold text-sm sm:text-base">© Coordinación de actualización docente</p>
     </footer>
 
@@ -56,7 +56,7 @@
         const { useState, useEffect, useCallback, useMemo, useRef } = React;
 
         const CONFIG = {
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz2hpmaNoCj0Zy0mzl8mvYU978u7llspIFMyNuqt7VRu7Xi3yK3vkkOFNDWyokPVl5ODw/exec'
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec'
         };
         
         const DEPARTMENTS = [
@@ -295,18 +295,27 @@
                     <div className="flex gap-4 mb-4">
                         {/* Aquí podrías agregar los filtros si los necesitas */}
                     </div>
-                    {filteredCourses.map(course => (
-                        <div key={course.id_curso} className="mb-2 p-2 border rounded">
-                            <input 
-                                type="checkbox" 
-                                id={course.id_curso} 
-                                disabled={selectedCount >= 3 && !(formData.selectedCourses || []).find(c => c.id_curso === course.id_curso)}
-                                checked={(formData.selectedCourses || []).some(c => c.id_curso === course.id_curso)}
-                                onChange={e => handleCourseSelect(course, e.target.checked)}
-                            />
-                            <label htmlFor={course.id_curso} className="ml-2">{course.nombre_curso}</label>
+                    {filteredCourses.length > 0 ? (
+                        filteredCourses.map(course => (
+                            <div key={course.id_curso} className="mb-2 p-3 border rounded-md hover:bg-gray-50 transition-colors">
+                                <label htmlFor={course.id_curso} className="flex items-center cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        id={course.id_curso} 
+                                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                        disabled={selectedCount >= 3 && !(formData.selectedCourses || []).find(c => c.id_curso === course.id_curso)}
+                                        checked={(formData.selectedCourses || []).some(c => c.id_curso === course.id_curso)}
+                                        onChange={e => handleCourseSelect(course, e.target.checked)}
+                                    />
+                                    <span className="ml-3 text-sm text-gray-700">{course.nombre_curso}</span>
+                                </label>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center bg-gray-50 text-gray-500 p-6 rounded-lg">
+                            <p>No hay cursos disponibles para el periodo seleccionado.</p>
                         </div>
-                    ))}
+                    )}
                     <div className="mt-6 flex justify-between">
                         <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
                         <button onClick={onNext} disabled={selectedCount === 0} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50">Continuar</button>
@@ -319,11 +328,19 @@
             return (
                 <div>
                     <h3 className="text-xl font-bold mb-4">Confirmar Inscripción</h3>
-                    <p><strong>Nombre:</strong> {formData.fullName}</p>
-                    <p><strong>Cursos Seleccionados:</strong></p>
-                    <ul>
-                        {(formData.selectedCourses || []).map(c => <li key={c.id_curso}>- {c.nombre_curso}</li>)}
-                    </ul>
+                    <div className="bg-white p-6 rounded-lg shadow-md border">
+                        <div className="border-b pb-4 mb-4">
+                            <h4 className="font-semibold text-gray-800">Información del Docente</h4>
+                            <p className="text-gray-600"><strong>Nombre:</strong> {formData.fullName}</p>
+                             <p className="text-gray-600"><strong>Email:</strong> {formData.email}</p>
+                        </div>
+                        <div>
+                            <h4 className="font-semibold text-gray-800">Cursos Seleccionados:</h4>
+                            <ul className="list-disc list-inside mt-2 text-gray-600">
+                                {(formData.selectedCourses || []).map(c => <li key={c.id_curso}>{c.nombre_curso}</li>)}
+                            </ul>
+                        </div>
+                    </div>
                     <div className="mt-6 flex justify-between">
                         <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
                         <button onClick={onSubmit} className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg">Confirmar e Inscribir</button>
@@ -368,19 +385,22 @@
                     setLoading(true);
                     setError(null);
                     const cacheBuster = `&ts=${new Date().getTime()}`;
-                    const fetchOptions = { method: 'GET', mode: 'cors', redirect: 'follow' };
-
+                    
                     try {
-                        const coursesRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`, fetchOptions);
-                        if (!coursesRes.ok) throw new Error(`No se pudo conectar con el servidor de cursos (código: ${coursesRes.status}).`);
-                        const coursesData = await coursesRes.json();
-                        if (!coursesData.success) throw new Error(`Error del servidor al cargar cursos: ${coursesData.message || 'Respuesta no válida'}`);
+                        // Usamos Promise.all para cargar en paralelo
+                        const [coursesResponse, teachersResponse] = await Promise.all([
+                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`, { mode: 'cors' }),
+                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`, { mode: 'cors' })
+                        ]);
+
+                        if (!coursesResponse.ok) throw new Error(`Error al cargar cursos: ${coursesResponse.statusText}`);
+                        const coursesData = await coursesResponse.json();
+                        if (!coursesData.success) throw new Error(`Error del servidor (cursos): ${coursesData.message}`);
                         setCourses(coursesData.data || []);
 
-                        const teachersRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`, fetchOptions);
-                        if (!teachersRes.ok) throw new Error(`No se pudo conectar con el servidor de docentes (código: ${teachersRes.status}).`);
-                        const teachersData = await teachersRes.json();
-                        if (!teachersData.success) throw new Error(`Error del servidor al cargar docentes: ${teachersData.message || 'Respuesta no válida'}`);
+                        if (!teachersResponse.ok) throw new Error(`Error al cargar docentes: ${teachersResponse.statusText}`);
+                        const teachersData = await teachersResponse.json();
+                        if (!teachersData.success) throw new Error(`Error del servidor (docentes): ${teachersData.message}`);
                         setTeachers(teachersData.data || []);
 
                     } catch (err) {
