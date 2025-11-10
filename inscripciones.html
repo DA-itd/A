@@ -48,12 +48,12 @@
 
     <div id="root"></div>
 
-    <footer class="bg-blue-800 text-white text-center p-4 mt-auto">
+    <footer class="bg-blue-800 text-white text-center p-4 mt-auto border-t-8 border-b-8 border-red-900">
         <p class="font-semibold text-sm sm:text-base">© Coordinación de actualización docente</p>
     </footer>
 
     <script type="text/babel">
-        const { useState, useEffect, useCallback, useMemo } = React;
+        const { useState, useEffect, useCallback, useMemo, useRef } = React;
 
         const CONFIG = {
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz2hpmaNoCj0Zy0mzl8mvYU978u7llspIFMyNuqt7VRu7Xi3yK3vkkOFNDWyokPVl5ODw/exec'
@@ -72,6 +72,15 @@
             "DIVISION DE ESTUDIOS DE POSGRADO E INVESTIGACION",
             "EDUCACION A DISTANCIA"
         ].sort();
+
+        // ============================================================================
+        // === FUNCIONES DE UTILIDAD ==================================================
+        // ============================================================================
+        
+        const removeAccents = (text) => {
+            if (!text) return '';
+            return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        };
 
         // ============================================================================
         // === COMPONENTES DE LA UI ==================================================
@@ -108,84 +117,100 @@
                 </div>
             );
         }
-
-        function Step1TeacherInfo({ formData, setFormData, onNext, teachers }) {
-            // 'inputValue' maneja solo lo que se ve en el campo de texto.
-            const [inputValue, setInputValue] = useState(formData.fullName || "");
+        
+        // --- COMPONENTE DE AUTOCOMPLETADO (BASADO EN EL EJEMPLO QUE FUNCIONA) ---
+        function AutocompleteInput({ items, onSelect, value, onChange, placeholder }) {
+            const [suggestions, setSuggestions] = useState([]);
             const [showSuggestions, setShowSuggestions] = useState(false);
+            const containerRef = useRef(null);
 
-            // --- CAMBIO CLAVE 1: Lógica de 'handleInputChange' simplificada ---
-            const handleInputChange = (e) => {
-                const value = e.target.value.toUpperCase();
-                setInputValue(value); // Solo actualizamos el valor visible del input
-                setShowSuggestions(true); // Mostramos las sugerencias
-
-                // Si el usuario borra todo el texto, limpiamos el formulario.
-                if (value === "") {
-                    setFormData(prev => ({
-                        ...prev,
-                        fullName: '',
-                        email: '',
-                        department: ''
-                    }));
-                }
-            };
-
-            // --- CAMBIO CLAVE 2: Nueva función 'handleBlur' para sincronizar ---
-            // Se ejecuta cuando el usuario sale del campo de texto.
-            const handleBlur = () => {
-                // Usamos un timeout para que el clic en una sugerencia se pueda registrar antes de que se oculte la lista.
-                setTimeout(() => {
-                    setShowSuggestions(false);
-                    
-                    // Sincronizamos el estado del formulario con el valor final del input.
-                    const finalValue = inputValue.trim();
-                    const teacherMatch = teachers.find(t => t.nombre.toUpperCase() === finalValue);
-
-                    if (teacherMatch) {
-                        // Si el texto final coincide exactamente con un profesor, aseguramos que los datos estén correctos.
-                        setFormData(prev => ({
-                            ...prev,
-                            fullName: teacherMatch.nombre.toUpperCase(),
-                            email: teacherMatch.email || '',
-                            department: teacherMatch.departamento || ''
-                        }));
-                    } else {
-                        // Si no hay coincidencia exacta, el nombre se guarda como está y se limpian los campos dependientes.
-                        setFormData(prev => ({
-                            ...prev,
-                            fullName: finalValue,
-                            email: '',
-                            department: ''
-                        }));
+            useEffect(() => {
+                const handleClickOutside = (event) => {
+                    if (containerRef.current && !containerRef.current.contains(event.target)) {
+                        setShowSuggestions(false);
                     }
-                }, 200);
+                };
+                document.addEventListener('mousedown', handleClickOutside);
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+            }, []);
+
+            const handleInputChange = (e) => {
+                const currentValue = e.target.value;
+                onChange(e); // Llama al onChange del padre
+
+                if (currentValue && currentValue.length > 0) {
+                    const normalizedInput = removeAccents(currentValue.toLowerCase());
+                    const filtered = items.filter(item =>
+                        item && item.nombre && removeAccents(item.nombre.toLowerCase()).includes(normalizedInput)
+                    ).slice(0, 7); // Muestra hasta 7 sugerencias
+                    setSuggestions(filtered);
+                    setShowSuggestions(filtered.length > 0);
+                } else {
+                    setSuggestions([]);
+                    setShowSuggestions(false);
+                }
             };
 
-            // --- CAMBIO CLAVE 3: 'onTeacherSelect' ahora es la única fuente para autocompletar ---
-            const onTeacherSelect = (teacher) => {
-                if (teacher && teacher.nombre) {
-                    const teacherName = teacher.nombre.toUpperCase();
-                    setInputValue(teacherName); // Actualizamos el input visual
-                    // Actualizamos TODO el estado del formulario con los datos del profesor
-                    setFormData(prev => ({
-                        ...prev,
-                        fullName: teacherName,
-                        email: teacher.email || '',
-                        department: teacher.departamento || ''
-                    }));
-                }
-                setShowSuggestions(false); // Ocultamos las sugerencias
+            const handleSelect = (item) => {
+                onSelect(item); // Llama al onSelect del padre
+                setShowSuggestions(false);
+            };
+
+            return (
+                <div className="relative" ref={containerRef}>
+                    <input
+                        type="text"
+                        value={value}
+                        onChange={handleInputChange}
+                        onFocus={() => { if (value) setShowSuggestions(true); }}
+                        placeholder={placeholder || "Escriba un nombre"}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 uppercase"
+                        autoComplete="off"
+                    />
+                    {showSuggestions && suggestions.length > 0 && (
+                        <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
+                            {suggestions.map((item, index) => (
+                                <li
+                                    key={item.email || index}
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        handleSelect(item);
+                                    }}
+                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                >
+                                    {item.nombre} {item.departamento && <span className="text-sm text-gray-500 ml-2">({item.departamento})</span>}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            );
+        }
+
+        // --- COMPONENTE Step1TeacherInfo CORREGIDO Y USANDO AutocompleteInput ---
+        function Step1TeacherInfo({ formData, setFormData, onNext, teachers }) {
+
+            const handleTeacherSelect = (teacher) => {
+                setFormData(prev => ({
+                    ...prev,
+                    fullName: teacher.nombre.toUpperCase(),
+                    email: teacher.email || '',
+                    department: teacher.departamento || ''
+                }));
             };
             
-            // La lista de sugerencias sigue funcionando igual, lo cual estaba correcto.
-            const filteredTeachers = useMemo(() => {
-                if (!inputValue) return [];
-                return teachers.filter(teacher =>
-                    teacher && teacher.nombre && teacher.nombre.toLowerCase().includes(inputValue.toLowerCase())
-                ).slice(0, 5);
-            }, [inputValue, teachers]);
-            
+            const handleNameChange = (e) => {
+                const newName = e.target.value.toUpperCase();
+                const exactMatch = teachers.find(t => t.nombre.toUpperCase() === newName);
+                
+                setFormData(prev => ({
+                    ...prev,
+                    fullName: newName,
+                    email: exactMatch ? exactMatch.email : '',
+                    department: exactMatch ? exactMatch.departamento : ''
+                }));
+            };
+
             const isFormValid = formData.fullName && formData.curp && formData.email && formData.gender && formData.department;
 
             return (
@@ -194,32 +219,14 @@
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="relative">
                             <label className="block text-sm font-medium text-gray-700">Nombre Completo *</label>
-                            <input
-                                type="text"
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 uppercase"
-                                value={inputValue}
-                                onChange={handleInputChange}
-                                onFocus={() => setShowSuggestions(true)}
-                                // --- CAMBIO CLAVE 4: Usamos la nueva función 'handleBlur' ---
-                                onBlur={handleBlur}
-                                placeholder="Escriba su nombre y seleccione de la lista"
+                            <AutocompleteInput
+                                items={teachers}
+                                value={formData.fullName}
+                                onChange={handleNameChange}
+                                onSelect={handleTeacherSelect}
+                                placeholder="Escriba su nombre y seleccione"
                             />
-                            {showSuggestions && filteredTeachers.length > 0 && (
-                                <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
-                                    {filteredTeachers.map((teacher, index) => (
-                                        <li
-                                            key={teacher.email || index}
-                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                            // 'onMouseDown' es mejor que 'onClick' aquí para evitar conflictos con 'onBlur'
-                                            onMouseDown={() => onTeacherSelect(teacher)}
-                                        >
-                                            {teacher.nombre} {teacher.departamento && <span className="text-sm text-gray-500 ml-2">({teacher.departamento})</span>}
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
                         </div>
-                        {/* El resto de los campos no necesitan cambios */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">CURP *</label>
                             <input type="text" value={formData.curp} onChange={e => setFormData(prev => ({ ...prev, curp: e.target.value.toUpperCase() }))} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 uppercase" placeholder="18 caracteres" maxLength="18" />
@@ -255,7 +262,6 @@
             );
         }
 
-
         function Step2CourseSelection({ formData, setFormData, onNext, onBack, courses }) {
             const [filters, setFilters] = useState({ period: 'Enero - Junio 2025', type: 'Todos' });
             
@@ -287,7 +293,7 @@
                 <div>
                     <h3 className="text-xl font-bold mb-4">Selección de Cursos</h3>
                     <div className="flex gap-4 mb-4">
-                        {/* Filtros */}
+                        {/* Aquí podrías agregar los filtros si los necesitas */}
                     </div>
                     {filteredCourses.map(course => (
                         <div key={course.id_curso} className="mb-2 p-2 border rounded">
@@ -364,32 +370,16 @@
                     const cacheBuster = `&ts=${new Date().getTime()}`;
 
                     try {
-                        const fetchOptions = {
-                            method: 'GET',
-                            mode: 'cors',
-                            redirect: 'follow'
-                        };
-
-                        // 1. Cargar Cursos
-                        const coursesRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`, fetchOptions);
-                        if (!coursesRes.ok) {
-                            throw new Error(`No se pudo conectar con el servidor de cursos (código: ${coursesRes.status}).`);
-                        }
+                        const coursesRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`);
+                        if (!coursesRes.ok) throw new Error(`No se pudo conectar con el servidor de cursos (código: ${coursesRes.status}).`);
                         const coursesData = await coursesRes.json();
-                        if (!coursesData.success) {
-                            throw new Error(`Error del servidor al cargar cursos: ${coursesData.message || 'Respuesta no válida'}`);
-                        }
+                        if (!coursesData.success) throw new Error(`Error del servidor al cargar cursos: ${coursesData.message || 'Respuesta no válida'}`);
                         setCourses(coursesData.data || []);
 
-                        // 2. Cargar Docentes
-                        const teachersRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`, fetchOptions);
-                        if (!teachersRes.ok) {
-                            throw new Error(`No se pudo conectar con el servidor de docentes (código: ${teachersRes.status}).`);
-                        }
+                        const teachersRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`);
+                        if (!teachersRes.ok) throw new Error(`No se pudo conectar con el servidor de docentes (código: ${teachersRes.status}).`);
                         const teachersData = await teachersRes.json();
-                        if (!teachersData.success) {
-                            throw new Error(`Error del servidor al cargar docentes: ${teachersData.message || 'Respuesta no válida'}`);
-                        }
+                        if (!teachersData.success) throw new Error(`Error del servidor al cargar docentes: ${teachersData.message || 'Respuesta no válida'}`);
                         setTeachers(teachersData.data || []);
 
                     } catch (err) {
@@ -412,7 +402,7 @@
 
             const handleSubmit = async () => {
                 setLoading(true);
-                setStep(4); // Go to final step to show results
+                setStep(4);
                 const results = [];
                 for (const course of formData.selectedCourses) {
                     try {
