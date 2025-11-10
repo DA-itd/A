@@ -102,8 +102,28 @@
             const handleInputChange = (e) => {
                 const value = e.target.value.toUpperCase();
                 setInputValue(value);
-                setFormData(prev => ({ ...prev, fullName: value, email: '', department: '' }));
                 setShowSuggestions(true);
+
+                const exactMatch = teachers.find(
+                    (teacher) => teacher && teacher.nombre && teacher.nombre.toUpperCase() === value
+                );
+
+                if (exactMatch) {
+                    setFormData(prev => ({
+                        ...prev,
+                        fullName: exactMatch.nombre.toUpperCase(),
+                        email: exactMatch.email || '',
+                        department: exactMatch.departamento || ''
+                    }));
+                    setShowSuggestions(false);
+                } else {
+                    setFormData(prev => ({
+                        ...prev,
+                        fullName: value,
+                        email: '',
+                        department: ''
+                    }));
+                }
             };
 
             const onTeacherSelect = (teacher) => {
