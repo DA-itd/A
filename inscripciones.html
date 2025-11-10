@@ -104,11 +104,12 @@
                 setInputValue(value);
                 setShowSuggestions(true);
 
-                const exactMatch = teachers.find(
+                const exactMatches = teachers.filter(
                     (teacher) => teacher && teacher.nombre && teacher.nombre.toUpperCase() === value
                 );
 
-                if (exactMatch) {
+                if (exactMatches.length === 1) {
+                    const exactMatch = exactMatches[0];
                     setFormData(prev => ({
                         ...prev,
                         fullName: exactMatch.nombre.toUpperCase(),
@@ -141,7 +142,6 @@
 
             const filteredTeachers = useMemo(() => {
                 if (!inputValue) return [];
-                // Robust filtering: ensure teacher and teacher.nombre exist before calling toLowerCase
                 return teachers.filter(teacher =>
                     teacher && teacher.nombre && teacher.nombre.toLowerCase().includes(inputValue.toLowerCase())
                 ).slice(0, 5);
@@ -168,11 +168,11 @@
                                 <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
                                     {filteredTeachers.map((teacher, index) => (
                                         <li
-                                            key={index}
+                                            key={teacher.email || index}
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                             onClick={() => onTeacherSelect(teacher)}
                                         >
-                                            {teacher.nombre}
+                                            {teacher.nombre} {teacher.departamento && <span className="text-sm text-gray-500 ml-2">({teacher.departamento})</span>}
                                         </li>
                                     ))}
                                 </ul>
