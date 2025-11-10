@@ -316,22 +316,33 @@
 
             useEffect(() => {
                 async function loadInitialData() {
+                    setLoading(true);
+                    setError(null);
+                    const cacheBuster = `&ts=${new Date().getTime()}`;
                     try {
-                        const [coursesRes, teachersRes] = await Promise.all([
-                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList`),
-                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList`)
-                        ]);
-                        const coursesData = await coursesRes.json();
-                        const teachersData = await teachersRes.json();
-
-                        if (!coursesData.success || !teachersData.success) {
-                            throw new Error("Error al cargar datos iniciales.");
+                        const coursesRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`);
+                        if (!coursesRes.ok) {
+                            throw new Error(`Error de red al cargar cursos (código: ${coursesRes.status}).`);
                         }
-                        
+                        const coursesData = await coursesRes.json();
+                        if (!coursesData.success) {
+                            throw new Error(coursesData.message || "El servidor no pudo cargar los cursos.");
+                        }
                         setCourses(coursesData.data);
+
+                        const teachersRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`);
+                        if (!teachersRes.ok) {
+                            throw new Error(`Error de red al cargar docentes (código: ${teachersRes.status}).`);
+                        }
+                        const teachersData = await teachersRes.json();
+                        if (!teachersData.success) {
+                            throw new Error(teachersData.message || "El servidor no pudo cargar los docentes.");
+                        }
                         setTeachers(teachersData.data);
+
                     } catch (err) {
-                        setError("Error al cargar datos. Asegúrese de que el script esté implementado con la última versión del código.");
+                        console.error("Fallo en loadInitialData:", err);
+                        setError(err.message || "Error al cargar datos. Asegúrese de que el script esté implementado con la última versión del código.");
                     } finally {
                         setLoading(false);
                     }
@@ -369,7 +380,7 @@
 
             const renderStep = () => {
                 if (loading && step < 4) return <Spinner />;
-                if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
+                if (error) return <div className="text-red-500 text-center p-4 bg-red-50 border border-red-200 rounded-md">{error}</div>;
 
                 switch (step) {
                     case 1: return <Step1TeacherInfo formData={formData} setFormData={setFormData} onNext={handleNext} teachers={teachers} />;
