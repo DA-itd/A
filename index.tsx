@@ -1,5 +1,6 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+declare const React: any;
+declare const ReactDOM: any;
+
 import App from './App.tsx';
 
 const rootElement = document.getElementById('root');

@@ -1,15 +1,11 @@
-import React from 'react';
-
-// Declare global variables from CDNs to satisfy TypeScript
+declare const React: any;
 declare const window: any;
 
-// FIX: Move constants to module scope to be accessible by sub-components.
 const DATABASE_URL = 'https://raw.githubusercontent.com/DA-itd/web2/main/database.xlsx';
 const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web2/main/image.jpg';
 const TECNM_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web2/main/TecNM_logo.jpg';
 const VALIDATION_URL = 'https://da-itd.github.io/web2';
 
-// FIX: Cannot find name 'POTENTIAL_FOLIO_HEADERS'. Moved to module scope.
 const POTENTIAL_FOLIO_HEADERS = [
     'Folio', 'ID', 'Folio del certificado', 'Folio de la constancia',
     'No. de Folio', '# Folio', 'folio', 'Folio personal'
@@ -22,7 +18,6 @@ const ValidationStatus = {
     ERROR: 'error',
 };
 
-// FIX: Move helper functions to module scope for reuse and to fix scope issues.
 const getProperty = (obj, keyName) => {
     if (!obj || typeof obj !== 'object' || !keyName) return undefined;
     const keyToFind = keyName.toLowerCase();
@@ -42,7 +37,6 @@ const getFlexibleProperty = (obj, keys) => {
 const formatDate = (dateValue) => {
     if (dateValue === undefined || dateValue === null) return 'N/A';
     if (typeof dateValue === 'string') {
-        // FIX: Argument of type 'string' is not assignable to parameter of type 'number'.
         if (!isNaN(parseFloat(dateValue))) {
             let date = new Date((parseFloat(dateValue) - 25569) * 86400 * 1000);
             date = new Date(date.valueOf() + date.getTimezoneOffset() * 60000);
@@ -65,18 +59,10 @@ const formatDate = (dateValue) => {
 const VerificadorPage = () => {
     const { useState, useEffect, useCallback } = React;
 
-    // --- PDF SERVICE ---
      const generatePdf = async (result) => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        // The rest of the PDF generation logic from the original file...
-        // This logic remains largely unchanged.
-        // For brevity, it is assumed to be correctly ported.
-        alert('La generación de PDF ha sido portada. Implementación completa no mostrada para brevedad.');
+        alert('La generación de PDF aún no está completamente implementada en esta versión.');
     };
 
-    // --- DATABASE SERVICE ---
     const loadDatabase = async () => {
         const cacheBustingUrl = `${DATABASE_URL}?v=${new Date().getTime()}`;
         const response = await fetch(cacheBustingUrl);
@@ -127,7 +113,6 @@ const VerificadorPage = () => {
         return allData;
     };
 
-    // --- STATE AND LOGIC HOOKS ---
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [certificateData, setCertificateData] = useState([]);
@@ -143,7 +128,6 @@ const VerificadorPage = () => {
             setLoading(true);
             const db = await loadDatabase();
             setCertificateData(db);
-            // URL param check logic would go here
           } catch (e) {
             setError(e.message);
           } finally {
@@ -169,8 +153,7 @@ const VerificadorPage = () => {
                 const folio = getFlexibleProperty(record, POTENTIAL_FOLIO_HEADERS);
                 return folio && String(folio).trim().toLowerCase() === searchStr;
             });
-
-        } // 'code' mode logic would go here
+        }
         
         if (found) {
             setResult(found);
@@ -187,28 +170,25 @@ const VerificadorPage = () => {
         setResult(null);
     }, []);
 
-    // --- RENDER ---
     return (
-        <div className="max-w-4xl mx-auto">
-            {loading && <p className="text-gray-600 p-8 text-center">Cargando base de datos...</p>}
-            {error && <p className="text-red-600 p-8 text-center bg-red-50 rounded-lg">{error}</p>}
-            {!loading && !error && (
-                <>
-                    <SearchForm query={query} setQuery={setQuery} onSearch={handleSearch} onClear={handleClear} mode={mode} setMode={setMode} />
-                    <ValidationResult status={status} result={result} mode={mode} generatePdf={generatePdf} />
-                </>
-            )}
+        <div className="container mx-auto px-4 py-8 sm:py-12">
+            <div className="max-w-4xl mx-auto">
+                {loading && <p className="text-gray-600 p-8 text-center">Cargando base de datos...</p>}
+                {error && <p className="text-red-600 p-8 text-center bg-red-50 rounded-lg">{error}</p>}
+                {!loading && !error && (
+                    <>
+                        <SearchForm query={query} setQuery={setQuery} onSearch={handleSearch} onClear={handleClear} mode={mode} setMode={setMode} />
+                        <ValidationResult status={status} result={result} mode={mode} generatePdf={generatePdf} />
+                    </>
+                )}
+            </div>
         </div>
     );
 };
 
-// --- SUB-COMPONENTS ---
-
 const SearchForm = ({ query, setQuery, onSearch, onClear, mode, setMode }) => {
-    // JSX from original file...
     return (
          <div className="bg-white p-6 sm:p-8 rounded-xl shadow-md w-full max-w-2xl mx-auto">
-            {/* Form JSX goes here, it's identical to the original */}
              <form onSubmit={(e) => { e.preventDefault(); onSearch(query); }} className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <div className="flex-grow w-full">
                   <div className="flex w-full border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 overflow-hidden">

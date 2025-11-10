@@ -1,5 +1,4 @@
-import React from 'react';
-// FIX: Property 'ReactRouterDOM' does not exist on type 'Window & typeof globalThis'.
+declare const React: any;
 declare global {
     interface Window {
         ReactRouterDOM: any;
@@ -22,13 +21,11 @@ const HomePage = () => {
         const rotateQuotes = () => {
             const randomIndex = Math.floor(Math.random() * inspirationalQuotes.length);
             const quote = inspirationalQuotes[randomIndex];
-            // FIX: Type 'number' is not assignable to type 'string'.
             quoteContainer.style.opacity = '0';
             setTimeout(() => {
                 quoteContainer.innerHTML = `
                     <p class="text-base sm:text-lg italic text-gray-700 leading-relaxed">"${quote.quote}"</p>
                     <p class="text-sm sm:text-base text-gray-600 text-right mt-2">- ${quote.author}</p>`;
-                // FIX: Type 'number' is not assignable to type 'string'.
                 quoteContainer.style.opacity = '1';
             }, 500);
         };
@@ -47,10 +44,10 @@ const HomePage = () => {
                 </div>
             </section>
         
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto mb-12">
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto mb-12">
                 
                 <Link to="/encuestas-y-constancias" 
-                   className="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp" style={{animationDelay: '0.1s'}}>
+                   className="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp" style={{animationDelay: '0.1s', textDecoration: 'none'}}>
                     <div className="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📊</div>
                     <h3 className="text-lg font-bold text-gray-800 mb-2">
                         Encuestas y Constancias
@@ -64,7 +61,7 @@ const HomePage = () => {
                 </Link>
 
                 <a href="formatos.html" 
-                   className="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp" style={{animationDelay: '0.2s'}}>
+                   className="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp" style={{animationDelay: '0.2s', textDecoration: 'none'}}>
                     <div className="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📋</div>
                     <h3 className="text-lg font-bold text-gray-800 mb-2">
                         Formatos Oficiales
@@ -78,7 +75,7 @@ const HomePage = () => {
                 </a>
 
                 <Link to="/verificador" 
-                   className="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp" style={{animationDelay: '0.3s'}}>
+                   className="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp" style={{animationDelay: '0.3s', textDecoration: 'none'}}>
                     <div className="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">✅</div>
                     <h3 className="text-lg font-bold text-gray-800 mb-2">
                         Validación de Constancias
@@ -92,7 +89,7 @@ const HomePage = () => {
                 </Link>
 
                 <a href="inscripciones.html" 
-                   className="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-400 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+                   className="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-400 animate-fadeInUp" style={{animationDelay: '0.4s', textDecoration: 'none'}}>
                     <div className="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📝</div>
                     <h3 className="text-lg font-bold text-gray-800 mb-2">
                         Inscripción a Cursos
@@ -106,7 +103,7 @@ const HomePage = () => {
                 </a>
 
                 <a href="instructores.html" 
-                   className="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp" style={{animationDelay: '0.5s'}}>
+                   className="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp" style={{animationDelay: '0.5s', textDecoration: 'none'}}>
                     <div className="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
                     <h3 className="text-lg font-bold text-gray-800 mb-2">
                         Área para Instructores

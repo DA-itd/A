@@ -1,6 +1,4 @@
-import React from 'react';
-
-// Declare global variables from CDNs to satisfy TypeScript
+declare const React: any;
 declare const window: any;
 
 const EncuestasConstanciasPage = () => {
@@ -73,7 +71,6 @@ const EncuestasConstanciasPage = () => {
         }
     };
     
-    // Main App Component Logic
     const [step, setStep] = useState('loading');
     const [error, setError] = useState(null);
     const [isActionInProgress, setIsActionInProgress] = useState(false);
@@ -154,7 +151,6 @@ const EncuestasConstanciasPage = () => {
         }
     };
 
-    // --- Render Logic ---
     const renderContent = () => {
         if (step === 'loading') {
             return <div className="flex justify-center items-center h-64">
@@ -163,7 +159,7 @@ const EncuestasConstanciasPage = () => {
         }
         if (step === 'login') return <LoginStep onLogin={handleLogin} error={error} CONFIG={CONFIG}/>;
         if (step === 'dashboard' && appData) {
-            return <DashboardStep appData={appData} onLogout={handleLogout} onAction={handleAction} />;
+            return <DashboardStep appData={appData} onLogout={handleLogout} onAction={handleAction} CONFIG={CONFIG} />;
         }
         return <LoginStep onLogin={handleLogin} error={"Ocurrió un error inesperado. Por favor, recarga la página."} CONFIG={CONFIG}/>;
     };
@@ -180,9 +176,7 @@ const EncuestasConstanciasPage = () => {
     );
 };
 
-// --- Sub-components defined inside or outside, but kept together for clarity ---
 const LoginStep = ({ onLogin, error, CONFIG }) => {
-    // FIX: Cannot find name 'useEffect'.
     React.useEffect(() => {
         if (window.google) {
             window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
@@ -207,17 +201,57 @@ const LoginStep = ({ onLogin, error, CONFIG }) => {
     );
 };
 
-const DashboardStep = ({ appData, onLogout, onAction }) => {
-    // Dashboard JSX and logic... Same as previous implementation
+const DashboardStep = ({ appData, onLogout, onAction, CONFIG }) => {
     const { teacherData, courses, efficacySurvey } = appData;
             
     const handleSurveyClick = (type, data) => {
-        // ... (implementation is the same)
-        onAction('survey', { /* ... data ... */ });
+        let recordData, url;
+        
+        if (type === 'opinion') {
+            recordData = {
+                teacherName: teacherData.fullName, teacherEmail: teacherData.email, department: teacherData.department,
+                courseId: data.id, courseName: data.name, surveyType: 'opinion'
+            };
+            url = new URL(CONFIG.SURVEY_URLS.opinion);
+            url.searchParams.set(CONFIG.ENTRY_IDS.opinion.course, data.name);
+            url.searchParams.set(CONFIG.ENTRY_IDS.opinion.department, teacherData.department);
+        } else {
+             recordData = {
+                teacherName: teacherData.fullName, teacherEmail: teacherData.email, department: teacherData.department,
+                courseId: data.periodId, courseName: `Encuesta General de Eficacia (${data.periodName})`, surveyType: 'eficacia'
+            };
+            url = new URL(CONFIG.SURVEY_URLS.eficacia);
+            url.searchParams.set(CONFIG.ENTRY_IDS.eficacia.name, teacherData.fullName);
+            url.searchParams.set(CONFIG.ENTRY_IDS.eficacia.department, teacherData.department);
+        }
+        onAction('survey', { recordData, url: url.toString() });
     };
     
     const handleCertificateClick = (course) => {
          onAction('certificate', { courseId: course.id });
+    };
+
+    // FIX: Make the 'children' prop optional by providing a default value.
+    // This resolves the error when the Step component is used without children.
+    const Step = ({ title, status, children = null }) => {
+        const colors = {
+            done: { bg: 'bg-green-100', text: 'text-green-800', icon: '✅' },
+            pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: '⏳' },
+            next: { bg: 'bg-blue-100', text: 'text-blue-800', icon: '➡️' },
+            disabled: { bg: 'bg-gray-100', text: 'text-gray-500', icon: '⚪' }
+        };
+        const { bg, text, icon } = colors[status] || colors['disabled'];
+        return (
+            <div className={`step-item p-3 rounded-lg ${bg} ${text}`}>
+                <div className="flex items-center gap-3">
+                    <span className="text-xl">{icon}</span>
+                    <div className="flex-1">
+                        <p className="font-bold text-sm">{title}</p>
+                        {children && <div className="mt-2">{children}</div>}
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -231,7 +265,62 @@ const DashboardStep = ({ appData, onLogout, onAction }) => {
                     Cerrar Sesión
                 </button>
             </div>
-             {/* ... The rest of the detailed dashboard JSX from previous correct implementation ... */}
+             <div className="space-y-8">
+                {efficacySurvey && (
+                     <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-green-500">
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">Encuesta General de Eficacia</h3>
+                        <p className="text-sm text-gray-600 mb-4">Periodo: {efficacySurvey.periodName}</p>
+                        {efficacySurvey.completed ? (
+                            <p className="font-semibold text-green-700">✔️ Gracias por completar esta encuesta.</p>
+                        ) : (
+                            <button onClick={() => handleSurveyClick('eficacia', efficacySurvey)} className="w-full sm:w-auto text-center font-semibold py-2 px-4 rounded-md text-white bg-green-600 hover:bg-green-700">
+                                📈 Responder Encuesta de Eficacia
+                            </button>
+                        )}
+                     </div>
+                )}
+                
+                {courses && courses.map(course => {
+                    const opinionStatus = course.surveyCompleted ? 'done' : course.isOpinionActive ? 'next' : 'disabled';
+
+                    return (
+                    <div key={course.id} className="bg-white p-4 sm:p-6 rounded-lg shadow-md border-l-4 border-indigo-500">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">{course.name}</h3>
+                        <div className="space-y-3">
+                            <Step title="1. Contestar Encuesta de Opinión" status={opinionStatus}>
+                                {course.isOpinionActive && (
+                                    <button onClick={() => handleSurveyClick('opinion', course)} className="w-full sm:w-auto text-center font-semibold py-2 px-4 rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                        💬 Responder Encuesta
+                                    </button>
+                                )}
+                                {!course.surveyCompleted && !course.isOpinionActive && (
+                                    <p className="text-xs text-yellow-800 font-semibold">
+                                        Temporalmente desactivada.
+                                    </p>
+                                )}
+                            </Step>
+
+                            <Step title="2. Validación de Asistencia" status={!course.surveyCompleted ? 'disabled' : course.attendanceApproved ? 'done' : 'pending'} />
+                            
+                            <Step title="3. Obtener Constancia" status={!course.surveyCompleted || !course.attendanceApproved ? 'disabled' : 'next'}>
+                                {course.surveyCompleted && course.attendanceApproved && (
+                                     <button onClick={() => handleCertificateClick(course)} className="w-full sm:w-auto text-center font-semibold py-2 px-4 rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                                        ✉️ Enviar a mi Correo
+                                    </button>
+                                )}
+                            </Step>
+                        </div>
+                    </div>
+                    )
+                })}
+                
+                 {courses.length === 0 && !efficacySurvey && (
+                    <div className="text-center bg-blue-50 text-blue-800 p-8 rounded-lg">
+                        <p className="font-semibold text-lg">No tienes actividades pendientes por ahora.</p>
+                        <p className="mt-2 text-sm">Vuelve más tarde para revisar si hay nuevas encuestas disponibles.</p>
+                    </div>
+                 )}
+            </div>
          </div>
     );
 };
