@@ -48,7 +48,7 @@
 
     <div id="root"></div>
 
-    <footer class="bg-blue-800 text-white text-center p-4 mt-auto border-t-8 border-b-8 border-red-900">
+    <footer class="bg-blue-800 text-white text-center p-4 mt-auto">
         <p class="font-semibold text-sm sm:text-base">© Coordinación de actualización docente</p>
     </footer>
 
@@ -335,8 +335,14 @@
                     const cacheBuster = `&ts=${new Date().getTime()}`;
 
                     try {
+                        const fetchOptions = {
+                            method: 'GET',
+                            mode: 'cors',
+                            redirect: 'follow'
+                        };
+
                         // 1. Cargar Cursos
-                        const coursesRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`);
+                        const coursesRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`, fetchOptions);
                         if (!coursesRes.ok) {
                             throw new Error(`No se pudo conectar con el servidor de cursos (código: ${coursesRes.status}).`);
                         }
@@ -347,7 +353,7 @@
                         setCourses(coursesData.data || []);
 
                         // 2. Cargar Docentes
-                        const teachersRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`);
+                        const teachersRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`, fetchOptions);
                         if (!teachersRes.ok) {
                             throw new Error(`No se pudo conectar con el servidor de docentes (código: ${teachersRes.status}).`);
                         }
