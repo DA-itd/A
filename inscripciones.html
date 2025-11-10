@@ -333,26 +333,37 @@
                     setLoading(true);
                     setError(null);
                     const cacheBuster = `&ts=${new Date().getTime()}`;
+                    
                     try {
-                        const coursesRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`);
-                        if (!coursesRes.ok) {
-                            throw new Error(`Error de red al cargar cursos (código: ${coursesRes.status}).`);
-                        }
-                        const coursesData = await coursesRes.json();
-                        if (!coursesData.success) {
-                            throw new Error(coursesData.message || "El servidor no pudo cargar los cursos.");
-                        }
-                        setCourses(coursesData.data);
+                        const [coursesRes, teachersRes] = await Promise.all([
+                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`),
+                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`)
+                        ]);
 
-                        const teachersRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`);
-                        if (!teachersRes.ok) {
-                            throw new Error(`Error de red al cargar docentes (código: ${teachersRes.status}).`);
+                        const coursesDataPromise = coursesRes.json();
+                        const teachersDataPromise = teachersRes.json();
+
+                        const [coursesData, teachersData] = await Promise.all([coursesDataPromise, teachersDataPromise]);
+
+                        const errorMessages = [];
+                        
+                        if (!coursesRes.ok || !coursesData.success) {
+                            const message = coursesData.message || `Error al cargar cursos (código: ${coursesRes.status}).`;
+                            errorMessages.push(`Cursos: ${message}`);
+                        } else {
+                            setCourses(coursesData.data || []);
                         }
-                        const teachersData = await teachersRes.json();
-                        if (!teachersData.success) {
-                            throw new Error(teachersData.message || "El servidor no pudo cargar los docentes.");
+
+                        if (!teachersRes.ok || !teachersData.success) {
+                            const message = teachersData.message || `Error al cargar docentes (código: ${teachersRes.status}).`;
+                            errorMessages.push(`Docentes: ${message}`);
+                        } else {
+                            setTeachers(teachersData.data || []);
                         }
-                        setTeachers(teachersData.data);
+
+                        if (errorMessages.length > 0) {
+                            throw new Error(errorMessages.join(' | '));
+                        }
 
                     } catch (err) {
                         console.error("Fallo en loadInitialData:", err);
