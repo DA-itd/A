@@ -387,21 +387,33 @@
                     const cacheBuster = `&ts=${new Date().getTime()}`;
                     
                     try {
-                        // Usamos Promise.all para cargar en paralelo
-                        const [coursesResponse, teachersResponse] = await Promise.all([
-                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`, { mode: 'cors' }),
-                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`, { mode: 'cors' })
-                        ]);
-
+                        // Carga SECUENCIAL para mayor robustez
+                        // 1. Cargar Cursos
+                        const coursesResponse = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`, { mode: 'cors' });
                         if (!coursesResponse.ok) {
-                            const errorText = await coursesResponse.text();
-                            throw new Error(`Error del servidor al cargar cursos: Acción no reconocida en doGet. Se recibió: 'getCoursesList'. Asegúrese de que el script esté implementado con la última versión del código.`);
+                             const errorText = await coursesResponse.text();
+                             let friendlyMessage = `Error del servidor al cargar cursos. Asegúrese de que el script esté implementado con la última versión del código.`;
+                             try {
+                                const errorJson = JSON.parse(errorText);
+                                friendlyMessage = `Error del servidor (cursos): ${errorJson.message}`;
+                             } catch (e) { /* Mantener el mensaje genérico */ }
+                            throw new Error(friendlyMessage);
                         }
                         const coursesData = await coursesResponse.json();
                         if (!coursesData.success) throw new Error(`Error del servidor (cursos): ${coursesData.message}`);
                         setCourses(coursesData.data || []);
 
-                        if (!teachersResponse.ok) throw new Error(`Error al cargar docentes: ${teachersResponse.statusText}`);
+                        // 2. Cargar Docentes (solo si los cursos cargaron bien)
+                        const teachersResponse = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`, { mode: 'cors' });
+                        if (!teachersResponse.ok) {
+                            const errorText = await teachersResponse.text();
+                            let friendlyMessage = `Error del servidor al cargar la lista de docentes.`;
+                            try {
+                               const errorJson = JSON.parse(errorText);
+                               friendlyMessage = `Error del servidor (docentes): ${errorJson.message}`;
+                            } catch (e) { /* Mantener el mensaje genérico */ }
+                           throw new Error(friendlyMessage);
+                        }
                         const teachersData = await teachersResponse.json();
                         if (!teachersData.success) throw new Error(`Error del servidor (docentes): ${teachersData.message}`);
                         setTeachers(teachersData.data || []);
