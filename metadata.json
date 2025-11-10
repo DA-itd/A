@@ -1,0 +1,5 @@
+{
+  "name": "Portal de Actualización Docente ITD (SPA)",
+  "description": "Una aplicación de página única (SPA) para la gestión de cursos de actualización docente en el Instituto Tecnológico de Durango. Permite a los docentes inscribirse, responder encuestas, generar constancias y más, todo en una interfaz fluida y moderna.",
+  "requestFramePermissions": []
+}
