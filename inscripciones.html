@@ -368,15 +368,16 @@
                     setLoading(true);
                     setError(null);
                     const cacheBuster = `&ts=${new Date().getTime()}`;
+                    const fetchOptions = { method: 'GET', mode: 'cors', redirect: 'follow' };
 
                     try {
-                        const coursesRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`);
+                        const coursesRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList${cacheBuster}`, fetchOptions);
                         if (!coursesRes.ok) throw new Error(`No se pudo conectar con el servidor de cursos (código: ${coursesRes.status}).`);
                         const coursesData = await coursesRes.json();
                         if (!coursesData.success) throw new Error(`Error del servidor al cargar cursos: ${coursesData.message || 'Respuesta no válida'}`);
                         setCourses(coursesData.data || []);
 
-                        const teachersRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`);
+                        const teachersRes = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList${cacheBuster}`, fetchOptions);
                         if (!teachersRes.ok) throw new Error(`No se pudo conectar con el servidor de docentes (código: ${teachersRes.status}).`);
                         const teachersData = await teachersRes.json();
                         if (!teachersData.success) throw new Error(`Error del servidor al cargar docentes: ${teachersData.message || 'Respuesta no válida'}`);
@@ -408,6 +409,9 @@
                     try {
                         const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
                             method: 'POST',
+                            mode: 'cors',
+                            redirect: 'follow',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                             body: JSON.stringify({ action: 'registerCourse', ...formData, course: course })
                         });
                         const result = await response.json();
