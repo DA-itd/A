@@ -74,7 +74,7 @@
             clear: () => localStorage.removeItem(CONFIG.SESSION_KEY)
         };
 
-        const LoginStep = ({ onLogin, error }) => {
+        function LoginStep({ onLogin, error }) {
             useEffect(() => {
                 if (window.google) {
                     google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
@@ -100,9 +100,10 @@
                     </div>
                 </div>
             );
-        };
+        }
 
-        const CertificateCard = ({ course, onGenerate, courseStatuses, setCourseStatuses }) => {
+        function CertificateCard(props) {
+            const { course, onGenerate, courseStatuses, setCourseStatuses } = props;
             const currentStatus = courseStatuses[course.id] || 'idle';
             const isApproved = course.status === 'approved';
 
@@ -147,35 +148,38 @@
                     </button>
                 </div>
             );
-        };
+        }
 
-        const CertificateListStep = ({ teacherData, eligibleCourses, onLogout, onGenerate, courseStatuses, setCourseStatuses }) => (
-            <div>
-                <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-                    <div>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Constancias Disponibles</h2>
-                        <p className="text-gray-600 mt-1">Hola, <strong>{teacherData.fullName}</strong></p>
-                    </div>
-                    <button onClick={onLogout} className="text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg">
-                        Cerrar Sesión
-                    </button>
-                </div>
-                <div className="space-y-4">
-                    {eligibleCourses.length > 0 ? (
-                        eligibleCourses.map(course => (
-                            <CertificateCard key={course.id} course={course} onGenerate={onGenerate} courseStatuses={courseStatuses} setCourseStatuses={setCourseStatuses}/>
-                        ))
-                    ) : (
-                        <div className="text-center bg-blue-50 text-blue-800 p-8 rounded-lg">
-                            <p className="font-semibold text-lg">No tienes constancias disponibles por ahora.</p>
-                            <p className="mt-2 text-sm">Asegúrate de haber contestado la encuesta de opinión del curso correspondiente.</p>
+        function CertificateListStep(props) {
+            const { teacherData, eligibleCourses, onLogout, onGenerate, courseStatuses, setCourseStatuses } = props;
+            return (
+                <div>
+                    <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+                        <div>
+                            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Constancias Disponibles</h2>
+                            <p className="text-gray-600 mt-1">Hola, <strong>{teacherData.fullName}</strong></p>
                         </div>
-                    )}
+                        <button onClick={onLogout} className="text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg">
+                            Cerrar Sesión
+                        </button>
+                    </div>
+                    <div className="space-y-4">
+                        {eligibleCourses.length > 0 ? (
+                            eligibleCourses.map(course => (
+                                <CertificateCard key={course.id} course={course} onGenerate={onGenerate} courseStatuses={courseStatuses} setCourseStatuses={setCourseStatuses}/>
+                            ))
+                        ) : (
+                            <div className="text-center bg-blue-50 text-blue-800 p-8 rounded-lg">
+                                <p className="font-semibold text-lg">No tienes constancias disponibles por ahora.</p>
+                                <p className="mt-2 text-sm">Asegúrate de haber contestado la encuesta de opinión del curso correspondiente.</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        }
 
-        const ConstanciasApp = () => {
+        function ConstanciasApp() {
             const [step, setStep] = useState('loading');
             const [error, setError] = useState(null);
             const [appData, setAppData] = useState({ teacherData: null, eligibleCourses: [] });
@@ -188,7 +192,7 @@
                     url.searchParams.append('action', 'getEligibleCoursesForCertificate');
                     url.searchParams.append('email', email);
                     
-                    const response = await fetch(url.toString(), { cache: 'no-store' }); // FORZAR DATOS FRESCOS
+                    const response = await fetch(url.toString(), { cache: 'no-store' });
                     if (!response.ok) throw new Error(`Error del servidor: ${response.status}`);
                     
                     const result = await response.json();
@@ -298,7 +302,7 @@
                     </div>
                 </main>
             );
-        };
+        }
 
         window.addEventListener('load', () => {
             const root = ReactDOM.createRoot(document.getElementById('root'));
