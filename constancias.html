@@ -49,7 +49,7 @@
 
         const CONFIG = {
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwaCOFUQFQnvuCEVJU33uNsILIGaVTuv_aREuMdqxrsKYAZ7dtYNtWxX3LdqwP614i6/exec',
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz2hpmaNoCj0Zy0mzl8mvYU978u7llspIFMyNuqt7VRu7Xi3yK3vkkOFNDWyokPVl5ODw/exec',
             SESSION_KEY: 'certificate_session',
             SESSION_TIMEOUT_MINUTES: 60,
             INSTITUTIONAL_DOMAIN: '@itdurango.edu.mx'
@@ -74,7 +74,8 @@
             clear: () => localStorage.removeItem(CONFIG.SESSION_KEY)
         };
 
-        function LoginStep({ onLogin, error }) {
+        function LoginStep(props) {
+            const { onLogin, error } = props;
             useEffect(() => {
                 if (window.google) {
                     google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
