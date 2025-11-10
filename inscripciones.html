@@ -4,352 +4,374 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscripción a Cursos - ITD</title>
-    <meta name="description" content="Inscríbete a los cursos de actualización docente del Instituto Tecnológico de Durango. Consulta la oferta disponible y asegura tu lugar.">
-    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+    <meta name="description" content="Inscríbete a los cursos de actualización docente del Instituto Tecnológico de Durango. Consulta la oferta académica, selecciona tus cursos y regístrate en línea.">
+    <meta name="keywords" content="inscripciones ITD, cursos ITD, registro cursos, actualización docente, TecNM Durango">
+    
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
 
-    <header class="bg-white shadow-xl sticky top-0 z-40">
-        <div class="container mx-auto px-4 py-4 sm:py-6">
-            <div class="flex items-center justify-between gap-4">
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="Logo TecNM" class="h-16 md:h-20 lg:h-24 object-contain">
-                <div class="text-center flex-1 px-2 sm:px-4">
-                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">SISTEMA DE INSCRIPCIÓN A CURSOS DE ACTUALIZACIÓN DOCENTE</h1>
-                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">INSTITUTO TECNOLÓGICO DE DURANGO</p>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JH1X2720VL');
+    </script>
+</head>
+<body class="bg-gray-100">
+
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between gap-4 py-4 min-h-[100px]">
+                <div class="flex-shrink-0">
+                    <img class="h-16 md:h-20 lg:h-24" src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="Logo TecNM">
                 </div>
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="Logo ITD" class="h-16 md:h-20 lg:h-24 object-contain">
+                <div class="text-center flex-1 px-2">
+                    <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-blue-900">
+                        SISTEMA DE INSCRIPCIÓN A CURSOS DE ACTUALIZACIÓN DOCENTE
+                    </h1>
+                    <h2 class="text-sm sm:text-base md:text-lg text-blue-900 mt-1">
+                        INSTITUTO TECNOLÓGICO DE DURANGO
+                    </h2>
+                </div>
+                <div class="flex-shrink-0">
+                    <img class="h-16 md:h-20 lg:h-24" src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="Logo Instituto Tecnológico de Durango">
+                </div>
             </div>
         </div>
     </header>
 
     <div id="root"></div>
 
-    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
-        <div class="container mx-auto px-4">
-            <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
-        </div>
+    <footer class="bg-blue-800 text-white text-center p-4 mt-auto">
+        <p class="font-semibold text-sm sm:text-base">© Coordinación de actualización docente</p>
     </footer>
 
     <script type="text/babel">
-        window.addEventListener('load', function() {
-            const { useState, useEffect, useCallback, useMemo } = React;
+        const { useState, useEffect, useCallback, useMemo } = React;
 
-            const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2hpmaNoCj0Zy0mzl8mvYU978u7llspIFMyNuqt7VRu7Xi3yK3vkkOFNDWyokPVl5ODw/exec';
-            
-            function fetchData(action) {
-                const url = new URL(APPS_SCRIPT_URL);
-                url.searchParams.append('action', action);
-                url.searchParams.append('t', new Date().getTime()); // Cache busting
-                return fetch(url).then(res => res.json());
-            }
+        const CONFIG = {
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz2hpmaNoCj0Zy0mzl8mvYU978u7llspIFMyNuqt7VRu7Xi3yK3vkkOFNDWyokPVl5ODw/exec'
+        };
 
-            const Spinner = () => (
+        // ============================================================================
+        // === COMPONENTES DE LA UI ==================================================
+        // ============================================================================
+
+        function Spinner() {
+            return (
                 <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-800"></div>
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600"></div>
                 </div>
             );
+        }
 
-            const StepIndicator = ({ currentStep }) => {
-                const steps = ["Información", "Cursos", "Confirmar", "Finalizado"];
-                return (
-                    <div className="flex justify-center items-center space-x-4 sm:space-x-8 mb-8">
-                        {steps.map((label, index) => {
-                            const stepNumber = index + 1;
-                            const isActive = stepNumber === currentStep;
-                            const isCompleted = stepNumber < currentStep;
-                            return (
-                                <div key={label} className="flex flex-col items-center">
-                                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-white transition-colors ${isCompleted ? 'bg-green-500' : isActive ? 'bg-blue-600' : 'bg-gray-300'}`}>
+        function StepIndicator({ currentStep }) {
+            const steps = ["Información", "Cursos", "Confirmar", "Finalizado"];
+            return (
+                <div className="flex justify-between items-center mb-8 px-4">
+                    {steps.map((step, index) => {
+                        const stepNumber = index + 1;
+                        const isCompleted = currentStep > stepNumber;
+                        const isActive = currentStep === stepNumber;
+                        return (
+                            <React.Fragment key={step}>
+                                <div className="flex flex-col items-center">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white transition-colors ${isCompleted ? 'bg-green-500' : isActive ? 'bg-blue-600' : 'bg-gray-300'}`}>
                                         {isCompleted ? '✓' : stepNumber}
                                     </div>
-                                    <span className={`mt-2 text-xs sm:text-sm transition-colors ${isActive ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>{label}</span>
+                                    <p className={`mt-2 text-xs text-center font-semibold ${isActive ? 'text-blue-600' : 'text-gray-500'}`}>{step}</p>
                                 </div>
-                            );
-                        })}
-                    </div>
-                );
+                                {stepNumber < steps.length && <div className={`flex-1 h-1 mx-2 ${isCompleted ? 'bg-green-500' : 'bg-gray-300'}`}></div>}
+                            </React.Fragment>
+                        );
+                    })}
+                </div>
+            );
+        }
+
+        function Step1TeacherInfo({ formData, setFormData, onNext, teachers }) {
+            const [inputValue, setInputValue] = useState(formData.fullName || "");
+            const [showSuggestions, setShowSuggestions] = useState(false);
+
+            const handleInputChange = (e) => {
+                const value = e.target.value.toUpperCase();
+                setInputValue(value);
+                setFormData(prev => ({ ...prev, fullName: value, email: '', department: '' }));
+                setShowSuggestions(true);
             };
 
-            const Step1PersonalInfo = ({ onNext, formData, setFormData, teachers }) => {
-                const [suggestions, setSuggestions] = useState([]);
-
-                const handleNameChange = (e) => {
-                    const value = e.target.value.toUpperCase();
-                    setFormData(prev => ({ ...prev, fullName: value }));
-                    if (value.length > 2) {
-                        const filtered = teachers.filter(t => t.nombre.toLowerCase().includes(value.toLowerCase()));
-                        setSuggestions(filtered);
-                    } else {
-                        setSuggestions([]);
-                    }
-                };
-
-                const handleSuggestionClick = (teacher) => {
+            const onTeacherSelect = (teacher) => {
+                if (teacher && teacher.nombre) {
+                    setInputValue(teacher.nombre.toUpperCase());
                     setFormData(prev => ({
                         ...prev,
-                        fullName: teacher.nombre,
-                        email: teacher.email,
-                        department: teacher.departamento
+                        fullName: teacher.nombre.toUpperCase(),
+                        email: teacher.email || '',
+                        department: teacher.departamento || ''
                     }));
-                    setSuggestions([]);
-                };
-
-                const isFormValid = formData.fullName && formData.email && formData.email.includes('@') && formData.department && formData.curp.length === 18 && formData.gender;
-
-                return (
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-1">Información Personal</h3>
-                        <p className="text-sm text-gray-600 mb-6">Completa tus datos para continuar.</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="relative">
-                                <label className="block text-sm font-medium text-gray-700">Nombre Completo *</label>
-                                <input type="text" value={formData.fullName} onChange={handleNameChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Escriba su nombre" />
-                                {suggestions.length > 0 && (
-                                    <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
-                                        {suggestions.map((teacher, index) => (
-                                            <li key={index} onClick={() => handleSuggestionClick(teacher)} className="px-3 py-2 hover:bg-gray-100 cursor-pointer">{teacher.nombre}</li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">CURP *</label>
-                                <input type="text" value={formData.curp} onChange={e => setFormData(p => ({ ...p, curp: e.target.value.toUpperCase() }))} maxLength="18" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="18 caracteres" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Email Institucional *</label>
-                                <input type="email" value={formData.email} onChange={e => setFormData(p => ({ ...p, email: e.target.value }))} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100" placeholder="email@itdurango.edu.mx" readOnly />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Género *</label>
-                                <select value={formData.gender} onChange={e => setFormData(p => ({ ...p, gender: e.target.value }))} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                                    <option value="">Seleccione un género</option>
-                                    <option value="Hombre">Hombre</option>
-                                    <option value="Mujer">Mujer</option>
-                                </select>
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700">Departamento *</label>
-                                <input type="text" value={formData.department} onChange={e => setFormData(p => ({ ...p, department: e.target.value }))} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100" placeholder="Seleccione un departamento" readOnly />
-                            </div>
-                        </div>
-                        <div className="mt-8 flex justify-end">
-                            <button onClick={onNext} disabled={!isFormValid} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-400 transition-colors">
-                                Continuar
-                            </button>
-                        </div>
-                    </div>
-                );
+                }
+                setShowSuggestions(false);
             };
 
-            const Step2CourseSelection = ({ onBack, onNext, formData, setFormData, courses }) => {
-                const availablePeriods = useMemo(() => [...new Set(courses.map(c => c.periodo))], [courses]);
-                const [selectedPeriod, setSelectedPeriod] = useState(availablePeriods[0] || '');
+            const filteredTeachers = useMemo(() => {
+                if (!inputValue) return [];
+                // Robust filtering: ensure teacher and teacher.nombre exist before calling toLowerCase
+                return teachers.filter(teacher =>
+                    teacher && teacher.nombre && teacher.nombre.toLowerCase().includes(inputValue.toLowerCase())
+                ).slice(0, 5);
+            }, [inputValue, teachers]);
+            
+            const isFormValid = formData.fullName && formData.curp && formData.email && formData.gender && formData.department;
 
-                const availableTypes = useMemo(() => [...new Set(courses.filter(c => c.periodo === selectedPeriod).map(c => c.tipo))], [courses, selectedPeriod]);
-                const [selectedType, setSelectedType] = useState(availableTypes[0] || '');
-
-                useEffect(() => {
-                    const newAvailableTypes = [...new Set(courses.filter(c => c.periodo === selectedPeriod).map(c => c.tipo))];
-                    setSelectedType(newAvailableTypes[0] || '');
-                }, [selectedPeriod, courses]);
-
-                const filteredCourses = useMemo(() => courses.filter(c => c.periodo === selectedPeriod && c.tipo === selectedType), [courses, selectedPeriod, selectedType]);
-
-                const handleAddCourse = (course) => {
-                    setFormData(prev => {
-                        const isAlreadyAdded = prev.selectedCourses.some(c => c.id_curso === course.id_curso);
-                        if (isAlreadyAdded || prev.selectedCourses.length >= 3) return prev;
-                        return { ...prev, selectedCourses: [...prev.selectedCourses, course] };
-                    });
-                };
-
-                const handleRemoveCourse = (courseId) => {
-                    setFormData(prev => ({ ...prev, selectedCourses: prev.selectedCourses.filter(c => c.id_curso !== courseId) }));
-                };
-
-                return (
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-6">Selección de Cursos (Máximo 3)</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Periodo</label>
-                                <select value={selectedPeriod} onChange={e => setSelectedPeriod(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                                    {availablePeriods.map(p => <option key={p} value={p}>{p}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Tipo de Curso</label>
-                                <select value={selectedType} onChange={e => setSelectedType(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                                    {availableTypes.map(t => <option key={t} value={t}>{t}</option>)}
-                                </select>
-                            </div>
+            return (
+                <div>
+                    <h3 className="text-xl font-bold mb-4">Información Personal</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="relative">
+                            <label className="block text-sm font-medium text-gray-700">Nombre Completo *</label>
+                            <input
+                                type="text"
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 uppercase"
+                                value={inputValue}
+                                onChange={handleInputChange}
+                                onFocus={() => setShowSuggestions(true)}
+                                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                                placeholder="Escriba su nombre"
+                            />
+                            {showSuggestions && filteredTeachers.length > 0 && (
+                                <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
+                                    {filteredTeachers.map((teacher, index) => (
+                                        <li
+                                            key={index}
+                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                            onClick={() => onTeacherSelect(teacher)}
+                                        >
+                                            {teacher.nombre}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">CURP *</label>
+                            <input type="text" value={formData.curp} onChange={e => setFormData(prev => ({ ...prev, curp: e.target.value }))} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" placeholder="18 caracteres" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Email Institucional *</label>
+                            <input type="email" value={formData.email} onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" placeholder="email@itdurango.edu.mx" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Género *</label>
+                            <select value={formData.gender} onChange={e => setFormData(prev => ({ ...prev, gender: e.target.value }))} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                                <option value="">Seleccione un género</option>
+                                <option value="Mujer">Mujer</option>
+                                <option value="Hombre">Hombre</option>
+                            </select>
+                        </div>
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700">Departamento *</label>
+                            <select value={formData.department} onChange={e => setFormData(prev => ({ ...prev, department: e.target.value }))} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                                <option value="">Seleccione un departamento</option>
+                                {[...new Set(teachers.map(t => t.departamento).filter(Boolean))].sort().map(dep => (
+                                    <option key={dep} value={dep}>{dep}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="mt-6 text-right">
+                        <button onClick={onNext} disabled={!isFormValid} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50">
+                            Continuar
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        function Step2CourseSelection({ formData, setFormData, onNext, onBack, courses }) {
+            const [filters, setFilters] = useState({ period: 'Enero - Junio 2025', type: 'Todos' });
+            
+            const handleCourseSelect = (course, isSelected) => {
+                setFormData(prev => {
+                    const currentSelection = prev.selectedCourses || [];
+                    if (isSelected) {
+                        return { ...prev, selectedCourses: [...currentSelection, course] };
+                    } else {
+                        return { ...prev, selectedCourses: currentSelection.filter(c => c.id_curso !== course.id_curso) };
+                    }
+                });
+            };
+
+            const availablePeriods = useMemo(() => [...new Set(courses.map(c => c.periodo))], [courses]);
+            const availableTypes = useMemo(() => ['Todos', ...new Set(courses.map(c => c.tipo))], [courses]);
+            
+            const filteredCourses = useMemo(() => {
+                return courses.filter(course =>
+                    course.estado === 'Activo' &&
+                    course.periodo === filters.period &&
+                    (filters.type === 'Todos' || course.tipo === filters.type)
+                );
+            }, [courses, filters]);
+
+            const selectedCount = (formData.selectedCourses || []).length;
+
+            return (
+                <div>
+                    <h3 className="text-xl font-bold mb-4">Selección de Cursos</h3>
+                    <div className="flex gap-4 mb-4">
+                        {/* Filtros */}
+                    </div>
+                    {filteredCourses.map(course => (
+                        <div key={course.id_curso} className="mb-2 p-2 border rounded">
+                            <input 
+                                type="checkbox" 
+                                id={course.id_curso} 
+                                disabled={selectedCount >= 3 && !(formData.selectedCourses || []).find(c => c.id_curso === course.id_curso)}
+                                checked={(formData.selectedCourses || []).some(c => c.id_curso === course.id_curso)}
+                                onChange={e => handleCourseSelect(course, e.target.checked)}
+                            />
+                            <label htmlFor={course.id_curso} className="ml-2">{course.nombre_curso}</label>
+                        </div>
+                    ))}
+                    <div className="mt-6 flex justify-between">
+                        <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
+                        <button onClick={onNext} disabled={selectedCount === 0} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50">Continuar</button>
+                    </div>
+                </div>
+            );
+        }
+
+        function Step3Confirm({ formData, onBack, onSubmit }) {
+            return (
+                <div>
+                    <h3 className="text-xl font-bold mb-4">Confirmar Inscripción</h3>
+                    <p><strong>Nombre:</strong> {formData.fullName}</p>
+                    <p><strong>Cursos Seleccionados:</strong></p>
+                    <ul>
+                        {(formData.selectedCourses || []).map(c => <li key={c.id_curso}>- {c.nombre_curso}</li>)}
+                    </ul>
+                    <div className="mt-6 flex justify-between">
+                        <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
+                        <button onClick={onSubmit} className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg">Confirmar e Inscribir</button>
+                    </div>
+                </div>
+            );
+        }
+
+        function Step4Finalized({ results, onReset }) {
+             return (
+                <div>
+                    <h3 className="text-xl font-bold mb-4">Resultado de la Inscripción</h3>
+                    {results.map(result => (
+                        <div key={result.courseId} className={`p-4 border-l-4 rounded-r-lg mb-2 ${result.success ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
+                            <h4 className="font-bold">{result.courseName}</h4>
+                            <p className={`text-sm ${result.success ? 'text-green-800' : 'text-red-800'}`}>{result.message}</p>
+                        </div>
+                    ))}
+                    <div className="mt-6 text-center">
+                        <button onClick={onReset} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">Realizar otra inscripción</button>
+                    </div>
+                </div>
+            );
+        }
+
+
+        // ============================================================================
+        // === COMPONENTE PRINCIPAL DE LA APLICACIÓN =================================
+        // ============================================================================
+
+        function InscripcionesApp() {
+            const [step, setStep] = useState(1);
+            const [formData, setFormData] = useState({ fullName: '', curp: '', email: '', gender: '', department: '', selectedCourses: [] });
+            const [courses, setCourses] = useState([]);
+            const [teachers, setTeachers] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(null);
+            const [submissionResults, setSubmissionResults] = useState([]);
+
+            useEffect(() => {
+                async function loadInitialData() {
+                    try {
+                        const [coursesRes, teachersRes] = await Promise.all([
+                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getCoursesList`),
+                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeachersList`)
+                        ]);
+                        const coursesData = await coursesRes.json();
+                        const teachersData = await teachersRes.json();
+
+                        if (!coursesData.success || !teachersData.success) {
+                            throw new Error("Error al cargar datos iniciales.");
+                        }
                         
-                        <div className="space-y-3 max-h-60 overflow-y-auto pr-2 mb-6 border rounded-md p-2">
-                            {filteredCourses.map(course => (
-                                <div key={course.id_curso} className="p-3 bg-gray-50 rounded-md flex justify-between items-center">
-                                    <div>
-                                        <p className="font-semibold">{course.nombre_curso}</p>
-                                        <p className="text-xs text-gray-500">{course.fecha_curso} | {course.horario}</p>
-                                    </div>
-                                    <button onClick={() => handleAddCourse(course)} className="bg-green-500 text-white px-3 py-1 text-sm rounded-md hover:bg-green-600">+</button>
-                                </div>
-                            ))}
-                        </div>
-
-                        <h4 className="font-bold mb-2">Cursos Seleccionados:</h4>
-                        <div className="space-y-2">
-                            {formData.selectedCourses.length > 0 ? formData.selectedCourses.map(course => (
-                                <div key={course.id_curso} className="p-3 bg-blue-100 rounded-md flex justify-between items-center">
-                                    <p className="font-semibold text-blue-800">{course.nombre_curso}</p>
-                                    <button onClick={() => handleRemoveCourse(course.id_curso)} className="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600">-</button>
-                                </div>
-                            )) : <p className="text-gray-500">Ningún curso seleccionado.</p>}
-                        </div>
-
-                        <div className="mt-8 flex justify-between">
-                            <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
-                            <button onClick={onNext} disabled={formData.selectedCourses.length === 0} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-400">Continuar</button>
-                        </div>
-                    </div>
-                );
+                        setCourses(coursesData.data);
+                        setTeachers(teachersData.data);
+                    } catch (err) {
+                        setError("Error al cargar datos. Asegúrese de que el script esté implementado con la última versión del código.");
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+                loadInitialData();
+            }, []);
+            
+            const handleNext = () => setStep(prev => prev + 1);
+            const handleBack = () => setStep(prev => prev - 1);
+            const handleReset = () => {
+                setStep(1);
+                setFormData({ fullName: '', curp: '', email: '', gender: '', department: '', selectedCourses: [] });
+                setSubmissionResults([]);
             };
 
-            const Step3Confirmation = ({ onBack, onSubmit, formData }) => {
-                return (
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-6">Confirmar Inscripción</h3>
-                        <div className="space-y-4 bg-gray-50 p-4 rounded-md border">
-                            <p><strong>Nombre:</strong> {formData.fullName}</p>
-                            <p><strong>Email:</strong> {formData.email}</p>
-                            <p><strong>Departamento:</strong> {formData.department}</p>
-                            <h4 className="font-bold mt-4">Cursos a Inscribir:</h4>
-                            <ul className="list-disc list-inside space-y-1">
-                                {formData.selectedCourses.map(c => <li key={c.id_curso}>{c.nombre_curso}</li>)}
-                            </ul>
-                        </div>
-                        <div className="mt-8 flex justify-between">
-                            <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
-                            <button onClick={onSubmit} className="bg-green-600 text-white font-bold py-2 px-6 rounded-lg">Confirmar y Enviar</button>
-                        </div>
-                    </div>
-                );
+            const handleSubmit = async () => {
+                setLoading(true);
+                setStep(4); // Go to final step to show results
+                const results = [];
+                for (const course of formData.selectedCourses) {
+                    try {
+                        const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({ action: 'registerCourse', ...formData, course: course })
+                        });
+                        const result = await response.json();
+                        results.push({ ...result, courseId: course.id_curso, courseName: course.nombre_curso });
+                    } catch (err) {
+                        results.push({ success: false, message: 'Error de conexión', courseId: course.id_curso, courseName: course.nombre_curso });
+                    }
+                }
+                setSubmissionResults(results);
+                setLoading(false);
             };
 
-            const Step4Final = ({ results, onReset }) => {
-                return (
-                    <div className="text-center">
-                        <h3 className="text-2xl font-bold text-gray-800 mb-4">Proceso de Inscripción Finalizado</h3>
-                        <p className="text-gray-600 mb-6">A continuación se muestra el resultado de cada una de sus solicitudes de inscripción.</p>
-                        <div className="space-y-4 text-left">
-                            {results.map(result => {
-                                const course = result.course;
-                                const courseName = (course && course.nombre_curso) ? course.nombre_curso : 'Curso Desconocido';
-                                return (
-                                    <div key={result.courseId} className={`p-4 border-l-4 rounded-r-lg ${result.success ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
-                                        <h3 className="font-bold">{courseName}</h3>
-                                        <p className={`text-sm ${result.success ? 'text-green-800' : 'text-red-800'}`}>{result.message}</p>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        <button onClick={onReset} className="mt-8 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700">Realizar otra inscripción</button>
-                    </div>
-                );
+            const renderStep = () => {
+                if (loading && step < 4) return <Spinner />;
+                if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
+
+                switch (step) {
+                    case 1: return <Step1TeacherInfo formData={formData} setFormData={setFormData} onNext={handleNext} teachers={teachers} />;
+                    case 2: return <Step2CourseSelection formData={formData} setFormData={setFormData} onNext={handleNext} onBack={handleBack} courses={courses} />;
+                    case 3: return <Step3Confirm formData={formData} onBack={handleBack} onSubmit={handleSubmit} />;
+                    case 4: return <Step4Finalized results={submissionResults} onReset={handleReset} />;
+                    default: return <div>Paso no válido</div>;
+                }
             };
             
-            const InscripcionesApp = () => {
-                const [step, setStep] = useState(1);
-                const [isLoading, setIsLoading] = useState(true);
-                const [error, setError] = useState(null);
-                const [courses, setCourses] = useState([]);
-                const [teachers, setTeachers] = useState([]);
-                const [formData, setFormData] = useState({
-                    fullName: '', email: '', department: '', curp: '', gender: '', selectedCourses: []
-                });
-                const [submissionResults, setSubmissionResults] = useState([]);
+            return (
+                <main className="container mx-auto px-4 py-8">
+                    <a href="index.html" className="text-blue-600 hover:underline mb-4 inline-block">← Volver al Portal</a>
+                    <div className="bg-white rounded-lg shadow-xl p-6">
+                        <StepIndicator currentStep={step} />
+                        {renderStep()}
+                    </div>
+                </main>
+            );
+        }
 
-                useEffect(() => {
-                    Promise.all([fetchData('getCoursesList'), fetchData('getTeachersList')])
-                        .then(([coursesResult, teachersResult]) => {
-                            if (coursesResult.success) setCourses(coursesResult.data);
-                            else throw new Error(coursesResult.message || 'No se pudieron cargar los cursos.');
-                            
-                            if (teachersResult.success) setTeachers(teachersResult.data);
-                            else throw new Error(teachersResult.message || 'No se pudieron cargar los docentes.');
-
-                            setIsLoading(false);
-                        })
-                        .catch(err => {
-                            setError(err.message || "Error al cargar datos. Asegúrese de que el script esté implementado con la última versión del código.");
-                            setIsLoading(false);
-                        });
-                }, []);
-
-                const handleSubmit = async () => {
-                    setIsLoading(true);
-                    setStep(4);
-                    const results = [];
-                    for (const course of formData.selectedCourses) {
-                        const payload = {
-                            action: 'registerCourse',
-                            ...formData,
-                            course: course
-                        };
-                        try {
-                            const response = await fetch(APPS_SCRIPT_URL, {
-                                method: 'POST',
-                                mode: 'cors',
-                                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                                body: JSON.stringify(payload)
-                            });
-                            const result = await response.json();
-                            results.push({ ...result, courseId: course.id_curso, course });
-                        } catch (err) {
-                            results.push({ success: false, message: 'Error de conexión con el servidor.', courseId: course.id_curso, course });
-                        }
-                    }
-                    setSubmissionResults(results);
-                    setIsLoading(false);
-                };
-
-                const resetForm = () => {
-                    setFormData({ fullName: '', email: '', department: '', curp: '', gender: '', selectedCourses: [] });
-                    setStep(1);
-                };
-
-                const renderContent = () => {
-                    if (isLoading && step === 1) return <Spinner />;
-                    if (error) return <div className="text-red-500 p-4 text-center bg-red-50 rounded-lg">{error}</div>;
-
-                    switch (step) {
-                        case 1: return <Step1PersonalInfo onNext={() => setStep(2)} formData={formData} setFormData={setFormData} teachers={teachers} />;
-                        case 2: return <Step2CourseSelection onBack={() => setStep(1)} onNext={() => setStep(3)} formData={formData} setFormData={setFormData} courses={courses} />;
-                        case 3: return <Step3Confirmation onBack={() => setStep(2)} onSubmit={handleSubmit} formData={formData} />;
-                        case 4: return isLoading ? <Spinner /> : <Step4Final results={submissionResults} onReset={resetForm} />;
-                        default: return <p>Paso desconocido</p>;
-                    }
-                };
-                
-                return (
-                    <main className="container mx-auto px-4 py-8 sm:py-12">
-                        <div className="max-w-3xl mx-auto">
-                            <a href="index.html" className="text-blue-600 hover:underline mb-4 inline-block">← Volver al Portal</a>
-                            <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8">
-                                <StepIndicator currentStep={step} />
-                                {renderContent()}
-                            </div>
-                        </div>
-                    </main>
-                );
-            };
-
+        window.addEventListener('load', () => {
             const root = ReactDOM.createRoot(document.getElementById('root'));
             root.render(<InscripcionesApp />);
         });
