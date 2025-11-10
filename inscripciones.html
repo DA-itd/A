@@ -110,50 +110,75 @@
         }
 
         function Step1TeacherInfo({ formData, setFormData, onNext, teachers }) {
+            // 'inputValue' maneja solo lo que se ve en el campo de texto.
             const [inputValue, setInputValue] = useState(formData.fullName || "");
             const [showSuggestions, setShowSuggestions] = useState(false);
 
+            // --- CAMBIO CLAVE 1: Lógica de 'handleInputChange' simplificada ---
             const handleInputChange = (e) => {
                 const value = e.target.value.toUpperCase();
-                setInputValue(value);
-                setShowSuggestions(true);
+                setInputValue(value); // Solo actualizamos el valor visible del input
+                setShowSuggestions(true); // Mostramos las sugerencias
 
-                const exactMatches = teachers.filter(
-                    (teacher) => teacher && teacher.nombre && teacher.nombre.toUpperCase() === value
-                );
-
-                if (exactMatches.length === 1) {
-                    const exactMatch = exactMatches[0];
+                // Si el usuario borra todo el texto, limpiamos el formulario.
+                if (value === "") {
                     setFormData(prev => ({
                         ...prev,
-                        fullName: exactMatch.nombre.toUpperCase(),
-                        email: exactMatch.email || '',
-                        department: exactMatch.departamento || ''
-                    }));
-                    setShowSuggestions(false);
-                } else {
-                    setFormData(prev => ({
-                        ...prev,
-                        fullName: value,
+                        fullName: '',
                         email: '',
                         department: ''
                     }));
                 }
             };
 
+            // --- CAMBIO CLAVE 2: Nueva función 'handleBlur' para sincronizar ---
+            // Se ejecuta cuando el usuario sale del campo de texto.
+            const handleBlur = () => {
+                // Usamos un timeout para que el clic en una sugerencia se pueda registrar antes de que se oculte la lista.
+                setTimeout(() => {
+                    setShowSuggestions(false);
+                    
+                    // Sincronizamos el estado del formulario con el valor final del input.
+                    const finalValue = inputValue.trim();
+                    const teacherMatch = teachers.find(t => t.nombre.toUpperCase() === finalValue);
+
+                    if (teacherMatch) {
+                        // Si el texto final coincide exactamente con un profesor, aseguramos que los datos estén correctos.
+                        setFormData(prev => ({
+                            ...prev,
+                            fullName: teacherMatch.nombre.toUpperCase(),
+                            email: teacherMatch.email || '',
+                            department: teacherMatch.departamento || ''
+                        }));
+                    } else {
+                        // Si no hay coincidencia exacta, el nombre se guarda como está y se limpian los campos dependientes.
+                        setFormData(prev => ({
+                            ...prev,
+                            fullName: finalValue,
+                            email: '',
+                            department: ''
+                        }));
+                    }
+                }, 200);
+            };
+
+            // --- CAMBIO CLAVE 3: 'onTeacherSelect' ahora es la única fuente para autocompletar ---
             const onTeacherSelect = (teacher) => {
                 if (teacher && teacher.nombre) {
-                    setInputValue(teacher.nombre.toUpperCase());
+                    const teacherName = teacher.nombre.toUpperCase();
+                    setInputValue(teacherName); // Actualizamos el input visual
+                    // Actualizamos TODO el estado del formulario con los datos del profesor
                     setFormData(prev => ({
                         ...prev,
-                        fullName: teacher.nombre.toUpperCase(),
+                        fullName: teacherName,
                         email: teacher.email || '',
                         department: teacher.departamento || ''
                     }));
                 }
-                setShowSuggestions(false);
+                setShowSuggestions(false); // Ocultamos las sugerencias
             };
-
+            
+            // La lista de sugerencias sigue funcionando igual, lo cual estaba correcto.
             const filteredTeachers = useMemo(() => {
                 if (!inputValue) return [];
                 return teachers.filter(teacher =>
@@ -175,8 +200,9 @@
                                 value={inputValue}
                                 onChange={handleInputChange}
                                 onFocus={() => setShowSuggestions(true)}
-                                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                                placeholder="Escriba su nombre"
+                                // --- CAMBIO CLAVE 4: Usamos la nueva función 'handleBlur' ---
+                                onBlur={handleBlur}
+                                placeholder="Escriba su nombre y seleccione de la lista"
                             />
                             {showSuggestions && filteredTeachers.length > 0 && (
                                 <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
@@ -184,7 +210,8 @@
                                         <li
                                             key={teacher.email || index}
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                            onClick={() => onTeacherSelect(teacher)}
+                                            // 'onMouseDown' es mejor que 'onClick' aquí para evitar conflictos con 'onBlur'
+                                            onMouseDown={() => onTeacherSelect(teacher)}
                                         >
                                             {teacher.nombre} {teacher.departamento && <span className="text-sm text-gray-500 ml-2">({teacher.departamento})</span>}
                                         </li>
@@ -192,9 +219,10 @@
                                 </ul>
                             )}
                         </div>
+                        {/* El resto de los campos no necesitan cambios */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">CURP *</label>
-                            <input type="text" value={formData.curp} onChange={e => setFormData(prev => ({ ...prev, curp: e.target.value }))} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3" placeholder="18 caracteres" />
+                            <input type="text" value={formData.curp} onChange={e => setFormData(prev => ({ ...prev, curp: e.target.value.toUpperCase() }))} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 uppercase" placeholder="18 caracteres" maxLength="18" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Email Institucional *</label>
@@ -226,6 +254,7 @@
                 </div>
             );
         }
+
 
         function Step2CourseSelection({ formData, setFormData, onNext, onBack, courses }) {
             const [filters, setFilters] = useState({ period: 'Enero - Junio 2025', type: 'Todos' });
