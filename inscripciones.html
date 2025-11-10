@@ -58,6 +58,20 @@
         const CONFIG = {
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz2hpmaNoCj0Zy0mzl8mvYU978u7llspIFMyNuqt7VRu7Xi3yK3vkkOFNDWyokPVl5ODw/exec'
         };
+        
+        const DEPARTMENTS = [
+            "ADMINISTRATIVO",
+            "DEPARTAMENTO DE CIENCIAS BASICAS",
+            "DEPARTAMENTO DE CIENCIAS DE LA TIERRA",
+            "DEPARTAMENTO DE CIENCIAS ECONOMICO ADMINISTRATIVAS",
+            "DEPARTAMENTO DE INGENIERÍA ELÉCTRICA Y ELECTRÓNICA",
+            "DEPARTAMENTO DE INGENIERÍA INDUSTRIAL",
+            "DEPARTAMENTO DE INGENIERÍA QUÍMICA BIOQUÍMICA",
+            "DEPARTAMENTO DE METAL MECÁNICA",
+            "DEPARTAMENTO DE SISTEMAS Y COMPUTACION",
+            "DIVISION DE ESTUDIOS DE POSGRADO E INVESTIGACION",
+            "EDUCACION A DISTANCIA"
+        ].sort();
 
         // ============================================================================
         // === COMPONENTES DE LA UI ==================================================
@@ -198,7 +212,7 @@
                             <label className="block text-sm font-medium text-gray-700">Departamento *</label>
                             <select value={formData.department} onChange={e => setFormData(prev => ({ ...prev, department: e.target.value }))} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
                                 <option value="">Seleccione un departamento</option>
-                                {[...new Set(teachers.map(t => t.departamento).filter(Boolean))].sort().map(dep => (
+                                {DEPARTMENTS.map(dep => (
                                     <option key={dep} value={dep}>{dep}</option>
                                 ))}
                             </select>
