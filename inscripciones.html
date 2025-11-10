@@ -5,21 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscripción a Cursos - ITD</title>
     <meta name="description" content="Inscríbete a los cursos de actualización docente del Instituto Tecnológico de Durango. Consulta la oferta disponible y asegura tu lugar.">
-    
     <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-JH1X2720VL');
-    </script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
 
@@ -45,300 +36,320 @@
     </footer>
 
     <script type="text/babel">
-        window.addEventListener('load', function() {
-            const { useState, useEffect, useCallback, useMemo } = React;
+        const { useState, useEffect, useCallback, useMemo } = React;
 
-            // ============================================================================
-            // === CONFIGURACIÓN Y SERVICIOS =============================================
-            // ============================================================================
-            const CONFIG = {
-                APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz2hpmaNoCj0Zy0mzl8mvYU978u7llspIFMyNuqt7VRu7Xi3yK3vkkOFNDWyokPVl5ODw/exec',
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2hpmaNoCj0Zy0mzl8mvYU978u7llspIFMyNuqt7VRu7Xi3yK3vkkOFNDWyokPVl5ODw/exec';
+        
+        function fetchData(action) {
+            const url = new URL(APPS_SCRIPT_URL);
+            url.searchParams.append('action', action);
+            url.searchParams.append('t', new Date().getTime()); // Cache busting
+            return fetch(url).then(res => res.json());
+        }
+
+        function Spinner() {
+            return (
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-800"></div>
+                </div>
+            );
+        }
+
+        function StepIndicator(props) {
+            const { currentStep } = props;
+            const steps = ["Información", "Cursos", "Confirmar", "Finalizado"];
+            return (
+                <div className="flex justify-center items-center space-x-4 sm:space-x-8 mb-8">
+                    {steps.map((label, index) => {
+                        const stepNumber = index + 1;
+                        const isActive = stepNumber === currentStep;
+                        const isCompleted = stepNumber < currentStep;
+                        return (
+                            <div key={label} className="flex flex-col items-center">
+                                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-white ${isCompleted ? 'bg-green-500' : isActive ? 'bg-blue-600' : 'bg-gray-300'}`}>
+                                    {isCompleted ? '✓' : stepNumber}
+                                </div>
+                                <span className={`mt-2 text-xs sm:text-sm ${isActive ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>{label}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        }
+
+        function Step1PersonalInfo({ onNext, formData, setFormData, teachers }) {
+            const [suggestions, setSuggestions] = useState([]);
+
+            const handleNameChange = (e) => {
+                const value = e.target.value;
+                setFormData(prev => ({ ...prev, fullName: value }));
+                if (value.length > 2) {
+                    const filtered = teachers.filter(t => t.nombre.toLowerCase().includes(value.toLowerCase()));
+                    setSuggestions(filtered);
+                } else {
+                    setSuggestions([]);
+                }
             };
 
-            const fetchDataFromServer = async (action) => {
-                const url = new URL(CONFIG.APPS_SCRIPT_URL);
-                url.searchParams.append('action', action);
-                url.searchParams.append('_', new Date().getTime()); // Cache busting
-
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`Error del servidor: ${response.status}`);
-                
-                const result = await response.json();
-                if (!result.success) throw new Error(result.message || 'Error al obtener datos.');
-                
-                return result.data;
-            };
-            
-            const postData = async (data) => {
-                const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(data)
-                });
-                if (!response.ok) throw new Error(`Error de red: ${response.status}`);
-                return await response.json();
+            const handleSuggestionClick = (teacher) => {
+                setFormData(prev => ({
+                    ...prev,
+                    fullName: teacher.nombre,
+                    email: teacher.email,
+                    department: teacher.departamento
+                }));
+                setSuggestions([]);
             };
 
-            // ============================================================================
-            // === COMPONENTES (Definidos antes de usarse) ===============================
-            // ============================================================================
-            function Spinner() {
-                return (
-                    <div className="flex justify-center items-center h-64">
-                        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-800"></div>
+            const isFormValid = formData.fullName && formData.email.endsWith('@itdurango.edu.mx') && formData.department && formData.curp.length === 18 && formData.gender;
+
+            return (
+                <div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-1">Información Personal</h3>
+                    <p className="text-sm text-gray-600 mb-6">Completa tus datos para continuar.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="relative">
+                            <label className="block text-sm font-medium text-gray-700">Nombre Completo *</label>
+                            <input type="text" value={formData.fullName} onChange={handleNameChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Escriba su nombre" />
+                            {suggestions.length > 0 && (
+                                <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-40 overflow-y-auto">
+                                    {suggestions.map((teacher, index) => (
+                                        <li key={index} onClick={() => handleSuggestionClick(teacher)} className="px-3 py-2 hover:bg-gray-100 cursor-pointer">{teacher.nombre}</li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">CURP *</label>
+                            <input type="text" value={formData.curp} onChange={e => setFormData(p => ({ ...p, curp: e.target.value.toUpperCase() }))} maxLength="18" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="18 caracteres" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Email Institucional *</label>
+                            <input type="email" value={formData.email} onChange={e => setFormData(p => ({ ...p, email: e.target.value }))} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100" readOnly />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Género *</label>
+                            <select value={formData.gender} onChange={e => setFormData(p => ({ ...p, gender: e.target.value }))} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                <option value="">Seleccione un género</option>
+                                <option value="Hombre">Hombre</option>
+                                <option value="Mujer">Mujer</option>
+                            </select>
+                        </div>
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700">Departamento *</label>
+                            <input type="text" value={formData.department} onChange={e => setFormData(p => ({ ...p, department: e.target.value }))} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100" readOnly />
+                        </div>
                     </div>
-                );
-            }
+                    <div className="mt-8 flex justify-end">
+                        <button onClick={onNext} disabled={!isFormValid} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-400">
+                            Continuar
+                        </button>
+                    </div>
+                </div>
+            );
+        }
 
-            function StepIndicator({ currentStep }) {
-                return (
-                    <div className="flex justify-center items-center space-x-4 sm:space-x-8 mb-8">
-                        {['Información', 'Cursos', 'Confirmar', 'Finalizado'].map((label, index) => {
-                            const stepNumber = index + 1;
-                            const isActive = stepNumber === currentStep;
-                            const isCompleted = stepNumber < currentStep;
+        function Step2CourseSelection({ onBack, onNext, formData, setFormData, courses }) {
+            const availablePeriods = useMemo(() => [...new Set(courses.map(c => c.periodo))], [courses]);
+            const [selectedPeriod, setSelectedPeriod] = useState(availablePeriods[0] || '');
+
+            const availableTypes = useMemo(() => [...new Set(courses.filter(c => c.periodo === selectedPeriod).map(c => c.tipo))], [courses, selectedPeriod]);
+            const [selectedType, setSelectedType] = useState(availableTypes[0] || '');
+
+            const filteredCourses = useMemo(() => courses.filter(c => c.periodo === selectedPeriod && c.tipo === selectedType), [courses, selectedPeriod, selectedType]);
+
+            const handleAddCourse = (course) => {
+                setFormData(prev => {
+                    const isAlreadyAdded = prev.selectedCourses.some(c => c.id_curso === course.id_curso);
+                    if (isAlreadyAdded || prev.selectedCourses.length >= 3) return prev;
+                    return { ...prev, selectedCourses: [...prev.selectedCourses, course] };
+                });
+            };
+
+            const handleRemoveCourse = (courseId) => {
+                setFormData(prev => ({ ...prev, selectedCourses: prev.selectedCourses.filter(c => c.id_curso !== courseId) }));
+            };
+
+            return (
+                <div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-6">Selección de Cursos (Máximo 3)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Periodo</label>
+                            <select value={selectedPeriod} onChange={e => setSelectedPeriod(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                {availablePeriods.map(p => <option key={p} value={p}>{p}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Tipo de Curso</label>
+                            <select value={selectedType} onChange={e => setSelectedType(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                {availableTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-3 max-h-60 overflow-y-auto pr-2 mb-6">
+                        {filteredCourses.map(course => (
+                             <div key={course.id_curso} className="p-3 bg-gray-50 rounded-md flex justify-between items-center">
+                                <div>
+                                    <p className="font-semibold">{course.nombre_curso}</p>
+                                    <p className="text-xs text-gray-500">{course.fecha_curso} | {course.horario}</p>
+                                </div>
+                                <button onClick={() => handleAddCourse(course)} className="bg-green-500 text-white px-3 py-1 text-sm rounded-md hover:bg-green-600">+</button>
+                            </div>
+                        ))}
+                    </div>
+
+                    <h4 className="font-bold mb-2">Cursos Seleccionados:</h4>
+                    <div className="space-y-2">
+                        {formData.selectedCourses.length > 0 ? formData.selectedCourses.map(course => (
+                            <div key={course.id_curso} className="p-3 bg-blue-100 rounded-md flex justify-between items-center">
+                                <p className="font-semibold text-blue-800">{course.nombre_curso}</p>
+                                <button onClick={() => handleRemoveCourse(course.id_curso)} className="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600">-</button>
+                            </div>
+                        )) : <p className="text-gray-500">Ningún curso seleccionado.</p>}
+                    </div>
+
+                    <div className="mt-8 flex justify-between">
+                        <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
+                        <button onClick={onNext} disabled={formData.selectedCourses.length === 0} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-400">Continuar</button>
+                    </div>
+                </div>
+            );
+        }
+
+        function Step3Confirmation({ onBack, onSubmit, formData }) {
+            return (
+                <div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-6">Confirmar Inscripción</h3>
+                    <div className="space-y-4 bg-gray-50 p-4 rounded-md">
+                        <p><strong>Nombre:</strong> {formData.fullName}</p>
+                        <p><strong>Email:</strong> {formData.email}</p>
+                        <p><strong>Departamento:</strong> {formData.department}</p>
+                        <h4 className="font-bold mt-4">Cursos a Inscribir:</h4>
+                        <ul className="list-disc list-inside">
+                            {formData.selectedCourses.map(c => <li key={c.id_curso}>{c.nombre_curso}</li>)}
+                        </ul>
+                    </div>
+                    <div className="mt-8 flex justify-between">
+                        <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
+                        <button onClick={onSubmit} className="bg-green-600 text-white font-bold py-2 px-6 rounded-lg">Confirmar y Enviar</button>
+                    </div>
+                </div>
+            );
+        }
+
+        function Step4Final({ results, onReset }) {
+             return (
+                <div className="text-center">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4">Proceso de Inscripción Finalizado</h3>
+                    <p className="text-gray-600 mb-6">A continuación se muestra el resultado de cada una de sus solicitudes de inscripción.</p>
+                    <div className="space-y-4 text-left">
+                        {results.map(result => {
+                            const course = result.course;
                             return (
-                                <div key={label} className="flex flex-col items-center text-center">
-                                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-white ${isCompleted ? 'bg-green-500' : isActive ? 'bg-blue-600' : 'bg-gray-300'}`}>
-                                        {isCompleted ? '✓' : stepNumber}
-                                    </div>
-                                    <span className={`mt-2 text-xs sm:text-sm ${isActive ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>{label}</span>
+                                <div key={result.courseId} className={`p-4 border-l-4 rounded-r-lg ${result.success ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
+                                    <h3 className="font-bold">{(course && course.nombre_curso) ? course.nombre_curso : 'Curso Desconocido'}</h3>
+                                    <p className={`text-sm ${result.success ? 'text-green-800' : 'text-red-800'}`}>{result.message}</p>
                                 </div>
                             );
                         })}
                     </div>
-                );
-            }
-            
-            function Step1PersonalInfo({ onNext, formData, setFormData, teachers }) {
-                const handleTeacherSelect = (e) => {
-                    const selectedEmail = e.target.value;
-                    const selectedTeacher = teachers.find(t => t.email === selectedEmail);
-                    const teacherData = selectedTeacher || {};
-                    
-                    setFormData(prev => ({
-                        ...prev,
-                        email: selectedEmail,
-                        nombreCompleto: teacherData.nombreCompleto || '',
-                        departamento: teacherData.department || '',
-                    }));
-                };
+                     <button onClick={onReset} className="mt-8 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700">Realizar otra inscripción</button>
+                </div>
+            );
+        }
 
-                return (
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-4">Información Personal</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Institucional *</label>
-                                <select id="email" value={formData.email} onChange={handleTeacherSelect} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" required>
-                                    <option value="">Seleccione su correo...</option>
-                                    {(teachers || []).map(teacher => <option key={teacher.email} value={teacher.email}>{teacher.email}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label htmlFor="nombreCompleto" className="block text-sm font-medium text-gray-700">Nombre Completo</label>
-                                <input type="text" id="nombreCompleto" value={formData.nombreCompleto} readOnly className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm sm:text-sm" />
-                            </div>
-                            <div>
-                                <label htmlFor="curp" className="block text-sm font-medium text-gray-700">CURP *</label>
-                                <input type="text" id="curp" value={formData.curp} onChange={e => setFormData(p => ({ ...p, curp: e.target.value.toUpperCase() }))} maxLength="18" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" required />
-                            </div>
-                            <div>
-                                <label htmlFor="genero" className="block text-sm font-medium text-gray-700">Género *</label>
-                                <select id="genero" value={formData.genero} onChange={e => setFormData(p => ({ ...p, genero: e.target.value }))} className="mt-1 block w-full pl-3 pr-10 py-2 border-gray-300 rounded-md" required>
-                                    <option value="">Seleccione...</option>
-                                    <option value="Hombre">Hombre</option>
-                                    <option value="Mujer">Mujer</option>
-                                </select>
-                            </div>
-                            <div className="sm:col-span-2">
-                                <label htmlFor="departamento" className="block text-sm font-medium text-gray-700">Departamento</label>
-                                <input type="text" id="departamento" value={formData.departamento} readOnly className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md" />
-                            </div>
-                        </div>
-                        <div className="mt-8 flex justify-end">
-                            <button onClick={onNext} disabled={!formData.email || !formData.curp || !formData.genero} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50">Siguiente</button>
-                        </div>
-                    </div>
-                );
-            }
-            
-            function Step2CourseSelection({ onBack, onNext, formData, setFormData, courses }) {
-                const handleCourseChange = (e, index) => {
-                    const { value } = e.target;
-                    const newSelection = [...formData.selectedCourses];
-                    newSelection[index] = value;
-                    setFormData(p => ({ ...p, selectedCourses: newSelection.filter(c => c) }));
-                };
-                const addCourseSelector = () => {
-                    if (formData.selectedCourses.length < 3) {
-                        setFormData(p => ({ ...p, selectedCourses: [...p.selectedCourses, ''] }));
-                    }
-                };
-                const availableCourses = (courses || []).filter(course => !formData.selectedCourses.includes(course.id_curso));
+        function InscripcionesApp() {
+            const [step, setStep] = useState(1);
+            const [isLoading, setIsLoading] = useState(true);
+            const [error, setError] = useState(null);
+            const [courses, setCourses] = useState([]);
+            const [teachers, setTeachers] = useState([]);
+            const [formData, setFormData] = useState({
+                fullName: '', email: '', department: '', curp: '', gender: '', selectedCourses: []
+            });
+            const [submissionResults, setSubmissionResults] = useState([]);
 
-                return (
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-4">Selección de Cursos</h3>
-                        <div className="space-y-4">
-                            {formData.selectedCourses.map((selected, index) => (
-                                <div key={index}>
-                                    <label className="block text-sm font-medium text-gray-700">Curso {index + 1}</label>
-                                    <select value={selected} onChange={e => handleCourseChange(e, index)} className="mt-1 block w-full pl-3 pr-10 py-2 border-gray-300 rounded-md">
-                                        <option value="">Seleccione un curso...</option>
-                                        {selected && <option value={selected}>{(courses.find(c => c.id_curso === selected) || {}).nombre_curso}</option>}
-                                        {availableCourses.map(course => <option key={course.id_curso} value={course.id_curso}>{course.nombre_curso}</option>)}
-                                    </select>
-                                </div>
-                            ))}
-                        </div>
-                        {formData.selectedCourses.length < 3 && (
-                            <button onClick={addCourseSelector} className="mt-4 text-sm text-blue-600 hover:underline">+ Agregar otro curso</button>
-                        )}
-                        <div className="mt-8 flex justify-between">
-                            <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
-                            <button onClick={onNext} disabled={formData.selectedCourses.length === 0} className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50">Siguiente</button>
-                        </div>
-                    </div>
-                );
-            }
+            useEffect(() => {
+                Promise.all([fetchData('getCoursesList'), fetchData('getTeachersList')])
+                    .then(([coursesResult, teachersResult]) => {
+                        if (coursesResult.success) setCourses(coursesResult.data);
+                        else throw new Error('No se pudieron cargar los cursos.');
+                        
+                        if (teachersResult.success) setTeachers(teachersResult.data);
+                        else throw new Error('No se pudieron cargar los docentes.');
 
-            function Step3Confirm({ onBack, onSubmit, formData, courses }) {
-                const selectedCourseDetails = formData.selectedCourses.map(id => (courses || []).find(c => c.id_curso === id)).filter(Boolean);
-                return (
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-4">Confirmar Inscripción</h3>
-                        <div className="bg-gray-50 p-4 rounded-lg space-y-4">
-                            <div>
-                                <h4 className="font-semibold">Información Personal</h4>
-                                <p><strong>Nombre:</strong> {formData.nombreCompleto}</p>
-                                <p><strong>Email:</strong> {formData.email}</p>
-                                <p><strong>CURP:</strong> {formData.curp}</p>
-                                <p><strong>Departamento:</strong> {formData.departamento}</p>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold">Cursos Seleccionados</h4>
-                                <ul className="list-disc pl-5">
-                                    {selectedCourseDetails.map(course => <li key={course.id_curso}>{course.nombre_curso} ({course.fecha_curso})</li>)}
-                                </ul>
-                            </div>
-                        </div>
-                        <div className="mt-8 flex justify-between">
-                            <button onClick={onBack} className="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">Atrás</button>
-                            <button onClick={onSubmit} className="bg-green-600 text-white font-bold py-2 px-6 rounded-lg">Confirmar y Enviar</button>
-                        </div>
-                    </div>
-                );
-            }
+                        setIsLoading(false);
+                    })
+                    .catch(err => {
+                        setError(err.message || "Error al cargar datos. Asegúrese de que el script esté implementado con la última versión del código.");
+                        setIsLoading(false);
+                    });
+            }, []);
 
-            function Step4Final({ results, onReset, courses }) {
-                return (
-                    <div className="text-center">
-                        <h3 className="text-2xl font-bold text-green-600 mb-4">Resultados de la Inscripción</h3>
-                        <div className="space-y-4 text-left">
-                            {(results || []).map(result => {
-                                const course = (courses || []).find(c => c.id_curso === result.courseId);
-                                const courseName = course ? course.nombre_curso : 'Curso Desconocido';
-                                return (
-                                    <div key={result.courseId} className={`p-4 border-l-4 rounded-r-lg ${result.success ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
-                                        <h3 className="font-bold">{courseName}</h3>
-                                        <p className={`text-sm ${result.success ? 'text-green-800' : 'text-red-800'}`}>{result.message}</p>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        <button onClick={onReset} className="mt-8 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg">Realizar otra inscripción</button>
-                    </div>
-                );
-            }
-
-            // ============================================================================
-            // === COMPONENTE PRINCIPAL ===================================================
-            // ============================================================================
-            function InscripcionesApp() {
-                const [step, setStep] = useState(1);
-                const [formData, setFormData] = useState({
-                    nombreCompleto: '', email: '', curp: '', genero: '', departamento: '', selectedCourses: ['']
-                });
-                const [loading, setLoading] = useState(true);
-                const [error, setError] = useState(null);
-                const [courses, setCourses] = useState([]);
-                const [teachers, setTeachers] = useState([]);
-                const [submissionResults, setSubmissionResults] = useState([]);
-
-                useEffect(() => {
-                    const loadInitialData = async () => {
-                        try {
-                            const [coursesData, teachersData] = await Promise.all([
-                                fetchDataFromServer('getCoursesList'),
-                                fetchDataFromServer('getTeachersList')
-                            ]);
-                            setCourses(coursesData || []);
-                            setTeachers(teachersData || []);
-                        } catch (err) {
-                            setError(err.message);
-                        } finally {
-                            setLoading(false);
-                        }
+            const handleSubmit = async () => {
+                setIsLoading(true);
+                setStep(4);
+                const results = [];
+                for (const course of formData.selectedCourses) {
+                    const payload = {
+                        action: 'registerCourse',
+                        ...formData,
+                        course: course
                     };
-                    loadInitialData();
-                }, []);
-
-                const handleNext = () => setStep(prev => prev + 1);
-                const handleBack = () => setStep(prev => prev - 1);
-                const handleReset = () => {
-                    setFormData({ nombreCompleto: '', email: '', curp: '', genero: '', departamento: '', selectedCourses: [''] });
-                    setStep(1);
-                };
-
-                const handleSubmit = async () => {
-                    setStep(4);
-                    setLoading(true);
-                    const results = [];
-                    for (const courseId of formData.selectedCourses) {
-                        if (!courseId) continue;
-                        try {
-                            const response = await postData({ action: 'registerCourse', ...formData, id_curso: courseId });
-                            results.push({ courseId, success: response.success, message: response.message });
-                        } catch (err) {
-                            results.push({ courseId, success: false, message: err.message });
-                        }
+                    try {
+                        const response = await fetch(APPS_SCRIPT_URL, {
+                            method: 'POST',
+                            mode: 'cors',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify(payload)
+                        });
+                        const result = await response.json();
+                        results.push({ ...result, courseId: course.id_curso, course });
+                    } catch (err) {
+                        results.push({ success: false, message: 'Error de conexión con el servidor.', courseId: course.id_curso, course });
                     }
-                    setSubmissionResults(results);
-                    setLoading(false);
-                };
-                
-                const renderContent = () => {
-                    if (loading && step !== 4) return <Spinner />;
-                    if (error) return <div className="text-red-600 text-center p-8">{error}</div>;
+                }
+                setSubmissionResults(results);
+                setIsLoading(false);
+            };
 
-                    switch(step) {
-                        case 1: return <Step1PersonalInfo onNext={handleNext} formData={formData} setFormData={setFormData} teachers={teachers} />;
-                        case 2: return <Step2CourseSelection onBack={handleBack} onNext={handleNext} formData={formData} setFormData={setFormData} courses={courses} />;
-                        case 3: return <Step3Confirm onBack={handleBack} onSubmit={handleSubmit} formData={formData} courses={courses} />;
-                        case 4: return loading ? <Spinner /> : <Step4Final results={submissionResults} onReset={handleReset} courses={courses} />;
-                        default: return <p>Paso desconocido</p>;
-                    }
-                };
+            const resetForm = () => {
+                setFormData({ fullName: '', email: '', department: '', curp: '', gender: '', selectedCourses: [] });
+                setStep(1);
+            };
 
-                return (
-                    <main className="container mx-auto px-4 py-8 sm:py-12">
-                        <div className="max-w-3xl mx-auto">
-                            <a href="index.html" className="text-blue-600 hover:underline mb-4 inline-block">← Volver al Portal</a>
-                            <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8">
-                                <StepIndicator currentStep={step} />
-                                {renderContent()}
-                            </div>
-                        </div>
-                    </main>
-                );
-            }
+            const renderContent = () => {
+                if (isLoading && step === 1) return <Spinner />;
+                if (error) return <div className="text-red-600 p-8 text-center">{error}</div>;
+
+                switch (step) {
+                    case 1: return <Step1PersonalInfo onNext={() => setStep(2)} formData={formData} setFormData={setFormData} teachers={teachers} />;
+                    case 2: return <Step2CourseSelection onBack={() => setStep(1)} onNext={() => setStep(3)} formData={formData} setFormData={setFormData} courses={courses} />;
+                    case 3: return <Step3Confirmation onBack={() => setStep(2)} onSubmit={handleSubmit} formData={formData} />;
+                    case 4: return isLoading ? <Spinner /> : <Step4Final results={submissionResults} onReset={resetForm} />;
+                    default: return <p>Paso desconocido</p>;
+                }
+            };
             
+            return (
+                <main className="container mx-auto px-4 py-8 sm:py-12">
+                    <div className="max-w-3xl mx-auto">
+                        <a href="index.html" className="text-blue-600 hover:underline mb-4 inline-block">← Volver al Portal</a>
+                        <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8">
+                            <StepIndicator currentStep={step} />
+                            {renderContent()}
+                        </div>
+                    </div>
+                </main>
+            );
+        }
+
+        window.addEventListener('load', () => {
             const root = ReactDOM.createRoot(document.getElementById('root'));
             root.render(<InscripcionesApp />);
         });
     </script>
-
 </body>
 </html>
