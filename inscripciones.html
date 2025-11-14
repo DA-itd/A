@@ -14,6 +14,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -24,6 +25,7 @@
 </head>
 <body class="bg-gray-100">
 
+    <!-- Header -->
     <header class="bg-white shadow-md">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between gap-4 py-4 min-h-[100px]">
@@ -47,17 +49,23 @@
 
     <div id="root"></div>
 
+    <!-- Footer -->
     <footer class="bg-blue-800 text-white text-center p-4 mt-auto">
         <p class="font-semibold text-sm sm:text-base">© Coordinación de actualización docente - M.C. Alejandro Calderón Rentería.</p>
         <p class="text-xs sm:text-sm">Todos los derechos reservados 2024.</p>
     </footer>
 
+    <!-- ========================================================================== -->
+    <!-- CONFIGURACIÓN: URL del Google Apps Script Unificado                      -->
+    <!-- ========================================================================== -->
     <script>
         window.CONFIG = {
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyN7mi_60wM3eOiDw65CEreaKR1tWX7dgjIxYebKDwvxIlXyWJ2z5c_SRLrhk77cw26/exec'
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz99U2AFCliLI34Aqh7nK__MT0NNIsE1DKr7glVGL7zxJhfxiR8izQUaD1BgPDVe5DNow/exec'
         };
     </script>
-    
+    <!-- ========================================================================== -->
+
+    <!-- Carga el archivo index.js con la lógica de React -->
     <script type="text/babel" src="index.js"></script>
 
 </body>
