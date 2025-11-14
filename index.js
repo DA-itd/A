@@ -13,14 +13,14 @@ const apiService = {
     if (!response.ok) throw new Error('No se pudo cargar la lista de docentes.');
     const result = await response.json();
     if (result.success) return result.data;
-    throw new Error(result.message || 'Error en la respuesta del servidor.');
+    throw new Error(result.message || 'Error en la respuesta del servidor para obtener docentes.');
   },
   getCourses: async () => {
     const response = await fetch(`${window.CONFIG.APPS_SCRIPT_URL}?action=getCoursesList&_=${Date.now()}`);
     if (!response.ok) throw new Error('No se pudo cargar la lista de cursos.');
     const result = await response.json();
     if (result.success) return result.data;
-    throw new Error(result.message || 'Error en la respuesta del servidor.');
+    throw new Error(result.message || 'Error en la respuesta del servidor para obtener cursos.');
   },
   lookupByCurp: async (curp) => {
     const response = await fetch(`${window.CONFIG.APPS_SCRIPT_URL}?action=lookupByCurp&curp=${curp}&_=${Date.now()}`);
@@ -349,14 +349,35 @@ const App = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const [coursesData, teachersData] = await Promise.all([
+        
+        const results = await Promise.allSettled([
           apiService.getCourses(),
           apiService.getTeachers()
         ]);
-        setCourses(coursesData);
-        setTeachers(teachersData);
+
+        const coursesResult = results[0];
+        const teachersResult = results[1];
+
+        if (coursesResult.status === 'rejected') {
+          throw coursesResult.reason;
+        }
+         if (teachersResult.status === 'rejected') {
+          throw teachersResult.reason;
+        }
+        
+        setCourses(coursesResult.value);
+        setTeachers(teachersResult.value);
+
       } catch (err) {
-        setError(err.message);
+        let detailedError = `Error: ${err.message}.`;
+        if (err.message.toLowerCase().includes('failed to fetch')) {
+            detailedError += ' Esto puede ser un problema de red (sin internet), CORS, o una URL de API incorrecta. Por favor, revisa la conexión y la configuración en `inscripciones.html`.';
+        } else {
+            detailedError += ' Esto puede ser un error en los datos recibidos del servidor.'
+        }
+        detailedError += ' Revisa la consola del navegador (F12) para más detalles técnicos.';
+        setError(detailedError);
+        console.error("Error detallado durante la carga de datos:", err);
       } finally {
         setIsLoading(false);
       }
@@ -366,7 +387,7 @@ const App = () => {
 
   const renderStep = () => {
     if (isLoading) return <div className="text-center p-8">Cargando datos...</div>;
-    if (error) return <div className="text-center p-8 text-red-600">{error}</div>;
+    if (error) return <div className="text-center p-8 text-red-600 bg-red-50 rounded-lg">{error}</div>;
 
     switch (step) {
       case 1:
