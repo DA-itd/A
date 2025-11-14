@@ -350,23 +350,21 @@ const App = () => {
         setIsLoading(true);
         setError(null);
         
-        const results = await Promise.allSettled([
-          apiService.getCourses(),
-          apiService.getTeachers()
-        ]);
-
-        const coursesResult = results[0];
-        const teachersResult = results[1];
-
-        if (coursesResult.status === 'rejected') {
-          throw coursesResult.reason;
-        }
-         if (teachersResult.status === 'rejected') {
-          throw teachersResult.reason;
+        let loadedCourses, loadedTeachers;
+        try {
+            loadedCourses = await apiService.getCourses();
+        } catch (err) {
+            throw new Error(`Fallo al cargar cursos: ${err.message}`);
         }
         
-        setCourses(coursesResult.value);
-        setTeachers(teachersResult.value);
+        try {
+            loadedTeachers = await apiService.getTeachers();
+        } catch (err) {
+            throw new Error(`Fallo al cargar docentes: ${err.message}`);
+        }
+        
+        setCourses(loadedCourses);
+        setTeachers(loadedTeachers);
 
       } catch (err) {
         let detailedError = `Error: ${err.message}.`;
