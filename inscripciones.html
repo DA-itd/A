@@ -11,8 +11,7 @@
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- ⚠️ ACTUALIZADO: Babel 7 para soportar sintaxis moderna -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Google tag (gtag.js) -->
@@ -127,7 +126,7 @@
         // 🔍 DIAGNÓSTICO AUTOMÁTICO
         // ========================================================================
         (function() {
-            const url = window.CONFIG && window.CONFIG.APPS_SCRIPT_URL;
+            const url = window.CONFIG?.APPS_SCRIPT_URL;
             
             console.log('%c=== DIAGNÓSTICO DEL SISTEMA DE INSCRIPCIONES ===', 'background: #1e40af; color: white; font-size: 14px; font-weight: bold; padding: 8px;');
             
@@ -148,7 +147,7 @@
                 }
                 
                 // Verificar si es la URL de ejemplo (sin cambiar)
-                if (url.includes('1KLPdMw1AzDdNSqYRRUZnvkyHLQnL2TWQ0Sk0282CN-A')) {
+                if (url.includes('AKfycbyzhldum7ClpkopJ-RmE7Me56kGFd')) {
                     console.warn('%c⚠️ ADVERTENCIA: Estás usando la URL de ejemplo', 'color: orange; font-size: 12px; font-weight: bold;');
                     console.log('%c→ Si acabas de actualizar Code.gs, necesitas:', 'color: orange; font-size: 11px;');
                     console.log('%c   1. Crear una NUEVA implementación en Google Apps Script', 'color: gray; font-size: 11px;');
