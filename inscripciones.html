@@ -11,7 +11,7 @@
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Google tag (gtag.js) -->
@@ -52,117 +52,25 @@
     <!-- Footer -->
     <footer class="bg-blue-800 text-white text-center p-4 mt-auto">
         <p class="font-semibold text-sm sm:text-base">© Coordinación de actualización docente - M.C. Alejandro Calderón Rentería.</p>
-        <p class="text-xs sm:text-sm">Todos los derechos reservados 2025.</p>
+        <p class="text-xs sm:text-sm">Todos los derechos reservados 2024.</p>
     </footer>
 
     <!-- ========================================================================== -->
-    <!-- 🔧 CONFIGURACIÓN CRÍTICA - LEA ATENTAMENTE                                -->
+    <!-- CONFIGURACIÓN: Coloque aquí la URL de su Google Apps Script              -->
     <!-- ========================================================================== -->
     <script>
         window.CONFIG = {
-            // ========================================================================
-            // ⚠️ PASO 1: ACTUALIZAR EL CODE.GS EN GOOGLE APPS SCRIPT
-            // ========================================================================
-            // 1. Ve a: https://script.google.com
-            // 2. Abre tu proyecto "Sistema ITD"
-            // 3. Reemplaza TODO el contenido de Code.gs con la versión 4.0.9
-            // 4. Guarda el archivo (Ctrl+S o Cmd+S)
-            //
-            // ========================================================================
-            // ⚠️ PASO 2: CREAR NUEVA IMPLEMENTACIÓN (MUY IMPORTANTE)
-            // ========================================================================
-            // 5. Haz clic en "Implementar" (arriba a la derecha)
-            // 6. Selecciona "Nueva implementación"
-            // 7. Tipo: "Aplicación web"
-            // 8. Ejecutar como: Tu cuenta
-            // 9. Acceso: "Cualquier usuario"
-            // 10. Haz clic en "Implementar"
-            // 11. AUTORIZA LOS PERMISOS cuando te lo pida
-            // 12. COPIA LA URL que se genera (ejemplo abajo)
-            //
-            // ========================================================================
-            // ⚠️ PASO 3: PEGAR LA NUEVA URL AQUÍ ABAJO
-            // ========================================================================
-            // 👇 REEMPLAZA ESTA URL CON LA QUE COPIASTE EN EL PASO 2
-            
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyzhldum7ClpkopJ-RmE7Me56kGFd-lS3YytjEVZChRNBB7VRXa8JzH-_P7T6lkuKV6Hw/exec'
-            
-            // ========================================================================
-            // 📝 EJEMPLO DE URL CORRECTA:
-            // 'https://script.google.com/macros/s/AKfycbyXXXXXXXXXXXXXXXXXXXXXX/exec'
-            // ========================================================================
-            //
-            // ⚠️ NOTAS IMPORTANTES:
-            // - La URL debe terminar con '/exec'
-            // - Debe empezar con 'https://script.google.com/macros/s/'
-            // - Si acabas de actualizar el Code.gs, DEBES crear una nueva implementación
-            // - Cada nueva implementación genera una URL diferente
-            // - No elimines las implementaciones anteriores (por si necesitas revertir)
-            //
-            // ========================================================================
-            // 🆘 SI EL SISTEMA NO CARGA:
-            // ========================================================================
-            // 1. Abre la consola del navegador (F12 > Console)
-            // 2. Busca errores en rojo
-            // 3. Si ves "Failed to fetch" o "CORS", significa que:
-            //    - La URL está mal
-            //    - No has creado una nueva implementación
-            //    - Los permisos no están configurados correctamente
-            //
-            // ========================================================================
-            // ✅ PARA VERIFICAR QUE FUNCIONA:
-            // ========================================================================
-            // Abre esta URL en tu navegador (reemplaza con tu URL):
-            // https://script.google.com/macros/s/TU_URL_AQUI/exec?action=lookupByCurp&curp=TEST123456789012
-            //
-            // Deberías ver algo como:
-            // {"success":true,"data":{"registeredCourses":[]}}
-            //
-            // Si ves un error HTML, la URL está incorrecta o no está desplegada.
-            // ========================================================================
+            // 👇 REEMPLACE ESTA URL CON LA URL DE SU GOOGLE APPS SCRIPT
+            // IMPORTANTE: Después de actualizar el código en Google Apps Script,
+            // debe ir a "Implementar" > "Nueva implementación" para que los
+            // cambios se apliquen. Copie la nueva URL que se genera y péguela aquí.
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz99U2AFCliLI34Aqh7nK__MT0NNIsE1DKr7glVGL7zxJhfxiR8izQUaD1BgPDVe5DNow/exec'
         };
-
-        // ========================================================================
-        // 🔍 DIAGNÓSTICO AUTOMÁTICO
-        // ========================================================================
-        (function() {
-            const url = window.CONFIG?.APPS_SCRIPT_URL;
-            
-            console.log('%c=== DIAGNÓSTICO DEL SISTEMA DE INSCRIPCIONES ===', 'background: #1e40af; color: white; font-size: 14px; font-weight: bold; padding: 8px;');
-            
-            if (!url) {
-                console.error('%c❌ ERROR: No hay URL configurada', 'color: red; font-size: 12px; font-weight: bold;');
-                console.log('%c→ Solución: Configure APPS_SCRIPT_URL en window.CONFIG', 'color: orange; font-size: 11px;');
-            } else {
-                console.log('%c✓ URL configurada:', 'color: green; font-size: 12px; font-weight: bold;');
-                console.log('%c  ' + url, 'color: blue; font-size: 11px;');
-                
-                // Validar formato de URL
-                if (!url.startsWith('https://script.google.com/macros/s/')) {
-                    console.warn('%c⚠️ ADVERTENCIA: La URL no parece ser de Google Apps Script', 'color: orange; font-size: 12px; font-weight: bold;');
-                }
-                
-                if (!url.endsWith('/exec')) {
-                    console.warn('%c⚠️ ADVERTENCIA: La URL debe terminar con /exec', 'color: orange; font-size: 12px; font-weight: bold;');
-                }
-                
-                // Verificar si es la URL de ejemplo (sin cambiar)
-                if (url.includes('AKfycbyzhldum7ClpkopJ-RmE7Me56kGFd')) {
-                    console.warn('%c⚠️ ADVERTENCIA: Estás usando la URL de ejemplo', 'color: orange; font-size: 12px; font-weight: bold;');
-                    console.log('%c→ Si acabas de actualizar Code.gs, necesitas:', 'color: orange; font-size: 11px;');
-                    console.log('%c   1. Crear una NUEVA implementación en Google Apps Script', 'color: gray; font-size: 11px;');
-                    console.log('%c   2. Copiar la NUEVA URL generada', 'color: gray; font-size: 11px;');
-                    console.log('%c   3. Reemplazar APPS_SCRIPT_URL con la nueva URL', 'color: gray; font-size: 11px;');
-                }
-            }
-            
-            console.log('%c==============================================', 'color: gray; font-size: 12px;');
-        })();
     </script>
     <!-- ========================================================================== -->
 
     <!-- Carga el archivo index.js que contiene toda la lógica -->
-    <script type="text/babel" src="index.js"></script>
+    <script src="index.js"></script>
 
 </body>
 </html>
