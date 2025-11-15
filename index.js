@@ -12,7 +12,7 @@ const COURSES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dm
 const TEACHERS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv';
 
 const CURP_REGEX = /^[A-Z]{4}\d{6}[HM][A-Z]{5}[0-9A-Z]\d$/;
-
+const APPS_SCRIPT_URL = window.CONFIG && window.CONFIG.APPS_SCRIPT_URL;
 const MOCK_DEPARTMENTS = [
     "DEPARTAMENTO DE SISTEMAS Y COMPUTACION",
     "DEPARTAMENTO DE INGENIERÍA ELÉCTRICA Y ELECTRÓNICA",
