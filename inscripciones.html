@@ -11,7 +11,8 @@
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <!-- ⚠️ ACTUALIZADO: Babel 7 para soportar sintaxis moderna -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Google tag (gtag.js) -->
@@ -85,8 +86,20 @@
             // ========================================================================
             // 👇 REEMPLAZA ESTA URL CON LA QUE COPIASTE EN EL PASO 2
             
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw0clkNQmQpLReKeDzmYbgkl5YU5gYQbgsooyKLJpLgzhaLzLxQhs1YHf1_lGKg0WRHFA/exec'
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyzhldum7ClpkopJ-RmE7Me56kGFd-lS3YytjEVZChRNBB7VRXa8JzH-_P7T6lkuKV6Hw/exec'
             
+            // ========================================================================
+            // 📝 EJEMPLO DE URL CORRECTA:
+            // 'https://script.google.com/macros/s/AKfycbyXXXXXXXXXXXXXXXXXXXXXX/exec'
+            // ========================================================================
+            //
+            // ⚠️ NOTAS IMPORTANTES:
+            // - La URL debe terminar con '/exec'
+            // - Debe empezar con 'https://script.google.com/macros/s/'
+            // - Si acabas de actualizar el Code.gs, DEBES crear una nueva implementación
+            // - Cada nueva implementación genera una URL diferente
+            // - No elimines las implementaciones anteriores (por si necesitas revertir)
+            //
             // ========================================================================
             // 🆘 SI EL SISTEMA NO CARGA:
             // ========================================================================
@@ -114,7 +127,7 @@
         // 🔍 DIAGNÓSTICO AUTOMÁTICO
         // ========================================================================
         (function() {
-            const url = window.CONFIG?.APPS_SCRIPT_URL;
+            const url = window.CONFIG && window.CONFIG.APPS_SCRIPT_URL;
             
             console.log('%c=== DIAGNÓSTICO DEL SISTEMA DE INSCRIPCIONES ===', 'background: #1e40af; color: white; font-size: 14px; font-weight: bold; padding: 8px;');
             
