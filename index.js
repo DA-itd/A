@@ -1,7 +1,7 @@
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
 // Versión: 2.0.0 - UI/UX Mejorada
-// Última actualización: Enero 2024
+// Última actualización: Noviembre 2025
 // =============================================================================
 
 // =============================================================================
@@ -794,3 +794,61 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                                 className: 'absolute inset-y-0 right-0 flex items-center pr-3'
                             },
                                 React.createElement('div', { className: 'animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900' })
+                            )
+                        ),
+                        errors.curp && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, 
+                            errors.curp
+                        )
+                    ),
+                    React.createElement('div', null,
+                        React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
+                            'Email *'
+                        ),
+                        React.createElement('input', {
+                            type: 'email', name: 'email', value: formData.email, onChange: handleChange,
+                            className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base',
+                            placeholder: 'email@itdurango.edu.mx', required: true
+                        }),
+                        errors.email && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, 
+                            errors.email
+                        )
+                    ),
+                    React.createElement('div', null,
+                        React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
+                            'Departamento *'
+                        ),
+                        React.createElement('select', {
+                            name: 'department', value: formData.department, onChange: handleChange,
+                            className: 'mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md',
+                            required: true
+                        },
+                            React.createElement('option', { value: '', disabled: true }, 'Seleccione su departamento'),
+                            departments.map(dept => React.createElement('option', { key: dept, value: dept }, dept))
+                        ),
+                        errors.department && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, 
+                            errors.department
+                        )
+                    )
+                ),
+                React.createElement('div', { className: 'mt-8 flex justify-end' },
+                    React.createElement('button', {
+                        type: 'submit',
+                        className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800'
+                    }, 'Siguiente')
+                )
+            )
+        )
+    );
+};
+
+window.addEventListener('load', () => {
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(
+            React.createElement(React.StrictMode, null, React.createElement(App))
+        );
+    } else {
+        console.error('No se encontró el elemento root');
+    }
+});
