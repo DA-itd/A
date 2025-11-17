@@ -1,7 +1,7 @@
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
 // Versión: 2.0.0 - UI/UX Mejorada
-// Última actualización: Noviembre 2025
+// Última actualización: Enero 2024
 // =============================================================================
 
 // =============================================================================
@@ -807,7 +807,7 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                         React.createElement('input', {
                             type: 'email', name: 'email', value: formData.email, onChange: handleChange,
                             className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base',
-                            placeholder: 'email@itdurango.edu.mx', required: true
+                            placeholder: 'ejemplo@itdurango.edu.mx', required: true
                         }),
                         errors.email && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, 
                             errors.email
@@ -815,12 +815,23 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                     ),
                     React.createElement('div', null,
                         React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
+                            'Género *'
+                        ),
+                        React.createElement('select', {
+                            name: 'gender', value: formData.gender, onChange: handleChange,
+                            className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base'
+                        },
+                            React.createElement('option', { value: 'Mujer' }, 'Mujer'),
+                            React.createElement('option', { value: 'Hombre' }, 'Hombre')
+                        )
+                    ),
+                    React.createElement('div', { className: 'md:col-span-2' },
+                        React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
                             'Departamento *'
                         ),
                         React.createElement('select', {
                             name: 'department', value: formData.department, onChange: handleChange,
-                            className: 'mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md',
-                            required: true
+                            className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base'
                         },
                             React.createElement('option', { value: '', disabled: true }, 'Seleccione su departamento'),
                             departments.map(dept => React.createElement('option', { key: dept, value: dept }, dept))
@@ -841,12 +852,287 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
     );
 };
 
+// =============================================================================
+// == STEP 2: SELECCIÓN DE CURSOS
+// =============================================================================
+
+const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, originalSelectedCourses, onNext, onBack }) => {
+    const { useState, useMemo } = React;
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const toggleCourse = (course) => {
+        setSelectedCourses(prev => {
+            const isSelected = prev.some(c => c.id === course.id);
+            if (isSelected) {
+                return prev.filter(c => c.id !== course.id);
+            } else {
+                if (prev.length < 3) return [...prev, course];
+                return prev;
+            }
+        });
+    };
+
+    const formatCourseDates = (dates) => {
+        if (!dates) return '';
+        return dates.split(',').map(d => d.trim()).join(' | ');
+    };
+    
+    const filteredCourses = useMemo(() => {
+        const normalizedSearch = removeAccents(searchTerm.toLowerCase());
+        return courses.filter(course => 
+            removeAccents(course.name.toLowerCase()).includes(normalizedSearch)
+        );
+    }, [searchTerm, courses]);
+
+    const groupedCourses = useMemo(() => {
+        return filteredCourses.reduce((acc, course) => {
+            const period = course.period || 'Sin Periodo';
+            if (!acc[period]) {
+                acc[period] = {
+                    courses: [],
+                    dates: ''
+                };
+            }
+            acc[period].courses.push(course);
+            if (!acc[period].dates && course.dates) {
+                acc[period].dates = formatCourseDates(course.dates);
+            }
+            return acc;
+        }, {});
+    }, [filteredCourses]);
+
+    return React.createElement('div', { className: 'bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md w-full max-w-6xl mx-auto' },
+        React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold mb-2 text-gray-800' }, 'Selección de Cursos'),
+        React.createElement('p', { className: 'text-sm text-gray-600 mb-4' }, 
+            `Seleccionados: ${selectedCourses.length} de 3. Límite de inscripción por docente.`
+        ),
+        React.createElement('input', {
+            type: 'text',
+            placeholder: 'Buscar curso por nombre...',
+            value: searchTerm,
+            onChange: (e) => setSearchTerm(e.target.value),
+            className: 'w-full px-4 py-2 mb-6 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+        }),
+        
+        courses.length === 0 
+            ? React.createElement('p', { className: 'text-red-500 text-center py-8' }, 'No hay cursos disponibles en este momento.')
+            : Object.entries(groupedCourses).map(([period, data]) => 
+                React.createElement('div', { key: period, className: 'mb-8' },
+                    React.createElement('h3', { className: 'text-lg sm:text-xl font-semibold text-gray-700 border-b-2 border-blue-200 pb-2 mb-4' },
+                        data.dates ? `${period.replace(/_/g, ' ')} | ${data.dates}` : period.replace(/_/g, ' ')
+                    ),
+                    React.createElement('div', { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' },
+                        data.courses.map(course => {
+                            const isSelected = selectedCourses.some(c => c.id === course.id);
+                            const isOriginal = originalSelectedCourses.some(c => c.id === course.id);
+                            const isDisabled = !isSelected && selectedCourses.length >= 3;
+
+                            let bgColor = 'bg-white';
+                            if (isSelected && isOriginal) bgColor = 'bg-blue-100';
+                            else if (isSelected) bgColor = 'bg-green-100';
+
+                            return React.createElement('div', {
+                                key: course.id,
+                                onClick: () => !isDisabled && toggleCourse(course),
+                                className: `p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                                    isSelected ? 'border-blue-600' : 'border-gray-200'
+                                } ${isDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-md hover:border-blue-400'} ${bgColor}`
+                            },
+                                React.createElement('h4', { className: 'font-bold text-sm sm:text-base text-gray-800' }, course.name),
+                                React.createElement('p', { className: 'text-xs text-gray-500 mt-2' }, `Lugar: ${course.location}`),
+                                React.createElement('p', { className: 'text-xs text-gray-500' }, `Horario: ${course.schedule}`)
+                            );
+                        })
+                    )
+                )
+            ),
+        
+        React.createElement('div', { className: 'mt-8 pt-6 border-t flex flex-col-reverse sm:flex-row justify-between items-center' },
+            React.createElement('button', {
+                onClick: onBack,
+                className: 'mt-4 sm:mt-0 w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300'
+            }, 'Regresar'),
+            React.createElement('button', {
+                onClick: onNext,
+                className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800'
+            }, 'Siguiente')
+        )
+    );
+};
+
+// =============================================================================
+// == STEP 3: CONFIRMACIÓN
+// =============================================================================
+
+const Step3Confirmation = ({ formData, courses, originalCourses, onBack, onSubmit }) => {
+    const { useState, useMemo } = React;
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const { coursesToAdd, coursesToCancel, isFullCancellation, noChanges } = useMemo(() => {
+        const originalCourseIds = new Set(originalCourses.map(c => c.id));
+        const selectedCourseIds = new Set(courses.map(c => c.id));
+
+        const toAdd = courses.filter(c => !originalCourseIds.has(c.id));
+        const toCancel = originalCourses.filter(c => !selectedCourseIds.has(c.id));
+        
+        return {
+            coursesToAdd: toAdd,
+            coursesToCancel: toCancel,
+            isFullCancellation: courses.length === 0 && originalCourses.length > 0,
+            noChanges: toAdd.length === 0 && toCancel.length === 0,
+        };
+    }, [courses, originalCourses]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            await onSubmit();
+        } catch (err) {
+            // The error is handled by the parent component, but we should re-enable the button.
+            setIsSubmitting(false);
+        }
+    };
+
+    const renderCourseList = (courseList, title, colorClass) => {
+        if (courseList.length === 0) return null;
+        return React.createElement('div', { className: 'mb-4' },
+            React.createElement('h4', { className: `font-semibold text-gray-700 ${colorClass}` }, title),
+            React.createElement('ul', { className: 'list-disc list-inside mt-2 space-y-1 text-sm text-gray-600' },
+                courseList.map(course => React.createElement('li', { key: course.id }, course.name))
+            )
+        );
+    };
+
+    return React.createElement('div', { className: 'bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md w-full max-w-4xl mx-auto' },
+        React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold mb-6 text-gray-800' }, 'Confirmar Información'),
+        
+        // Personal Info
+        React.createElement('div', { className: 'border-b pb-6 mb-6' },
+            React.createElement('h3', { className: 'text-lg font-semibold mb-4 text-gray-700' }, 'Datos Personales'),
+            React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-4 text-sm' },
+                React.createElement('div', null,
+                    React.createElement('p', { className: 'text-gray-500' }, 'Nombre Completo'),
+                    React.createElement('p', { className: 'font-semibold text-gray-800' }, formData.fullName)
+                ),
+                React.createElement('div', null,
+                    React.createElement('p', { className: 'text-gray-500' }, 'CURP'),
+                    React.createElement('p', { className: 'font-semibold text-gray-800' }, formData.curp)
+                ),
+                React.createElement('div', null,
+                    React.createElement('p', { className: 'text-gray-500' }, 'Email'),
+                    React.createElement('p', { className: 'font-semibold text-gray-800 break-all' }, formData.email)
+                ),
+                React.createElement('div', null,
+                    React.createElement('p', { className: 'text-gray-500' }, 'Departamento'),
+                    React.createElement('p', { className: 'font-semibold text-gray-800' }, formData.department)
+                )
+            )
+        ),
+        
+        // Course Changes
+        React.createElement('div', null,
+            React.createElement('h3', { className: 'text-lg font-semibold mb-4 text-gray-700' }, 'Resumen de Inscripción'),
+            isFullCancellation ?
+                React.createElement('div', { className: 'bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 rounded-md' },
+                    React.createElement('p', { className: 'font-bold' }, 'Confirmación de Cancelación Total'),
+                    React.createElement('p', { className: 'text-sm mt-1' }, 'Está a punto de cancelar la inscripción a todos sus cursos. Esta acción no se puede deshacer.')
+                ) :
+            noChanges ?
+                React.createElement('p', { className: 'text-gray-600' }, 'No se han realizado cambios en su selección de cursos.')
+                :
+                React.createElement('div', null,
+                    renderCourseList(coursesToAdd, 'Cursos a Inscribir:', 'text-green-700'),
+                    renderCourseList(coursesToCancel, 'Cursos a Cancelar:', 'text-red-700')
+                )
+        ),
+        
+        // Navigation
+        React.createElement('div', { className: 'mt-8 pt-6 border-t flex flex-col-reverse sm:flex-row justify-between items-center' },
+            React.createElement('button', {
+                onClick: onBack,
+                className: 'mt-4 sm:mt-0 w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300'
+            }, 'Regresar'),
+            React.createElement('button', {
+                onClick: handleSubmit,
+                disabled: isSubmitting,
+                className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800 disabled:opacity-50 flex items-center justify-center'
+            },
+                isSubmitting && React.createElement('div', { className: 'animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3' }),
+                isSubmitting ? 'Enviando...' : 'Confirmar y Enviar'
+            )
+        )
+    );
+};
+
+// =============================================================================
+// == STEP 4: FINALIZADO
+// =============================================================================
+
+const Step4Success = ({ registrationResult, applicantName, selectedCourses, submissionType, emailSent, emailError }) => {
+    const isCancellation = submissionType === 'cancellation';
+    const hasNewRegistrations = registrationResult && registrationResult.length > 0;
+
+    const title = isCancellation ? 'Cancelación Exitosa' : '¡Inscripción Exitosa!';
+    const message = isCancellation
+        ? `Hola ${applicantName}, hemos procesado la cancelación de tus cursos. Recibirás un correo de confirmación.`
+        : `¡Felicidades, ${applicantName}! Tu inscripción ha sido procesada correctamente.`;
+
+    return React.createElement('div', { className: 'bg-white p-6 sm:p-8 lg:p-10 rounded-lg shadow-md w-full max-w-4xl mx-auto text-center' },
+        React.createElement('div', { className: 'text-6xl mb-4' }, isCancellation ? '✅' : '🎉'),
+        React.createElement('h2', { className: 'text-2xl sm:text-3xl font-bold mb-4 text-gray-800' }, title),
+        React.createElement('p', { className: 'text-gray-600 mb-6' }, message),
+        
+        hasNewRegistrations && React.createElement('div', { className: 'bg-gray-50 p-4 rounded-lg border text-left my-6' },
+            React.createElement('h3', { className: 'font-semibold text-gray-700 mb-4' }, 'Cursos Inscritos:'),
+            React.createElement('div', { className: 'space-y-4' },
+                registrationResult.map(result => 
+                    React.createElement('div', { key: result.folio, className: 'border-l-4 border-blue-500 pl-4 py-2' },
+                        React.createElement('p', { className: 'font-bold text-gray-800' }, 
+                            (selectedCourses.find(c => c.id === result.registrationId) || {}).name
+                        ),
+                        React.createElement('p', { className: 'text-sm text-gray-600' }, `Folio: ${result.folio}`),
+                        React.createElement('p', { className: 'text-sm text-gray-600' }, `Fechas: ${result.dates}`)
+                    )
+                )
+            )
+        ),
+
+        !emailSent && React.createElement('div', { 
+            className: 'bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-6 rounded-md text-left' 
+        },
+            React.createElement('p', { className: 'font-bold' }, '⚠️ Problema al enviar el correo de confirmación.'),
+            React.createElement('p', { className: 'text-sm mt-1' }, 
+                'Tu inscripción fue exitosa, pero no pudimos enviarte el correo. Por favor, toma una captura de pantalla de esta página como comprobante.'
+            ),
+            emailError && React.createElement('p', { className: 'text-xs mt-2 text-gray-600' }, `Detalle: ${emailError}`)
+        ),
+        
+        React.createElement('p', { className: 'text-sm text-gray-500 mt-6' }, 
+            'Guarda una captura de pantalla de esta página para tu referencia. Si no recibes un correo de confirmación en breve, revisa tu carpeta de spam.'
+        ),
+        React.createElement('div', { className: 'mt-8' },
+            React.createElement('a', {
+                href: 'inscripciones.html',
+                className: 'w-full sm:w-auto inline-block bg-blue-700 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-800'
+            }, 'Finalizar')
+        )
+    );
+};
+
+
+// =============================================================================
+// == INICIALIZACIÓN DE LA APP
+// =============================================================================
+
 window.addEventListener('load', () => {
     const rootElement = document.getElementById('root');
     if (rootElement) {
         const root = ReactDOM.createRoot(rootElement);
         root.render(
-            React.createElement(React.StrictMode, null, React.createElement(App))
+            React.createElement(React.StrictMode, null, 
+                React.createElement(App)
+            )
         );
     } else {
         console.error('No se encontró el elemento root');
