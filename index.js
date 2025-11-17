@@ -762,90 +762,96 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
             deletingCourseId: deletingCourseId,
             onCancelAll: handleCancelAllRegistration
         }),
-        React.createElement('div', { className: 'bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md w-full max-w-4xl mx-auto' },
-            React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold mb-6 text-gray-800' }, 
-                'Información Personal'
-            ),
-            React.createElement('form', { onSubmit: handleSubmit, noValidate: true },
-                React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6' },
-                    React.createElement('div', null,
-                        React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
-                            'Nombre Completo *'
-                        ),
-                        React.createElement(AutocompleteInput, {
-                            teachers, onSelect: handleTeacherSelect, value: formData.fullName,
-                            onChange: handleChange, name: 'fullName', required: true
-                        }),
-                        errors.fullName && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, 
-                            errors.fullName
-                        )
-                    ),
-                    React.createElement('div', null,
-                        React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
-                            'CURP *'
-                        ),
-                        React.createElement('div', { className: 'relative' },
-                            React.createElement('input', {
-                                type: 'text', name: 'curp', value: formData.curp, onChange: handleChange,
-                                className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base',
-                                placeholder: '18 caracteres', maxLength: 18, required: true
+        React.createElement('div', { className: 'max-w-4xl mx-auto' },
+            React.createElement('a', {
+                href: 'index.html',
+                className: 'inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-4'
+            }, '← Volver al Portal Principal'),
+            React.createElement('div', { className: 'bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md' },
+                React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold mb-6 text-gray-800' }, 
+                    'Información Personal'
+                ),
+                React.createElement('form', { onSubmit: handleSubmit, noValidate: true },
+                    React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6' },
+                        React.createElement('div', null,
+                            React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
+                                'Nombre Completo *'
+                            ),
+                            React.createElement(AutocompleteInput, {
+                                teachers, onSelect: handleTeacherSelect, value: formData.fullName,
+                                onChange: handleChange, name: 'fullName', required: true
                             }),
-                            isCheckingCurp && React.createElement('div', {
-                                className: 'absolute inset-y-0 right-0 flex items-center pr-3'
-                            },
-                                React.createElement('div', { className: 'animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900' })
+                            errors.fullName && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, 
+                                errors.fullName
                             )
                         ),
-                        errors.curp && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, 
-                            errors.curp
+                        React.createElement('div', null,
+                            React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
+                                'CURP *'
+                            ),
+                            React.createElement('div', { className: 'relative' },
+                                React.createElement('input', {
+                                    type: 'text', name: 'curp', value: formData.curp, onChange: handleChange,
+                                    className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base',
+                                    placeholder: '18 caracteres', maxLength: 18, required: true
+                                }),
+                                isCheckingCurp && React.createElement('div', {
+                                    className: 'absolute inset-y-0 right-0 flex items-center pr-3'
+                                },
+                                    React.createElement('div', { className: 'animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900' })
+                                )
+                            ),
+                            errors.curp && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, 
+                                errors.curp
+                            )
+                        ),
+                        React.createElement('div', null,
+                            React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
+                                'Email *'
+                            ),
+                            React.createElement('input', {
+                                type: 'email', name: 'email', value: formData.email, onChange: handleChange,
+                                className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base',
+                                placeholder: 'ejemplo@itdurango.edu.mx', required: true
+                            }),
+                            errors.email && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, 
+                                errors.email
+                            )
+                        ),
+                        React.createElement('div', null,
+                            React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
+                                'Género *'
+                            ),
+                            React.createElement('select', {
+                                name: 'gender', value: formData.gender, onChange: handleChange,
+                                className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base'
+                            },
+                                React.createElement('option', { value: 'Mujer' }, 'Mujer'),
+                                React.createElement('option', { value: 'Hombre' }, 'Hombre')
+                            )
+                        ),
+                        React.createElement('div', { className: 'md:col-span-2' },
+                            React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
+                                'Departamento *'
+                            ),
+                            React.createElement('select', {
+                                name: 'department', value: formData.department, onChange: handleChange,
+                                className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base'
+                            },
+                                React.createElement('option', { value: '', disabled: true }, 'Seleccione su departamento'),
+                                departments.map(dept => React.createElement('option', { key: dept, value: dept }, dept))
+                            ),
+                            errors.department && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, 
+                                errors.department
+                            )
                         )
                     ),
-                    React.createElement('div', null,
-                        React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
-                            'Email *'
-                        ),
-                        React.createElement('input', {
-                            type: 'email', name: 'email', value: formData.email, onChange: handleChange,
-                            className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base',
-                            placeholder: 'ejemplo@itdurango.edu.mx', required: true
-                        }),
-                        errors.email && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, 
-                            errors.email
-                        )
-                    ),
-                    React.createElement('div', null,
-                        React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
-                            'Género *'
-                        ),
-                        React.createElement('select', {
-                            name: 'gender', value: formData.gender, onChange: handleChange,
-                            className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base'
-                        },
-                            React.createElement('option', { value: 'Mujer' }, 'Mujer'),
-                            React.createElement('option', { value: 'Hombre' }, 'Hombre')
-                        )
-                    ),
-                    React.createElement('div', { className: 'md:col-span-2' },
-                        React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, 
-                            'Departamento *'
-                        ),
-                        React.createElement('select', {
-                            name: 'department', value: formData.department, onChange: handleChange,
-                            className: 'mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base'
-                        },
-                            React.createElement('option', { value: '', disabled: true }, 'Seleccione su departamento'),
-                            departments.map(dept => React.createElement('option', { key: dept, value: dept }, dept))
-                        ),
-                        errors.department && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, 
-                            errors.department
-                        )
+                    React.createElement('div', { className: 'mt-8 flex justify-end' },
+                        React.createElement('button', {
+                            type: 'submit',
+                            className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800'
+                        }, 'Siguiente')
                     )
-                ),
-                React.createElement('div', { className: 'mt-8 flex justify-end' },
-                    React.createElement('button', {
-                        type: 'submit',
-                        className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800'
-                    }, 'Siguiente')
                 )
             )
         )
@@ -901,73 +907,79 @@ const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, or
         }, {});
     }, [filteredCourses]);
 
-    return React.createElement('div', { className: 'bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md w-full max-w-6xl mx-auto' },
-        React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold mb-2 text-gray-800' }, 'Selección de Cursos'),
-        React.createElement('p', { className: 'text-sm text-gray-600 mb-4' }, 
-            `Seleccionados: ${selectedCourses.length} de 3. Límite de inscripción por docente.`
-        ),
-        React.createElement('input', {
-            type: 'text',
-            placeholder: 'Buscar curso por nombre...',
-            value: searchTerm,
-            onChange: (e) => setSearchTerm(e.target.value),
-            className: 'w-full px-4 py-2 mb-6 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-        }),
-        
-        courses.length === 0 
-            ? React.createElement('p', { className: 'text-red-500 text-center py-8' }, 'No hay cursos disponibles en este momento.')
-            : Object.entries(groupedCourses).map(([period, data]) => {
-                const isPeriod1 = period === 'PERIODO_1';
-                const headerClass = isPeriod1 ? 'text-teal-800 border-teal-300' : 'text-indigo-800 border-indigo-300';
-                const headerIcon = isPeriod1 ? '☀️' : '🍂';
-
-                return React.createElement('div', { key: period, className: 'mb-8' },
-                    React.createElement('h3', { className: `flex items-center gap-3 text-lg sm:text-xl font-semibold border-b-2 pb-2 mb-4 ${headerClass}` },
-                        React.createElement('span', { className: 'text-2xl' }, headerIcon),
-                        data.dates ? `${period.replace(/_/g, ' ')} | ${data.dates}` : period.replace(/_/g, ' ')
-                    ),
-                    React.createElement('div', { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' },
-                        data.courses.map(course => {
-                            const isSelected = selectedCourses.some(c => c.id === course.id);
-                            const isOriginal = originalSelectedCourses.some(c => c.id === course.id);
-                            const isDisabled = !isSelected && selectedCourses.length >= 3;
-
-                            let bgColor = isPeriod1 ? 'bg-teal-50' : 'bg-indigo-50';
-                            if (isSelected) {
-                                bgColor = isOriginal ? (isPeriod1 ? 'bg-teal-200' : 'bg-indigo-200') : 'bg-green-100';
-                            }
-                            
-                            const borderColor = isSelected 
-                                ? (isPeriod1 ? 'border-teal-600' : 'border-indigo-600') 
-                                : 'border-transparent';
-                            
-                            const hoverEffect = isDisabled 
-                                ? 'opacity-60 cursor-not-allowed' 
-                                : `hover:shadow-md ${isPeriod1 ? 'hover:border-teal-400' : 'hover:border-indigo-400'}`;
-
-                            return React.createElement('div', {
-                                key: course.id,
-                                onClick: () => !isDisabled && toggleCourse(course),
-                                className: `p-4 rounded-lg border-2 transition-all ${borderColor} ${bgColor} ${hoverEffect}`
-                            },
-                                React.createElement('h4', { className: 'font-bold text-sm sm:text-base text-gray-800' }, course.name),
-                                React.createElement('p', { className: 'text-xs text-gray-500 mt-2' }, `Lugar: ${course.location}`),
-                                React.createElement('p', { className: 'text-xs text-gray-500' }, `Horario: ${course.schedule}`)
-                            );
-                        })
-                    )
-                );
+    return React.createElement('div', { className: 'max-w-6xl mx-auto' },
+        React.createElement('a', {
+            href: 'index.html',
+            className: 'inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-4'
+        }, '← Volver al Portal Principal'),
+        React.createElement('div', { className: 'bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md w-full' },
+            React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold mb-2 text-gray-800' }, 'Selección de Cursos'),
+            React.createElement('p', { className: 'text-sm text-gray-600 mb-4' }, 
+                `Seleccionados: ${selectedCourses.length} de 3. Límite de inscripción por docente.`
+            ),
+            React.createElement('input', {
+                type: 'text',
+                placeholder: 'Buscar curso por nombre...',
+                value: searchTerm,
+                onChange: (e) => setSearchTerm(e.target.value),
+                className: 'w-full px-4 py-2 mb-6 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
             }),
-        
-        React.createElement('div', { className: 'mt-8 pt-6 border-t flex flex-col-reverse sm:flex-row justify-between items-center' },
-            React.createElement('button', {
-                onClick: onBack,
-                className: 'mt-4 sm:mt-0 w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300'
-            }, 'Regresar'),
-            React.createElement('button', {
-                onClick: onNext,
-                className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800'
-            }, 'Siguiente')
+            
+            courses.length === 0 
+                ? React.createElement('p', { className: 'text-red-500 text-center py-8' }, 'No hay cursos disponibles en este momento.')
+                : Object.entries(groupedCourses).map(([period, data]) => {
+                    const isPeriod1 = period === 'PERIODO_1';
+                    const headerClass = isPeriod1 ? 'text-teal-800 border-teal-300' : 'text-indigo-800 border-indigo-300';
+                    const headerIcon = isPeriod1 ? '☀️' : '🍂';
+
+                    return React.createElement('div', { key: period, className: 'mb-8' },
+                        React.createElement('h3', { className: `flex items-center gap-3 text-lg sm:text-xl font-semibold border-b-2 pb-2 mb-4 ${headerClass}` },
+                            React.createElement('span', { className: 'text-2xl' }, headerIcon),
+                            data.dates ? `${period.replace(/_/g, ' ')} | ${data.dates}` : period.replace(/_/g, ' ')
+                        ),
+                        React.createElement('div', { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' },
+                            data.courses.map(course => {
+                                const isSelected = selectedCourses.some(c => c.id === course.id);
+                                const isOriginal = originalSelectedCourses.some(c => c.id === course.id);
+                                const isDisabled = !isSelected && selectedCourses.length >= 3;
+
+                                let bgColor = isPeriod1 ? 'bg-teal-50' : 'bg-indigo-50';
+                                if (isSelected) {
+                                    bgColor = isOriginal ? (isPeriod1 ? 'bg-teal-200' : 'bg-indigo-200') : 'bg-green-100';
+                                }
+                                
+                                const borderColor = isSelected 
+                                    ? (isPeriod1 ? 'border-teal-600' : 'border-indigo-600') 
+                                    : 'border-transparent';
+                                
+                                const hoverEffect = isDisabled 
+                                    ? 'opacity-60 cursor-not-allowed' 
+                                    : `hover:shadow-md ${isPeriod1 ? 'hover:border-teal-400' : 'hover:border-indigo-400'}`;
+
+                                return React.createElement('div', {
+                                    key: course.id,
+                                    onClick: () => !isDisabled && toggleCourse(course),
+                                    className: `p-4 rounded-lg border-2 transition-all ${borderColor} ${bgColor} ${hoverEffect}`
+                                },
+                                    React.createElement('h4', { className: 'font-bold text-sm sm:text-base text-gray-800' }, course.name),
+                                    React.createElement('p', { className: 'text-xs text-gray-500 mt-2' }, `Lugar: ${course.location}`),
+                                    React.createElement('p', { className: 'text-xs text-gray-500' }, `Horario: ${course.schedule}`)
+                                );
+                            })
+                        )
+                    );
+                }),
+            
+            React.createElement('div', { className: 'mt-8 pt-6 border-t flex flex-col-reverse sm:flex-row justify-between items-center' },
+                React.createElement('button', {
+                    onClick: onBack,
+                    className: 'mt-4 sm:mt-0 w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300'
+                }, 'Regresar'),
+                React.createElement('button', {
+                    onClick: onNext,
+                    className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800'
+                }, 'Siguiente')
+            )
         )
     );
 };
@@ -1016,62 +1028,68 @@ const Step3Confirmation = ({ formData, courses, originalCourses, onBack, onSubmi
         );
     };
 
-    return React.createElement('div', { className: 'bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md w-full max-w-4xl mx-auto' },
-        React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold mb-6 text-gray-800' }, 'Confirmar Información'),
-        
-        // Personal Info
-        React.createElement('div', { className: 'border-b pb-6 mb-6' },
-            React.createElement('h3', { className: 'text-lg font-semibold mb-4 text-gray-700' }, 'Datos Personales'),
-            React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-4 text-sm' },
-                React.createElement('div', null,
-                    React.createElement('p', { className: 'text-gray-500' }, 'Nombre Completo'),
-                    React.createElement('p', { className: 'font-semibold text-gray-800' }, formData.fullName)
-                ),
-                React.createElement('div', null,
-                    React.createElement('p', { className: 'text-gray-500' }, 'CURP'),
-                    React.createElement('p', { className: 'font-semibold text-gray-800' }, formData.curp)
-                ),
-                React.createElement('div', null,
-                    React.createElement('p', { className: 'text-gray-500' }, 'Email'),
-                    React.createElement('p', { className: 'font-semibold text-gray-800 break-all' }, formData.email)
-                ),
-                React.createElement('div', null,
-                    React.createElement('p', { className: 'text-gray-500' }, 'Departamento'),
-                    React.createElement('p', { className: 'font-semibold text-gray-800' }, formData.department)
+    return React.createElement('div', { className: 'max-w-4xl mx-auto' },
+        React.createElement('a', {
+            href: 'index.html',
+            className: 'inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-4'
+        }, '← Volver al Portal Principal'),
+        React.createElement('div', { className: 'bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md w-full' },
+            React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold mb-6 text-gray-800' }, 'Confirmar Información'),
+            
+            // Personal Info
+            React.createElement('div', { className: 'border-b pb-6 mb-6' },
+                React.createElement('h3', { className: 'text-lg font-semibold mb-4 text-gray-700' }, 'Datos Personales'),
+                React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-4 text-sm' },
+                    React.createElement('div', null,
+                        React.createElement('p', { className: 'text-gray-500' }, 'Nombre Completo'),
+                        React.createElement('p', { className: 'font-semibold text-gray-800' }, formData.fullName)
+                    ),
+                    React.createElement('div', null,
+                        React.createElement('p', { className: 'text-gray-500' }, 'CURP'),
+                        React.createElement('p', { className: 'font-semibold text-gray-800' }, formData.curp)
+                    ),
+                    React.createElement('div', null,
+                        React.createElement('p', { className: 'text-gray-500' }, 'Email'),
+                        React.createElement('p', { className: 'font-semibold text-gray-800 break-all' }, formData.email)
+                    ),
+                    React.createElement('div', null,
+                        React.createElement('p', { className: 'text-gray-500' }, 'Departamento'),
+                        React.createElement('p', { className: 'font-semibold text-gray-800' }, formData.department)
+                    )
                 )
-            )
-        ),
-        
-        // Course Changes
-        React.createElement('div', null,
-            React.createElement('h3', { className: 'text-lg font-semibold mb-4 text-gray-700' }, 'Resumen de Inscripción'),
-            isFullCancellation ?
-                React.createElement('div', { className: 'bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 rounded-md' },
-                    React.createElement('p', { className: 'font-bold' }, 'Confirmación de Cancelación Total'),
-                    React.createElement('p', { className: 'text-sm mt-1' }, 'Está a punto de cancelar la inscripción a todos sus cursos. Esta acción no se puede deshacer.')
-                ) :
-            noChanges ?
-                React.createElement('p', { className: 'text-gray-600' }, 'No se han realizado cambios en su selección de cursos.')
-                :
-                React.createElement('div', null,
-                    renderCourseList(coursesToAdd, 'Cursos a Inscribir:', 'text-green-700'),
-                    renderCourseList(coursesToCancel, 'Cursos a Cancelar:', 'text-red-700')
+            ),
+            
+            // Course Changes
+            React.createElement('div', null,
+                React.createElement('h3', { className: 'text-lg font-semibold mb-4 text-gray-700' }, 'Resumen de Inscripción'),
+                isFullCancellation ?
+                    React.createElement('div', { className: 'bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 rounded-md' },
+                        React.createElement('p', { className: 'font-bold' }, 'Confirmación de Cancelación Total'),
+                        React.createElement('p', { className: 'text-sm mt-1' }, 'Está a punto de cancelar la inscripción a todos sus cursos. Esta acción no se puede deshacer.')
+                    ) :
+                noChanges ?
+                    React.createElement('p', { className: 'text-gray-600' }, 'No se han realizado cambios en su selección de cursos.')
+                    :
+                    React.createElement('div', null,
+                        renderCourseList(coursesToAdd, 'Cursos a Inscribir:', 'text-green-700'),
+                        renderCourseList(coursesToCancel, 'Cursos a Cancelar:', 'text-red-700')
+                    )
+            ),
+            
+            // Navigation
+            React.createElement('div', { className: 'mt-8 pt-6 border-t flex flex-col-reverse sm:flex-row justify-between items-center' },
+                React.createElement('button', {
+                    onClick: onBack,
+                    className: 'mt-4 sm:mt-0 w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300'
+                }, 'Regresar'),
+                React.createElement('button', {
+                    onClick: handleSubmit,
+                    disabled: isSubmitting,
+                    className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800 disabled:opacity-50 flex items-center justify-center'
+                },
+                    isSubmitting && React.createElement('div', { className: 'animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3' }),
+                    isSubmitting ? 'Enviando...' : 'Confirmar y Enviar'
                 )
-        ),
-        
-        // Navigation
-        React.createElement('div', { className: 'mt-8 pt-6 border-t flex flex-col-reverse sm:flex-row justify-between items-center' },
-            React.createElement('button', {
-                onClick: onBack,
-                className: 'mt-4 sm:mt-0 w-full sm:w-auto bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300'
-            }, 'Regresar'),
-            React.createElement('button', {
-                onClick: handleSubmit,
-                disabled: isSubmitting,
-                className: 'w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800 disabled:opacity-50 flex items-center justify-center'
-            },
-                isSubmitting && React.createElement('div', { className: 'animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3' }),
-                isSubmitting ? 'Enviando...' : 'Confirmar y Enviar'
             )
         )
     );
@@ -1125,9 +1143,9 @@ const Step4Success = ({ registrationResult, applicantName, selectedCourses, subm
         ),
         React.createElement('div', { className: 'mt-8' },
             React.createElement('a', {
-                href: 'inscripciones.html',
+                href: 'index.html',
                 className: 'w-full sm:w-auto inline-block bg-blue-700 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-800'
-            }, 'Finalizar')
+            }, 'Volver al Portal Principal')
         )
     );
 };
