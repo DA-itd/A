@@ -145,6 +145,16 @@
             animation: modal-content-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
     </style>
+<script type="importmap">
+{
+  "imports": {
+    "vite": "https://aistudiocdn.com/vite@^7.1.12",
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "process": "https://aistudiocdn.com/process@^0.11.10"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
@@ -761,12 +771,13 @@
             rotateQuotes(); // Initial quote
             setInterval(rotateQuotes, 30000); // Change quote every 30 seconds
             updateCalendarYear();
-            
+
             console.log('%c Portal ITD - Listo ', 
                 'background: #1e3a8a; color: white; font-size: 16px; padding: 8px; border-radius: 4px;'
             );
         });
     </script>
 
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>
