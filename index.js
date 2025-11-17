@@ -298,6 +298,7 @@ const App = () => {
                     dates: c.dates,
                     location: c.location,
                     schedule: c.schedule,
+                    hours: c.hours
                 })),
                 previousRegistrationIds: originalSelectedCourses.map(c => c.id)
             };
