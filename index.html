@@ -145,31 +145,12 @@
             animation: modal-content-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "vite": "https://aistudiocdn.com/vite@^7.1.12",
-    "path": "https://aistudiocdn.com/path@^0.12.7",
-    "process": "https://aistudiocdn.com/process@^0.11.10"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
     
     <!-- Elemento del cursor personalizado -->
     <div id="cursor-dot"></div>
-
-    <!-- Modal de Bienvenida -->
-    <div id="welcome-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 transition-opacity duration-500 ease-out">
-        <div id="welcome-modal-content" class="bg-white rounded-2xl shadow-2xl p-8 sm:p-12 max-w-lg w-full text-center transform opacity-0">
-            <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="Logo ITD" class="h-24 sm:h-32 mx-auto mb-6">
-            <h2 class="text-2xl sm:text-4xl font-bold text-blue-900 mb-4">¡Bienvenido al Portal Docente!</h2>
-            <p class="text-base sm:text-lg text-gray-700">Tu centro de recursos para la actualización y el desarrollo profesional.</p>
-        </div>
-    </div>
 
     <!-- Header -->
     <header class="bg-white shadow-xl sticky top-0 z-40">
@@ -780,37 +761,6 @@
             rotateQuotes(); // Initial quote
             setInterval(rotateQuotes, 30000); // Change quote every 30 seconds
             updateCalendarYear();
-
-            // =========================================================================
-            // LÓGICA DE LA VENTANA DE BIENVENIDA
-            // =========================================================================
-            const welcomeModal = document.getElementById('welcome-modal');
-            const welcomeModalContent = document.getElementById('welcome-modal-content');
-
-            if (welcomeModal && welcomeModalContent) {
-                // Muestra el modal con animación
-                welcomeModalContent.classList.add('animate-modal-in');
-
-                const hideWelcomeModal = () => {
-                    if (welcomeModal) {
-                        welcomeModal.classList.add('opacity-0');
-                        
-                        // Limpia los listeners para que no se ejecuten de nuevo
-                        document.removeEventListener('click', hideWelcomeModal);
-                        document.removeEventListener('scroll', hideWelcomeModal);
-                        document.removeEventListener('touchstart', hideWelcomeModal);
-                        
-                        setTimeout(() => {
-                            welcomeModal.style.display = 'none';
-                        }, 500); // Coincide con la duración de la transición
-                    }
-                };
-
-                // Escucha la primera interacción del usuario para cerrar el modal
-                document.addEventListener('click', hideWelcomeModal, { once: true });
-                document.addEventListener('scroll', hideWelcomeModal, { once: true });
-                document.addEventListener('touchstart', hideWelcomeModal, { once: true });
-            }
             
             console.log('%c Portal ITD - Listo ', 
                 'background: #1e3a8a; color: white; font-size: 16px; padding: 8px; border-radius: 4px;'
@@ -818,6 +768,5 @@
         });
     </script>
 
-<script type="module" src="/index.tsx"></script>
 </body>
 </html>
