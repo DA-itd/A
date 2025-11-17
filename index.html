@@ -49,11 +49,11 @@
             transition: left 0.5s;
         }
         
-        .card-portal:hover::before {
+        .card-portal:not(.cursor-not-allowed):hover::before {
             left: 100%;
         }
         
-        .card-portal:hover {
+        .card-portal:not(.cursor-not-allowed):hover {
             transform: translateY(-8px) scale(1.02);
             box-shadow: 0 20px 40px rgba(0,0,0,0.12);
         }
@@ -298,10 +298,10 @@
             </a>
 
             <!-- Opción 2: Historial de Cursos -->
-            <a href="#" onclick="event.preventDefault(); showComingSoon('Historial de Cursos')"
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-400 cursor-pointer animate-fadeInUp delay-200">
+            <a href="#" onclick="event.preventDefault();"
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent animate-fadeInUp delay-200 opacity-60 cursor-not-allowed">
                 <span class="badge-soon">Próximamente</span>
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
+                <div class="text-4xl sm:text-5xl mb-4">📚</div>
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Historial de Cursos
                 </h3>
@@ -374,10 +374,10 @@
             </a>
             
             <!-- Opción 7: Estadísticas -->
-            <a href="#" onclick="event.preventDefault(); showComingSoon('Estadísticas')"
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 cursor-pointer animate-fadeInUp delay-700">
+            <a href="#" onclick="event.preventDefault();"
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent animate-fadeInUp delay-700 opacity-60 cursor-not-allowed">
                 <span class="badge-soon">Próximamente</span>
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📈</div>
+                <div class="text-4xl sm:text-5xl mb-4">📈</div>
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Estadísticas
                 </h3>
@@ -513,23 +513,6 @@
         </div>
     </footer>
 
-    <!-- Modal "Próximamente" -->
-    <div id="comingSoonModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center transform transition-all animate-fadeInUp">
-            <div class="text-6xl mb-4">🚧</div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2" id="modalTitle">
-                Próximamente
-            </h3>
-            <p class="text-gray-600 mb-6">
-                Esta sección está en desarrollo y estará disponible pronto.
-            </p>
-            <button onclick="closeModal()" 
-                    class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all">
-                Entendido
-            </button>
-        </div>
-    </div>
-
     <script>
         // =============================================================================
         // LÓGICA DEL CURSOR PERSONALIZADO
@@ -547,7 +530,7 @@
             
             const target = e.target;
             // Verifica si el elemento es un enlace, botón o tiene un rol de botón o es una tarjeta del portal
-            if (target.matches('a, button, [role="button"], .card-portal')) {
+            if (target.closest('a, button, [role="button"], .card-portal:not(.cursor-not-allowed)')) {
                 cursorDot.classList.add('active');
             } else {
                 cursorDot.classList.remove('active');
@@ -737,21 +720,6 @@
                 quoteContainer.style.opacity = 1;
             }, 500);
         }
-        
-        // =============================================================================
-        // MODALES
-        // =============================================================================
-        function showComingSoon(sectionName) {
-            document.getElementById('modalTitle').textContent = sectionName;
-            document.getElementById('comingSoonModal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('comingSoonModal').classList.add('hidden');
-        }
-        
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
-        document.getElementById('comingSoonModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 
         // =============================================================================
         // INICIALIZACIÓN
