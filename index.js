@@ -916,9 +916,14 @@ const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, or
         
         courses.length === 0 
             ? React.createElement('p', { className: 'text-red-500 text-center py-8' }, 'No hay cursos disponibles en este momento.')
-            : Object.entries(groupedCourses).map(([period, data]) => 
-                React.createElement('div', { key: period, className: 'mb-8' },
-                    React.createElement('h3', { className: 'text-lg sm:text-xl font-semibold text-gray-700 border-b-2 border-blue-200 pb-2 mb-4' },
+            : Object.entries(groupedCourses).map(([period, data]) => {
+                const isPeriod1 = period === 'PERIODO_1';
+                const headerClass = isPeriod1 ? 'text-teal-800 border-teal-300' : 'text-indigo-800 border-indigo-300';
+                const headerIcon = isPeriod1 ? '☀️' : '🍂';
+
+                return React.createElement('div', { key: period, className: 'mb-8' },
+                    React.createElement('h3', { className: `flex items-center gap-3 text-lg sm:text-xl font-semibold border-b-2 pb-2 mb-4 ${headerClass}` },
+                        React.createElement('span', { className: 'text-2xl' }, headerIcon),
                         data.dates ? `${period.replace(/_/g, ' ')} | ${data.dates}` : period.replace(/_/g, ' ')
                     ),
                     React.createElement('div', { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' },
@@ -927,16 +932,23 @@ const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, or
                             const isOriginal = originalSelectedCourses.some(c => c.id === course.id);
                             const isDisabled = !isSelected && selectedCourses.length >= 3;
 
-                            let bgColor = 'bg-white';
-                            if (isSelected && isOriginal) bgColor = 'bg-blue-100';
-                            else if (isSelected) bgColor = 'bg-green-100';
+                            let bgColor = isPeriod1 ? 'bg-teal-50' : 'bg-indigo-50';
+                            if (isSelected) {
+                                bgColor = isOriginal ? (isPeriod1 ? 'bg-teal-200' : 'bg-indigo-200') : 'bg-green-100';
+                            }
+                            
+                            const borderColor = isSelected 
+                                ? (isPeriod1 ? 'border-teal-600' : 'border-indigo-600') 
+                                : 'border-transparent';
+                            
+                            const hoverEffect = isDisabled 
+                                ? 'opacity-60 cursor-not-allowed' 
+                                : `hover:shadow-md ${isPeriod1 ? 'hover:border-teal-400' : 'hover:border-indigo-400'}`;
 
                             return React.createElement('div', {
                                 key: course.id,
                                 onClick: () => !isDisabled && toggleCourse(course),
-                                className: `p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                                    isSelected ? 'border-blue-600' : 'border-gray-200'
-                                } ${isDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-md hover:border-blue-400'} ${bgColor}`
+                                className: `p-4 rounded-lg border-2 transition-all ${borderColor} ${bgColor} ${hoverEffect}`
                             },
                                 React.createElement('h4', { className: 'font-bold text-sm sm:text-base text-gray-800' }, course.name),
                                 React.createElement('p', { className: 'text-xs text-gray-500 mt-2' }, `Lugar: ${course.location}`),
@@ -944,8 +956,8 @@ const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, or
                             );
                         })
                     )
-                )
-            ),
+                );
+            }),
         
         React.createElement('div', { className: 'mt-8 pt-6 border-t flex flex-col-reverse sm:flex-row justify-between items-center' },
             React.createElement('button', {
