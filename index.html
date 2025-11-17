@@ -167,15 +167,6 @@
             z-index: 2;
         }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "vite": "https://aistudiocdn.com/vite@^7.1.12",
-    "path": "https://aistudiocdn.com/path@^0.12.7",
-    "process": "https://aistudiocdn.com/process@^0.11.10"
-  }
-}
-</script>
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
@@ -297,7 +288,7 @@
                 </div>
             </a>
 
-            <a href="#" onclick="event.preventDefault(); showComingSoon('Historial de Cursos')"
+            <a href="#" onclick="event.preventDefault();"
                class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-400 cursor-pointer animate-fadeInUp delay-200">
                 <span class="badge-soon">Próximamente</span>
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
@@ -368,7 +359,7 @@
                 </div>
             </a>
             
-            <a href="#" onclick="event.preventDefault(); showComingSoon('Estadísticas')"
+            <a href="#" onclick="event.preventDefault();"
                class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 cursor-pointer animate-fadeInUp delay-700">
                 <span class="badge-soon">Próximamente</span>
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📈</div>
@@ -503,22 +494,6 @@
         </div>
     </footer>
 
-    <div id="comingSoonModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center transform transition-all animate-fadeInUp">
-            <div class="text-6xl mb-4">🚧</div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2" id="modalTitle">
-                Próximamente
-            </h3>
-            <p class="text-gray-600 mb-6">
-                Esta sección está en desarrollo y estará disponible pronto.
-            </p>
-            <button onclick="closeModal()" 
-                    class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-8 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all">
-                Entendido
-            </button>
-        </div>
-    </div>
-
     <script>
         const cursorDot = document.getElementById('cursor-dot');
         
@@ -630,18 +605,6 @@
             }, 500);
         }
         
-        function showComingSoon(sectionName) {
-            document.getElementById('modalTitle').textContent = sectionName;
-            document.getElementById('comingSoonModal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('comingSoonModal').classList.add('hidden');
-        }
-        
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-        document.getElementById('comingSoonModal').addEventListener('click', e => { if (e.target === this) closeModal(); });
-
         window.addEventListener('load', function() {
             startClock();
             updateDate();
