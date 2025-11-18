@@ -68,6 +68,12 @@
             <p class="font-semibold text-sm sm:text-base mb-2">
                 © Coordinación de Actualización Docente
             </p>
+            <p class="text-xs sm:text-sm opacity-90">
+                M.C. Alejandro Calderón Rentería
+            </p>
+            <p class="text-xs sm:text-sm opacity-75 mt-1">
+                Todos los derechos reservados <span id="copyright-year"></span>
+            </p>
         </div>
     </footer>
 
@@ -493,6 +499,14 @@
         window.addEventListener('load', () => {
             const root = ReactDOM.createRoot(document.getElementById('root'));
             root.render(<SurveyApp />);
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const yearSpan = document.getElementById('copyright-year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
         });
     </script>
 
