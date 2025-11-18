@@ -60,17 +60,14 @@
     <!-- ========================================================================== -->
     <script>
         window.CONFIG = {
-            // 👇 REEMPLACE ESTA URL CON LA URL DE SU GOOGLE APPS SCRIPT
-            // IMPORTANTE: Después de actualizar el código en Google Apps Script,
-            // debe ir a "Implementar" > "Nueva implementación" para que los
-            // cambios se apliquen. Copie la nueva URL que se genera y péguela aquí.
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
         };
     </script>
     <!-- ========================================================================== -->
 
     <!-- Carga el archivo index.js que contiene toda la lógica -->
-    <script src="index.js"></script>
+    <script type="text/babel" src="index.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const yearSpan = document.getElementById('copyright-year');
