@@ -135,6 +135,19 @@
             height: 40px;
             background-color: rgba(99, 102, 241, 0.2); /* Más grande y más transparente */
         }
+        
+        #announcement-banner {
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        #announcement-banner.hidden-banner {
+            opacity: 0;
+            height: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            margin-bottom: 0 !important;
+            transform: translateY(-100%);
+        }
     </style>
 <script type="importmap">
 {
@@ -231,6 +244,20 @@
             </div>
         </div>
     </div>
+    
+    <!-- Banner de Anuncios -->
+    <!-- ✏️ COMIENZA A EDITAR TU ANUNCIO AQUÍ (Línea ~198) ✏️ -->
+    <div id="announcement-banner" class="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 text-white p-4 text-center font-bold shadow-lg relative cursor-pointer">
+        <div class="container mx-auto flex items-center justify-center gap-4">
+            <span class="text-2xl animate-pulse">📢</span>
+            <div>
+                <strong class="block sm:inline text-lg">Aviso Importante:</strong>
+                <span class="block sm:inline ml-2">¡-Bienvenida(o) proximos cursos de actualizaciñon docente Enero 20206</span>
+            </div>
+        </div>
+    </div>
+    <!-- ✏️ FIN DEL ÁREA DE EDICIÓN DEL ANUNCIO ✏️ -->
+
 
     <!-- Contenido Principal -->
     <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
@@ -697,6 +724,32 @@
                 // Fade in
                 quoteContainer.style.opacity = 1;
             }, 500);
+        }
+        
+        // =============================================================================
+        // LÓGICA DEL BANNER DE ANUNCIOS
+        // =============================================================================
+        const announcementBanner = document.getElementById('announcement-banner');
+        if (announcementBanner) {
+            let bannerHidden = false;
+
+            const hideBanner = () => {
+                if (!bannerHidden) {
+                    bannerHidden = true;
+                    announcementBanner.classList.add('hidden-banner');
+                    // Limpiar listeners para evitar fugas de memoria
+                    window.removeEventListener('scroll', hideBanner);
+                    window.removeEventListener('click', hideBanner);
+                    clearTimeout(bannerTimeout);
+                }
+            };
+            
+            // 👇 CAMBIA EL TIEMPO (en milisegundos). 10000ms = 10 segundos. (Línea ~669)
+            const bannerTimeout = setTimeout(hideBanner, 10000);
+            
+            // Ocultar al hacer scroll o clic en cualquier lugar
+            window.addEventListener('scroll', hideBanner, { once: true });
+            window.addEventListener('click', hideBanner, { once: true });
         }
 
         // =============================================================================
