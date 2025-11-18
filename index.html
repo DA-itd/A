@@ -251,8 +251,8 @@
         <div class="container mx-auto flex items-center justify-center gap-4">
             <span class="text-2xl animate-pulse">📢</span>
             <div>
-                <strong class="block sm:inline text-lg">Bienvenida(o):</strong>
-                <span class="block sm:inline ml-2">Proximos cursos de actualizaciñon docente Enero 20206</span>
+                <strong class="block sm:inline text-lg">BIENVENIDA(O):</strong>
+                <span class="block sm:inline ml-2">¡Este es un espacio para anuncios! Puede editar este texto en el archivo index.html.</span>
             </div>
         </div>
     </div>
@@ -513,7 +513,7 @@
                 M.C. Alejandro Calderón Rentería
             </p>
             <p class="text-xs sm:text-sm opacity-75 mt-1">
-                Todos los derechos reservados 2025
+                Todos los derechos reservados <span id="copyright-year"></span>
             </p>
         </div>
     </footer>
@@ -705,6 +705,16 @@
         }
 
         // =============================================================================
+        // AÑO DEL COPYRIGHT
+        // =============================================================================
+        function updateCopyrightYear() {
+            const yearSpan = document.getElementById('copyright-year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+        }
+
+        // =============================================================================
         // FRASES INSPIRACIONALES (ROTATIVAS)
         // =============================================================================
         function rotateQuotes() {
@@ -762,6 +772,7 @@
             rotateQuotes(); // Initial quote
             setInterval(rotateQuotes, 30000); // Change quote every 30 seconds
             updateCalendarYear();
+            updateCopyrightYear();
 
             console.log('%c Portal ITD - Listo ', 
                 'background: #1e3a8a; color: white; font-size: 16px; padding: 8px; border-radius: 4px;'
