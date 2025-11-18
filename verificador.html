@@ -414,12 +414,19 @@
     );
 
     const Footer = () => (
-      <footer className="w-full bg-white shadow-sm mt-auto">
-        <div className="container mx-auto px-6 py-4 text-center text-gray-600 text-sm">
-          <p>&copy; {new Date().getFullYear()} Instituto Tecnológico de Durango. Todos los derechos reservados.</p>
-          <p className="mt-1">Desarrollado por la coordinacion de actualizacion docente. Ver 2.1 </p>
-        </div>
-      </footer>
+        <footer className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-auto">
+            <div className="container mx-auto px-4">
+                <p className="font-semibold text-sm sm:text-base mb-2">
+                    © Coordinación de Actualización Docente
+                </p>
+                <p className="text-xs sm:text-sm opacity-90">
+                    M.C. Alejandro Calderón Rentería
+                </p>
+                <p className="text-xs sm:text-sm opacity-75 mt-1">
+                    Todos los derechos reservados {new Date().getFullYear()}
+                </p>
+            </div>
+        </footer>
     );
 
     const SearchForm = ({ query, setQuery, onSearch, onClear, mode, setMode }) => {
