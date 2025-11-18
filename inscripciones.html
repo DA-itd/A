@@ -52,7 +52,7 @@
     <!-- Footer -->
     <footer class="bg-blue-800 text-white text-center p-4 mt-auto">
         <p class="font-semibold text-sm sm:text-base">© Coordinación de actualización docente - M.C. Alejandro Calderón Rentería.</p>
-        <p class="text-xs sm:text-sm">Todos los derechos reservados 2024.</p>
+        <p class="text-xs sm:text-sm">Todos los derechos reservados <span id="copyright-year"></span>.</p>
     </footer>
 
     <!-- ========================================================================== -->
@@ -71,6 +71,13 @@
 
     <!-- Carga el archivo index.js que contiene toda la lógica -->
     <script src="index.js"></script>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const yearSpan = document.getElementById('copyright-year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+        });
+    </script>
 </body>
 </html>
