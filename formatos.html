@@ -91,7 +91,7 @@
                 M.C. Alejandro Calderón Rentería
             </p>
             <p class="text-xs sm:text-sm opacity-75 mt-1">
-                Todos los derechos reservados 2024
+                Todos los derechos reservados <span id="copyright-year"></span>
             </p>
         </div>
     </footer>
@@ -269,6 +269,14 @@
                 );
             } else {
                 console.error('No se encontró el elemento root');
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const yearSpan = document.getElementById('copyright-year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
             }
         });
     </script>
