@@ -1,6 +1,6 @@
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
-// Versión: 2.2.0 - Stepper UI y Autocompletado de Género Restaurados
+// Versión: 2.1.0 - Envío de Tipo de Curso para Estadísticas
 // =============================================================================
 
 // =============================================================================
@@ -124,7 +124,7 @@ const getCourses = async () => {
                     hours: isNaN(hours) ? 30 : hours,
                     location: cleanCSVValue(values[5]),
                     schedule: cleanCSVValue(values[6]),
-                    type: cleanCSVValue(values[7]) || 'No especificado'
+                    type: cleanCSVValue(values[7]) || 'No especificado' // Asegurar que siempre haya un valor
                 };
             })
             .filter(course => course !== null);
@@ -194,43 +194,6 @@ const enrollStudent = async (data) => {
 // =============================================================================
 
 const { useState, useEffect, useCallback, useRef } = React;
-
-const Stepper = ({ currentStep }) => {
-    const steps = [
-        { number: 1, title: "Información" },
-        { number: 2, title: "Cursos" },
-        { number: 3, title: "Confirmar" },
-        { number: 4, title: "Finalizado" }
-    ];
-
-    return (
-        <div className="mb-8 px-2 sm:px-4">
-            <div className="flex items-center">
-                {steps.map((step, index) => (
-                    <React.Fragment key={step.number}>
-                        <div className="flex flex-col items-center text-center w-20">
-                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-white transition-all duration-300 transform ${
-                                currentStep > step.number ? 'bg-green-500 scale-100' :
-                                currentStep === step.number ? 'bg-blue-600 scale-110' :
-                                'bg-gray-400 scale-100'
-                            }`}>
-                                {currentStep > step.number ? '✔' : step.number}
-                            </div>
-                            <p className={`mt-2 text-xs sm:text-sm font-semibold transition-colors ${
-                                currentStep >= step.number ? 'text-blue-800' : 'text-gray-500'
-                            }`}>{step.title}</p>
-                        </div>
-                        {index < steps.length - 1 && (
-                            <div className={`flex-1 h-1 rounded-full transition-all duration-500 ${
-                                currentStep > step.number ? 'bg-green-500' : 'bg-gray-300'
-                            }`}></div>
-                        )}
-                    </React.Fragment>
-                ))}
-            </div>
-        </div>
-    );
-};
 
 const AutocompleteInput = ({ teachers, onSelect, value, onChange, placeholder }) => {
     const [suggestions, setSuggestions] = useState([]);
@@ -307,39 +270,21 @@ const AutocompleteInput = ({ teachers, onSelect, value, onChange, placeholder })
 const Step1PersonalInfo = ({ formData, setFormData, onNext, teachers, departments }) => {
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        if (formData.curp && CURP_REGEX.test(formData.curp)) {
-            const genderChar = formData.curp.charAt(10).toUpperCase();
-            if (genderChar === 'H' && formData.gender !== 'HOMBRE') {
-                setFormData(prev => ({ ...prev, gender: 'HOMBRE' }));
-            } else if (genderChar === 'M' && formData.gender !== 'MUJER') {
-                setFormData(prev => ({ ...prev, gender: 'MUJER' }));
-            }
-        }
-    }, [formData.curp, formData.gender, setFormData]);
-
     const handleTeacherSelect = (teacher) => {
-        const genderFromCurp = teacher.curp && teacher.curp.length >= 11
-            ? (teacher.curp.charAt(10).toUpperCase() === 'H' ? 'HOMBRE' : 'MUJER')
-            : '';
         setFormData({
             ...formData,
             fullName: teacher.nombreCompleto.toUpperCase(),
             curp: teacher.curp.toUpperCase(),
-            email: (teacher.email || '').toLowerCase(),
-            gender: genderFromCurp
+            email: (teacher.email || '').toLowerCase()
         });
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        let processedValue = value;
-        if (name === 'curp' || name === 'fullName') {
-            processedValue = value.toUpperCase();
-        } else if (name === 'email') {
-            processedValue = value.toLowerCase();
-        }
-        setFormData({ ...formData, [name]: processedValue });
+        setFormData({
+            ...formData,
+            [name]: name === 'curp' || name === 'fullName' ? value.toUpperCase() : value.toLowerCase()
+        });
     };
 
     const validateAndProceed = async () => {
@@ -376,8 +321,7 @@ const Step1PersonalInfo = ({ formData, setFormData, onNext, teachers, department
                     teachers={teachers}
                     onSelect={handleTeacherSelect}
                     value={formData.fullName}
-                    onChange={handleChange}
-                    name="fullName"
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value.toUpperCase() })}
                 />
             </div>
 
@@ -556,7 +500,7 @@ const Step3Confirmation = ({ onConfirm, onBack, formData, selectedCourses }) => 
 
 const SuccessScreen = ({ results }) => {
     return (
-        <div className="text-center py-4">
+        <div className="text-center">
             <h2 className="text-2xl font-bold text-green-600">¡Inscripción Exitosa!</h2>
             <p className="mt-2">Se ha enviado un correo de confirmación con los detalles.</p>
             <div className="mt-4 bg-gray-50 p-4 rounded-md border text-left">
@@ -693,12 +637,13 @@ const App = () => {
                 {error && step > 1 && (
                      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">{error}</div>
                 )}
-                {step < 5 && <Stepper currentStep={step} />}
                 {renderStep()}
             </div>
         </div>
     );
 };
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+window.addEventListener('load', () => {
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+});
