@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas - Portal de Actualización Docente ITD</title>
+    
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-xl sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 sm:py-6">
+            <div class="flex items-center justify-between gap-4">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
+                <div class="text-center flex-1 px-2 sm:px-4">
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">PANEL DE ESTADÍSTICAS</h1>
+                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">Desarrollo Académico</p>
+                </div>
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
+            </div>
+        </div>
+    </header>
+
+    <div id="root"></div>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
+        <div class="container mx-auto px-4"><p id="copyright-year" class="text-xs sm:text-sm opacity-75 mt-1"></p></div>
+    </footer>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        const CONFIG = {
+            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
+            ALLOWED_DOMAIN: 'itdurango.edu.mx'
+        };
+
+        const sessionManager = {
+            save: (data) => localStorage.setItem('stats_session', JSON.stringify(data)),
+            load: () => {
+                const session = localStorage.getItem('stats_session');
+                return session ? JSON.parse(session) : null;
+            },
+            clear: () => localStorage.removeItem('stats_session')
+        };
+        
+        const fetchData = async (token) => {
+            const url = new URL(CONFIG.APPS_SCRIPT_URL);
+            url.searchParams.append('action', 'getStatisticsData');
+            url.searchParams.append('id_token', token);
+            const response = await fetch(url);
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message);
+            return result.data;
+        };
+        
+        const generateReport = async (token) => {
+             const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'generateStatsReport', id_token: token })
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message);
+            return result.message;
+        };
+
+        const LoginScreen = ({ onLogin, error }) => {
+            const googleButtonRef = useRef(null);
+
+            useEffect(() => {
+                if (window.google) {
+                    google.accounts.id.initialize({
+                        client_id: CONFIG.GOOGLE_CLIENT_ID,
+                        callback: onLogin
+                    });
+                    if (googleButtonRef.current && !googleButtonRef.current.hasChildNodes()) {
+                        google.accounts.id.renderButton(googleButtonRef.current, { theme: "filled_blue", size: "large", text: "continue_with" });
+                    }
+                }
+            }, [onLogin]);
+
+            return (
+                <div className="text-center animate-fadeIn">
+                    <div className="text-6xl mb-4">🔐</div>
+                    <h2 className="text-2xl font-bold text-gray-800">Acceso Restringido</h2>
+                    <p className="text-gray-600 mt-2 max-w-lg mx-auto">Este panel contiene información sensible. Por favor, inicie sesión con su cuenta institucional para continuar.</p>
+                    {error && <p className="bg-red-100 text-red-700 p-3 rounded-md my-4">{error}</p>}
+                    <div className="mt-8 flex justify-center" ref={googleButtonRef}></div>
+                </div>
+            );
+        };
+        
+        const StatCard = ({ title, value, icon, color }) => (
+            <div className={`bg-white p-6 rounded-xl shadow-lg border-l-4 ${color} animate-fadeIn`}>
+                <div className="flex items-center">
+                    <div className="text-4xl mr-4">{icon}</div>
+                    <div>
+                        <p className="text-3xl font-bold text-gray-800">{value}</p>
+                        <p className="text-sm text-gray-500">{title}</p>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const Chart = ({ type, data, options, title }) => {
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+
+            useEffect(() => {
+                if (chartRef.current) {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                    const ctx = chartRef.current.getContext('2d');
+                    chartInstance.current = new Chart(ctx, { type, data, options });
+                }
+                return () => chartInstance.current?.destroy();
+            }, [type, data, options]);
+
+            return (
+                <div className="bg-white p-6 rounded-xl shadow-lg animate-fadeIn">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">{title}</h3>
+                    <canvas ref={chartRef}></canvas>
+                </div>
+            );
+        };
+
+        const Dashboard = ({ user, stats, onLogout, onGenerateReport }) => {
+             const [isGenerating, setIsGenerating] = useState(false);
+             const [reportStatus, setReportStatus] = useState('');
+
+             const handleGenerate = async () => {
+                 setIsGenerating(true);
+                 setReportStatus('Generando y enviando reporte...');
+                 try {
+                     const message = await onGenerateReport();
+                     setReportStatus(`✅ ${message}`);
+                 } catch (e) {
+                     setReportStatus(`❌ Error: ${e.message}`);
+                 } finally {
+                     setIsGenerating(false);
+                     setTimeout(() => setReportStatus(''), 5000);
+                 }
+             };
+
+            const genderData = {
+                labels: Object.keys(stats.distribucionGenero),
+                datasets: [{
+                    data: Object.values(stats.distribucionGenero),
+                    backgroundColor: ['#3b82f6', '#ec4899', '#a855f7']
+                }]
+            };
+
+            const typeData = {
+                labels: Object.keys(stats.distribucionTipo),
+                datasets: [{
+                    label: 'Tipo de Curso',
+                    data: Object.values(stats.distribucionTipo),
+                    backgroundColor: '#6366f1'
+                }]
+            };
+            
+            const topDeptData = {
+                labels: stats.topDepartamentos.map(d => d[0]),
+                datasets: [{
+                    label: 'Inscripciones',
+                    data: stats.topDepartamentos.map(d => d[1]),
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#3b82f6']
+                }]
+            };
+            
+             const topCourseData = {
+                labels: stats.topCursos.map(d => d[0]),
+                datasets: [{
+                    label: 'Inscripciones',
+                    data: stats.topCursos.map(d => d[1]),
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#3b82f6'].reverse()
+                }]
+            };
+
+            return (
+                <div className="space-y-8">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h2 className="text-3xl font-bold text-gray-800">Dashboard de Estadísticas</h2>
+                            <p className="text-gray-600">Bienvenido/a, {user.name}.</p>
+                        </div>
+                        <button onClick={onLogout} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg">Cerrar Sesión</button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <StatCard title="Inscripciones Activas" value={stats.totalInscripciones} icon="📝" color="border-blue-500" />
+                        <StatCard title="Docentes Actualizados" value={`${stats.coberturaDocente.actualizados} / ${stats.coberturaDocente.total}`} icon="👩‍🏫" color="border-green-500" />
+                        <StatCard title="% de Cobertura" value={`${stats.coberturaDocente.porcentaje}%`} icon="🎯" color="border-purple-500" />
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                       <Chart type="doughnut" data={genderData} title="Distribución por Género" options={{ responsive: true }} />
+                       <Chart type="bar" data={typeData} title="Distribución por Tipo de Curso" options={{ responsive: true, indexAxis: 'y' }} />
+                    </div>
+                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                       <Chart type="bar" data={topDeptData} title="Top 5 Departamentos" options={{ responsive: true }} />
+                       <Chart type="bar" data={topCourseData} title="Top 5 Cursos" options={{ responsive: true, indexAxis: 'y' }} />
+                    </div>
+                    
+                    <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+                        <h3 className="text-lg font-bold text-gray-800 mb-2">Generar Reporte de Inscritos</h3>
+                        <p className="text-sm text-gray-600 mb-4">Se enviará un PDF con la lista de inscritos por departamento a tu correo ({user.email}).</p>
+                        <button onClick={handleGenerate} disabled={isGenerating} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50">
+                            {isGenerating ? 'Enviando...' : 'Generar y Enviar Reporte'}
+                        </button>
+                        {reportStatus && <p className="text-sm mt-4">{reportStatus}</p>}
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [user, setUser] = useState(null);
+            const [error, setError] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [stats, setStats] = useState(null);
+
+            const handleLogin = useCallback(async (response) => {
+                setError(null);
+                const token = response.credential;
+                const decodedToken = JSON.parse(atob(token.split('.')[1]));
+
+                if (!decodedToken.email.endsWith(`@${CONFIG.ALLOWED_DOMAIN}`)) {
+                    setError(`Debe usar una cuenta @${CONFIG.ALLOWED_DOMAIN}.`);
+                    return;
+                }
+                
+                try {
+                    setLoading(true);
+                    const userData = {
+                        name: decodedToken.name,
+                        email: decodedToken.email,
+                        picture: decodedToken.picture,
+                        token: token
+                    };
+                    const statsData = await fetchData(token);
+                    setStats(statsData);
+                    setUser(userData);
+                    sessionManager.save(userData);
+                } catch(e) {
+                    setError(e.message);
+                    setUser(null);
+                    sessionManager.clear();
+                } finally {
+                    setLoading(false);
+                }
+            }, []);
+            
+            const handleLogout = () => {
+                setUser(null);
+                sessionManager.clear();
+                if(window.google) google.accounts.id.disableAutoSelect();
+            };
+            
+            const handleGenerateReport = useCallback(async () => {
+                if(!user?.token) throw new Error("No autenticado");
+                return await generateReport(user.token);
+            }, [user]);
+
+            useEffect(() => {
+                const session = sessionManager.load();
+                if (session?.token) {
+                    handleLogin({ credential: session.token });
+                } else {
+                    setLoading(false);
+                }
+            }, [handleLogin]);
+
+            const renderContent = () => {
+                if(loading) return <div className="text-center p-8">Cargando...</div>;
+                if(!user) return <LoginScreen onLogin={handleLogin} error={error} />;
+                if(stats) return <Dashboard user={user} stats={stats} onLogout={handleLogout} onGenerateReport={handleGenerateReport} />;
+                return <p className="text-red-500 text-center p-8">{error || "No se pudieron cargar las estadísticas."}</p>
+            };
+
+            return (
+                <main className="container mx-auto px-4 py-8 sm:py-12">
+                    <div className="max-w-5xl mx-auto">
+                        <a href="index.html" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-8">
+                            ← Volver al Portal Principal
+                        </a>
+                        <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8">
+                           {renderContent()}
+                        </div>
+                    </div>
+                </main>
+            );
+        };
+        
+        window.addEventListener('load', () => {
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<App />);
+            
+            document.getElementById('copyright-year').textContent = `© Coordinación de Actualización Docente - M.C. Alejandro Calderón Rentería. Todos los derechos reservados ${new Date().getFullYear()}`;
+        });
+    </script>
+</body>
+</html>
