@@ -1,6 +1,6 @@
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
-// Versión: 2.0.0 - UI/UX Mejorada
+// Versión: 2.0.1 - Robustez en campo "type"
 // Última actualización: Noviembre 2025
 // =============================================================================
 
@@ -116,6 +116,7 @@ const getCourses = async () => {
                 if (values.length < 8) return null;
                 
                 const hours = parseInt(cleanCSVValue(values[4]), 10);
+                const courseType = cleanCSVValue(values[7] || '');
                 
                 return {
                     id: cleanCSVValue(values[0]),
@@ -125,7 +126,7 @@ const getCourses = async () => {
                     hours: isNaN(hours) ? 30 : hours,
                     location: cleanCSVValue(values[5]),
                     schedule: cleanCSVValue(values[6]),
-                    type: cleanCSVValue(values[7])
+                    type: courseType || 'No especificado'
                 };
             })
             .filter(course => course !== null);
