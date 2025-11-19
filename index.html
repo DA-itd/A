@@ -246,7 +246,6 @@
     </div>
     
     <!-- Banner de Anuncios -->
-    <!-- ✏️ COMIENZA A EDITAR TU ANUNCIO AQUÍ (Línea ~198) ✏️ -->
     <div id="announcement-banner" class="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 text-white p-4 text-center font-bold shadow-lg relative cursor-pointer">
         <div class="container mx-auto flex items-center justify-center gap-4">
             <span class="text-2xl animate-pulse">📢</span>
@@ -256,8 +255,6 @@
             </div>
         </div>
     </div>
-    <!-- ✏️ FIN DEL ÁREA DE EDICIÓN DEL ANUNCIO ✏️ -->
-
 
     <!-- Contenido Principal -->
     <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
@@ -302,19 +299,18 @@
                 </div>
             </a>
 
-            <!-- Opción 2: Historial de Cursos -->
-            <a href="#" onclick="event.preventDefault();"
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent animate-fadeInUp delay-200 opacity-60 cursor-not-allowed">
-                <span class="badge-soon">Próximamente</span>
-                <div class="text-4xl sm:text-5xl mb-4">📚</div>
+            <!-- Opción 2: Historial de Cursos (AHORA DISPONIBLE) -->
+            <a href="historial.html" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-orange-400 animate-fadeInUp delay-200">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Historial de Cursos
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Ver mi historial de actualización docente
                 </p>
-                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
-                    En desarrollo
+                <div class="inline-block bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
                 </div>
             </a>
 
@@ -518,22 +514,15 @@
     </footer>
 
     <script>
-        // =============================================================================
-        // LÓGICA DEL CURSOR PERSONALIZADO
-        // =============================================================================
         const cursorDot = document.getElementById('cursor-dot');
         
         window.addEventListener('mousemove', e => {
             const { clientX, clientY } = e;
-            
-            // Usamos requestAnimationFrame para un rendimiento más suave
             requestAnimationFrame(() => {
                 cursorDot.style.left = `${clientX}px`;
                 cursorDot.style.top = `${clientY}px`;
             });
-            
             const target = e.target;
-            // Verifica si el elemento es un enlace, botón o tiene un rol de botón o es una tarjeta del portal
             if (target.closest('a, button, [role="button"], .card-portal:not(.cursor-not-allowed)')) {
                 cursorDot.classList.add('active');
             } else {
@@ -541,9 +530,6 @@
             }
         });
 
-        // =============================================================================
-        // LÓGICA DEL MENÚ MÓVIL
-        // =============================================================================
         const menuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         
@@ -551,66 +537,28 @@
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Cerrar menú al hacer clic en un enlace
         mobileMenu.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu.classList.add('hidden');
             });
         });
 
-        // =============================================================================
-        // FRASES INSPIRACIONALES SOBRE EDUCACIÓN Y CIENCIA
-        // =============================================================================
         const inspirationalQuotes = [
-            {
-                quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.",
-                author: "Nelson Mandela"
-            },
-            {
-                quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.",
-                author: "Carl Sagan"
-            },
-            {
-                quote: "La educación no es preparación para la vida; la educación es la vida misma.",
-                author: "John Dewey"
-            },
-            {
-                quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.",
-                author: "Albert Einstein"
-            },
-            {
-                quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.",
-                author: "Platón"
-            },
-            {
-                quote: "La ciencia no conoce fronteras, porque el conocimiento pertenece a la humanidad.",
-                author: "Louis Pasteur"
-            },
-            {
-                quote: "Educación es lo que queda después de olvidar lo que se ha aprendido en la escuela.",
-                author: "Albert Einstein"
-            },
-            {
-                quote: "La investigación es ver lo que todos han visto y pensar lo que nadie ha pensado.",
-                author: "Albert Szent-Györgyi"
-            },
-            {
-                quote: "Un maestro afecta la eternidad; nunca se sabe dónde termina su influencia.",
-                author: "Henry Adams"
-            },
-            {
-                quote: "La mejor forma de predecir el futuro es inventándolo.",
-                author: "Alan Kay"
-            }
+            { quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.", author: "Nelson Mandela" },
+            { quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.", author: "Carl Sagan" },
+            { quote: "La educación no es preparación para la vida; la educación es la vida misma.", author: "John Dewey" },
+            { quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.", author: "Albert Einstein" },
+            { quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.", author: "Platón" },
+            { quote: "La ciencia no conoce fronteras, porque el conocimiento pertenece a la humanidad.", author: "Louis Pasteur" },
+            { quote: "Educación es lo que queda después de olvidar lo que se ha aprendido en la escuela.", author: "Albert Einstein" },
+            { quote: "La investigación es ver lo que todos han visto y pensar lo que nadie ha pensado.", author: "Albert Szent-Györgyi" },
+            { quote: "Un maestro afecta la eternidad; nunca se sabe dónde termina su influencia.", author: "Henry Adams" },
+            { quote: "La mejor forma de predecir el futuro es inventándolo.", author: "Alan Kay" }
         ];
 
-        // =============================================================================
-        // CLIMA LOCAL
-        // =============================================================================
         function updateWeather() {
             const weatherElement = document.getElementById('weatherInfo');
             if (!weatherElement) return;
-
             const getWeatherIcon = (code) => {
                 if (code === 0) return '☀️';
                 if ([1, 2, 3].includes(code)) return '⛅';
@@ -622,160 +570,87 @@
                 if ([95, 96, 99].includes(code)) return '🌩️';
                 return '🌤️';
             };
-
             const showWeather = (lat, lon) => {
                 const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
                 fetch(url)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Weather response not ok');
-                        return response.json();
-                    })
+                    .then(response => { if (!response.ok) throw new Error('Err'); return response.json(); })
                     .then(data => {
                         if (data && data.current_weather) {
                             const temp = Math.round(data.current_weather.temperature);
                             const icon = getWeatherIcon(data.current_weather.weathercode);
-                            weatherElement.innerHTML = `
-                                <span class="text-2xl weather-icon">${icon}</span>
-                                <span class="font-semibold">Durango, Dgo. ${temp}°C</span>`;
+                            weatherElement.innerHTML = `<span class="text-2xl weather-icon">${icon}</span><span class="font-semibold">Durango, Dgo. ${temp}°C</span>`;
                         }
                     })
-                    .catch(error => {
-                        console.error("Error fetching weather:", error);
-                    });
+                    .catch(e => console.error(e));
             };
-
             const durangoLat = 24.0277;
             const durangoLon = -104.653;
-
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        showWeather(position.coords.latitude, position.coords.longitude);
-                    },
-                    (error) => {
-                        console.warn(`Geolocation error (${error.code}): ${error.message}`);
-                        showWeather(durangoLat, durangoLon); 
-                    }
+                    (p) => showWeather(p.coords.latitude, p.coords.longitude),
+                    (e) => showWeather(durangoLat, durangoLon)
                 );
-            } else {
-                showWeather(durangoLat, durangoLon); 
-            }
+            } else { showWeather(durangoLat, durangoLon); }
         }
 
-        // =============================================================================
-        // RELOJ EN TIEMPO REAL
-        // =============================================================================
         function startClock() {
             function updateClock() {
                 const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+                document.getElementById('clock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
             }
-            updateClock();
-            setInterval(updateClock, 1000);
+            updateClock(); setInterval(updateClock, 1000);
         }
 
-        // =============================================================================
-        // FECHA ACTUAL
-        // =============================================================================
         function updateDate() {
             const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            };
-            const dateString = now.toLocaleDateString('es-MX', options);
-            document.getElementById('currentDate').textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const ds = now.toLocaleDateString('es-MX', options);
+            document.getElementById('currentDate').textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
         }
 
-        // =============================================================================
-        // AÑO DEL CALENDARIO
-        // =============================================================================
         function updateCalendarYear() {
-            const calendarElement = document.getElementById('calendar-year-text');
-            if (calendarElement) {
-                const currentYear = new Date().getFullYear();
-                calendarElement.textContent = `Calendario Institucional ${currentYear}`;
-            }
+            const el = document.getElementById('calendar-year-text');
+            if (el) el.textContent = `Calendario Institucional ${new Date().getFullYear()}`;
         }
 
-        // =============================================================================
-        // AÑO DEL COPYRIGHT
-        // =============================================================================
         function updateCopyrightYear() {
-            const yearSpan = document.getElementById('copyright-year');
-            if (yearSpan) {
-                yearSpan.textContent = new Date().getFullYear();
-            }
+            const el = document.getElementById('copyright-year');
+            if (el) el.textContent = new Date().getFullYear();
         }
 
-        // =============================================================================
-        // FRASES INSPIRACIONALES (ROTATIVAS)
-        // =============================================================================
         function rotateQuotes() {
-            const quoteContainer = document.getElementById('quote-container');
-            if (!quoteContainer) return;
-
-            const randomIndex = Math.floor(Math.random() * inspirationalQuotes.length);
-            const quote = inspirationalQuotes[randomIndex];
-
-            // Fade out
-            quoteContainer.style.opacity = 0;
-
+            const qc = document.getElementById('quote-container');
+            if (!qc) return;
+            const q = inspirationalQuotes[Math.floor(Math.random() * inspirationalQuotes.length)];
+            qc.style.opacity = 0;
             setTimeout(() => {
-                quoteContainer.innerHTML = `
-                    <p class="text-base sm:text-lg italic text-gray-700 leading-relaxed">"${quote.quote}"</p>
-                    <p class="text-sm sm:text-base text-gray-600 text-right mt-2">- ${quote.author}</p>`;
-                // Fade in
-                quoteContainer.style.opacity = 1;
+                qc.innerHTML = `<p class="text-base sm:text-lg italic text-gray-700 leading-relaxed">"${q.quote}"</p><p class="text-sm sm:text-base text-gray-600 text-right mt-2">- ${q.author}</p>`;
+                qc.style.opacity = 1;
             }, 500);
         }
         
-        // =============================================================================
-        // LÓGICA DEL BANNER DE ANUNCIOS
-        // =============================================================================
         const announcementBanner = document.getElementById('announcement-banner');
         if (announcementBanner) {
             let bannerHidden = false;
-
             const hideBanner = () => {
                 if (!bannerHidden) {
                     bannerHidden = true;
                     announcementBanner.classList.add('hidden-banner');
-                    // Limpiar listeners para evitar fugas de memoria
                     window.removeEventListener('scroll', hideBanner);
                     window.removeEventListener('click', hideBanner);
                     clearTimeout(bannerTimeout);
                 }
             };
-            
-            // 👇 CAMBIA EL TIEMPO (en milisegundos). 10000ms = 10 segundos. (Línea ~669)
             const bannerTimeout = setTimeout(hideBanner, 10000);
-            
-            // Ocultar al hacer scroll o clic en cualquier lugar
             window.addEventListener('scroll', hideBanner, { once: true });
             window.addEventListener('click', hideBanner, { once: true });
         }
 
-        // =============================================================================
-        // INICIALIZACIÓN
-        // =============================================================================
         window.addEventListener('load', function() {
-            startClock();
-            updateDate();
-            updateWeather();
-            rotateQuotes(); // Initial quote
-            setInterval(rotateQuotes, 30000); // Change quote every 30 seconds
-            updateCalendarYear();
-            updateCopyrightYear();
-
-            console.log('%c Portal ITD - Listo ', 
-                'background: #1e3a8a; color: white; font-size: 16px; padding: 8px; border-radius: 4px;'
-            );
+            startClock(); updateDate(); updateWeather();
+            rotateQuotes(); setInterval(rotateQuotes, 30000);
+            updateCalendarYear(); updateCopyrightYear();
+            console.log('%c Portal ITD - Listo ', 'background: #1e3a8a; color: white; font-size: 16px; padding: 8px; border-radius: 4px;');
         });
     </script>
 
