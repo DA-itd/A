@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,15 +8,6 @@
     
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
     
-    <!-- Import Map para Google GenAI (Permite importar la librería moderna) -->
-    <script type="importmap">
-    {
-      "imports": {
-        "@google/genai": "https://esm.run/@google/genai"
-      }
-    }
-    </script>
-
     <!-- React y Babel -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -36,16 +28,6 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-JH1X2720VL');
-    </script>
-
-    <!-- SHIM: Simulación de process.env para que el SDK de Google funcione en navegador -->
-    <script>
-        window.process = {
-            env: {
-                // ⚠️ IMPORTANTE: Reemplaza esto con tu API KEY real de Google AI Studio
-                API_KEY: 'TU_API_KEY_DE_GOOGLE_AQUI' 
-            }
-        };
     </script>
 
     <style>
@@ -95,9 +77,11 @@
 
         // CONFIGURACIÓN
         const CONFIG = {
-            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', // Tu Client ID
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec', // Tu Script URL
-            ALLOWED_DOMAIN: 'itdurango.edu.mx'
+            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', 
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
+            
+            // ⚠️ IMPORTANTE: Coloca aquí tu API KEY de Google AI Studio
+            GEMINI_API_KEY: 'TU_API_KEY_DE_GOOGLE_AQUI' 
         };
 
         // ==========================================
@@ -114,66 +98,68 @@
             useEffect(() => {
                 if (!canvasRef.current || !hasData) return;
                 
-                // Asegurarse que Chart.js esté cargado
                 if (typeof window.Chart === 'undefined') {
                     console.error("Chart.js no está cargado");
                     return;
                 }
 
-                // Destruir gráfica previa si existe
                 if (chartRef.current) {
                     chartRef.current.destroy();
                 }
 
-                const ctx = canvasRef.current.getContext('2d');
-                
-                const colors = [
-                    'rgba(59, 130, 246, 0.7)', // Azul
-                    'rgba(236, 72, 153, 0.7)', // Rosa
-                    'rgba(245, 158, 11, 0.7)', // Ambar
-                    'rgba(16, 185, 129, 0.7)', // Verde
-                    'rgba(139, 92, 246, 0.7)', // Violeta
-                ];
+                try {
+                    const ctx = canvasRef.current.getContext('2d');
+                    const colors = [
+                        'rgba(59, 130, 246, 0.7)', 
+                        'rgba(236, 72, 153, 0.7)', 
+                        'rgba(245, 158, 11, 0.7)', 
+                        'rgba(16, 185, 129, 0.7)', 
+                        'rgba(139, 92, 246, 0.7)', 
+                    ];
+                    
+                    const borderColors = colors.map(c => c.replace('0.7', '1'));
+                    
+                    // Determinar si usamos array de colores o un solo color
+                    const isMultiColor = type === 'pie' || type === 'doughnut';
+                    const bgColorsToUse = isMultiColor ? colors : colors[0];
+                    const borderColorsToUse = isMultiColor ? borderColors : borderColors[0];
 
-                // Para gráficas de barra, usamos un solo color principal, para pie/doughnut usamos varios
-                const bgColors = (type === 'pie' || type === 'doughnut') ? colors : colors[0];
-                const borderColors = (type === 'pie' || type === 'doughnut') ? colors.map(c => c.replace('0.7', '1')) : colors[0].replace('0.7', '1');
-
-                chartRef.current = new window.Chart(ctx, {
-                    type: type,
-                    data: {
-                        labels: Object.keys(data),
-                        datasets: [{
-                            label: title,
-                            data: Object.values(data),
-                            backgroundColor: bgColors,
-                            borderColor: borderColors,
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                display: type !== 'bar'
-                            },
-                            title: {
-                                display: true,
-                                text: title
-                            }
+                    chartRef.current = new window.Chart(ctx, {
+                        type: type,
+                        data: {
+                            labels: Object.keys(data),
+                            datasets: [{
+                                label: title,
+                                data: Object.values(data),
+                                backgroundColor: bgColorsToUse,
+                                borderColor: borderColorsToUse,
+                                borderWidth: 1
+                            }]
                         },
-                        scales: type === 'bar' ? {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    precision: 0 // Solo números enteros
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    display: type !== 'bar'
+                                },
+                                title: {
+                                    display: true,
+                                    text: title
                                 }
-                            }
-                        } : {}
-                    }
-                });
+                            },
+                            scales: type === 'bar' ? {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { precision: 0 }
+                                }
+                            } : {}
+                        }
+                    });
+                } catch (err) {
+                    console.error("Error creando gráfica:", err);
+                }
 
                 return () => {
                     if (chartRef.current) chartRef.current.destroy();
@@ -184,7 +170,7 @@
                 return (
                     <div className="bg-white p-4 rounded-xl shadow-md h-80 w-full flex flex-col items-center justify-center text-gray-400">
                         <span className="text-4xl mb-2">📊</span>
-                        <p className="text-sm">Sin datos suficientes para mostrar.</p>
+                        <p className="text-sm">Sin datos suficientes.</p>
                     </div>
                 );
             }
@@ -197,7 +183,7 @@
         };
 
         // ==========================================
-        // COMPONENTE: ANÁLISIS IA (Gemini)
+        // COMPONENTE: ANÁLISIS IA (Fetch Directo)
         // ==========================================
         const AIAnalysisPanel = ({ statsData }) => {
             const [analysis, setAnalysis] = useState(null);
@@ -207,39 +193,51 @@
             const handleGenerateAnalysis = async () => {
                 setLoading(true);
                 setError(null);
+                
+                if (!CONFIG.GEMINI_API_KEY || CONFIG.GEMINI_API_KEY === 'TU_API_KEY_DE_GOOGLE_AQUI') {
+                    setError("⚠️ Falta configurar la API Key en el código (línea ~80).");
+                    setLoading(false);
+                    return;
+                }
+
                 try {
-                    // Importación Dinámica para evitar errores de carga inicial
-                    const { GoogleGenAI } = await import("@google/genai");
-                    
-                    if (!window.process?.env?.API_KEY || window.process.env.API_KEY === 'TU_API_KEY_DE_GOOGLE_AQUI') {
-                        throw new Error("Falta configurar la API Key en el código HTML.");
-                    }
-
-                    const ai = new GoogleGenAI({ apiKey: window.process.env.API_KEY });
-                    
-                    // Preparar el prompt con los datos
+                    // Usamos FETCH directo para evitar problemas con librerías y módulos
                     const prompt = `
-                        Actúa como un experto analista de datos académicos del Tecnológico Nacional de México.
-                        Analiza los siguientes datos JSON de inscripciones a cursos de actualización docente:
-                        ${JSON.stringify(statsData)}
-
-                        Genera un reporte ejecutivo breve (máximo 200 palabras) en formato Markdown que incluya:
-                        1. Un resumen general de la participación.
-                        2. Hallazgos clave (ej. departamentos con baja participación, género predominante).
-                        3. Una recomendación estratégica para mejorar la cobertura docente.
+                        Actúa como un experto analista de datos académicos.
+                        Analiza estos datos de inscripciones: ${JSON.stringify(statsData)}
                         
-                        Usa un tono profesional, institucional y motivador.
+                        Genera un reporte ejecutivo breve (máximo 200 palabras) en Markdown con:
+                        1. Resumen general.
+                        2. Hallazgos clave (tendencias, departamentos).
+                        3. Una recomendación estratégica breve.
+                        
+                        Usa tono profesional y motivador.
                     `;
 
-                    const response = await ai.models.generateContent({
-                        model: 'gemini-2.5-flash',
-                        contents: prompt,
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
+                    
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }]
+                        })
                     });
 
-                    setAnalysis(response.text);
+                    if (!response.ok) throw new Error(`Error API: ${response.statusText}`);
+                    
+                    const data = await response.json();
+                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                    if (text) {
+                        setAnalysis(text);
+                    } else {
+                        throw new Error("La IA no devolvió texto válido.");
+                    }
+
                 } catch (err) {
                     console.error(err);
-                    setError("No se pudo generar el análisis. Verifique la API Key o la conexión. Detalle: " + err.message);
+                    setError("Error al generar análisis: " + err.message);
                 } finally {
                     setLoading(false);
                 }
@@ -265,7 +263,7 @@
                     {loading && (
                         <div className="flex items-center justify-center py-8 text-violet-700">
                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-violet-700 mr-3"></div>
-                            Analizando datos históricos y tendencias...
+                            Analizando datos históricos...
                         </div>
                     )}
 
@@ -281,62 +279,40 @@
                                 className="markdown-body text-sm text-gray-800"
                                 dangerouslySetInnerHTML={{ __html: marked.parse(analysis) }}
                             />
-                            <p className="text-xs text-gray-400 mt-4 text-right italic">Generado por Google Gemini 2.5 Flash</p>
+                            <p className="text-xs text-gray-400 mt-4 text-right italic">Generado por Google Gemini</p>
                         </div>
-                    )}
-                    
-                    {!analysis && !loading && (
-                        <p className="text-sm text-violet-700 italic opacity-80">
-                            Genera insights y resúmenes ejecutivos con Inteligencia Artificial.
-                        </p>
                     )}
                 </div>
             );
         };
 
         // ==========================================
-        // COMPONENTE: MODAL DE REPORTE PDF
+        // COMPONENTE: MODAL REPORTE
         // ==========================================
         const ReportModal = ({ isOpen, onClose, departments, onGenerate, isGenerating }) => {
             const [selectedDept, setSelectedDept] = useState('TODOS');
-
             if (!isOpen) return null;
 
             return (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-fadeIn">
                         <h3 className="text-xl font-bold text-gray-800 mb-4">Generar Reporte PDF</h3>
-                        <p className="text-gray-600 text-sm mb-4">
-                            Seleccione el departamento para filtrar el reporte, o elija "TODOS" para un reporte general.
-                            El PDF se enviará a su correo electrónico.
-                        </p>
+                        <p className="text-gray-600 text-sm mb-4">El PDF se enviará a su correo.</p>
                         
                         <label className="block text-sm font-medium text-gray-700 mb-2">Filtrar por Departamento:</label>
                         <select 
-                            className="w-full border border-gray-300 rounded-lg p-2 mb-6 text-sm focus:ring-2 focus:ring-blue-500"
+                            className="w-full border border-gray-300 rounded-lg p-2 mb-6 text-sm"
                             value={selectedDept}
                             onChange={(e) => setSelectedDept(e.target.value)}
                         >
-                            <option value="TODOS">-- TODOS LOS DEPARTAMENTOS --</option>
-                            {departments.map(dept => (
-                                <option key={dept} value={dept}>{dept}</option>
-                            ))}
+                            <option value="TODOS">-- TODOS --</option>
+                            {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
                         </select>
 
                         <div className="flex justify-end gap-3">
-                            <button 
-                                onClick={onClose}
-                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-semibold"
-                                disabled={isGenerating}
-                            >
-                                Cancelar
-                            </button>
-                            <button 
-                                onClick={() => onGenerate(selectedDept)}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2"
-                                disabled={isGenerating}
-                            >
-                                {isGenerating ? 'Generando...' : '📄 Enviar Reporte'}
+                            <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-semibold" disabled={isGenerating}>Cancelar</button>
+                            <button onClick={() => onGenerate(selectedDept)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2" disabled={isGenerating}>
+                                {isGenerating ? 'Enviando...' : '📄 Enviar Reporte'}
                             </button>
                         </div>
                     </div>
@@ -345,21 +321,14 @@
         };
 
         // ==========================================
-        // PANTALLA DE LOGIN
+        // LOGIN
         // ==========================================
         const LoginScreen = ({ onLogin, error }) => {
             const googleButtonRef = useRef(null);
-
             useEffect(() => {
-                if (window.google && window.google.accounts) {
-                    window.google.accounts.id.initialize({
-                        client_id: CONFIG.GOOGLE_CLIENT_ID,
-                        callback: onLogin
-                    });
-                    window.google.accounts.id.renderButton(
-                        googleButtonRef.current, 
-                        { theme: "outline", size: "large", width: "250" }
-                    );
+                if (window.google?.accounts) {
+                    window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
+                    window.google.accounts.id.renderButton(googleButtonRef.current, { theme: "outline", size: "large", width: "250" });
                 }
             }, [onLogin]);
 
@@ -368,22 +337,10 @@
                     <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border-t-4 border-blue-600">
                         <div className="text-6xl mb-4">📊</div>
                         <h2 className="text-2xl font-bold text-gray-800 mb-2">Acceso a Estadísticas</h2>
-                        <p className="text-gray-600 mb-6 text-sm">
-                            Este panel es exclusivo para jefes de departamento y directivos. Inicie sesión con su cuenta institucional.
-                        </p>
-                        
-                        <div className="mb-6 text-left text-xs bg-blue-50 p-3 rounded text-blue-800 border border-blue-100">
-                            <a href="index.html" className="flex items-center gap-1 font-bold hover:underline">
-                                <span>←</span> Volver al Portal Principal
-                            </a>
+                        <div className="mb-6 text-left text-xs bg-blue-50 p-3 rounded text-blue-800">
+                            <a href="index.html" className="font-bold hover:underline">← Volver al Portal Principal</a>
                         </div>
-                        
-                        {error && (
-                            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-6 border border-red-200">
-                                {error}
-                            </div>
-                        )}
-
+                        {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-6">{error}</div>}
                         <div className="flex justify-center" ref={googleButtonRef}></div>
                     </div>
                 </div>
@@ -391,7 +348,7 @@
         };
 
         // ==========================================
-        // COMPONENTE PRINCIPAL: DASHBOARD
+        // DASHBOARD PRINCIPAL
         // ==========================================
         const Dashboard = ({ user, onLogout }) => {
             const [stats, setStats] = useState(null);
@@ -400,202 +357,108 @@
             const [generatingReport, setGeneratingReport] = useState(false);
 
             useEffect(() => {
+                const fetchStats = async () => {
+                    try {
+                        const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData`);
+                        const result = await response.json();
+                        if (result.success) setStats(result.data);
+                    } catch (error) {
+                        console.error("Error:", error);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
                 fetchStats();
             }, []);
-
-            const fetchStats = async () => {
-                try {
-                    const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData`);
-                    const result = await response.json();
-                    if (result.success) {
-                        setStats(result.data);
-                    } else {
-                        console.error(result.message);
-                    }
-                } catch (error) {
-                    console.error("Error fetching stats:", error);
-                } finally {
-                    setLoading(false);
-                }
-            };
 
             const handleGenerateReport = async (dept) => {
                 setGeneratingReport(true);
                 try {
                     await fetch(CONFIG.APPS_SCRIPT_URL, {
                         method: 'POST',
-                        mode: 'no-cors', // Google Apps Script limitation fix
+                        mode: 'no-cors',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'generateStatsReport',
-                            id_token: user.token,
-                            department: dept
-                        })
+                        body: JSON.stringify({ action: 'generateStatsReport', id_token: user.token, department: dept })
                     });
-                    alert(`Solicitud enviada. El reporte de ${dept} llegará a su correo en breve.`);
+                    alert(`Solicitud enviada. El reporte llegará a ${user.email}.`);
                     setReportModalOpen(false);
                 } catch (error) {
-                    alert("Error al solicitar reporte: " + error.message);
+                    alert("Error: " + error.message);
                 } finally {
                     setGeneratingReport(false);
                 }
             };
 
-            if (loading) {
-                return (
-                    <div className="flex flex-col items-center justify-center min-h-[50vh]">
-                        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
-                        <p className="text-gray-600 font-semibold">Cargando datos en tiempo real...</p>
-                    </div>
-                );
-            }
-
+            if (loading) return <div className="flex justify-center items-center min-h-[50vh]"><div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div></div>;
             if (!stats) return <div className="text-center p-10">No hay datos disponibles.</div>;
 
-            // Preparamos los datos de forma memorizada para evitar re-renderizados
-            const topDeptosData = useMemo(() => Object.fromEntries(stats.topDepartamentos || []), [stats]);
-            const topCursosData = useMemo(() => Object.fromEntries(stats.topCursos || []), [stats]);
+            const topDeptosData = Object.fromEntries(stats.topDepartamentos || []);
+            const topCursosData = Object.fromEntries(stats.topCursos || []);
 
             return (
                 <div className="container mx-auto px-4 py-8 max-w-7xl animate-fadeIn">
-                    
-                    {/* Botón Volver */}
                     <div className="mb-6">
-                        <a href="index.html" className="inline-flex items-center px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow-sm hover:bg-gray-50 transition-colors border border-gray-200">
-                            ← Volver al Portal Principal
-                        </a>
+                        <a href="index.html" className="inline-flex items-center px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow-sm hover:bg-gray-50 border border-gray-200">← Volver al Portal</a>
                     </div>
 
-                    {/* Barra Superior */}
                     <div className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col sm:flex-row justify-between items-center border-l-4 border-blue-600">
                         <div>
                             <h2 className="text-xl font-bold text-gray-800">Dashboard de Resultados</h2>
                             <p className="text-sm text-gray-600">Hola, <span className="font-semibold text-blue-800">{user.name}</span>.</p>
                         </div>
-                        <button onClick={onLogout} className="mt-4 sm:mt-0 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
-                            Cerrar Sesión
-                        </button>
+                        <button onClick={onLogout} className="mt-4 sm:mt-0 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold">Cerrar Sesión</button>
                     </div>
 
-                    {/* Tarjetas KPI */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500 flex items-center">
                             <div className="text-4xl mr-4">📝</div>
-                            <div>
-                                <p className="text-3xl font-bold text-gray-800">{stats.totalInscripciones}</p>
-                                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Inscripciones Activas</p>
-                            </div>
+                            <div><p className="text-3xl font-bold">{stats.totalInscripciones}</p><p className="text-xs text-gray-500 font-bold">INSCRIPCIONES</p></div>
                         </div>
                         <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500 flex items-center">
                             <div className="text-4xl mr-4">👩‍🏫</div>
-                            <div>
-                                <p className="text-3xl font-bold text-gray-800">{stats.coberturaDocente.actualizados}</p>
-                                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Docentes Participantes</p>
-                            </div>
+                            <div><p className="text-3xl font-bold">{stats.coberturaDocente.actualizados}</p><p className="text-xs text-gray-500 font-bold">DOCENTES</p></div>
                         </div>
                         <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-purple-500 flex items-center">
                             <div className="text-4xl mr-4">🎯</div>
-                            <div>
-                                <p className="text-3xl font-bold text-gray-800">{stats.coberturaDocente.porcentaje}%</p>
-                                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">% Cobertura Estimada</p>
-                            </div>
+                            <div><p className="text-3xl font-bold">{stats.coberturaDocente.porcentaje}%</p><p className="text-xs text-gray-500 font-bold">COBERTURA</p></div>
                         </div>
                     </div>
 
-                    {/* Panel IA */}
                     <AIAnalysisPanel statsData={stats} />
 
-                    <div className="h-8"></div>
-
-                    {/* Gráficas */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 my-8">
+                        <div><h3 className="text-center font-bold text-gray-700 mb-4">Género</h3><StatsChart type="doughnut" data={stats.distribucionGenero} title="Género" id="chartG" /></div>
+                        <div><h3 className="text-center font-bold text-gray-700 mb-4">Tipo de Curso</h3><StatsChart type="bar" data={stats.distribucionTipo} title="Tipo" id="chartT" /></div>
+                    </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                        <div>
-                            <h3 className="text-center font-bold text-gray-700 mb-4">Distribución por Género</h3>
-                            <StatsChart type="doughnut" data={stats.distribucionGenero} title="Participación por Género" id="chartGeneros" />
-                        </div>
-                        <div>
-                            <h3 className="text-center font-bold text-gray-700 mb-4">Tipo de Curso</h3>
-                            <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartTipo" />
-                        </div>
+                        <div><h3 className="text-center font-bold text-gray-700 mb-4">Top Departamentos</h3><StatsChart type="bar" data={topDeptosData} title="Departamentos" id="chartD" /></div>
+                        <div><h3 className="text-center font-bold text-gray-700 mb-4">Top Cursos</h3><StatsChart type="bar" data={topCursosData} title="Cursos" id="chartC" /></div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                        <div>
-                            <h3 className="text-center font-bold text-gray-700 mb-4">Top 5 Departamentos</h3>
-                            <StatsChart type="bar" data={topDeptosData} title="Participación por Depto" id="chartDeptos" />
-                        </div>
-                        <div>
-                            <h3 className="text-center font-bold text-gray-700 mb-4">Cursos Más Demandados</h3>
-                            <StatsChart type="bar" data={topCursosData} title="Inscritos por Curso" id="chartCursos" />
-                        </div>
-                    </div>
-
-                    {/* Botón Generar Reporte */}
                     <div className="bg-blue-600 rounded-xl shadow-lg p-8 text-center text-white">
-                        <div className="text-5xl mb-4">📄</div>
                         <h3 className="text-2xl font-bold mb-2">Reporte Ejecutivo</h3>
-                        <p className="opacity-90 mb-6 max-w-2xl mx-auto">
-                            Genere un reporte PDF detallado con la lista de participantes y estadísticas clave, 
-                            filtrado por departamento. El documento se enviará a su correo: 
-                            <strong> {user.email}</strong>
-                        </p>
-                        <button 
-                            onClick={() => setReportModalOpen(true)}
-                            className="bg-white text-blue-700 font-bold py-3 px-8 rounded-full hover:bg-blue-50 transition-all transform hover:scale-105 shadow-md flex items-center justify-center gap-2 mx-auto"
-                        >
-                            <span>✨ Seleccionar y Generar Reporte</span>
-                        </button>
-                    </div>
-                    
-                    <div className="mt-8 text-center">
-                         <a href="index.html" className="text-blue-600 hover:underline">← Volver al Portal Principal</a>
+                        <button onClick={() => setReportModalOpen(true)} className="bg-white text-blue-700 font-bold py-3 px-8 rounded-full hover:scale-105 shadow-md mt-4">✨ Generar Reporte</button>
                     </div>
 
-                    <ReportModal 
-                        isOpen={reportModalOpen} 
-                        onClose={() => setReportModalOpen(false)}
-                        departments={stats.allDepartamentos || []}
-                        onGenerate={handleGenerateReport}
-                        isGenerating={generatingReport}
-                    />
+                    <ReportModal isOpen={reportModalOpen} onClose={() => setReportModalOpen(false)} departments={stats.allDepartamentos || []} onGenerate={handleGenerateReport} isGenerating={generatingReport} />
                 </div>
             );
         };
 
-        // ==========================================
-        // APP CONTAINER
-        // ==========================================
+        // APP
         const App = () => {
             const [user, setUser] = useState(null);
-            const [loginError, setLoginError] = useState(null);
-
             const handleLogin = (response) => {
                 try {
                     const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                    setUser({
-                        name: payload.name,
-                        email: payload.email,
-                        token: response.credential
-                    });
-                } catch (e) {
-                    setLoginError("Error al iniciar sesión. Intente nuevamente.");
-                }
+                    setUser({ name: payload.name, email: payload.email, token: response.credential });
+                } catch (e) { alert("Error login"); }
             };
-
-            const handleLogout = () => {
-                if (window.google) window.google.accounts.id.disableAutoSelect();
-                setUser(null);
-            };
-
-            return user ? <Dashboard user={user} onLogout={handleLogout} /> : <LoginScreen onLogin={handleLogin} error={loginError} />;
+            return user ? <Dashboard user={user} onLogout={() => { window.google?.accounts?.id?.disableAutoSelect(); setUser(null); }} /> : <LoginScreen onLogin={handleLogin} />;
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('copyright-year').textContent = new Date().getFullYear();
-        });
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+        document.addEventListener('DOMContentLoaded', () => document.getElementById('copyright-year').textContent = new Date().getFullYear());
     </script>
 </body>
 </html>
