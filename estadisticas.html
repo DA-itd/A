@@ -8,6 +8,15 @@
     
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
     
+    <!-- Import Map para Google GenAI -->
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.run/@google/genai"
+      }
+    }
+    </script>
+
     <!-- React y Babel -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -16,6 +25,7 @@
     <!-- Estilos y Utilidades -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <!-- Google Identity -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -32,6 +42,12 @@
     <style>
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+        .markdown-body h1 { font-size: 1.5em; font-weight: bold; margin-bottom: 0.5em; color: #1e3a8a; }
+        .markdown-body h2 { font-size: 1.25em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; color: #1e40af; }
+        .markdown-body p { margin-bottom: 0.8em; line-height: 1.6; }
+        .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+        .markdown-body li { margin-bottom: 0.3em; }
+        .markdown-body strong { color: #334155; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
@@ -61,7 +77,9 @@
         </div>
     </footer>
 
-    <script type="text/babel">
+    <script type="text/babel" data-type="module">
+        import { GoogleGenAI } from "@google/genai";
+
         // =============================================================================
         // CONFIGURACIÓN
         // =============================================================================
@@ -231,6 +249,99 @@
             );
         };
 
+        // =============================================================================
+        // COMPONENTE AI ANALYSIS (GEMINI)
+        // =============================================================================
+        const AIAnalysisPanel = ({ stats }) => {
+            const [analysis, setAnalysis] = React.useState(null);
+            const [isLoading, setIsLoading] = React.useState(false);
+            const [error, setError] = React.useState(null);
+
+            const generateAnalysis = async () => {
+                setIsLoading(true);
+                setError(null);
+                
+                try {
+                    // En un entorno real, esta key debe venir de una variable de entorno segura
+                    // o pasarse desde el backend. Aquí asumimos que está disponible como dice la instrucción.
+                    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                    
+                    const prompt = `
+                        Actúa como un Analista de Datos Educativos experto. Analiza los siguientes datos de inscripción a cursos de actualización docente del ITD (Instituto Tecnológico de Durango).
+                        
+                        Datos: ${JSON.stringify(stats)}
+                        
+                        Genera un reporte ejecutivo en formato Markdown que incluya:
+                        1. **Resumen General:** Un párrafo breve con lo más destacado.
+                        2. **Hallazgos Clave:** 3 puntos importantes sobre la participación (departamentos más activos, menos activos, género).
+                        3. **Recomendación:** Una sugerencia estratégica para mejorar la cobertura docente.
+                        
+                        Usa un tono profesional, institucional y motivador.
+                    `;
+
+                    const response = await ai.models.generateContent({
+                        model: 'gemini-2.5-flash',
+                        contents: prompt,
+                    });
+
+                    setAnalysis(response.text);
+
+                } catch (err) {
+                    console.error("Error AI:", err);
+                    setError("No se pudo generar el análisis en este momento. Verifica tu conexión o configuración de API.");
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            return (
+                <div className="bg-white rounded-xl shadow-xl overflow-hidden border-t-4 border-purple-600 mt-8 animate-fadeIn">
+                    <div className="p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-100 flex justify-between items-center flex-wrap gap-4">
+                        <div>
+                            <h3 className="text-xl font-bold text-purple-900 flex items-center gap-2">
+                                <span className="text-2xl">✨</span> Análisis Inteligente (IA)
+                            </h3>
+                            <p className="text-sm text-purple-700 mt-1">
+                                Genera insights y resúmenes ejecutivos con Inteligencia Artificial.
+                            </p>
+                        </div>
+                        <button 
+                            onClick={generateAnalysis}
+                            disabled={isLoading}
+                            className={`px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            {isLoading ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Analizando...
+                                </>
+                            ) : (
+                                <>⚡ Generar Análisis</>
+                            )}
+                        </button>
+                    </div>
+                    
+                    <div className="p-6 md:p-8">
+                        {error && (
+                            <div className="bg-red-50 text-red-600 p-4 rounded-lg border border-red-200 text-sm">
+                                {error}
+                            </div>
+                        )}
+                        
+                        {analysis ? (
+                            <div className="markdown-body text-gray-700" dangerouslySetInnerHTML={{ __html: marked.parse(analysis) }} />
+                        ) : (
+                            !isLoading && !error && (
+                                <div className="text-center text-gray-500 py-8 italic">
+                                    Presiona el botón para obtener un diagnóstico profesional de los datos actuales.
+                                </div>
+                            )
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
         // Modal para seleccionar departamento antes de generar reporte
         const ReportModal = ({ isOpen, onClose, onConfirm, departments }) => {
             const [selectedDept, setSelectedDept] = React.useState('TODOS');
@@ -377,6 +488,9 @@
                         <StatCard title="Docentes Participantes" value={`${stats.coberturaDocente.actualizados}`} icon="👩‍🏫" color="border-green-500" />
                         <StatCard title="% Cobertura Estimada" value={`${stats.coberturaDocente.porcentaje}%`} icon="🎯" color="border-purple-500" />
                     </div>
+
+                    {/* SECCIÓN DE IA - Ubicada prominentemente */}
+                    <AIAnalysisPanel stats={stats} />
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                        <DashboardChart 
