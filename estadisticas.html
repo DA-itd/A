@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -361,6 +360,7 @@
                     try {
                         const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData`);
                         const result = await response.json();
+                        console.log("Datos recibidos:", result); // LOG PARA DEPURACIÓN
                         if (result.success) setStats(result.data);
                     } catch (error) {
                         console.error("Error:", error);
