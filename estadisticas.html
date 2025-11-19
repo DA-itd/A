@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -103,13 +104,17 @@
             return result.data;
         };
         
-        const generateReport = async (token) => {
+        const generateReport = async (token, department) => {
              const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'cors',
                 redirect: 'follow',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'generateStatsReport', id_token: token })
+                body: JSON.stringify({ 
+                    action: 'generateStatsReport', 
+                    id_token: token,
+                    department: department 
+                })
             });
             
             if (!response.ok) throw new Error('Error de red al generar reporte.');
@@ -147,7 +152,6 @@
                     }
                 };
 
-                // Intentar inicializar inmediatamente o esperar un poco si la librería no ha cargado
                 if (window.google) {
                     initGoogle();
                 } else {
@@ -191,19 +195,16 @@
             </div>
         );
 
-        // Renombrado a DashboardChart para evitar conflicto con la clase global Chart
         const DashboardChart = ({ type, data, options, title }) => {
             const chartRef = React.useRef(null);
             const chartInstance = React.useRef(null);
 
             React.useEffect(() => {
                 if (chartRef.current) {
-                    // Destruir instancia previa si existe
                     if (chartInstance.current) {
                         chartInstance.current.destroy();
                     }
                     
-                    // Verificar que Chart.js esté cargado
                     if (window.Chart) {
                         try {
                             const ctx = chartRef.current.getContext('2d');
@@ -230,26 +231,78 @@
             );
         };
 
+        // Modal para seleccionar departamento antes de generar reporte
+        const ReportModal = ({ isOpen, onClose, onConfirm, departments }) => {
+            const [selectedDept, setSelectedDept] = React.useState('TODOS');
+            
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 animate-fadeIn">
+                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                        <div className="flex justify-between items-center mb-4 border-b pb-2">
+                            <h3 className="text-xl font-bold text-gray-800">Generar Reporte PDF</h3>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+                        </div>
+                        
+                        <p className="text-gray-600 mb-4">
+                            Seleccione el departamento para el cual desea generar el reporte detallado de participantes.
+                        </p>
+                        
+                        <div className="mb-6">
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Departamento</label>
+                            <select 
+                                value={selectedDept} 
+                                onChange={(e) => setSelectedDept(e.target.value)}
+                                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            >
+                                <option value="TODOS">-- Todos los Departamentos --</option>
+                                {departments.map((dept, idx) => (
+                                    <option key={idx} value={dept}>{dept}</option>
+                                ))}
+                            </select>
+                        </div>
+                        
+                        <div className="flex justify-end gap-3">
+                            <button 
+                                onClick={onClose}
+                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                onClick={() => onConfirm(selectedDept)}
+                                className="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700"
+                            >
+                                Generar Reporte
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
         const Dashboard = ({ user, stats, onLogout, onGenerateReport }) => {
              const [isGenerating, setIsGenerating] = React.useState(false);
              const [reportStatus, setReportStatus] = React.useState('');
+             const [showModal, setShowModal] = React.useState(false);
 
-             const handleGenerate = async () => {
+             const handleConfirmGenerate = async (department) => {
+                 setShowModal(false);
                  setIsGenerating(true);
-                 setReportStatus('Generando y enviando reporte... ⏳');
+                 setReportStatus(`Generando reporte para ${department}... ⏳`);
+                 
                  try {
-                     const message = await onGenerateReport();
+                     const message = await onGenerateReport(department);
                      setReportStatus(`✅ ${message}`);
                  } catch (e) {
                      setReportStatus(`❌ Error: ${e.message}`);
                  } finally {
                      setIsGenerating(false);
-                     // Limpiar mensaje después de 5 segundos
-                     setTimeout(() => setReportStatus(''), 8000);
+                     setTimeout(() => setReportStatus(''), 10000);
                  }
              };
 
-            // Datos para las gráficas
             const genderData = React.useMemo(() => ({
                 labels: Object.keys(stats.distribucionGenero),
                 datasets: [{
@@ -299,6 +352,13 @@
 
             return (
                 <div className="space-y-8 pb-12">
+                    <ReportModal 
+                        isOpen={showModal} 
+                        onClose={() => setShowModal(false)} 
+                        onConfirm={handleConfirmGenerate}
+                        departments={stats.allDepartamentos || []}
+                    />
+
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-600">
                         <div>
                             <h2 className="text-2xl font-bold text-gray-800">Dashboard de Resultados</h2>
@@ -366,17 +426,17 @@
                         <div className="text-4xl mb-4">📄</div>
                         <h3 className="text-2xl font-bold mb-2">Reporte Ejecutivo</h3>
                         <p className="text-indigo-100 mb-6 max-w-2xl mx-auto">
-                            Genere un reporte detallado en PDF con la lista de participantes y estadísticas clave. 
-                            El documento se enviará automáticamente a su correo: <strong>{user.email}</strong>
+                            Genere un reporte PDF detallado con la lista de participantes y estadísticas clave, filtrado por departamento. 
+                            El documento se enviará a su correo: <strong>{user.email}</strong>
                         </p>
                         
                         <div className="flex flex-col items-center gap-4">
                             <button 
-                                onClick={handleGenerate} 
+                                onClick={() => setShowModal(true)} 
                                 disabled={isGenerating} 
                                 className={`px-8 py-3 bg-white text-indigo-600 font-bold rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all ${isGenerating ? 'opacity-75 cursor-wait' : ''}`}
                             >
-                                {isGenerating ? 'Generando...' : '✨ Generar y Enviar Reporte'}
+                                {isGenerating ? 'Procesando...' : '✨ Seleccionar y Generar Reporte'}
                             </button>
                             
                             {reportStatus && (
@@ -402,7 +462,6 @@
                 
                 try {
                     const token = response.credential;
-                    // Decodificar JWT simple (solo para extraer email, validación real en backend)
                     const base64Url = token.split('.')[1];
                     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
                     const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
@@ -415,7 +474,6 @@
                         throw new Error(`Acceso denegado. Debe usar una cuenta institucional (@${CONFIG.ALLOWED_DOMAIN}).`);
                     }
                     
-                    // Obtener datos
                     const statsData = await fetchData(token);
                     
                     const userData = {
@@ -446,30 +504,26 @@
                 if(window.google && window.google.accounts) {
                     window.google.accounts.id.disableAutoSelect();
                 }
-                // Recargar para limpiar estado limpiamente
                 window.location.reload();
             };
             
-            const handleGenerateReport = React.useCallback(async () => {
+            const handleGenerateReport = React.useCallback(async (department) => {
                 if(!user?.token) throw new Error("Su sesión ha expirado. Por favor ingrese de nuevo.");
-                return await generateReport(user.token);
+                return await generateReport(user.token, department);
             }, [user]);
 
             React.useEffect(() => {
                 const checkSession = async () => {
                     const session = sessionManager.load();
                     if (session && session.token) {
-                        // Si hay sesión guardada, intentamos re-autenticar/cargar datos
                         await handleLogin({ credential: session.token });
                     } else {
-                        // Si no hay sesión, terminamos carga para mostrar login
                         setLoading(false);
                     }
                 };
                 
                 checkSession();
                 
-                // Timeout de seguridad por si algo se cuelga
                 const safetyTimeout = setTimeout(() => {
                     setLoading((currentLoading) => {
                         if (currentLoading) {
@@ -478,12 +532,11 @@
                         }
                         return currentLoading;
                     });
-                }, 8000); // 8 segundos max de carga inicial
+                }, 8000);
                 
                 return () => clearTimeout(safetyTimeout);
             }, [handleLogin]);
 
-            // Renderizado condicional
             if (loading) {
                 return (
                     <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -523,7 +576,6 @@
             );
         };
         
-        // Inicialización
         window.addEventListener('load', () => {
             const rootElement = document.getElementById('root');
             if (rootElement) {
