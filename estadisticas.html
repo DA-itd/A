@@ -32,7 +32,6 @@
     <style>
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-        /* Estilos para el Markdown generado por la IA */
         .markdown-body h1 { font-size: 1.5em; font-weight: bold; margin-bottom: 0.5em; color: #1e3a8a; }
         .markdown-body h2 { font-size: 1.25em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; color: #1e40af; }
         .markdown-body p { margin-bottom: 0.8em; line-height: 1.6; }
@@ -78,50 +77,29 @@
         const CONFIG = {
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', 
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
-            
-            // ⚠️ IMPORTANTE: Coloca aquí tu API KEY de Google AI Studio
-            GEMINI_API_KEY: 'TU_API_KEY_DE_GOOGLE_AQUI' 
+            GEMINI_API_KEY: 'TU_API_KEY_DE_GOOGLE_AQUI' // Reemplazar con clave real
         };
 
-        // ==========================================
-        // COMPONENTE: GRÁFICA (Chart.js Wrapper)
-        // ==========================================
+        // COMPONENTE: GRÁFICA (Robustecido)
         const StatsChart = ({ type, data, title, id }) => {
             const chartRef = useRef(null);
             const canvasRef = useRef(null);
 
             const hasData = useMemo(() => {
-                return data && Object.keys(data).length > 0 && Object.values(data).some(val => val > 0);
+                if (!data) return false;
+                return Object.keys(data).length > 0 && Object.values(data).some(val => val > 0);
             }, [data]);
 
             useEffect(() => {
                 if (!canvasRef.current || !hasData) return;
-                
-                if (typeof window.Chart === 'undefined') {
-                    console.error("Chart.js no está cargado");
-                    return;
-                }
+                if (typeof window.Chart === 'undefined') return;
 
-                if (chartRef.current) {
-                    chartRef.current.destroy();
-                }
+                if (chartRef.current) chartRef.current.destroy();
 
                 try {
                     const ctx = canvasRef.current.getContext('2d');
-                    const colors = [
-                        'rgba(59, 130, 246, 0.7)', 
-                        'rgba(236, 72, 153, 0.7)', 
-                        'rgba(245, 158, 11, 0.7)', 
-                        'rgba(16, 185, 129, 0.7)', 
-                        'rgba(139, 92, 246, 0.7)', 
-                    ];
-                    
-                    const borderColors = colors.map(c => c.replace('0.7', '1'));
-                    
-                    // Determinar si usamos array de colores o un solo color
-                    const isMultiColor = type === 'pie' || type === 'doughnut';
-                    const bgColorsToUse = isMultiColor ? colors : colors[0];
-                    const borderColorsToUse = isMultiColor ? borderColors : borderColors[0];
+                    const colors = ['rgba(59, 130, 246, 0.7)', 'rgba(236, 72, 153, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(139, 92, 246, 0.7)'];
+                    const isPie = type === 'pie' || type === 'doughnut';
 
                     chartRef.current = new window.Chart(ctx, {
                         type: type,
@@ -130,8 +108,8 @@
                             datasets: [{
                                 label: title,
                                 data: Object.values(data),
-                                backgroundColor: bgColorsToUse,
-                                borderColor: borderColorsToUse,
+                                backgroundColor: isPie ? colors : colors[0],
+                                borderColor: isPie ? colors.map(c=>c.replace('0.7','1')) : colors[0].replace('0.7','1'),
                                 borderWidth: 1
                             }]
                         },
@@ -139,36 +117,20 @@
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
-                                legend: {
-                                    position: 'top',
-                                    display: type !== 'bar'
-                                },
-                                title: {
-                                    display: true,
-                                    text: title
-                                }
-                            },
-                            scales: type === 'bar' ? {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: { precision: 0 }
-                                }
-                            } : {}
+                                legend: { position: 'top', display: isPie },
+                                title: { display: true, text: title }
+                            }
                         }
                     });
-                } catch (err) {
-                    console.error("Error creando gráfica:", err);
-                }
+                } catch (err) { console.error("Chart error:", err); }
 
-                return () => {
-                    if (chartRef.current) chartRef.current.destroy();
-                };
+                return () => { if (chartRef.current) chartRef.current.destroy(); };
             }, [data, type, title, hasData]);
 
             if (!hasData) {
                 return (
                     <div className="bg-white p-4 rounded-xl shadow-md h-80 w-full flex flex-col items-center justify-center text-gray-400">
-                        <span className="text-4xl mb-2">📊</span>
+                        <span className="text-4xl mb-2">📉</span>
                         <p className="text-sm">Sin datos suficientes.</p>
                     </div>
                 );
@@ -181,280 +143,137 @@
             );
         };
 
-        // ==========================================
-        // COMPONENTE: ANÁLISIS IA (Fetch Directo)
-        // ==========================================
+        // COMPONENTE: ANÁLISIS IA
         const AIAnalysisPanel = ({ statsData }) => {
             const [analysis, setAnalysis] = useState(null);
             const [loading, setLoading] = useState(false);
             const [error, setError] = useState(null);
 
             const handleGenerateAnalysis = async () => {
-                setLoading(true);
-                setError(null);
-                
-                if (!CONFIG.GEMINI_API_KEY || CONFIG.GEMINI_API_KEY === 'TU_API_KEY_DE_GOOGLE_AQUI') {
-                    setError("⚠️ Falta configurar la API Key en el código (línea ~80).");
-                    setLoading(false);
-                    return;
+                setLoading(true); setError(null);
+                if (!CONFIG.GEMINI_API_KEY || CONFIG.GEMINI_API_KEY.includes('TU_API')) {
+                    setError("⚠️ Configura tu API Key de Gemini en el código.");
+                    setLoading(false); return;
                 }
-
                 try {
-                    // Usamos FETCH directo para evitar problemas con librerías y módulos
-                    const prompt = `
-                        Actúa como un experto analista de datos académicos.
-                        Analiza estos datos de inscripciones: ${JSON.stringify(statsData)}
-                        
-                        Genera un reporte ejecutivo breve (máximo 200 palabras) en Markdown con:
-                        1. Resumen general.
-                        2. Hallazgos clave (tendencias, departamentos).
-                        3. Una recomendación estratégica breve.
-                        
-                        Usa tono profesional y motivador.
-                    `;
-
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
-                    
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: prompt }] }]
-                        })
+                    const prompt = `Actúa como un analista académico experto. Analiza estos datos de capacitación: ${JSON.stringify(statsData)}. Genera un resumen ejecutivo muy breve (max 150 palabras) con: 1) Logros principales, 2) Áreas de oportunidad. Usa formato Markdown.`;
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                     });
-
-                    if (!response.ok) throw new Error(`Error API: ${response.statusText}`);
-                    
                     const data = await response.json();
                     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                    if (text) {
-                        setAnalysis(text);
-                    } else {
-                        throw new Error("La IA no devolvió texto válido.");
-                    }
-
-                } catch (err) {
-                    console.error(err);
-                    setError("Error al generar análisis: " + err.message);
-                } finally {
-                    setLoading(false);
-                }
+                    if (text) setAnalysis(text); else throw new Error("Sin respuesta de IA");
+                } catch (err) { setError(err.message); } finally { setLoading(false); }
             };
 
             return (
                 <div className="mt-8 bg-gradient-to-r from-violet-100 to-fuchsia-50 border border-violet-200 rounded-xl p-6 shadow-sm">
                     <div className="flex justify-between items-center mb-4">
                         <div className="flex items-center gap-2">
-                            <span className="text-2xl">✨</span>
-                            <h3 className="text-lg font-bold text-violet-900">Análisis Inteligente (IA)</h3>
+                            <span className="text-2xl">✨</span><h3 className="text-lg font-bold text-violet-900">Análisis Inteligente (IA)</h3>
                         </div>
                         {!analysis && !loading && (
-                            <button 
-                                onClick={handleGenerateAnalysis}
-                                className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 shadow-md"
-                            >
-                                ⚡ Generar Análisis
-                            </button>
+                            <button onClick={handleGenerateAnalysis} className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md">⚡ Generar Análisis</button>
                         )}
                     </div>
-
-                    {loading && (
-                        <div className="flex items-center justify-center py-8 text-violet-700">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-violet-700 mr-3"></div>
-                            Analizando datos históricos...
-                        </div>
-                    )}
-
-                    {error && (
-                        <div className="text-red-600 text-sm bg-red-50 p-3 rounded border border-red-200">
-                            {error}
-                        </div>
-                    )}
-
-                    {analysis && (
-                        <div className="animate-fadeIn bg-white p-6 rounded-lg border border-violet-100 shadow-inner">
-                            <div 
-                                className="markdown-body text-sm text-gray-800"
-                                dangerouslySetInnerHTML={{ __html: marked.parse(analysis) }}
-                            />
-                            <p className="text-xs text-gray-400 mt-4 text-right italic">Generado por Google Gemini</p>
-                        </div>
-                    )}
+                    {loading && <div className="text-violet-700 animate-pulse">Analizando datos...</div>}
+                    {error && <div className="text-red-600 text-sm">{error}</div>}
+                    {analysis && <div className="bg-white p-4 rounded-lg border border-violet-100 markdown-body" dangerouslySetInnerHTML={{ __html: marked.parse(analysis) }} />}
                 </div>
             );
         };
 
-        // ==========================================
-        // COMPONENTE: MODAL REPORTE
-        // ==========================================
-        const ReportModal = ({ isOpen, onClose, departments, onGenerate, isGenerating }) => {
-            const [selectedDept, setSelectedDept] = useState('TODOS');
-            if (!isOpen) return null;
-
-            return (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-fadeIn">
-                        <h3 className="text-xl font-bold text-gray-800 mb-4">Generar Reporte PDF</h3>
-                        <p className="text-gray-600 text-sm mb-4">El PDF se enviará a su correo.</p>
-                        
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Filtrar por Departamento:</label>
-                        <select 
-                            className="w-full border border-gray-300 rounded-lg p-2 mb-6 text-sm"
-                            value={selectedDept}
-                            onChange={(e) => setSelectedDept(e.target.value)}
-                        >
-                            <option value="TODOS">-- TODOS --</option>
-                            {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
-                        </select>
-
-                        <div className="flex justify-end gap-3">
-                            <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-semibold" disabled={isGenerating}>Cancelar</button>
-                            <button onClick={() => onGenerate(selectedDept)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2" disabled={isGenerating}>
-                                {isGenerating ? 'Enviando...' : '📄 Enviar Reporte'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // ==========================================
-        // LOGIN
-        // ==========================================
-        const LoginScreen = ({ onLogin, error }) => {
-            const googleButtonRef = useRef(null);
-            useEffect(() => {
-                if (window.google?.accounts) {
-                    window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
-                    window.google.accounts.id.renderButton(googleButtonRef.current, { theme: "outline", size: "large", width: "250" });
-                }
-            }, [onLogin]);
-
-            return (
-                <div className="flex flex-col items-center justify-center py-12 px-4 animate-fadeIn">
-                    <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border-t-4 border-blue-600">
-                        <div className="text-6xl mb-4">📊</div>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-2">Acceso a Estadísticas</h2>
-                        <div className="mb-6 text-left text-xs bg-blue-50 p-3 rounded text-blue-800">
-                            <a href="index.html" className="font-bold hover:underline">← Volver al Portal Principal</a>
-                        </div>
-                        {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-6">{error}</div>}
-                        <div className="flex justify-center" ref={googleButtonRef}></div>
-                    </div>
-                </div>
-            );
-        };
-
-        // ==========================================
-        // DASHBOARD PRINCIPAL
-        // ==========================================
+        // COMPONENTE: DASHBOARD
         const Dashboard = ({ user, onLogout }) => {
             const [stats, setStats] = useState(null);
             const [loading, setLoading] = useState(true);
-            const [reportModalOpen, setReportModalOpen] = useState(false);
             const [generatingReport, setGeneratingReport] = useState(false);
 
             useEffect(() => {
-                const fetchStats = async () => {
-                    try {
-                        const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData`);
-                        const result = await response.json();
-                        console.log("Datos recibidos:", result); // LOG PARA DEPURACIÓN
-                        if (result.success) setStats(result.data);
-                    } catch (error) {
-                        console.error("Error:", error);
-                    } finally {
-                        setLoading(false);
-                    }
-                };
-                fetchStats();
+                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData`)
+                    .then(r => r.json())
+                    .then(res => {
+                        console.log("Stats Data:", res); // Debug
+                        if(res.success) setStats(res.data);
+                    })
+                    .catch(e => console.error(e))
+                    .finally(() => setLoading(false));
             }, []);
 
-            const handleGenerateReport = async (dept) => {
+            const handleReport = async () => {
                 setGeneratingReport(true);
                 try {
                     await fetch(CONFIG.APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'generateStatsReport', id_token: user.token, department: dept })
+                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'generateStatsReport', id_token: user.token, department: 'TODOS' })
                     });
-                    alert(`Solicitud enviada. El reporte llegará a ${user.email}.`);
-                    setReportModalOpen(false);
-                } catch (error) {
-                    alert("Error: " + error.message);
-                } finally {
-                    setGeneratingReport(false);
-                }
+                    alert("Reporte enviado a tu correo.");
+                } catch (e) { alert("Error al generar reporte"); } finally { setGeneratingReport(false); }
             };
 
-            if (loading) return <div className="flex justify-center items-center min-h-[50vh]"><div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div></div>;
-            if (!stats) return <div className="text-center p-10">No hay datos disponibles.</div>;
-
-            const topDeptosData = Object.fromEntries(stats.topDepartamentos || []);
-            const topCursosData = Object.fromEntries(stats.topCursos || []);
+            if (loading) return <div className="flex justify-center p-10"><div className="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"></div></div>;
+            if (!stats) return <div className="text-center p-10">Error al cargar datos.</div>;
 
             return (
                 <div className="container mx-auto px-4 py-8 max-w-7xl animate-fadeIn">
-                    <div className="mb-6">
-                        <a href="index.html" className="inline-flex items-center px-4 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow-sm hover:bg-gray-50 border border-gray-200">← Volver al Portal</a>
-                    </div>
-
-                    <div className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col sm:flex-row justify-between items-center border-l-4 border-blue-600">
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-800">Dashboard de Resultados</h2>
-                            <p className="text-sm text-gray-600">Hola, <span className="font-semibold text-blue-800">{user.name}</span>.</p>
-                        </div>
-                        <button onClick={onLogout} className="mt-4 sm:mt-0 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold">Cerrar Sesión</button>
+                    <div className="mb-6"><a href="index.html" className="text-blue-600 hover:underline">← Volver al Portal Principal</a></div>
+                    
+                    <div className="bg-white rounded-xl shadow-sm p-4 mb-8 flex justify-between items-center border-l-4 border-blue-600">
+                        <div><h2 className="text-xl font-bold text-gray-800">Dashboard de Resultados</h2><p className="text-sm">Hola, {user.name}</p></div>
+                        <button onClick={onLogout} className="bg-gray-100 px-4 py-2 rounded text-sm font-bold">Cerrar Sesión</button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500 flex items-center">
-                            <div className="text-4xl mr-4">📝</div>
-                            <div><p className="text-3xl font-bold">{stats.totalInscripciones}</p><p className="text-xs text-gray-500 font-bold">INSCRIPCIONES</p></div>
+                        <div className="bg-white p-6 rounded-xl shadow border-l-4 border-blue-500">
+                            <div className="text-3xl font-bold">{stats.totalInscripciones}</div><div className="text-xs text-gray-500">INSCRIPCIONES</div>
                         </div>
-                        <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500 flex items-center">
-                            <div className="text-4xl mr-4">👩‍🏫</div>
-                            <div><p className="text-3xl font-bold">{stats.coberturaDocente.actualizados}</p><p className="text-xs text-gray-500 font-bold">DOCENTES</p></div>
+                        <div className="bg-white p-6 rounded-xl shadow border-l-4 border-green-500">
+                            <div className="text-3xl font-bold">{stats.coberturaDocente.actualizados}</div><div className="text-xs text-gray-500">DOCENTES</div>
                         </div>
-                        <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-purple-500 flex items-center">
-                            <div className="text-4xl mr-4">🎯</div>
-                            <div><p className="text-3xl font-bold">{stats.coberturaDocente.porcentaje}%</p><p className="text-xs text-gray-500 font-bold">COBERTURA</p></div>
+                        <div className="bg-white p-6 rounded-xl shadow border-l-4 border-purple-500">
+                            <div className="text-3xl font-bold">{stats.coberturaDocente.porcentaje}%</div><div className="text-xs text-gray-500">COBERTURA</div>
                         </div>
                     </div>
 
                     <AIAnalysisPanel statsData={stats} />
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 my-8">
-                        <div><h3 className="text-center font-bold text-gray-700 mb-4">Género</h3><StatsChart type="doughnut" data={stats.distribucionGenero} title="Género" id="chartG" /></div>
-                        <div><h3 className="text-center font-bold text-gray-700 mb-4">Tipo de Curso</h3><StatsChart type="bar" data={stats.distribucionTipo} title="Tipo" id="chartT" /></div>
+                        <StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="cG" />
+                        <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="cT" />
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                        <div><h3 className="text-center font-bold text-gray-700 mb-4">Top Departamentos</h3><StatsChart type="bar" data={topDeptosData} title="Departamentos" id="chartD" /></div>
-                        <div><h3 className="text-center font-bold text-gray-700 mb-4">Top Cursos</h3><StatsChart type="bar" data={topCursosData} title="Cursos" id="chartC" /></div>
+                        <StatsChart type="bar" data={Object.fromEntries(stats.topDepartamentos||[])} title="Top Departamentos" id="cD" />
+                        <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="cC" />
                     </div>
 
-                    <div className="bg-blue-600 rounded-xl shadow-lg p-8 text-center text-white">
-                        <h3 className="text-2xl font-bold mb-2">Reporte Ejecutivo</h3>
-                        <button onClick={() => setReportModalOpen(true)} className="bg-white text-blue-700 font-bold py-3 px-8 rounded-full hover:scale-105 shadow-md mt-4">✨ Generar Reporte</button>
+                    <div className="text-center mt-8">
+                        <button onClick={handleReport} disabled={generatingReport} className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow hover:bg-blue-700 disabled:opacity-50">
+                            {generatingReport ? "Generando..." : "📄 Enviar Reporte Ejecutivo"}
+                        </button>
                     </div>
-
-                    <ReportModal isOpen={reportModalOpen} onClose={() => setReportModalOpen(false)} departments={stats.allDepartamentos || []} onGenerate={handleGenerateReport} isGenerating={generatingReport} />
                 </div>
             );
         };
 
-        // APP
+        const Login = ({ onLogin }) => {
+            const ref = useRef(null);
+            useEffect(() => {
+                if(window.google?.accounts) {
+                    window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
+                    window.google.accounts.id.renderButton(ref.current, { theme: "outline", size: "large" });
+                }
+            }, [onLogin]);
+            return <div className="flex justify-center py-20"><div ref={ref}></div></div>;
+        };
+
         const App = () => {
             const [user, setUser] = useState(null);
-            const handleLogin = (response) => {
-                try {
-                    const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                    setUser({ name: payload.name, email: payload.email, token: response.credential });
-                } catch (e) { alert("Error login"); }
+            const handleLogin = (res) => {
+                const p = JSON.parse(atob(res.credential.split('.')[1]));
+                setUser({ name: p.name, email: p.email, token: res.credential });
             };
-            return user ? <Dashboard user={user} onLogout={() => { window.google?.accounts?.id?.disableAutoSelect(); setUser(null); }} /> : <LoginScreen onLogin={handleLogin} />;
+            return user ? <Dashboard user={user} onLogout={() => setUser(null)} /> : <Login onLogin={handleLogin} />;
         };
 
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
