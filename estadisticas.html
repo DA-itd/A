@@ -454,7 +454,12 @@
                     
                 } catch (err) { 
                     console.error("AI Error:", err); 
-                    setError("Error al generar el análisis: " + err.message); 
+                    let msg = err.message;
+                    // Detectar error de permisos y dar instrucciones precisas
+                    if(msg.includes("No cuentas con el permiso") || msg.includes("permissions") || msg.includes("Exception:")) {
+                        msg = "⚠️ EL SCRIPT NECESITA AUTORIZACIÓN: Ve al editor de Apps Script, ejecuta la función 'AUTHORIZE_PERMISSIONS', acepta los permisos y crea una Nueva Implementación (Deploy).";
+                    }
+                    setError(msg); 
                 } finally { 
                     setLoading(false); 
                 }
