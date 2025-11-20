@@ -95,7 +95,6 @@
         const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
         const TECNM_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg';
 
-        // Helper para obtener imágenes para el PDF
         const getImageDataFromURL = (url) => {
             return new Promise((resolve, reject) => {
                 const img = new Image();
@@ -113,38 +112,27 @@
             });
         };
 
-        // Función para Generar PDF Cliente Avanzado
         const generatePDFReport = async (data, meta) => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
 
-            // Cargar Imágenes
             const [itdLogo, tecNmLogo] = await Promise.all([
                 getImageDataFromURL(ITD_LOGO_URL),
                 getImageDataFromURL(TECNM_LOGO_URL)
             ]);
 
-            // Definir función de cabecera para repetir en cada página
             const drawHeader = (data) => {
-                // 1. Logo TecNM (IZQUIERDA) - Apaisado
-                if (tecNmLogo) {
-                    // x=15 (margen izq), y=10
-                    doc.addImage(tecNmLogo, 'JPEG', 15, 10, 35, 16);
-                }
-
-                // 2. Logo ITD (DERECHA) - Cuadrado/Circular
+                if (tecNmLogo) doc.addImage(tecNmLogo, 'JPEG', 15, 10, 35, 16);
                 if (itdLogo) {
-                    // x = AnchoPagina - MargenDer - AnchoLogo
                     const logoSize = 22; 
                     doc.addImage(itdLogo, 'PNG', pageWidth - 15 - logoSize, 8, logoSize, logoSize);
                 }
 
-                // 3. Textos Centrales
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(12);
-                doc.setTextColor(27, 57, 106); // Azul ITD
+                doc.setTextColor(27, 57, 106);
                 doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth / 2, 18, { align: "center" });
                 
                 doc.setFontSize(10);
@@ -152,22 +140,20 @@
                 doc.text("Coordinación de Actualización Docente", pageWidth / 2, 23, { align: "center" });
                 
                 doc.setFontSize(11);
-                doc.setTextColor(157, 36, 73); // Guinda
+                doc.setTextColor(157, 36, 73);
                 doc.text(`REPORTE DE INSCRIPCIONES - PERIODO ${meta.period}`, pageWidth / 2, 32, { align: "center" });
 
-                // Información del Filtro
                 doc.setFontSize(9);
                 doc.setTextColor(50);
                 doc.text(`Departamento Filtrado: ${meta.department}`, 15, 42);
                 doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString()}`, 15, 47);
             };
 
-            // Definir función de Marca de Agua (ITD Logo en el fondo CENTRADO)
             const drawWatermark = () => {
                 if (itdLogo) {
                     doc.saveGraphicsState();
-                    doc.setGState(new doc.GState({ opacity: 0.08 })); // Transparencia muy baja
-                    const w = 140; // Un poco más grande
+                    doc.setGState(new doc.GState({ opacity: 0.08 }));
+                    const w = 140;
                     const h = 140;
                     const x = (pageWidth - w) / 2;
                     const y = (pageHeight - h) / 2;
@@ -176,7 +162,6 @@
                 }
             };
 
-            // Definir columnas y datos
             const tableColumn = ["Docente", "Curso Inscrito", "Fechas", "Depto. que Ofrece"];
             const tableRows = data.map(row => [
                 row.nombre,
@@ -185,37 +170,19 @@
                 row.depto_oferente || 'N/A'
             ]);
 
-            // Generar Tabla con Hooks
             doc.autoTable({
                 head: [tableColumn],
                 body: tableRows,
                 startY: 52,
                 theme: 'grid',
-                headStyles: { 
-                    fillColor: [27, 57, 106], 
-                    textColor: 255, 
-                    fontSize: 8, 
-                    fontStyle: 'bold',
-                    halign: 'center'
-                },
+                headStyles: { fillColor: [27, 57, 106], textColor: 255, fontSize: 8, fontStyle: 'bold', halign: 'center' },
                 bodyStyles: { fontSize: 7 },
-                columnStyles: {
-                    0: { cellWidth: 50 }, // Docente
-                    1: { cellWidth: 'auto' }, // Curso
-                    2: { cellWidth: 30 }, // Fechas
-                    3: { cellWidth: 45 } // Depto Oferente
-                },
+                columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 30 }, 3: { cellWidth: 45 } },
                 alternateRowStyles: { fillColor: [245, 245, 245] },
                 margin: { top: 52, left: 15, right: 15 },
-                // Hook: Se ejecuta antes de dibujar cada página
-                didDrawPage: function (data) {
-                    // Dibujar Marca de Agua y Cabecera en cada página
-                    drawWatermark();
-                    drawHeader();
-                }
+                didDrawPage: function (data) { drawWatermark(); drawHeader(); }
             });
 
-            // Footer con número de página
             const pageCount = doc.internal.getNumberOfPages();
             for(let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
@@ -227,46 +194,20 @@
             doc.save(`Reporte_ITD_${meta.period}_${meta.department.substring(0,10)}.pdf`);
         };
 
-        // Función para Generar Excel
         const generateExcelReport = (data, meta) => {
-            if (typeof XLSX === 'undefined') {
-                alert("La librería de Excel no se cargó correctamente.");
-                return;
-            }
-
-            // Preparar datos para Excel
-            const formattedData = data.map(row => ({
-                "Docente": row.nombre,
-                "Curso Inscrito": row.curso,
-                "Fechas del Curso": row.fechas || 'N/A',
-                "Departamento que Ofrece": row.depto_oferente || 'N/A',
-                "Folio": row.folio
-            }));
-
-            // Crear libro y hoja
+            if (typeof XLSX === 'undefined') { alert("La librería de Excel no se cargó correctamente."); return; }
+            const formattedData = data.map(row => ({ "Docente": row.nombre, "Curso Inscrito": row.curso, "Fechas del Curso": row.fechas || 'N/A', "Departamento que Ofrece": row.depto_oferente || 'N/A', "Folio": row.folio }));
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.json_to_sheet(formattedData);
-
-            // Ajustar ancho de columnas (estimado)
-            const wscols = [
-                {wch: 40}, // Docente
-                {wch: 50}, // Curso
-                {wch: 25}, // Fechas
-                {wch: 35}, // Depto
-                {wch: 20}  // Folio
-            ];
+            const wscols = [{wch: 40}, {wch: 50}, {wch: 25}, {wch: 35}, {wch: 20}];
             ws['!cols'] = wscols;
-
             XLSX.utils.book_append_sheet(wb, ws, `Reporte ${meta.period}`);
-            
-            // Descargar
             XLSX.writeFile(wb, `Reporte_ITD_${meta.period}.xlsx`);
         };
 
         const StatsChart = ({ type, data, title, id }) => {
             const chartRef = useRef(null);
             const canvasRef = useRef(null);
-
             const hasData = useMemo(() => {
                 if (!data) return false;
                 return Object.keys(data).length > 0 && Object.values(data).some(val => typeof val === 'number' ? val > 0 : false);
@@ -276,7 +217,6 @@
                 if (!canvasRef.current || !hasData) return;
                 if (typeof window.Chart === 'undefined') return;
                 if (chartRef.current) chartRef.current.destroy();
-
                 try {
                     const ctx = canvasRef.current.getContext('2d');
                     const isPie = type === 'pie' || type === 'doughnut';
@@ -319,6 +259,78 @@
             );
         };
 
+        // Nuevo Componente: Buscador de Historial de Instructor
+        const InstructorHistoryPanel = ({ instructorsList, details }) => {
+            const [search, setSearch] = useState('');
+            const [selectedInstructor, setSelectedInstructor] = useState(null);
+
+            const filteredInstructors = useMemo(() => {
+                if (!search) return [];
+                return instructorsList.filter(name => name.toLowerCase().includes(search.toLowerCase())).slice(0, 10);
+            }, [search, instructorsList]);
+
+            return (
+                <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#9D2449] mt-8">
+                    <h3 className="text-xl font-bold text-[#1B396A] mb-4 flex items-center gap-2">
+                        <span>🧑‍🏫</span> Historial por Instructor
+                    </h3>
+                    
+                    <div className="mb-6 relative">
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Buscar Instructor:</label>
+                        <input 
+                            type="text" 
+                            value={search}
+                            onChange={(e) => { setSearch(e.target.value); setSelectedInstructor(null); }}
+                            placeholder="Escriba el nombre del instructor..." 
+                            className="w-full border border-gray-300 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-[#1B396A] outline-none"
+                        />
+                        <div className="absolute left-3 top-[42px] text-gray-400">🔍</div>
+                        
+                        {search && !selectedInstructor && filteredInstructors.length > 0 && (
+                            <ul className="absolute z-10 w-full bg-white border border-gray-200 mt-1 rounded-lg shadow-xl max-h-60 overflow-auto">
+                                {filteredInstructors.map(inst => (
+                                    <li 
+                                        key={inst} 
+                                        onClick={() => { setSearch(inst); setSelectedInstructor(inst); }}
+                                        className="p-3 hover:bg-gray-100 cursor-pointer text-sm border-b last:border-0"
+                                    >
+                                        {inst}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+
+                    {selectedInstructor && details[selectedInstructor] && (
+                        <div className="animate-fadeIn">
+                            <h4 className="font-bold text-lg text-[#9D2449] mb-3">{selectedInstructor}</h4>
+                            <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                                <table className="w-full text-sm text-left">
+                                    <thead className="bg-[#1B396A] text-white">
+                                        <tr>
+                                            <th className="p-3">Curso Impartido</th>
+                                            <th className="p-3">Fechas</th>
+                                            <th className="p-3 text-center">Horas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {details[selectedInstructor].map((course, idx) => (
+                                            <tr key={idx} className="border-b border-gray-200 hover:bg-white">
+                                                <td className="p-3 font-medium">{course.course}</td>
+                                                <td className="p-3 text-gray-600">{course.date || 'N/A'}</td>
+                                                <td className="p-3 text-center font-bold text-gray-700">{course.hours}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p className="text-right text-xs text-gray-500 mt-2">Total cursos: {details[selectedInstructor].length}</p>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
         const AIAnalysisPanel = ({ statsData, period }) => {
             const [analysis, setAnalysis] = useState(null);
             const [loading, setLoading] = useState(false);
@@ -326,39 +338,21 @@
 
             const handleGenerateAnalysis = async () => {
                 setLoading(true); setError(null);
-                
-                // Acceder directamente a la variable de entorno
                 const apiKey = process.env.API_KEY;
-                
-                if (!apiKey) { 
-                    setError("⚠️ Falta configuración de API Key."); 
-                    setLoading(false); 
-                    return; 
-                }
-                
+                if (!apiKey) { setError("⚠️ Falta configuración de API Key."); setLoading(false); return; }
                 try {
-                    const cleanStats = { ...statsData, allDepartamentos: undefined };
-                    const prompt = `Actúa como analista académico. Analiza estos datos del periodo ${period}: ${JSON.stringify(cleanStats)}. Destaca el índice de recurrencia docente (maestros tomando >1 curso). Dame un resumen ejecutivo.`;
+                    const cleanStats = { ...statsData, allDepartamentos: undefined, allInstructors: undefined, instructorDetails: undefined };
+                    const prompt = `Actúa como analista académico. Analiza estos datos del periodo ${period}: ${JSON.stringify(cleanStats)}. Enfócate en los instructores más activos y la demanda de cursos. Dame un resumen ejecutivo breve.`;
                     
                     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                     });
-                    
-                    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-
+                    if (!response.ok) throw new Error(`Error ${response.status}`);
                     const result = await response.json();
                     const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                    
                     if (text) setAnalysis(text); else throw new Error("Sin respuesta del modelo.");
-                    
-                } catch (err) { 
-                    console.error("AI Error:", err);
-                    setError("Error al conectar con la IA. Verifique la consola."); 
-                } finally { 
-                    setLoading(false); 
-                }
+                } catch (err) { console.error("AI Error:", err); setError("Error al conectar con la IA."); } finally { setLoading(false); }
             };
 
             return (
@@ -377,9 +371,7 @@
         const ReportModal = ({ isOpen, onClose, departments, period, onGeneratePdf, onGenerateExcel }) => {
             const [selectedDept, setSelectedDept] = useState('TODOS');
             const [loading, setLoading] = useState(false);
-
             if(!isOpen) return null;
-
             const handleAction = async (action) => {
                 setLoading(true);
                 if (action === 'pdf') await onGeneratePdf(selectedDept);
@@ -387,29 +379,20 @@
                 setLoading(false);
                 onClose();
             };
-
             return (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
                     <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full animate-fadeIn border-t-4 border-[#1B396A]">
                         <h3 className="text-xl font-bold text-[#1B396A] mb-2">Descargar Reporte</h3>
                         <p className="text-sm text-gray-600 mb-6">Periodo: <strong>{period}</strong>.</p>
-                        
                         <label className="block text-sm font-bold text-gray-700 mb-2">Filtrar por Departamento:</label>
                         <select value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)} className="w-full border border-gray-300 rounded-lg p-3 mb-8 bg-gray-50">
                             <option value="TODOS">-- TODOS LOS DEPARTAMENTOS --</option>
                             {departments.map(d => <option key={d} value={d}>{d}</option>)}
                         </select>
-
                         <div className="grid grid-cols-1 gap-3">
-                            <button onClick={() => handleAction('pdf')} disabled={loading} className="bg-[#1B396A] hover:bg-[#152d54] text-white px-4 py-3 rounded-lg font-semibold shadow-lg flex items-center justify-center gap-2">
-                                {loading ? '⏳' : '📄'} Descargar PDF
-                            </button>
-                            <button onClick={() => handleAction('excel')} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold shadow-lg flex items-center justify-center gap-2">
-                                {loading ? '⏳' : '📊'} Descargar Excel
-                            </button>
-                            <button onClick={onClose} disabled={loading} className="mt-2 bg-gray-100 text-gray-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">
-                                Cancelar
-                            </button>
+                            <button onClick={() => handleAction('pdf')} disabled={loading} className="bg-[#1B396A] hover:bg-[#152d54] text-white px-4 py-3 rounded-lg font-semibold shadow-lg flex items-center justify-center gap-2">{loading ? '⏳' : '📄'} Descargar PDF</button>
+                            <button onClick={() => handleAction('excel')} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold shadow-lg flex items-center justify-center gap-2">{loading ? '⏳' : '📊'} Descargar Excel</button>
+                            <button onClick={onClose} disabled={loading} className="mt-2 bg-gray-100 text-gray-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">Cancelar</button>
                         </div>
                     </div>
                 </div>
@@ -427,9 +410,7 @@
                 setLoading(true);
                 fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}`)
                     .then(r => r.json())
-                    .then(res => {
-                        if(res.success) { setStats(res.data); if(res.availableYears) setAvailableYears(res.availableYears); }
-                    })
+                    .then(res => { if(res.success) { setStats(res.data); if(res.availableYears) setAvailableYears(res.availableYears); } })
                     .finally(() => setLoading(false));
             }, [period]);
 
@@ -437,23 +418,12 @@
                 try {
                     const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getReportData&period=${period}&department=${encodeURIComponent(dept)}`);
                     const json = await response.json();
-                    if(json.success) return json;
-                    else throw new Error(json.message);
-                } catch(e) {
-                    alert("Error obteniendo datos: " + e.toString());
-                    return null;
-                }
+                    if(json.success) return json; else throw new Error(json.message);
+                } catch(e) { alert("Error obteniendo datos: " + e.toString()); return null; }
             };
 
-            const handlePdf = async (dept) => {
-                const res = await getReportData(dept);
-                if(res) await generatePDFReport(res.data, res.meta);
-            };
-
-            const handleExcel = async (dept) => {
-                const res = await getReportData(dept);
-                if(res) generateExcelReport(res.data, res.meta);
-            };
+            const handlePdf = async (dept) => { const res = await getReportData(dept); if(res) await generatePDFReport(res.data, res.meta); };
+            const handleExcel = async (dept) => { const res = await getReportData(dept); if(res) generateExcelReport(res.data, res.meta); };
 
             return (
                 <div className="container mx-auto px-4 py-8 max-w-7xl animate-fadeIn">
@@ -478,41 +448,25 @@
                                 <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-[#1B396A]">
                                     <div className="flex items-center gap-3">
                                         <div className="text-3xl">📝</div>
-                                        <div>
-                                            <div className="text-2xl font-bold text-gray-800">{stats.totalInscripciones}</div>
-                                            <div className="text-[10px] font-bold text-gray-500 uppercase">Inscripciones Totales</div>
-                                        </div>
+                                        <div><div className="text-2xl font-bold text-gray-800">{stats.totalInscripciones}</div><div className="text-[10px] font-bold text-gray-500 uppercase">Inscripciones Totales</div></div>
                                     </div>
                                 </div>
-                                
                                 <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-[#D4AF37]">
                                     <div className="flex items-center gap-3">
                                         <div className="text-3xl">👩‍🏫</div>
-                                        <div>
-                                            <div className="text-2xl font-bold text-gray-800">{stats.coberturaDocente.actualizados}</div>
-                                            <div className="text-[10px] font-bold text-gray-500 uppercase">Docentes Únicos</div>
-                                        </div>
+                                        <div><div className="text-2xl font-bold text-gray-800">{stats.coberturaDocente.actualizados}</div><div className="text-[10px] font-bold text-gray-500 uppercase">Docentes Únicos</div></div>
                                     </div>
                                 </div>
-
                                 <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-[#9D2449]">
                                     <div className="flex items-center gap-3">
                                         <div className="text-3xl">🔁</div>
-                                        <div>
-                                            <div className="text-2xl font-bold text-gray-800">{stats.coberturaDocente.recurrentes}</div>
-                                            <div className="text-[10px] font-bold text-gray-500 uppercase">Docentes Recurrentes</div>
-                                            <div className="text-[9px] text-gray-400">Más de 1 curso</div>
-                                        </div>
+                                        <div><div className="text-2xl font-bold text-gray-800">{stats.coberturaDocente.recurrentes}</div><div className="text-[10px] font-bold text-gray-500 uppercase">Docentes Recurrentes</div></div>
                                     </div>
                                 </div>
-
                                 <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-gray-500">
                                     <div className="flex items-center gap-3">
                                         <div className="text-3xl">🎯</div>
-                                        <div>
-                                            <div className="text-2xl font-bold text-gray-800">{stats.coberturaDocente.porcentaje}%</div>
-                                            <div className="text-[10px] font-bold text-gray-500 uppercase">Cobertura Estimada</div>
-                                        </div>
+                                        <div><div className="text-2xl font-bold text-gray-800">{stats.coberturaDocente.porcentaje}%</div><div className="text-[10px] font-bold text-gray-500 uppercase">Cobertura Estimada</div></div>
                                     </div>
                                 </div>
                             </div>
@@ -523,9 +477,20 @@
                                 <StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="chartGen" />
                                 <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" />
                             </div>
+                            
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                                 <StatsChart type="bar" data={Object.fromEntries(stats.topDepartamentos||[])} title="Top 5 Departamentos" id="chartDept" />
                                 <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" />
+                            </div>
+
+                            {/* SECCIÓN DE INSTRUCTORES */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                                <div className="lg:col-span-1">
+                                    <StatsChart type="bar" data={Object.fromEntries(stats.topInstructors||[])} title="Top Instructores (Contribución)" id="chartInst" />
+                                </div>
+                                <div className="lg:col-span-2">
+                                    <InstructorHistoryPanel instructorsList={stats.allInstructors || []} details={stats.instructorDetails || {}} />
+                                </div>
                             </div>
 
                             <div className="bg-[#1B396A] rounded-xl p-8 text-center text-white shadow-lg mb-12 relative overflow-hidden">
@@ -533,20 +498,11 @@
                                     <div className="text-4xl mb-4">📄</div>
                                     <h3 className="text-2xl font-bold mb-2">Reporte Ejecutivo</h3>
                                     <p className="mb-6 opacity-90 text-sm">Descargar lista detallada de participantes del periodo <strong>{period}</strong>.</p>
-                                    <button onClick={() => setShowReportModal(true)} className="bg-white text-[#1B396A] px-8 py-3 rounded-full font-bold shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105">
-                                        ⬇️ Descargar Reporte
-                                    </button>
+                                    <button onClick={() => setShowReportModal(true)} className="bg-white text-[#1B396A] px-8 py-3 rounded-full font-bold shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105">⬇️ Descargar Reporte</button>
                                 </div>
                             </div>
 
-                            <ReportModal 
-                                isOpen={showReportModal} 
-                                onClose={() => setShowReportModal(false)} 
-                                departments={stats.allDepartamentos || []} 
-                                period={period} 
-                                onGeneratePdf={handlePdf}
-                                onGenerateExcel={handleExcel}
-                            />
+                            <ReportModal isOpen={showReportModal} onClose={() => setShowReportModal(false)} departments={stats.allDepartamentos || []} period={period} onGeneratePdf={handlePdf} onGenerateExcel={handleExcel} />
                         </>
                     )}
                 </div>
