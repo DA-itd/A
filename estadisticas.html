@@ -125,13 +125,14 @@
                 getImageDataFromURL(TECNM_LOGO_URL)
             ]);
 
-            // 2. Header (Logos Simétricos)
-            // ITD Logo (Izquierda): Cuadrado, 20x20mm
+            // 2. Header (Logos Simétricos y Alineados)
+            // Logo ITD (Izq) - 20mm x 20mm
             if (itdLogo) doc.addImage(itdLogo, 'PNG', 15, 10, 20, 20);
             
-            // TecNM Logo (Derecha): Rectangular, ajustado para equilibrio visual (30x15mm approx)
-            // Posición X = AnchoPagina - Margen - AnchoLogo = 210 - 15 - 30 = 165
-            if (tecNmLogo) doc.addImage(tecNmLogo, 'JPEG', 165, 12, 30, 15);
+            // Logo TecNM (Der) - 30mm ancho x 15mm alto (relación 2:1)
+            // Posición X = 210 (Ancho A4) - 15 (Margen) - 30 (Ancho Logo) = 165
+            // Posición Y = 12.5 para centrar verticalmente con el logo ITD (que está en Y=10, alto 20)
+            if (tecNmLogo) doc.addImage(tecNmLogo, 'JPEG', 165, 12.5, 30, 15);
 
             doc.setFont("helvetica", "bold");
             doc.setFontSize(12);
@@ -153,12 +154,12 @@
             doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString()}`, 15, 47);
             doc.text(`Total de Registros: ${data.length}`, pageWidth - 15, 47, { align: "right" });
 
-            // 4. Tabla (Columnas Solicitadas)
-            const tableColumn = ["Docente", "Departamento de Adscripción", "Curso Inscrito"];
+            // 4. Tabla (Columnas Solicitadas: Docente, Curso, Depto que Ofrece)
+            const tableColumn = ["Docente", "Curso Inscrito", "Depto. que Ofrece"];
             const tableRows = data.map(row => [
                 row.nombre,
-                row.departamento, // Departamento de donde procede el usuario
-                row.curso
+                row.curso,
+                row.depto_oferente || 'N/A' // Departamento que ofrece el curso (cruzado en backend)
             ]);
 
             doc.autoTable({
@@ -175,9 +176,9 @@
                 },
                 bodyStyles: { fontSize: 8 },
                 columnStyles: {
-                    0: { cellWidth: 60 }, // Docente
-                    1: { cellWidth: 60 }, // Departamento
-                    2: { cellWidth: 'auto' } // Curso (resto del espacio)
+                    0: { cellWidth: 55 }, // Docente
+                    1: { cellWidth: 'auto' }, // Curso (El más largo, toma el resto)
+                    2: { cellWidth: 50 } // Depto Oferente
                 },
                 alternateRowStyles: { fillColor: [245, 245, 245] },
                 margin: { top: 52, left: 15, right: 15 },
