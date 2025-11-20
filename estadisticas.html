@@ -93,6 +93,24 @@
         };
 
         const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
+        
+        // Paleta VIBRANTE y COLORIDA (Estilo Arcoiris) para gráficas de barras
+        const VIBRANT_COLORS = [
+            '#FF6384', // Rojo suave
+            '#36A2EB', // Azul brillante
+            '#FFCE56', // Amarillo
+            '#4BC0C0', // Turquesa
+            '#9966FF', // Violeta
+            '#FF9F40', // Naranja
+            '#8AC926', // Verde Lima
+            '#1982C4', // Azul Oscuro
+            '#6A4C93', // Morado Oscuro
+            '#F15BB5', // Rosa
+            '#E9C46A', // Ocre
+            '#2A9D8F', // Verde Azulado
+            '#E76F51'  // Terracota
+        ];
+
         const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
         const TECNM_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg';
 
@@ -251,7 +269,17 @@
                 try {
                     const ctx = canvasRef.current.getContext('2d');
                     const isPie = type === 'pie' || type === 'doughnut';
-                    let backgroundColors = isPie ? INSTITUTIONAL_COLORS : '#1B396A';
+                    
+                    // Si es PIE, usamos colores institucionales (o vibrantes si se prefiere, pero institucionales suelen verse mejor en pie).
+                    // Si es BARRA, usamos colores vibrantes MULTICOLOR.
+                    let backgroundColors;
+                    
+                    if (isPie) {
+                        backgroundColors = INSTITUTIONAL_COLORS;
+                    } else {
+                        // Para barras, asignamos un color diferente a cada barra del array VIBRANT_COLORS
+                        backgroundColors = VIBRANT_COLORS;
+                    }
                     
                     chartRef.current = new window.Chart(ctx, {
                         type: type,
@@ -263,7 +291,8 @@
                                 backgroundColor: backgroundColors,
                                 borderWidth: isPie ? 2 : 0,
                                 borderRadius: isPie ? 0 : 4,
-                                hoverBackgroundColor: isPie ? INSTITUTIONAL_COLORS : '#9D2449'
+                                // Para hover en pie usamos institucionales, en barras vibrantes
+                                hoverBackgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS
                             }]
                         },
                         options: {
