@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -16,6 +15,9 @@
     <!-- Estilos y Utilidades -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <!-- Plugin para etiquetas de datos en gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <!-- Librerías para Reportes (PDF y Excel) -->
@@ -56,7 +58,8 @@
         window.process = window.process || { env: {} };
     </script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<!-- FONDO CÁLIDO APLICADO -->
+<body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen">
 
     <!-- Header -->
     <header class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A]">
@@ -73,7 +76,7 @@
     </header>
     
     <div id="back-link" class="container mx-auto px-4 py-4">
-        <a href="index.html" class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center gap-1 text-sm font-semibold transition-colors">
+        <a href="index.html" class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center gap-1 text-sm font-bold transition-colors">
             ← Volver al Portal Principal
         </a>
     </div>
@@ -268,16 +271,52 @@
             useEffect(() => {
                 if (!canvasRef.current || !hasData) return;
                 if (typeof window.Chart === 'undefined') return;
+                
+                // Registro de Plugin para Etiquetas en Puntos
+                if(window.ChartDataLabels) {
+                    window.Chart.register(window.ChartDataLabels);
+                }
+
                 if (chartRef.current) chartRef.current.destroy();
+                
                 try {
                     const ctx = canvasRef.current.getContext('2d');
                     const isPie = type === 'pie' || type === 'doughnut';
+                    const isHistory = id === 'chartHistory'; // Flag para la gráfica de historia
                     
                     let chartDataConfig = {};
-                    const isDoubleBar = id === 'chartHistory';
+                    let chartType = type;
+                    let chartOptions = {
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        indexAxis: horizontal ? 'y' : 'x',
+                        plugins: { 
+                            legend: { 
+                                position: 'bottom', 
+                                display: isPie || isHistory,
+                                labels: { font: { weight: 'bold' } }
+                            },
+                            datalabels: {
+                                display: false // Por defecto apagado
+                            }
+                        },
+                        scales: !isPie ? { 
+                            y: { 
+                                beginAtZero: true, 
+                                grid: { color: '#e0e0e0' },
+                                ticks: { font: { weight: 'bold' } }
+                            }, 
+                            x: { 
+                                beginAtZero: true, 
+                                grid: { display: false },
+                                ticks: { autoSkip: false, font: { weight: 'bold' } }
+                            } 
+                        } : {}
+                    };
 
-                    // Lógica para doble barra (Historial)
-                    if (isDoubleBar) {
+                    // Lógica para Historial (LÍNEAS + PUNTOS + ETIQUETAS)
+                    if (isHistory) {
+                        chartType = 'line'; // Forzamos tipo línea
                         const labels = Object.keys(data).sort((a,b) => parseInt(a) - parseInt(b));
                         const regData = labels.map(year => data[year].registros);
                         const courseData = labels.map(year => data[year].cursos);
@@ -288,19 +327,38 @@
                                 {
                                     label: 'Alumnos Inscritos',
                                     data: regData,
-                                    backgroundColor: '#36A2EB', // Azul
-                                    borderRadius: 4
+                                    borderColor: '#36A2EB', // Azul
+                                    backgroundColor: '#36A2EB',
+                                    tension: 0.3, // Curva suave
+                                    pointRadius: 6,
+                                    pointHoverRadius: 8,
+                                    borderWidth: 3
                                 },
                                 {
                                     label: 'Cursos Ofertados',
                                     data: courseData,
-                                    backgroundColor: '#FF6384', // Rojo
-                                    borderRadius: 4
+                                    borderColor: '#FF6384', // Rojo
+                                    backgroundColor: '#FF6384',
+                                    tension: 0.3,
+                                    pointRadius: 6,
+                                    pointHoverRadius: 8,
+                                    borderWidth: 3
                                 }
                             ]
                         };
+
+                        // Configurar datalabels SOLO para esta gráfica
+                        chartOptions.plugins.datalabels = {
+                            display: true,
+                            color: '#333',
+                            font: { weight: 'bold', size: 11 },
+                            align: 'top',
+                            offset: 4,
+                            formatter: Math.round
+                        };
+
                     } else {
-                        // Lógica normal
+                        // Lógica para Gráficas Normales (Barras / Pastel)
                         let backgroundColors = isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS;
                         let labels = Object.keys(data);
                         let values = Object.values(data);
@@ -318,24 +376,9 @@
                     }
 
                     const chartConfig = {
-                        type: type,
+                        type: chartType,
                         data: chartDataConfig,
-                        options: {
-                            responsive: true, 
-                            maintainAspectRatio: false,
-                            indexAxis: horizontal ? 'y' : 'x',
-                            plugins: { 
-                                legend: { position: 'bottom', display: isPie || isDoubleBar } 
-                            },
-                            scales: !isPie ? { 
-                                y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, 
-                                x: { 
-                                    beginAtZero: true, 
-                                    grid: { display: false },
-                                    ticks: { autoSkip: false, maxRotation: 45, minRotation: 45 } // Evitar empalme
-                                } 
-                            } : {}
-                        }
+                        options: chartOptions
                     };
 
                     chartRef.current = new window.Chart(ctx, chartConfig);
@@ -345,13 +388,13 @@
 
             if (!hasData) return (
                 <div className="bg-white p-4 rounded-xl shadow-md h-full w-full flex flex-col items-center justify-center text-gray-400 border border-gray-100 min-h-[320px]">
-                    <div className="text-4xl mb-2">📊</div><p className="text-sm">Sin datos suficientes.</p>
+                    <div className="text-4xl mb-2">📊</div><p className="text-sm font-bold">Sin datos suficientes.</p>
                 </div>
             );
 
             return (
                 <div className="bg-white p-6 rounded-xl shadow-md h-full w-full border-t-4 border-[#1B396A] flex flex-col">
-                    {/* Título condicional: Si viene vacío, no renderiza h3 */}
+                    {/* Título condicional */}
                     {title && <h3 className="text-lg font-bold text-gray-800 mb-4 text-center flex-shrink-0">{title}</h3>}
                     <div className="flex-1 min-h-[240px] relative"><canvas ref={canvasRef} id={id}></canvas></div>
                 </div>
@@ -386,10 +429,10 @@
                 <div className="mt-8 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                     <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                         <div className="flex items-center gap-2"><span className="text-2xl">✨</span><h3 className="text-lg font-bold text-[#1B396A]">Análisis Inteligente (IA)</h3></div>
-                        {!analysis && !loading && <button onClick={handleGenerateAnalysis} className="bg-[#9D2449] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md">⚡ Generar Análisis</button>}
+                        {!analysis && !loading && <button onClick={handleGenerateAnalysis} className="bg-[#9D2449] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md hover:bg-[#801d3b]">⚡ Generar Análisis</button>}
                     </div>
-                    {loading && <div className="text-[#1B396A] p-4 animate-pulse">Analizando datos...</div>}
-                    {error && <div className="text-red-600 p-3 text-sm bg-red-50 rounded border border-red-200">{error}</div>}
+                    {loading && <div className="text-[#1B396A] p-4 animate-pulse font-bold">Analizando datos...</div>}
+                    {error && <div className="text-red-600 p-3 text-sm bg-red-50 rounded border border-red-200 font-bold">{error}</div>}
                     {analysis && <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-[#D4AF37] markdown-body text-sm" dangerouslySetInnerHTML={{ __html: marked.parse(analysis) }} />}
                 </div>
             );
@@ -402,7 +445,7 @@
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col animate-fadeIn">
                         <div className="flex justify-between items-center p-4 border-b border-gray-200">
                             <h3 className="text-xl font-bold text-[#1B396A]">Vista Previa del Reporte</h3>
-                            <button onClick={onClose} className="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+                            <button onClick={onClose} className="text-gray-500 hover:text-red-500 text-2xl font-bold">&times;</button>
                         </div>
                         <div className="flex-1 bg-gray-100 p-1 overflow-hidden">
                             {pdfUrl ? (
@@ -414,7 +457,7 @@
                             )}
                         </div>
                         <div className="p-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
-                            <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300">Cerrar</button>
+                            <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg font-bold hover:bg-gray-300">Cerrar</button>
                             <button onClick={onDownload} className="px-6 py-2 bg-[#1B396A] text-white rounded-lg font-bold hover:bg-[#152d54] shadow-lg">🖨️ Imprimir / Descargar</button>
                         </div>
                     </div>
@@ -470,18 +513,18 @@
                         <h3 className="text-xl font-bold text-[#1B396A] mb-2">Generar Reporte</h3>
                         <p className="text-sm text-gray-600 mb-6">Periodo: <strong>{period}</strong>.</p>
                         <label className="block text-sm font-bold text-gray-700 mb-2">Filtrar por Departamento:</label>
-                        <select value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)} className="w-full border border-gray-300 rounded-lg p-3 mb-8 bg-gray-50">
+                        <select value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)} className="w-full border border-gray-300 rounded-lg p-3 mb-8 bg-gray-50 font-semibold">
                             <option value="TODOS">-- TODOS LOS DEPARTAMENTOS --</option>
                             {departments.map(d => <option key={d} value={d}>{d}</option>)}
                         </select>
                         <div className="grid grid-cols-1 gap-3">
-                            <button onClick={handlePreviewPdf} disabled={loading} className="bg-[#1B396A] hover:bg-[#152d54] text-white px-4 py-3 rounded-lg font-semibold shadow-lg flex items-center justify-center gap-2">
+                            <button onClick={handlePreviewPdf} disabled={loading} className="bg-[#1B396A] hover:bg-[#152d54] text-white px-4 py-3 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">
                                 {loading ? '⏳ Generando...' : '👁️ Vista Previa PDF'}
                             </button>
-                            <button onClick={handleExcel} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold shadow-lg flex items-center justify-center gap-2">
+                            <button onClick={handleExcel} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">
                                 {loading ? '⏳' : '📊'} Descargar Excel
                             </button>
-                            <button onClick={onClose} disabled={loading} className="mt-2 bg-gray-100 text-gray-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">Cancelar</button>
+                            <button onClick={onClose} disabled={loading} className="mt-2 bg-gray-100 text-gray-600 px-4 py-2 rounded-lg font-bold hover:bg-gray-200">Cancelar</button>
                         </div>
                     </div>
                 </div>
@@ -539,11 +582,11 @@
                     <div className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#1B396A] gap-4">
                         <div className="flex-1">
                             <h2 className="text-xl font-bold text-[#1B396A]">Dashboard de Resultados</h2>
-                            <p className="text-sm text-gray-500">Usuario: <span className="font-semibold">{user.name}</span></p>
+                            <p className="text-sm text-gray-500 font-bold">Usuario: <span className="font-extrabold text-gray-700">{user.name}</span></p>
                         </div>
                         <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-200">
                             <span className="text-sm font-bold text-gray-700">Periodo:</span>
-                            <select value={period} onChange={(e) => setPeriod(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md font-semibold block p-1.5" disabled={loading}>
+                            <select value={period} onChange={(e) => setPeriod(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md font-bold block p-1.5" disabled={loading}>
                                 <option value="ACTUAL">🟢 Periodo Actual</option>
                                 {availableYears.map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
                             </select>
@@ -551,7 +594,7 @@
                         <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm font-bold text-gray-700 border border-gray-300">Cerrar Sesión</button>
                     </div>
 
-                    {loading ? <div className="flex justify-center p-20"><div className="animate-spin h-12 w-12 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div> : !stats ? <div className="text-center p-10">Error de carga.</div> : (
+                    {loading ? <div className="flex justify-center p-20"><div className="animate-spin h-12 w-12 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div> : !stats ? <div className="text-center p-10 font-bold">Error de carga.</div> : (
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                                 <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-[#1B396A]">
@@ -597,12 +640,12 @@
 
                             {/* FILA 2: DEPARTAMENTOS (Izq) y TIPO DE CURSO (Der) */}
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-                                {/* IZQUIERDA: Top Departamentos (Más ancho para la leyenda) */}
+                                {/* IZQUIERDA: Top Departamentos (Horizontal ahora para siglas) */}
                                 <div className="lg:col-span-9 h-full flex flex-col bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
                                     <div className="p-6 flex-1">
-                                        {/* SIN TÍTULO AQUI COMO SOLICITADO */}
                                         <div className="h-64">
-                                            <StatsChart type="bar" data={processedDepts.chartData} title="" id="chartDept" />
+                                            {/* TITULO AÑADIDO AQUI */}
+                                            <StatsChart type="bar" data={processedDepts.chartData} title="Top 5 Departamentos" id="chartDept" horizontal={true} />
                                         </div>
                                     </div>
                                     <div className="bg-gray-50 p-4 border-t border-gray-200 rounded-b-xl">
@@ -611,29 +654,29 @@
                                             {processedDepts.legend.map((item, idx) => (
                                                 <div key={idx} className="flex items-start gap-2">
                                                     <span className="font-bold text-[#1B396A] min-w-[35px]">{item.acronym}:</span>
-                                                    <span className="truncate" title={item.name}>{item.name}</span>
+                                                    <span className="truncate font-bold" title={item.name}>{item.name}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                 </div>
                                 
-                                {/* DERECHA: Tipo de Curso (Más compacto) */}
+                                {/* DERECHA: Tipo de Curso (CAMBIADO A HORIZONTAL) */}
                                 <div className="lg:col-span-3 h-full">
-                                    <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={false} />
+                                    <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={true} />
                                 </div>
                             </div>
 
-                            {/* SECCIÓN DE TENDENCIA HISTÓRICA (DOBLE BARRA) */}
+                            {/* SECCIÓN DE TENDENCIA HISTÓRICA (LÍNEA + PUNTOS + ETIQUETAS) */}
                             <div className="mb-8">
-                                <StatsChart type="bar" data={stats.historicalTrend || {}} title="Evolución de Inscripciones y Oferta por Año" id="chartHistory" horizontal={false} />
+                                <StatsChart type="line" data={stats.historicalTrend || {}} title="Evolución de Inscripciones y Oferta por Año" id="chartHistory" horizontal={false} />
                             </div>
 
                             <div className="bg-[#1B396A] rounded-xl p-8 text-center text-white shadow-lg mb-12 relative overflow-hidden">
                                 <div className="relative z-10">
                                     <div className="text-4xl mb-4">📄</div>
                                     <h3 className="text-2xl font-bold mb-2">Reporte Ejecutivo</h3>
-                                    <p className="mb-6 opacity-90 text-sm">Generar reporte detallado de participantes del periodo <strong>{period}</strong>.</p>
+                                    <p className="mb-6 opacity-90 text-sm font-bold">Generar reporte detallado de participantes del periodo <strong>{period}</strong>.</p>
                                     <button onClick={() => setShowReportModal(true)} className="bg-white text-[#1B396A] px-8 py-3 rounded-full font-bold shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105">📄 Generar Reporte</button>
                                 </div>
                             </div>
@@ -657,7 +700,7 @@
                 <div className="flex justify-center items-center py-20 animate-fadeIn">
                     <div className="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-10 rounded-xl shadow-lg text-center max-w-md w-full border-t-4 border-[#9D2449]">
                         <h2 className="text-2xl font-bold text-[#9D2449] mb-4">Acceso Restringido</h2>
-                        <p className="text-gray-600 mb-8">Inicie sesión con su cuenta institucional.</p>
+                        <p className="text-gray-600 mb-8 font-bold">Inicie sesión con su cuenta institucional.</p>
                         <div className="flex justify-center" ref={ref}></div>
                     </div>
                 </div>
