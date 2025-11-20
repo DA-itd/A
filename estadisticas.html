@@ -350,15 +350,15 @@
             }, [data, type, title, hasData, horizontal]);
 
             if (!hasData) return (
-                <div className="bg-white p-4 rounded-xl shadow-md h-80 w-full flex flex-col items-center justify-center text-gray-400 border border-gray-100">
+                <div className="bg-white p-4 rounded-xl shadow-md h-full w-full flex flex-col items-center justify-center text-gray-400 border border-gray-100 min-h-[320px]">
                     <div className="text-4xl mb-2">📊</div><p className="text-sm">Sin datos suficientes.</p>
                 </div>
             );
 
             return (
-                <div className="bg-white p-6 rounded-xl shadow-md h-80 w-full border-t-4 border-[#1B396A]">
-                    <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">{title}</h3>
-                    <div className="h-60"><canvas ref={canvasRef} id={id}></canvas></div>
+                <div className="bg-white p-6 rounded-xl shadow-md h-full w-full border-t-4 border-[#1B396A] flex flex-col">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4 text-center flex-shrink-0">{title}</h3>
+                    <div className="flex-1 min-h-[240px] relative"><canvas ref={canvasRef} id={id}></canvas></div>
                 </div>
             );
         };
@@ -719,23 +719,26 @@
 
                             <AIAnalysisPanel statsData={stats} period={period} />
 
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 my-8">
-                                <StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="chartGen" />
-                                <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={true} />
-                            </div>
+                            {/* LAYOUT REORGANIZADO */}
                             
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                                {/* Top 5 Departamentos con Siglas y Leyenda */}
-                                <div className="flex flex-col h-full bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
+                            {/* FILA 1: CURSOS Y DEPARTAMENTOS */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-8">
+                                {/* IZQUIERDA: Cursos Más Demandados (40%) */}
+                                <div className="lg:col-span-5 h-full">
+                                    <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" horizontal={true} />
+                                </div>
+
+                                {/* DERECHA: Top Departamentos (60% - Más grande para la leyenda) */}
+                                <div className="lg:col-span-7 h-full flex flex-col bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
                                     <div className="p-6 flex-1">
                                         <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">Top 5 Departamentos</h3>
-                                        <div className="h-60">
+                                        <div className="h-64">
                                             <StatsChart type="bar" data={processedDepts.chartData} title="Departamentos (Siglas)" id="chartDept" />
                                         </div>
                                     </div>
                                     <div className="bg-gray-50 p-4 border-t border-gray-200 rounded-b-xl">
                                         <p className="text-xs font-bold text-gray-500 mb-2 uppercase">Leyenda de Departamentos:</p>
-                                        <div className="grid grid-cols-1 gap-1 text-xs text-gray-600 max-h-32 overflow-y-auto custom-scrollbar">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-600 max-h-32 overflow-y-auto custom-scrollbar">
                                             {processedDepts.legend.map((item, idx) => (
                                                 <div key={idx} className="flex items-start gap-2">
                                                     <span className="font-bold text-[#1B396A] min-w-[35px]">{item.acronym}:</span>
@@ -745,9 +748,19 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Cursos más demandados (Horizontal) */}
-                                <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" horizontal={true} />
+                            </div>
+                            
+                            {/* FILA 2: GÉNERO Y TIPO (COMPACTO) */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+                                {/* Género (Grande) */}
+                                <div className="lg:col-span-9 h-full">
+                                    <StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="chartGen" />
+                                </div>
+                                
+                                {/* Tipo de Curso (Pequeño) */}
+                                <div className="lg:col-span-3 h-full">
+                                    <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={false} />
+                                </div>
                             </div>
 
                             {/* SECCIÓN DE INSTRUCTORES */}
