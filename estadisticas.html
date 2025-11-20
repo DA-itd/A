@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -97,22 +98,9 @@
         };
 
         const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
-        
-        // Paleta VIBRANTE y COLORIDA (Estilo Arcoiris) para gráficas de barras
         const VIBRANT_COLORS = [
-            '#FF6384', // Rojo suave
-            '#36A2EB', // Azul brillante
-            '#FFCE56', // Amarillo
-            '#4BC0C0', // Turquesa
-            '#9966FF', // Violeta
-            '#FF9F40', // Naranja
-            '#8AC926', // Verde Lima
-            '#1982C4', // Azul Oscuro
-            '#6A4C93', // Morado Oscuro
-            '#F15BB5', // Rosa
-            '#E9C46A', // Ocre
-            '#2A9D8F', // Verde Azulado
-            '#E76F51'  // Terracota
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
+            '#8AC926', '#1982C4', '#6A4C93', '#F15BB5', '#E9C46A', '#2A9D8F', '#E76F51'
         ];
 
         // Mapeo de Departamentos a Siglas
@@ -271,9 +259,10 @@
         const StatsChart = ({ type, data, title, id, horizontal = false }) => {
             const chartRef = useRef(null);
             const canvasRef = useRef(null);
+            
             const hasData = useMemo(() => {
                 if (!data) return false;
-                return Object.keys(data).length > 0 && Object.values(data).some(val => typeof val === 'number' ? val > 0 : false);
+                return Object.keys(data).length > 0;
             }, [data]);
 
             useEffect(() => {
@@ -284,45 +273,67 @@
                     const ctx = canvasRef.current.getContext('2d');
                     const isPie = type === 'pie' || type === 'doughnut';
                     
-                    let backgroundColors;
-                    if (isPie) {
-                        backgroundColors = INSTITUTIONAL_COLORS;
-                    } else {
-                        backgroundColors = VIBRANT_COLORS;
-                    }
-                    
-                    // Para gráficas de años (keys numéricas), aseguramos el orden
-                    let labels = Object.keys(data);
-                    let values = Object.values(data);
+                    let chartDataConfig = {};
+                    const isDoubleBar = id === 'chartHistory';
 
-                    // Si es una gráfica de evolución por año, ordenamos cronológicamente
-                    if(type === 'bar' && labels.every(l => !isNaN(parseInt(l)))) {
-                        const sortedKeys = labels.sort((a,b) => parseInt(a) - parseInt(b));
-                        labels = sortedKeys;
-                        values = sortedKeys.map(k => data[k]);
+                    // Lógica para doble barra (Historial)
+                    if (isDoubleBar) {
+                        const labels = Object.keys(data).sort((a,b) => parseInt(a) - parseInt(b));
+                        const regData = labels.map(year => data[year].registros);
+                        const courseData = labels.map(year => data[year].cursos);
+                        
+                        chartDataConfig = {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Alumnos Inscritos',
+                                    data: regData,
+                                    backgroundColor: '#36A2EB', // Azul
+                                    borderRadius: 4
+                                },
+                                {
+                                    label: 'Cursos Ofertados',
+                                    data: courseData,
+                                    backgroundColor: '#FF6384', // Rojo
+                                    borderRadius: 4
+                                }
+                            ]
+                        };
+                    } else {
+                        // Lógica normal
+                        let backgroundColors = isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS;
+                        let labels = Object.keys(data);
+                        let values = Object.values(data);
+
+                        chartDataConfig = {
+                            labels: labels,
+                            datasets: [{
+                                label: title || 'Valor',
+                                data: values,
+                                backgroundColor: backgroundColors,
+                                borderWidth: isPie ? 2 : 0,
+                                borderRadius: isPie ? 0 : 4
+                            }]
+                        };
                     }
 
                     const chartConfig = {
                         type: type,
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: title,
-                                data: values,
-                                backgroundColor: backgroundColors,
-                                borderWidth: isPie ? 2 : 0,
-                                borderRadius: isPie ? 0 : 4,
-                                hoverBackgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS
-                            }]
-                        },
+                        data: chartDataConfig,
                         options: {
                             responsive: true, 
                             maintainAspectRatio: false,
                             indexAxis: horizontal ? 'y' : 'x',
-                            plugins: { legend: { position: 'bottom', display: isPie } },
+                            plugins: { 
+                                legend: { position: 'bottom', display: isPie || isDoubleBar } 
+                            },
                             scales: !isPie ? { 
                                 y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, 
-                                x: { beginAtZero: true, grid: { display: false } } 
+                                x: { 
+                                    beginAtZero: true, 
+                                    grid: { display: false },
+                                    ticks: { autoSkip: false, maxRotation: 45, minRotation: 45 } // Evitar empalme
+                                } 
                             } : {}
                         }
                     };
@@ -330,7 +341,7 @@
                     chartRef.current = new window.Chart(ctx, chartConfig);
                 } catch (err) { console.error("Chart error:", err); }
                 return () => { if (chartRef.current) chartRef.current.destroy(); };
-            }, [data, type, title, hasData, horizontal]);
+            }, [data, type, title, hasData, horizontal, id]);
 
             if (!hasData) return (
                 <div className="bg-white p-4 rounded-xl shadow-md h-full w-full flex flex-col items-center justify-center text-gray-400 border border-gray-100 min-h-[320px]">
@@ -340,7 +351,8 @@
 
             return (
                 <div className="bg-white p-6 rounded-xl shadow-md h-full w-full border-t-4 border-[#1B396A] flex flex-col">
-                    <h3 className="text-lg font-bold text-gray-800 mb-4 text-center flex-shrink-0">{title}</h3>
+                    {/* Título condicional: Si viene vacío, no renderiza h3 */}
+                    {title && <h3 className="text-lg font-bold text-gray-800 mb-4 text-center flex-shrink-0">{title}</h3>}
                     <div className="flex-1 min-h-[240px] relative"><canvas ref={canvasRef} id={id}></canvas></div>
                 </div>
             );
@@ -356,7 +368,7 @@
                 const apiKey = process.env.API_KEY;
                 if (!apiKey) { setError("⚠️ Falta configuración de API Key."); setLoading(false); return; }
                 try {
-                    const cleanStats = { ...statsData, allDepartamentos: undefined, allInstructors: undefined, instructorDetails: undefined };
+                    const cleanStats = { ...statsData, allDepartamentos: undefined };
                     const prompt = `Actúa como analista académico. Analiza estos datos del periodo ${period}: ${JSON.stringify(cleanStats)}. Dame un resumen ejecutivo breve.`;
                     
                     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
@@ -588,9 +600,9 @@
                                 {/* IZQUIERDA: Top Departamentos (Más ancho para la leyenda) */}
                                 <div className="lg:col-span-9 h-full flex flex-col bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
                                     <div className="p-6 flex-1">
-                                        <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">Top 5 Departamentos</h3>
+                                        {/* SIN TÍTULO AQUI COMO SOLICITADO */}
                                         <div className="h-64">
-                                            <StatsChart type="bar" data={processedDepts.chartData} title="Departamentos (Siglas)" id="chartDept" />
+                                            <StatsChart type="bar" data={processedDepts.chartData} title="" id="chartDept" />
                                         </div>
                                     </div>
                                     <div className="bg-gray-50 p-4 border-t border-gray-200 rounded-b-xl">
@@ -612,9 +624,9 @@
                                 </div>
                             </div>
 
-                            {/* SECCIÓN DE TENDENCIA HISTÓRICA (Reemplaza Instructores) */}
+                            {/* SECCIÓN DE TENDENCIA HISTÓRICA (DOBLE BARRA) */}
                             <div className="mb-8">
-                                <StatsChart type="bar" data={stats.historicalTrend || {}} title="Evolución de Inscripciones por Año" id="chartHistory" horizontal={false} />
+                                <StatsChart type="bar" data={stats.historicalTrend || {}} title="Evolución de Inscripciones y Oferta por Año" id="chartHistory" horizontal={false} />
                             </div>
 
                             <div className="bg-[#1B396A] rounded-xl p-8 text-center text-white shadow-lg mb-12 relative overflow-hidden">
@@ -643,8 +655,8 @@
             }, [onLogin]);
             return (
                 <div className="flex justify-center items-center py-20 animate-fadeIn">
-                    <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md w-full border-t-4 border-[#1B396A]">
-                        <h2 className="text-2xl font-bold text-[#1B396A] mb-4">Acceso Administrativo</h2>
+                    <div className="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-10 rounded-xl shadow-lg text-center max-w-md w-full border-t-4 border-[#9D2449]">
+                        <h2 className="text-2xl font-bold text-[#9D2449] mb-4">Acceso Restringido</h2>
                         <p className="text-gray-600 mb-8">Inicie sesión con su cuenta institucional.</p>
                         <div className="flex justify-center" ref={ref}></div>
                     </div>
