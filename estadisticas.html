@@ -142,6 +142,24 @@
             return nameUpper.substring(0, 4) + ".";
         };
 
+        // Función auxiliar para dividir texto largo en líneas
+        const splitLabel = (label, maxLength = 45) => {
+            if (label.length <= maxLength) return label;
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+            for (let i = 1; i < words.length; i++) {
+                if (currentLine.length + 1 + words[i].length <= maxLength) {
+                    currentLine += " " + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        };
+
         const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
         const TECNM_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg';
 
@@ -325,7 +343,7 @@
                             labels: labels,
                             datasets: [
                                 {
-                                    label: 'Alumnos Inscritos',
+                                    label: 'Docentes Inscritos', // CORRECCIÓN: Cambiado de 'Alumnos Inscritos'
                                     data: regData,
                                     borderColor: '#36A2EB', // Azul
                                     backgroundColor: '#36A2EB',
@@ -361,6 +379,12 @@
                         // Lógica para Gráficas Normales (Barras / Pastel)
                         let backgroundColors = isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS;
                         let labels = Object.keys(data);
+                        
+                        // CORRECCIÓN: Dividir etiquetas largas en múltiples líneas para cursos horizontales
+                        if (horizontal && id === 'chartCourse') {
+                            labels = labels.map(l => splitLabel(l));
+                        }
+
                         let values = Object.values(data);
 
                         chartDataConfig = {
@@ -661,9 +685,9 @@
                                     </div>
                                 </div>
                                 
-                                {/* DERECHA: Tipo de Curso (CAMBIADO A HORIZONTAL) */}
+                                {/* DERECHA: Tipo de Curso (CAMBIADO A VERTICAL) */}
                                 <div className="lg:col-span-3 h-full">
-                                    <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={true} />
+                                    <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={false} />
                                 </div>
                             </div>
 
