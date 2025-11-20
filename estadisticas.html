@@ -126,13 +126,13 @@
             ]);
 
             // 2. Header (Logos Simétricos y Alineados)
-            // Logo ITD (Izq) - 20mm x 20mm
-            if (itdLogo) doc.addImage(itdLogo, 'PNG', 15, 10, 20, 20);
+            // Logo ITD (Izq) - Tamaño ajustado para balance visual
+            // X=15 (Margen Izq), Y=10 (Margen Sup), W=22, H=22
+            if (itdLogo) doc.addImage(itdLogo, 'PNG', 15, 10, 22, 22);
             
-            // Logo TecNM (Der) - 30mm ancho x 15mm alto (relación 2:1)
-            // Posición X = 210 (Ancho A4) - 15 (Margen) - 30 (Ancho Logo) = 165
-            // Posición Y = 12.5 para centrar verticalmente con el logo ITD (que está en Y=10, alto 20)
-            if (tecNmLogo) doc.addImage(tecNmLogo, 'JPEG', 165, 12.5, 30, 15);
+            // Logo TecNM (Der) - Más ancho para compensar
+            // X=160 (Para dejar 15mm de margen derecho: 210 - 15 - 35 = 160), Y=13 (Centrado verticalmente con ITD), W=35, H=16
+            if (tecNmLogo) doc.addImage(tecNmLogo, 'JPEG', 160, 13, 35, 16);
 
             doc.setFont("helvetica", "bold");
             doc.setFontSize(12);
@@ -154,12 +154,12 @@
             doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString()}`, 15, 47);
             doc.text(`Total de Registros: ${data.length}`, pageWidth - 15, 47, { align: "right" });
 
-            // 4. Tabla (Columnas Solicitadas: Docente, Curso, Depto que Ofrece)
+            // 4. Tabla (Columnas: Docente, Curso Inscrito, Depto que Ofrece)
             const tableColumn = ["Docente", "Curso Inscrito", "Depto. que Ofrece"];
             const tableRows = data.map(row => [
                 row.nombre,
                 row.curso,
-                row.depto_oferente || 'N/A' // Departamento que ofrece el curso (cruzado en backend)
+                row.depto_oferente || 'N/A' // Datos del backend que ya cruzan la información
             ]);
 
             doc.autoTable({
@@ -264,7 +264,7 @@
                 if (!CONFIG.GEMINI_API_KEY || CONFIG.GEMINI_API_KEY.includes('TU_API')) { setError("⚠️ Falta API Key."); setLoading(false); return; }
                 try {
                     const cleanStats = { ...statsData, allDepartamentos: undefined };
-                    const prompt = `Actúa como analista académico. Analiza: ${JSON.stringify(cleanStats)}. Periodo: ${period}. Resume logros y oportunidades.`;
+                    const prompt = `Actúa como analista académico. Analiza estos datos del periodo ${period}: ${JSON.stringify(cleanStats)}. Destaca el índice de recurrencia docente (maestros tomando >1 curso). Dame un resumen ejecutivo.`;
                     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
@@ -343,12 +343,10 @@
 
             const handleReportGeneration = async (dept) => {
                 try {
-                    // 1. Obtener datos crudos del servidor
                     const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getReportData&period=${period}&department=${encodeURIComponent(dept)}`);
                     const json = await response.json();
                     
                     if(json.success) {
-                        // 2. Generar PDF en el cliente
                         await generatePDFReport(json.data, json.meta);
                     } else {
                         alert("Error obteniendo datos del reporte: " + json.message);
@@ -378,10 +376,47 @@
 
                     {loading ? <div className="flex justify-center p-20"><div className="animate-spin h-12 w-12 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div> : !stats ? <div className="text-center p-10">Error de carga.</div> : (
                         <>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                                <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-[#1B396A]"><div className="flex gap-4"><div className="text-4xl">📝</div><div><div className="text-3xl font-bold">{stats.totalInscripciones}</div><div className="text-xs font-bold text-gray-500">INSCRIPCIONES</div></div></div></div>
-                                <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-[#D4AF37]"><div className="flex gap-4"><div className="text-4xl">👩‍🏫</div><div><div className="text-3xl font-bold">{stats.coberturaDocente.actualizados}</div><div className="text-xs font-bold text-gray-500">DOCENTES</div></div></div></div>
-                                <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-[#9D2449]"><div className="flex gap-4"><div className="text-4xl">🎯</div><div><div className="text-3xl font-bold">{stats.coberturaDocente.porcentaje}%</div><div className="text-xs font-bold text-gray-500">COBERTURA</div></div></div></div>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                                <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-[#1B396A]">
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-3xl">📝</div>
+                                        <div>
+                                            <div className="text-2xl font-bold text-gray-800">{stats.totalInscripciones}</div>
+                                            <div className="text-[10px] font-bold text-gray-500 uppercase">Inscripciones Totales</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-[#D4AF37]">
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-3xl">👩‍🏫</div>
+                                        <div>
+                                            <div className="text-2xl font-bold text-gray-800">{stats.coberturaDocente.actualizados}</div>
+                                            <div className="text-[10px] font-bold text-gray-500 uppercase">Docentes Únicos</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-[#9D2449]">
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-3xl">🔁</div>
+                                        <div>
+                                            <div className="text-2xl font-bold text-gray-800">{stats.coberturaDocente.recurrentes}</div>
+                                            <div className="text-[10px] font-bold text-gray-500 uppercase">Docentes Recurrentes</div>
+                                            <div className="text-[9px] text-gray-400">Más de 1 curso</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-gray-500">
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-3xl">🎯</div>
+                                        <div>
+                                            <div className="text-2xl font-bold text-gray-800">{stats.coberturaDocente.porcentaje}%</div>
+                                            <div className="text-[10px] font-bold text-gray-500 uppercase">Cobertura Estimada</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <AIAnalysisPanel statsData={stats} period={period} />
