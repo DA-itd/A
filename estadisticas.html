@@ -128,9 +128,20 @@
 
             // Definir función de cabecera para repetir en cada página
             const drawHeader = (data) => {
-                // Logo TecNM (Derecha) - Mantenemos en cabecera
-                if (tecNmLogo) doc.addImage(tecNmLogo, 'JPEG', 160, 10, 35, 16);
+                // 1. Logo TecNM (IZQUIERDA) - Apaisado
+                if (tecNmLogo) {
+                    // x=15 (margen izq), y=10
+                    doc.addImage(tecNmLogo, 'JPEG', 15, 10, 35, 16);
+                }
 
+                // 2. Logo ITD (DERECHA) - Cuadrado/Circular
+                if (itdLogo) {
+                    // x = AnchoPagina - MargenDer - AnchoLogo
+                    const logoSize = 22; 
+                    doc.addImage(itdLogo, 'PNG', pageWidth - 15 - logoSize, 8, logoSize, logoSize);
+                }
+
+                // 3. Textos Centrales
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(12);
                 doc.setTextColor(27, 57, 106); // Azul ITD
@@ -151,13 +162,13 @@
                 doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString()}`, 15, 47);
             };
 
-            // Definir función de Marca de Agua (ITD Logo en el fondo)
+            // Definir función de Marca de Agua (ITD Logo en el fondo CENTRADO)
             const drawWatermark = () => {
                 if (itdLogo) {
                     doc.saveGraphicsState();
-                    doc.setGState(new doc.GState({ opacity: 0.1 })); // Transparencia baja
-                    const w = 120;
-                    const h = 120;
+                    doc.setGState(new doc.GState({ opacity: 0.08 })); // Transparencia muy baja
+                    const w = 140; // Un poco más grande
+                    const h = 140;
                     const x = (pageWidth - w) / 2;
                     const y = (pageHeight - h) / 2;
                     doc.addImage(itdLogo, 'PNG', x, y, w, h);
@@ -170,7 +181,7 @@
             const tableRows = data.map(row => [
                 row.nombre,
                 row.curso,
-                row.fechas || 'N/A', // Nueva Columna Fechas
+                row.fechas || 'N/A',
                 row.depto_oferente || 'N/A'
             ]);
 
