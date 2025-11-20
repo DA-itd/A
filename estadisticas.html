@@ -88,12 +88,39 @@
 
         const CONFIG = {
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', 
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
+            TEACHERS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv'
         };
 
         const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
         const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
         const TECNM_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg';
+
+        // === UTILIDADES CSV ===
+        const parseCSVLine = (line) => {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    if (inQuotes && line[i + 1] === '"') { current += '"'; i++; } 
+                    else { inQuotes = !inQuotes; }
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim()); current = '';
+                } else { current += char; }
+            }
+            result.push(current.trim());
+            return result;
+        };
+
+        const cleanCSVValue = (val) => {
+            let cleaned = val.trim();
+            if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+                cleaned = cleaned.substring(1, cleaned.length - 1).replace(/""/g, '"');
+            }
+            return cleaned;
+        };
 
         const getImageDataFromURL = (url) => {
             return new Promise((resolve, reject) => {
@@ -112,7 +139,7 @@
             });
         };
 
-        const generatePDFReport = async (data, meta) => {
+        const generatePDFReport = async (data, meta, returnBlob = false) => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
@@ -191,7 +218,11 @@
                 doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, 290, { align: "center" });
             }
 
-            doc.save(`Reporte_ITD_${meta.period}_${meta.department.substring(0,10)}.pdf`);
+            if (returnBlob) {
+                return doc.output('bloburl');
+            } else {
+                doc.save(`Reporte_ITD_${meta.period}_${meta.department.substring(0,10)}.pdf`);
+            }
         };
 
         const generateExcelReport = (data, meta) => {
@@ -259,18 +290,68 @@
             );
         };
 
-        // Nuevo Componente: Buscador de Historial de Instructor
+        // Componente: Buscador de Historial de Instructor con Autocomplete
         const InstructorHistoryPanel = ({ instructorsList, details }) => {
             const [search, setSearch] = useState('');
             const [selectedInstructor, setSelectedInstructor] = useState(null);
+            const [allTeachers, setAllTeachers] = useState([]);
+            const [showSuggestions, setShowSuggestions] = useState(false);
+            const wrapperRef = useRef(null);
+
+            // Cargar catálogo completo de docentes
+            useEffect(() => {
+                const fetchTeachers = async () => {
+                    try {
+                        const response = await fetch(`${CONFIG.TEACHERS_CSV_URL}&_=${Date.now()}`);
+                        if (response.ok) {
+                            const csvText = await response.text();
+                            const lines = csvText.trim().split(/\r?\n/);
+                            const loadedTeachers = lines.slice(1)
+                                .map(line => {
+                                    const vals = parseCSVLine(line);
+                                    return vals[0] ? cleanCSVValue(vals[0]).toUpperCase() : null;
+                                })
+                                .filter(t => t !== null);
+                            
+                            // Combinar con los que ya tienen historial (por si acaso)
+                            const combined = new Set([...loadedTeachers, ...instructorsList]);
+                            setAllTeachers(Array.from(combined).sort());
+                        } else {
+                            // Fallback: usar solo los que tienen historial si falla la carga
+                            setAllTeachers(instructorsList);
+                        }
+                    } catch (e) {
+                        console.error("Error cargando docentes", e);
+                        setAllTeachers(instructorsList);
+                    }
+                };
+                fetchTeachers();
+            }, [instructorsList]);
+
+            // Manejar clic fuera para cerrar sugerencias
+            useEffect(() => {
+                const handleClickOutside = (event) => {
+                    if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+                        setShowSuggestions(false);
+                    }
+                };
+                document.addEventListener("mousedown", handleClickOutside);
+                return () => document.removeEventListener("mousedown", handleClickOutside);
+            }, []);
 
             const filteredInstructors = useMemo(() => {
                 if (!search) return [];
-                return instructorsList.filter(name => name.toLowerCase().includes(search.toLowerCase())).slice(0, 10);
-            }, [search, instructorsList]);
+                return allTeachers.filter(name => name.includes(search.toUpperCase())).slice(0, 8);
+            }, [search, allTeachers]);
+
+            const handleSelect = (name) => {
+                setSearch(name);
+                setSelectedInstructor(name);
+                setShowSuggestions(false);
+            };
 
             return (
-                <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#9D2449] mt-8">
+                <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#9D2449] mt-8" ref={wrapperRef}>
                     <h3 className="text-xl font-bold text-[#1B396A] mb-4 flex items-center gap-2">
                         <span>🧑‍🏫</span> Historial por Instructor
                     </h3>
@@ -280,18 +361,23 @@
                         <input 
                             type="text" 
                             value={search}
-                            onChange={(e) => { setSearch(e.target.value); setSelectedInstructor(null); }}
+                            onChange={(e) => { 
+                                setSearch(e.target.value.toUpperCase()); 
+                                setSelectedInstructor(null); 
+                                setShowSuggestions(true);
+                            }}
+                            onFocus={() => setShowSuggestions(true)}
                             placeholder="Escriba el nombre del instructor..." 
-                            className="w-full border border-gray-300 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-[#1B396A] outline-none"
+                            className="w-full border border-gray-300 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-[#1B396A] outline-none uppercase"
                         />
                         <div className="absolute left-3 top-[42px] text-gray-400">🔍</div>
                         
-                        {search && !selectedInstructor && filteredInstructors.length > 0 && (
+                        {showSuggestions && search && filteredInstructors.length > 0 && (
                             <ul className="absolute z-10 w-full bg-white border border-gray-200 mt-1 rounded-lg shadow-xl max-h-60 overflow-auto">
                                 {filteredInstructors.map(inst => (
                                     <li 
                                         key={inst} 
-                                        onClick={() => { setSearch(inst); setSelectedInstructor(inst); }}
+                                        onClick={() => handleSelect(inst)}
                                         className="p-3 hover:bg-gray-100 cursor-pointer text-sm border-b last:border-0"
                                     >
                                         {inst}
@@ -301,30 +387,38 @@
                         )}
                     </div>
 
-                    {selectedInstructor && details[selectedInstructor] && (
+                    {selectedInstructor && (
                         <div className="animate-fadeIn">
                             <h4 className="font-bold text-lg text-[#9D2449] mb-3">{selectedInstructor}</h4>
-                            <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-[#1B396A] text-white">
-                                        <tr>
-                                            <th className="p-3">Curso Impartido</th>
-                                            <th className="p-3">Fechas</th>
-                                            <th className="p-3 text-center">Horas</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {details[selectedInstructor].map((course, idx) => (
-                                            <tr key={idx} className="border-b border-gray-200 hover:bg-white">
-                                                <td className="p-3 font-medium">{course.course}</td>
-                                                <td className="p-3 text-gray-600">{course.date || 'N/A'}</td>
-                                                <td className="p-3 text-center font-bold text-gray-700">{course.hours}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <p className="text-right text-xs text-gray-500 mt-2">Total cursos: {details[selectedInstructor].length}</p>
+                            {details[selectedInstructor] ? (
+                                <>
+                                    <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                                        <table className="w-full text-sm text-left">
+                                            <thead className="bg-[#1B396A] text-white">
+                                                <tr>
+                                                    <th className="p-3">Curso Impartido</th>
+                                                    <th className="p-3">Fechas</th>
+                                                    <th className="p-3 text-center">Horas</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {details[selectedInstructor].map((course, idx) => (
+                                                    <tr key={idx} className="border-b border-gray-200 hover:bg-white">
+                                                        <td className="p-3 font-medium">{course.course}</td>
+                                                        <td className="p-3 text-gray-600">{course.date || 'N/A'}</td>
+                                                        <td className="p-3 text-center font-bold text-gray-700">{course.hours}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <p className="text-right text-xs text-gray-500 mt-2">Total cursos: {details[selectedInstructor].length}</p>
+                                </>
+                            ) : (
+                                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-center">
+                                    <p>Este docente no tiene cursos registrados como instructor en el sistema.</p>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -368,21 +462,81 @@
             );
         };
 
+        const PdfPreviewModal = ({ isOpen, onClose, pdfUrl, onDownload }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col animate-fadeIn">
+                        <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                            <h3 className="text-xl font-bold text-[#1B396A]">Vista Previa del Reporte</h3>
+                            <button onClick={onClose} className="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+                        </div>
+                        <div className="flex-1 bg-gray-100 p-1 overflow-hidden">
+                            {pdfUrl ? (
+                                <iframe src={pdfUrl} className="w-full h-full border-0 rounded" title="Vista Previa PDF"></iframe>
+                            ) : (
+                                <div className="flex justify-center items-center h-full">
+                                    <div className="animate-spin h-10 w-10 border-4 border-[#1B396A] rounded-full border-t-transparent"></div>
+                                </div>
+                            )}
+                        </div>
+                        <div className="p-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
+                            <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300">Cerrar</button>
+                            <button onClick={onDownload} className="px-6 py-2 bg-[#1B396A] text-white rounded-lg font-bold hover:bg-[#152d54] shadow-lg">🖨️ Imprimir / Descargar</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
         const ReportModal = ({ isOpen, onClose, departments, period, onGeneratePdf, onGenerateExcel }) => {
             const [selectedDept, setSelectedDept] = useState('TODOS');
             const [loading, setLoading] = useState(false);
+            const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
+            const [showPreview, setShowPreview] = useState(false);
+
+            // Resetear estado al abrir
+            useEffect(() => {
+                if (isOpen) { setShowPreview(false); setPdfPreviewUrl(null); }
+            }, [isOpen]);
+
             if(!isOpen) return null;
-            const handleAction = async (action) => {
+
+            const handlePreviewPdf = async () => {
                 setLoading(true);
-                if (action === 'pdf') await onGeneratePdf(selectedDept);
-                if (action === 'excel') await onGenerateExcel(selectedDept);
+                try {
+                    const url = await onGeneratePdf(selectedDept, true); // true para solo obtener URL
+                    setPdfPreviewUrl(url);
+                    setShowPreview(true);
+                } catch (e) {
+                    console.error(e);
+                    alert("Error al generar vista previa.");
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleDownloadPdf = async () => {
+                 await onGeneratePdf(selectedDept, false); // false para descargar directo
+                 onClose();
+            };
+
+            const handleExcel = async () => {
+                setLoading(true);
+                await onGenerateExcel(selectedDept);
                 setLoading(false);
                 onClose();
             };
+
+            // Si estamos en modo vista previa, mostrar el modal grande
+            if (showPreview) {
+                return <PdfPreviewModal isOpen={true} onClose={() => setShowPreview(false)} pdfUrl={pdfPreviewUrl} onDownload={handleDownloadPdf} />;
+            }
+
             return (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
                     <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full animate-fadeIn border-t-4 border-[#1B396A]">
-                        <h3 className="text-xl font-bold text-[#1B396A] mb-2">Descargar Reporte</h3>
+                        <h3 className="text-xl font-bold text-[#1B396A] mb-2">Generar Reporte</h3>
                         <p className="text-sm text-gray-600 mb-6">Periodo: <strong>{period}</strong>.</p>
                         <label className="block text-sm font-bold text-gray-700 mb-2">Filtrar por Departamento:</label>
                         <select value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)} className="w-full border border-gray-300 rounded-lg p-3 mb-8 bg-gray-50">
@@ -390,8 +544,12 @@
                             {departments.map(d => <option key={d} value={d}>{d}</option>)}
                         </select>
                         <div className="grid grid-cols-1 gap-3">
-                            <button onClick={() => handleAction('pdf')} disabled={loading} className="bg-[#1B396A] hover:bg-[#152d54] text-white px-4 py-3 rounded-lg font-semibold shadow-lg flex items-center justify-center gap-2">{loading ? '⏳' : '📄'} Descargar PDF</button>
-                            <button onClick={() => handleAction('excel')} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold shadow-lg flex items-center justify-center gap-2">{loading ? '⏳' : '📊'} Descargar Excel</button>
+                            <button onClick={handlePreviewPdf} disabled={loading} className="bg-[#1B396A] hover:bg-[#152d54] text-white px-4 py-3 rounded-lg font-semibold shadow-lg flex items-center justify-center gap-2">
+                                {loading ? '⏳ Generando...' : '👁️ Vista Previa PDF'}
+                            </button>
+                            <button onClick={handleExcel} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold shadow-lg flex items-center justify-center gap-2">
+                                {loading ? '⏳' : '📊'} Descargar Excel
+                            </button>
                             <button onClick={onClose} disabled={loading} className="mt-2 bg-gray-100 text-gray-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">Cancelar</button>
                         </div>
                     </div>
@@ -422,7 +580,14 @@
                 } catch(e) { alert("Error obteniendo datos: " + e.toString()); return null; }
             };
 
-            const handlePdf = async (dept) => { const res = await getReportData(dept); if(res) await generatePDFReport(res.data, res.meta); };
+            // Modificado para soportar preview (returnBlob)
+            const handlePdf = async (dept, returnBlob = false) => { 
+                const res = await getReportData(dept); 
+                if(res) {
+                    return await generatePDFReport(res.data, res.meta, returnBlob);
+                }
+            };
+            
             const handleExcel = async (dept) => { const res = await getReportData(dept); if(res) generateExcelReport(res.data, res.meta); };
 
             return (
@@ -497,8 +662,8 @@
                                 <div className="relative z-10">
                                     <div className="text-4xl mb-4">📄</div>
                                     <h3 className="text-2xl font-bold mb-2">Reporte Ejecutivo</h3>
-                                    <p className="mb-6 opacity-90 text-sm">Descargar lista detallada de participantes del periodo <strong>{period}</strong>.</p>
-                                    <button onClick={() => setShowReportModal(true)} className="bg-white text-[#1B396A] px-8 py-3 rounded-full font-bold shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105">⬇️ Descargar Reporte</button>
+                                    <p className="mb-6 opacity-90 text-sm">Generar reporte detallado de participantes del periodo <strong>{period}</strong>.</p>
+                                    <button onClick={() => setShowReportModal(true)} className="bg-white text-[#1B396A] px-8 py-3 rounded-full font-bold shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105">📄 Generar Reporte</button>
                                 </div>
                             </div>
 
