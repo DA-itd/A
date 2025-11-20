@@ -43,6 +43,11 @@
         .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
         .markdown-body li { margin-bottom: 0.3em; }
         .markdown-body strong { color: #1B396A; }
+        /* Scrollbar para la leyenda */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
     </style>
     
     <!-- Inicialización segura de process.env si no existe -->
@@ -110,6 +115,43 @@
             '#2A9D8F', // Verde Azulado
             '#E76F51'  // Terracota
         ];
+
+        // Mapeo de Departamentos a Siglas
+        const DEPT_ACRONYMS = {
+            "SISTEMAS Y COMPUTACION": "DSC",
+            "CIENCIAS ECONOMICO-ADMINISTRATIVAS": "DCEA",
+            "INGENIERÍA QUÍMICA-BIOQUÍMICA": "DIQB",
+            "QUIMICA-BIOQUIMICA": "DIQB",
+            "CIENCIAS DE LA TIERRA": "DCT",
+            "CIENCIAS BASICAS": "DCB",
+            "METAL-MECÁNICA": "DMM",
+            "METAL MECANICA": "DMM",
+            "INGENIERÍA INDUSTRIAL": "DII",
+            "INDUSTRIAL": "DII",
+            "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA": "DIEE",
+            "ELECTRICA Y ELECTRONICA": "DIEE",
+            "POSGRADO E INVESTIGACION": "DEPI",
+            "ADMINISTRATIVO": "ADMON",
+            "EXTERNO": "EXT",
+            "DESARROLLO ACADÉMICO": "DDA",
+            "GESTION TECNOLOGICA": "DGT"
+        };
+
+        const getAcronym = (fullName) => {
+            if(!fullName) return "ND";
+            const nameUpper = fullName.toUpperCase()
+                .replace('DEPARTAMENTO DE ', '')
+                .replace('DIVISION DE ESTUDIOS DE ', '')
+                .replace('CENTRO DE ', '');
+            
+            for (const [key, val] of Object.entries(DEPT_ACRONYMS)) {
+                if (nameUpper.includes(key)) return val;
+            }
+            // Si no encuentra, toma las primeras 3 letras o iniciales
+            const words = nameUpper.split(' ');
+            if(words.length > 1) return words.map(w => w[0]).join('').substring(0,4);
+            return nameUpper.substring(0, 4) + ".";
+        };
 
         const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
         const TECNM_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg';
@@ -254,7 +296,7 @@
             XLSX.writeFile(wb, `Reporte_ITD_${meta.period}.xlsx`);
         };
 
-        const StatsChart = ({ type, data, title, id }) => {
+        const StatsChart = ({ type, data, title, id, horizontal = false }) => {
             const chartRef = useRef(null);
             const canvasRef = useRef(null);
             const hasData = useMemo(() => {
@@ -270,18 +312,14 @@
                     const ctx = canvasRef.current.getContext('2d');
                     const isPie = type === 'pie' || type === 'doughnut';
                     
-                    // Si es PIE, usamos colores institucionales (o vibrantes si se prefiere, pero institucionales suelen verse mejor en pie).
-                    // Si es BARRA, usamos colores vibrantes MULTICOLOR.
                     let backgroundColors;
-                    
                     if (isPie) {
                         backgroundColors = INSTITUTIONAL_COLORS;
                     } else {
-                        // Para barras, asignamos un color diferente a cada barra del array VIBRANT_COLORS
                         backgroundColors = VIBRANT_COLORS;
                     }
                     
-                    chartRef.current = new window.Chart(ctx, {
+                    const chartConfig = {
                         type: type,
                         data: {
                             labels: Object.keys(data),
@@ -291,19 +329,25 @@
                                 backgroundColor: backgroundColors,
                                 borderWidth: isPie ? 2 : 0,
                                 borderRadius: isPie ? 0 : 4,
-                                // Para hover en pie usamos institucionales, en barras vibrantes
                                 hoverBackgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS
                             }]
                         },
                         options: {
-                            responsive: true, maintainAspectRatio: false,
+                            responsive: true, 
+                            maintainAspectRatio: false,
+                            indexAxis: horizontal ? 'y' : 'x',
                             plugins: { legend: { position: 'bottom', display: isPie } },
-                            scales: !isPie ? { y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } } : {}
+                            scales: !isPie ? { 
+                                y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, 
+                                x: { beginAtZero: true, grid: { display: false } } 
+                            } : {}
                         }
-                    });
+                    };
+
+                    chartRef.current = new window.Chart(ctx, chartConfig);
                 } catch (err) { console.error("Chart error:", err); }
                 return () => { if (chartRef.current) chartRef.current.destroy(); };
-            }, [data, type, title, hasData]);
+            }, [data, type, title, hasData, horizontal]);
 
             if (!hasData) return (
                 <div className="bg-white p-4 rounded-xl shadow-md h-80 w-full flex flex-col items-center justify-center text-gray-400 border border-gray-100">
@@ -342,11 +386,9 @@
                                 })
                                 .filter(t => t !== null);
                             
-                            // Combinar con los que ya tienen historial (por si acaso)
                             const combined = new Set([...loadedTeachers, ...instructorsList]);
                             setAllTeachers(Array.from(combined).sort());
                         } else {
-                            // Fallback: usar solo los que tienen historial si falla la carga
                             setAllTeachers(instructorsList);
                         }
                     } catch (e) {
@@ -357,7 +399,6 @@
                 fetchTeachers();
             }, [instructorsList]);
 
-            // Manejar clic fuera para cerrar sugerencias
             useEffect(() => {
                 const handleClickOutside = (event) => {
                     if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -524,7 +565,6 @@
             const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
             const [showPreview, setShowPreview] = useState(false);
 
-            // Resetear estado al abrir
             useEffect(() => {
                 if (isOpen) { setShowPreview(false); setPdfPreviewUrl(null); }
             }, [isOpen]);
@@ -534,7 +574,7 @@
             const handlePreviewPdf = async () => {
                 setLoading(true);
                 try {
-                    const url = await onGeneratePdf(selectedDept, true); // true para solo obtener URL
+                    const url = await onGeneratePdf(selectedDept, true); 
                     setPdfPreviewUrl(url);
                     setShowPreview(true);
                 } catch (e) {
@@ -546,7 +586,7 @@
             };
 
             const handleDownloadPdf = async () => {
-                 await onGeneratePdf(selectedDept, false); // false para descargar directo
+                 await onGeneratePdf(selectedDept, false); 
                  onClose();
             };
 
@@ -557,7 +597,6 @@
                 onClose();
             };
 
-            // Si estamos en modo vista previa, mostrar el modal grande
             if (showPreview) {
                 return <PdfPreviewModal isOpen={true} onClose={() => setShowPreview(false)} pdfUrl={pdfPreviewUrl} onDownload={handleDownloadPdf} />;
             }
@@ -609,7 +648,6 @@
                 } catch(e) { alert("Error obteniendo datos: " + e.toString()); return null; }
             };
 
-            // Modificado para soportar preview (returnBlob)
             const handlePdf = async (dept, returnBlob = false) => { 
                 const res = await getReportData(dept); 
                 if(res) {
@@ -618,6 +656,20 @@
             };
             
             const handleExcel = async (dept) => { const res = await getReportData(dept); if(res) generateExcelReport(res.data, res.meta); };
+
+            // Datos procesados para departamentos con siglas
+            const processedDepts = useMemo(() => {
+                if (!stats?.topDepartamentos) return { chartData: {}, legend: [] };
+                const chartData = {};
+                const legend = [];
+                
+                stats.topDepartamentos.forEach(([name, count]) => {
+                    const acronym = getAcronym(name);
+                    chartData[acronym] = count;
+                    legend.push({ acronym, name });
+                });
+                return { chartData, legend };
+            }, [stats]);
 
             return (
                 <div className="container mx-auto px-4 py-8 max-w-7xl animate-fadeIn">
@@ -669,18 +721,39 @@
 
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 my-8">
                                 <StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="chartGen" />
-                                <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" />
+                                <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={true} />
                             </div>
                             
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                                <StatsChart type="bar" data={Object.fromEntries(stats.topDepartamentos||[])} title="Top 5 Departamentos" id="chartDept" />
-                                <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" />
+                                {/* Top 5 Departamentos con Siglas y Leyenda */}
+                                <div className="flex flex-col h-full bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
+                                    <div className="p-6 flex-1">
+                                        <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">Top 5 Departamentos</h3>
+                                        <div className="h-60">
+                                            <StatsChart type="bar" data={processedDepts.chartData} title="Departamentos (Siglas)" id="chartDept" />
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-50 p-4 border-t border-gray-200 rounded-b-xl">
+                                        <p className="text-xs font-bold text-gray-500 mb-2 uppercase">Leyenda de Departamentos:</p>
+                                        <div className="grid grid-cols-1 gap-1 text-xs text-gray-600 max-h-32 overflow-y-auto custom-scrollbar">
+                                            {processedDepts.legend.map((item, idx) => (
+                                                <div key={idx} className="flex items-start gap-2">
+                                                    <span className="font-bold text-[#1B396A] min-w-[35px]">{item.acronym}:</span>
+                                                    <span className="truncate" title={item.name}>{item.name}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Cursos más demandados (Horizontal) */}
+                                <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" horizontal={true} />
                             </div>
 
                             {/* SECCIÓN DE INSTRUCTORES */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                                 <div className="lg:col-span-1">
-                                    <StatsChart type="bar" data={Object.fromEntries(stats.topInstructors||[])} title="Top Instructores (Contribución)" id="chartInst" />
+                                    <StatsChart type="bar" data={Object.fromEntries(stats.topInstructors||[])} title="Top Instructores (Contribución)" id="chartInst" horizontal={true} />
                                 </div>
                                 <div className="lg:col-span-2">
                                     <InstructorHistoryPanel instructorsList={stats.allInstructors || []} details={stats.instructorDetails || {}} />
