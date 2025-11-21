@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial Académico - Portal ITD</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -27,12 +27,12 @@
 
     <header class="bg-white shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-6 flex justify-between items-center gap-4">
-            <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" class="h-12 sm:h-16 object-contain">
+            <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" class="h-12 sm:h-16 object-contain">
             <div class="text-center flex-1">
                 <h1 class="text-sm sm:text-2xl font-bold text-blue-900">HISTORIAL DE CURSOS</h1>
                 <p class="text-xs sm:text-sm text-blue-700 font-semibold">Kardex de Actualización Docente</p>
             </div>
-            <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" class="h-12 sm:h-16 object-contain">
+            <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" class="h-12 sm:h-16 object-contain">
         </div>
     </header>
 
@@ -67,6 +67,10 @@
             'desarrollo.academico@itdurango.edu.mx'
         ];
 
+        // URLs CDN para evitar problemas de CORS en PDF
+        const ITD_LOGO_URL = 'https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png';
+        const TECNM_LOGO_URL = 'https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg';
+
         // --- UTILIDADES CSV ---
         const parseCSVLine = (line) => {
             const result = []; let current = ''; let inQuotes = false;
@@ -81,6 +85,29 @@
         };
         const cleanCSVValue = (val) => { let c = val.trim(); if (c.startsWith('"') && c.endsWith('"')) c = c.substring(1, c.length - 1).replace(/""/g, '"'); return c; };
         const removeAccents = (text) => text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+
+        // --- UTILIDADES IMAGEN PARA PDF ---
+        const getImageDataFromURL = (url) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    try {
+                        resolve(canvas.toDataURL('image/png'));
+                    } catch (e) {
+                        console.warn("Canvas tainted, skipping image", e);
+                        resolve(null);
+                    }
+                };
+                img.onerror = (err) => { console.warn("Error cargando imagen PDF", err); resolve(null); };
+                img.src = url;
+            });
+        };
 
         const getTeachers = async () => {
             try {
@@ -152,21 +179,38 @@
         const exportToPdf = async (teacherName, courses) => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+
+            // Cargar imágenes antes de generar
+            const [itdLogo, tecNmLogo] = await Promise.all([
+                getImageDataFromURL(ITD_LOGO_URL),
+                getImageDataFromURL(TECNM_LOGO_URL)
+            ]);
+
+            // Dibujar Logos
+            if (tecNmLogo) doc.addImage(tecNmLogo, 'JPEG', 15, 10, 35, 16);
+            if (itdLogo) {
+                const logoSize = 20; 
+                doc.addImage(itdLogo, 'PNG', pageWidth - 15 - logoSize, 8, logoSize, logoSize);
+            }
             
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(14);
-            doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", 105, 20, { align: "center" });
-            doc.setFontSize(10);
-            doc.text("Coordinación de Actualización Docente", 105, 26, { align: "center" });
-            
             doc.setFontSize(12);
+            doc.setTextColor(27, 57, 106); // Azul ITD
+            doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth / 2, 18, { align: "center" });
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text("Coordinación de Actualización Docente", pageWidth / 2, 23, { align: "center" });
+            
+            doc.setFontSize(14);
             doc.setTextColor(200, 100, 0); // Naranja
-            doc.text("HISTORIAL ACADÉMICO", 105, 40, { align: "center" });
+            doc.text("HISTORIAL ACADÉMICO", pageWidth / 2, 35, { align: "center" });
             
             doc.setTextColor(0);
             doc.setFontSize(10);
-            doc.text(`Docente: ${teacherName}`, 14, 50);
-            doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, 14, 55);
+            doc.text(`Docente: ${teacherName}`, 15, 45);
+            doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, 15, 50);
 
             const tableRows = courses.map(c => [
                 c.year,
@@ -180,12 +224,25 @@
             doc.autoTable({
                 head: [['Año', 'Folio', 'Curso', 'Fechas', 'Hrs', 'Tipo']],
                 body: tableRows,
-                startY: 60,
+                startY: 55,
                 theme: 'grid',
-                headStyles: { fillColor: [234, 88, 12], textColor: 255 }, 
+                headStyles: { fillColor: [234, 88, 12], textColor: 255, halign: 'center' }, 
                 styles: { fontSize: 8 },
-                columnStyles: { 2: { cellWidth: 'auto' } }
+                columnStyles: { 
+                    0: { cellWidth: 15, halign: 'center' },
+                    2: { cellWidth: 'auto' },
+                    4: { cellWidth: 15, halign: 'center' }
+                }
             });
+
+            // Pie de página
+            const pageCount = doc.internal.getNumberOfPages();
+            for(let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(150);
+                doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, 290, { align: "center" });
+            }
 
             doc.save(`Kardex_${teacherName.replace(/\s+/g, '_')}.pdf`);
         };
