@@ -57,12 +57,12 @@
         .print-header-element, .print-footer-element { display: none; }
 
         /* ========================================= */
-        /* ESTILOS ESTRICTOS DE IMPRESIÓN (AJUSTADO) */
+        /* ESTILOS DE IMPRESIÓN (FLUJO NATURAL)      */
         /* ========================================= */
         @media print {
             @page { 
                 size: letter portrait; 
-                margin: 5mm; /* Margen mínimo */
+                margin: 10mm; 
             }
             
             body { 
@@ -70,8 +70,7 @@
                 color: black !important; 
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important; 
-                margin: 0;
-                padding: 0;
+                font-size: 10pt;
             }
 
             /* Ocultar elementos de UI */
@@ -84,39 +83,16 @@
                 display: flex !important; 
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 5px;
+                margin-bottom: 15px;
                 border-bottom: 2px solid #1B396A;
-                padding-bottom: 5px;
+                padding-bottom: 10px;
                 width: 100%;
             }
             
-            /* Títulos específicos de impresión - AJUSTADOS */
-            .print-header-element h1 {
-                font-size: 12pt !important; /* Reducido para dar espacio */
-                font-weight: 900 !important;
-                text-transform: uppercase;
-                margin-bottom: 2px;
-                line-height: 1.1;
-            }
-            
-            .print-header-element h2 {
-                font-size: 9pt !important; 
-                font-weight: bold !important;
-                color: #444 !important;
-                text-transform: uppercase;
-                margin-top: 0;
-                margin-bottom: 2px;
-            }
-
-            .print-header-element h3 {
-                display: block !important;
-                font-size: 14pt !important;
-                font-weight: 900 !important;
-                color: #1B396A !important;
-                text-transform: uppercase;
-                margin-top: 2px;
-                letter-spacing: 1px;
-            }
+            /* Ajuste de fuentes del encabezado */
+            .print-header-element h1 { font-size: 12pt !important; font-weight: 900 !important; margin-bottom: 4px; }
+            .print-header-element h2 { font-size: 9pt !important; font-weight: bold !important; margin-bottom: 4px; color: #333 !important; }
+            .print-header-element h3 { font-size: 14pt !important; font-weight: 900 !important; color: #1B396A !important; margin-top: 5px; }
             
             /* Mostrar Pie de Página Oficial */
             .print-footer-element {
@@ -127,81 +103,58 @@
                 width: 100%;
                 text-align: center;
                 font-size: 8pt;
-                color: #333;
+                color: #555;
                 padding-top: 5px;
                 background: white;
                 border-top: 1px solid #eee;
             }
 
-            /* --- REESCALADO Y COMPACTACIÓN --- */
+            /* --- CONTENIDO --- */
             #dashboard-content {
                 width: 100% !important;
                 max-width: none !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                zoom: 55%; /* Zoom ajustado para que quepa todo */
+                /* Eliminamos el zoom agresivo para evitar problemas de layout */
+                zoom: 80%; 
             }
             
-            /* Eliminar sombras y bordes gruesos */
+            /* Tarjetas */
             .shadow-md, .shadow-xl, .shadow-lg { 
                 box-shadow: none !important; 
-                border: 1px solid #ccc !important; 
+                border: 1px solid #ddd !important; 
+                /* Evitar que las tarjetas se corten entre páginas */
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                margin-bottom: 15px !important;
             }
 
-            /* Reducir espacios entre tarjetas */
-            .mb-8, .mb-12, .my-8 { margin-bottom: 6px !important; margin-top: 6px !important; }
-            .gap-4, .gap-6 { gap: 6px !important; }
-            .p-5, .p-6, .p-8 { padding: 5px !important; }
+            /* Ajuste de Grillas para que se vean bien */
+            .grid { display: block !important; } /* En impresión a veces block es más seguro que grid */
+            .grid-cols-1, .grid-cols-4, .grid-cols-12 { display: flex !important; flex-wrap: wrap !important; gap: 15px !important; }
+            
+            /* Forzar anchos en flex para simular el grid */
+            .md\:grid-cols-4 > div { width: 23% !important; flex: 0 0 23% !important; }
+            
+            /* Fila 1 */
+            .lg\:col-span-7 { width: 58% !important; flex: 0 0 58% !important; }
+            .lg\:col-span-5 { width: 40% !important; flex: 0 0 40% !important; }
+            
+            /* Fila 2 */
+            .lg\:col-span-9 { width: 73% !important; flex: 0 0 73% !important; }
+            .lg\:col-span-3 { width: 25% !important; flex: 0 0 25% !important; }
 
-            /* --- CORRECCIÓN DE DEFORMACIÓN Y ALINEACIÓN (FLEXBOX STRICT) --- */
-            
-            /* Altura estricta para evitar estiramiento */
-            .chart-container-print {
-                height: 200px !important;
-                min-height: 200px !important;
-                max-height: 200px !important;
-                display: block !important;
+            /* Altura automática para no deformar */
+            .h-64, .min-h-\[320px\], .min-h-\[240px\] {
+                height: auto !important;
+                min-height: 250px !important; 
             }
             
-            /* Convertir el GRID en FLEX para impresión para evitar saltos */
-            .grid-cols-12 { 
-                display: flex !important; 
-                flex-direction: row !important;
-                width: 100% !important;
-                gap: 10px !important;
-            }
-            
-            /* Fila 1: Cursos (Izq) + Genero (Der) */
-            /* El selector .lg\\:col-span-7 escapa los dos puntos de la clase de Tailwind */
-            .lg\:col-span-7 { 
-                width: 60% !important; 
-                flex: 0 0 60% !important;
-                margin: 0 !important;
-            }
-            .lg\:col-span-5 { 
-                width: 40% !important; 
-                flex: 0 0 40% !important;
-                margin: 0 !important;
-            }
-            
-            /* Fila 2: Deptos (Izq) + Tipo (Der) */
-            .lg\:col-span-9 { 
-                width: 75% !important; 
-                flex: 0 0 75% !important;
-                margin: 0 !important;
-            }
-            .lg\:col-span-3 { 
-                width: 25% !important; 
-                flex: 0 0 25% !important;
-                margin: 0 !important;
-            }
-
-            /* Ajustes de texto */
-            h2, h3 { color: #000 !important; font-size: 14pt !important; }
-            .text-2xl { font-size: 16pt !important; }
+            /* Textos */
+            h2, h3 { color: #000 !important; }
             .text-white { color: #000 !important; }
-            /* Bordes de tarjetas de KPIs */
-            .bg-\[\#1B396A\] { background-color: transparent !important; color: black !important; border: 1px solid black; }
+            /* KPI Cards */
+            .bg-\[\#1B396A\] { background-color: transparent !important; color: black !important; border: 1px solid #000 !important; }
         }
     </style>
 </head>
