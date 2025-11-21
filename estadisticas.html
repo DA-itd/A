@@ -430,9 +430,15 @@
                 setError(null);
                 
                 try {
-                    const cleanStats = { ...statsData, allDepartamentos: undefined };
+                    const cleanStats = { 
+                        totalInscripciones: statsData.totalInscripciones,
+                        topDepartamentos: statsData.topDepartamentos,
+                        topCursos: statsData.topCursos,
+                        coberturaDocente: statsData.coberturaDocente
+                    };
+                    
                     // Enviamos el prompt a nuestro backend (Apps Script)
-                    const promptText = `Actúa como analista académico. Analiza estos datos del periodo ${period}: ${JSON.stringify(cleanStats)}. Dame un resumen ejecutivo breve.`;
+                    const promptText = `Actúa como analista académico. Analiza estos datos del periodo ${period}: ${JSON.stringify(cleanStats)}. Dame un resumen ejecutivo breve y profesional.`;
                     
                     // Hacemos la petición a nuestro propio Apps Script, no a Google directamente
                     const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
@@ -455,10 +461,16 @@
                 } catch (err) { 
                     console.error("AI Error:", err); 
                     let msg = err.message;
-                    // Detectar error de permisos y dar instrucciones precisas
+                    
+                    // Traducción y mejora de mensajes de error comunes
                     if(msg.includes("No cuentas con el permiso") || msg.includes("permissions") || msg.includes("Exception:")) {
                         msg = "⚠️ EL SCRIPT NECESITA AUTORIZACIÓN: Ve al editor de Apps Script, ejecuta la función 'AUTHORIZE_PERMISSIONS', acepta los permisos y crea una Nueva Implementación (Deploy).";
+                    } else if(msg.includes("quota") || msg.includes("429") || msg.includes("Too Many Requests")) {
+                        msg = "⏳ Límite de uso alcanzado. El servicio gratuito de IA está saturado momentáneamente. Por favor, espera 1 minuto e intenta de nuevo.";
+                    } else if(msg.includes("bill") || msg.includes("payment")) {
+                        msg = "⚠️ Error de facturación en la cuenta de Google Cloud asociada a la API Key.";
                     }
+
                     setError(msg); 
                 } finally { 
                     setLoading(false); 
@@ -472,7 +484,7 @@
                         {!analysis && !loading && <button onClick={handleGenerateAnalysis} className="bg-[#9D2449] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md hover:bg-[#801d3b]">⚡ Generar Análisis</button>}
                     </div>
                     {loading && <div className="text-[#1B396A] p-4 animate-pulse font-bold">Analizando datos con IA... Esto puede tomar unos segundos.</div>}
-                    {error && <div className="text-red-600 p-3 text-sm bg-red-50 rounded border border-red-200 font-bold">{error}</div>}
+                    {error && <div className="text-amber-800 p-3 text-sm bg-amber-50 rounded border border-amber-200 font-bold">{error}</div>}
                     {analysis && <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-[#D4AF37] markdown-body text-sm" dangerouslySetInnerHTML={{ __html: marked.parse(analysis) }} />}
                 </div>
             );
