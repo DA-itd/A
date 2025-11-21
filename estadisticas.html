@@ -56,11 +56,34 @@
 
         @media print {
             @page { size: letter portrait; margin: 1.0cm; }
-            body { background: white !important; color: black !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { 
+                background: white !important; 
+                color: black !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                padding-top: 110px; /* Espacio para el header fijo */
+                transform: scale(0.75); /* Reducir escala general */
+                transform-origin: top center;
+                width: 133%; /* Compensar la escala (1 / 0.75) */
+            }
+            
             header, footer, #back-link, .no-print, button, select, .bg-gray-50.border, #dashboard-header-controls, .print-hide { display: none !important; }
             
-            /* Mostrar encabezado oficial solo al imprimir */
-            .print-header-element { display: flex !important; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #1B396A; padding-bottom: 10px; width: 100%; }
+            /* Encabezado FIJO en todas las páginas */
+            .print-header-element { 
+                display: flex !important; 
+                justify-content: space-between; 
+                align-items: center; 
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 90px;
+                background: white;
+                z-index: 1000;
+                border-bottom: 2px solid #1B396A; 
+                padding-bottom: 10px; 
+            }
             .print-header-element img { height: 60px; object-fit: contain; }
             .print-header-element .text-center { flex: 1; padding: 0 20px; }
             .print-header-element h1 { font-size: 16pt !important; font-weight: 900 !important; margin: 0; color: #1B396A; line-height: 1.2; }
@@ -68,16 +91,21 @@
             
             .print-footer-element { display: block !important; position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 9pt; color: #555; padding-top: 10px; background: white; border-top: 1px solid #eee; }
             
-            #dashboard-content { width: 100% !important; margin: 0 !important; padding: 0 !important; zoom: 0.85; }
-            .bg-white, .shadow-md, .shadow-xl { box-shadow: none !important; border: none !important; margin-bottom: 20px !important; break-inside: avoid; }
-            canvas { max-width: 100% !important; height: auto !important; max-height: 300px !important; }
+            #dashboard-content { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .bg-white, .shadow-md, .shadow-xl { box-shadow: none !important; border: none !important; margin-bottom: 15px !important; break-inside: avoid; }
+            
+            /* Gráficas más pequeñas en impresión */
+            .chart-container-wrapper { height: 220px !important; min-height: 0 !important; }
+            canvas { max-width: 100% !important; max-height: 220px !important; }
             
             .grid { display: block !important; }
             .grid > div { margin-bottom: 20px; width: 100% !important; page-break-inside: avoid; }
             
             /* Ajuste para los KPIs */
             .md\:grid-cols-4 { display: flex !important; flex-wrap: wrap; gap: 10px; justify-content: space-between; }
-            .md\:grid-cols-4 > div { flex: 1 1 22%; border: 1px solid #ddd !important; margin-bottom: 10px; }
+            .md\:grid-cols-4 > div { flex: 1 1 22%; border: 1px solid #ddd !important; margin-bottom: 10px; padding: 10px !important; }
+            .md\:grid-cols-4 .text-3xl { font-size: 1.5rem !important; }
+            .md\:grid-cols-4 .text-2xl { font-size: 1.2rem !important; }
         }
     </style>
 </head>
@@ -361,17 +389,17 @@
 
                     {/* Charts Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-8">
-                        <div className="lg:col-span-7 h-96">
+                        <div className="lg:col-span-7 h-96 chart-container-wrapper">
                             <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" horizontal={true} />
                         </div>
-                        <div className="lg:col-span-5 h-96">
+                        <div className="lg:col-span-5 h-96 chart-container-wrapper">
                             <StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="chartGen" />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
                         <div className="lg:col-span-9 h-full flex flex-col bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
-                            <div className="p-6 flex-1 h-96">
+                            <div className="p-6 flex-1 h-96 chart-container-wrapper">
                                 <StatsChart type="bar" data={processedDepts.chartData} title="Top 5 Departamentos" id="chartDept" horizontal={true} />
                             </div>
                             <div className="bg-gray-50 p-4 border-t border-gray-200 rounded-b-xl print-hide">
@@ -384,13 +412,13 @@
                             </div>
                         </div>
                         <div className="lg:col-span-3 h-full">
-                             <div className="h-96">
+                             <div className="h-96 chart-container-wrapper">
                                 <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={false} />
                              </div>
                         </div>
                     </div>
 
-                     <div className="mb-8 h-96">
+                     <div className="mb-8 h-96 chart-container-wrapper">
                         <StatsChart type="line" data={stats.historicalTrend || {}} title="Evolución Histórica" id="chartHistory" horizontal={false} />
                     </div>
                 </div>
