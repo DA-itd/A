@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estadísticas - Portal de Actualización Docente ITD</title>
     
-    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
     
-    <!-- React y Babel -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <!-- React y Babel (CDNJS para mayor estabilidad) -->
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     
     <!-- Estilos y Utilidades -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     
-    <!-- Google Identity -->
+    <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <!-- Google tag (gtag.js) -->
@@ -37,21 +37,33 @@
         .bg-tecnm-blue { background-color: #1B396A; }
         .border-tecnm-guinda { border-color: #9D2449; }
         .text-tecnm-guinda { color: #9D2449; }
+        
+        /* Spinner para carga inicial */
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #9D2449;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<!-- Fondo actualizado para coincidir con historial.html -->
-<body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800">
+<!-- Fondo cálido (orange/amber) igual que historial.html -->
+<body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800 flex flex-col">
 
     <!-- Header -->
     <header class="bg-white shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 object-contain">
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 object-contain">
                 <div class="text-center flex-1">
                     <h1 class="text-lg sm:text-2xl font-bold text-tecnm-blue">ESTADÍSTICAS</h1>
                     <p class="text-xs sm:text-sm text-blue-700 font-semibold">Actualización Docente ITD</p>
                 </div>
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 object-contain">
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 object-contain">
             </div>
         </div>
     </header>
@@ -63,7 +75,15 @@
         </a>
     </div>
 
-    <div id="root"></div>
+    <!-- Contenedor Principal React -->
+    <div id="root" class="flex-grow container mx-auto px-4">
+        <!-- Fallback visible si React falla -->
+        <div class="bg-white p-8 rounded-xl shadow-lg max-w-md mx-auto mt-10 text-center">
+            <div class="loader"></div>
+            <h2 class="text-xl font-bold text-gray-700 mt-4">Cargando sistema...</h2>
+            <p class="text-sm text-gray-500 mt-2">Si esto tarda demasiado, por favor recargue la página.</p>
+        </div>
+    </div>
 
     <footer class="bg-gradient-to-r from-orange-900 to-amber-900 text-white text-center py-6 mt-12">
         <div class="container mx-auto px-4">
@@ -77,17 +97,15 @@
         const { useState, useEffect, useRef } = React;
 
         const CONFIG = {
-            // URL del Script de Google Apps (backend)
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
         };
 
-        // Función segura para decodificar JWT (evita errores de atob con caracteres especiales)
         function parseJwt(token) {
             try {
-                var base64Url = token.split('.')[1];
-                var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
                     return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
                 }).join(''));
                 return JSON.parse(jsonPayload);
@@ -114,9 +132,14 @@
 
             useEffect(() => {
                 if (!data) return;
-
-                // Limpiar gráficas previas para evitar superposición
-                Object.values(chartsRef.current).forEach(chart => chart && chart.destroy());
+                
+                // Limpieza segura
+                Object.keys(chartsRef.current).forEach(key => {
+                    if (chartsRef.current[key]) {
+                        chartsRef.current[key].destroy();
+                        chartsRef.current[key] = null;
+                    }
+                });
 
                 const commonOptions = {
                     responsive: true,
@@ -124,83 +147,77 @@
                     plugins: { legend: { position: 'bottom' } }
                 };
 
-                // 1. Gráfica por Departamento (Barras)
-                const deptLabels = data.topDepartamentos ? data.topDepartamentos.map(d => d[0]) : [];
-                const deptValues = data.topDepartamentos ? data.topDepartamentos.map(d => d[1]) : [];
+                try {
+                    // 1. Gráfica por Departamento
+                    const ctxDept = document.getElementById('chartDept');
+                    if (ctxDept && data.topDepartamentos) {
+                        chartsRef.current.dept = new Chart(ctxDept, {
+                            type: 'bar',
+                            data: {
+                                labels: data.topDepartamentos.map(d => d[0]),
+                                datasets: [{
+                                    label: 'Participantes',
+                                    data: data.topDepartamentos.map(d => d[1]),
+                                    backgroundColor: '#1B396A',
+                                    borderRadius: 4
+                                }]
+                            },
+                            options: { ...commonOptions, plugins: { legend: { display: false } } }
+                        });
+                    }
 
-                const ctxDept = document.getElementById('chartDept')?.getContext('2d');
-                if (ctxDept && deptLabels.length > 0) {
-                    chartsRef.current.dept = new Chart(ctxDept, {
-                        type: 'bar',
-                        data: {
-                            labels: deptLabels,
-                            datasets: [{
-                                label: 'Participantes',
-                                data: deptValues,
-                                backgroundColor: 'rgba(27, 57, 106, 0.8)', // Azul TecNM
-                                borderRadius: 4
-                            }]
-                        },
-                        options: {
-                            ...commonOptions,
-                            plugins: { legend: { display: false } }
-                        }
-                    });
+                    // 2. Gráfica por Género
+                    const ctxGender = document.getElementById('chartGender');
+                    if (ctxGender && data.distribucionGenero) {
+                        chartsRef.current.gender = new Chart(ctxGender, {
+                            type: 'doughnut',
+                            data: {
+                                labels: Object.keys(data.distribucionGenero),
+                                datasets: [{
+                                    data: Object.values(data.distribucionGenero),
+                                    backgroundColor: ['#1B396A', '#9D2449', '#9CA3AF'],
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: commonOptions
+                        });
+                    }
+
+                    // 3. Top Cursos
+                    const ctxCourses = document.getElementById('chartCourses');
+                    if (ctxCourses && data.topCursos) {
+                        const labels = data.topCursos.map(c => {
+                            const name = c[0] || '';
+                            return name.length > 30 ? name.substring(0, 30) + '...' : name;
+                        });
+                        chartsRef.current.courses = new Chart(ctxCourses, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Inscritos',
+                                    data: data.topCursos.map(c => c[1]),
+                                    backgroundColor: '#9D2449',
+                                    borderRadius: 4,
+                                    indexAxis: 'y',
+                                }]
+                            },
+                            options: { ...commonOptions, indexAxis: 'y', plugins: { legend: { display: false } } }
+                        });
+                    }
+                } catch (e) {
+                    console.error("Error creando gráficas:", e);
                 }
 
-                // 2. Gráfica por Género (Doughnut)
-                const genderLabels = data.distribucionGenero ? Object.keys(data.distribucionGenero) : [];
-                const genderValues = data.distribucionGenero ? Object.values(data.distribucionGenero) : [];
-
-                const ctxGender = document.getElementById('chartGender')?.getContext('2d');
-                if (ctxGender && genderLabels.length > 0) {
-                    chartsRef.current.gender = new Chart(ctxGender, {
-                        type: 'doughnut',
-                        data: {
-                            labels: genderLabels,
-                            datasets: [{
-                                data: genderValues,
-                                backgroundColor: ['#1B396A', '#9D2449', '#9CA3AF'], // Azul y Guinda
-                                borderWidth: 0
-                            }]
-                        },
-                        options: commonOptions
-                    });
-                }
-
-                // 3. Top Cursos (Horizontal Bar)
-                const courseLabels = data.topCursos ? data.topCursos.map(c => c[0].length > 25 ? c[0].substring(0, 25) + '...' : c[0]) : [];
-                const courseValues = data.topCursos ? data.topCursos.map(c => c[1]) : [];
-                
-                const ctxCourses = document.getElementById('chartCourses')?.getContext('2d');
-                if (ctxCourses && courseLabels.length > 0) {
-                    chartsRef.current.courses = new Chart(ctxCourses, {
-                        type: 'bar',
-                        data: {
-                            labels: courseLabels,
-                            datasets: [{
-                                label: 'Inscritos',
-                                data: courseValues,
-                                backgroundColor: 'rgba(157, 36, 73, 0.7)', // Guinda claro
-                                borderRadius: 4,
-                                indexAxis: 'y',
-                            }]
-                        },
-                        options: {
-                            ...commonOptions,
-                            indexAxis: 'y',
-                            plugins: { legend: { display: false } }
-                        }
-                    });
-                }
-
-                return () => Object.values(chartsRef.current).forEach(c => c && c.destroy());
+                return () => {
+                    Object.values(chartsRef.current).forEach(c => c && c.destroy());
+                };
             }, [data]);
 
             return (
-                <div className="animate-fadeIn container mx-auto px-4 py-4 max-w-7xl">
+                <div className="animate-fadeIn container mx-auto py-4">
                     
-                    {/* Tarjeta Principal con Línea Guinda (Estilo solicitado) */}
+                    {/* Tarjeta Principal con Línea Guinda */}
                     <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-8 border-tecnm-guinda flex flex-col md:flex-row justify-between items-center gap-4">
                         <div>
                             <h2 className="text-3xl font-bold text-tecnm-blue">Tablero de Control</h2>
@@ -230,7 +247,7 @@
                         <KpiCard title="Cursos Ofertados" value={data.historicalTrend?.[selectedPeriod === 'ACTUAL' ? new Date().getFullYear() : selectedPeriod]?.cursos || (data.topCursos ? data.topCursos.length : 0)} icon="📚" color="border-tecnm-guinda" />
                     </div>
 
-                    {/* Gráficas Principales */}
+                    {/* Gráficas */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                         <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-800">
                             <h3 className="text-lg font-bold text-tecnm-blue mb-4">Participación por Departamento (Top 5)</h3>
@@ -252,60 +269,64 @@
 
         const LoginScreen = ({ onLogin, error }) => {
             const btnRef = useRef(null);
+            const [status, setStatus] = useState('loading'); // loading, ready, error
 
             useEffect(() => {
-                // Función para intentar renderizar el botón con reintentos (Polling)
-                const renderGoogleButton = () => {
-                    if (window.google && window.google.accounts && btnRef.current) {
+                let attempts = 0;
+                const interval = setInterval(() => {
+                    if (window.google && window.google.accounts) {
+                        clearInterval(interval);
+                        setStatus('ready');
                         try {
                             window.google.accounts.id.initialize({
                                 client_id: CONFIG.GOOGLE_CLIENT_ID,
-                                callback: onLogin
+                                callback: onLogin,
+                                cancel_on_tap_outside: false
                             });
-                            window.google.accounts.id.renderButton(btnRef.current, {
-                                theme: "filled_blue", size: "large", shape: "rectangular", width: 280
-                            });
-                            return true;
+                            if (btnRef.current) {
+                                window.google.accounts.id.renderButton(btnRef.current, {
+                                    theme: "filled_blue", size: "large", shape: "rectangular", width: 280
+                                });
+                            }
                         } catch (e) {
-                            console.error("Error renderizando botón Google:", e);
-                            return false;
+                            console.error("GSI Error:", e);
+                            setStatus('error');
+                        }
+                    } else {
+                        attempts++;
+                        if (attempts > 20) { // 10 segundos
+                            clearInterval(interval);
+                            setStatus('timeout');
                         }
                     }
-                    return false;
-                };
-
-                // Intento inmediato
-                if (!renderGoogleButton()) {
-                    // Si falla, intentar cada 500ms (máximo 10 veces)
-                    let attempts = 0;
-                    const interval = setInterval(() => {
-                        attempts++;
-                        if (renderGoogleButton() || attempts > 10) {
-                            clearInterval(interval);
-                        }
-                    }, 500);
-                    return () => clearInterval(interval);
-                }
+                }, 500);
+                return () => clearInterval(interval);
             }, [onLogin]);
 
             return (
-                <div className="flex flex-col items-center justify-center py-20 animate-fadeIn px-4">
+                <div className="flex flex-col items-center justify-center py-12 animate-fadeIn px-4">
                     <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full border-t-8 border-tecnm-blue">
                         <div className="text-6xl mb-4">🔒</div>
                         <h2 className="text-2xl font-bold text-tecnm-blue mb-2">Acceso a Estadísticas</h2>
                         <p className="text-gray-600 mb-8">
-                            Esta sección muestra datos sensibles. Por favor, inicie sesión con su cuenta institucional.
+                            Por favor, inicie sesión con su cuenta institucional para visualizar los datos.
                         </p>
                         
                         {error && (
                             <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-6 border border-red-200">
-                                {error}
+                                <strong>Error:</strong> {error}
+                            </div>
+                        )}
+
+                        {status === 'timeout' && (
+                            <div className="bg-yellow-50 text-yellow-800 p-3 rounded mb-4 text-sm">
+                                La conexión con Google está tardando. Verifique su internet.
                             </div>
                         )}
                         
                         <div className="flex justify-center min-h-[50px]" ref={btnRef}>
-                            {/* El botón de Google se renderiza aquí */}
-                            <span className="text-gray-400 text-sm self-center">Cargando acceso...</span>
+                            {status === 'loading' && <span className="text-gray-400 text-sm self-center animate-pulse">Cargando botón de acceso...</span>}
+                            {status === 'timeout' && <button onClick={() => window.location.reload()} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Recargar Página</button>}
                         </div>
                     </div>
                 </div>
@@ -314,12 +335,11 @@
 
         const LoadingScreen = () => (
             <div className="flex flex-col items-center justify-center h-96 animate-fadeIn">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-tecnm-guinda mb-4"></div>
+                <div className="loader mb-4"></div>
                 <p className="text-gray-600 font-semibold animate-pulse">Procesando datos del servidor...</p>
             </div>
         );
 
-        // --- COMPONENTE PRINCIPAL (APP) ---
         const App = () => {
             const [user, setUser] = useState(null);
             const [statsResponse, setStatsResponse] = useState(null);
@@ -329,7 +349,6 @@
 
             const handleLogin = async (response) => {
                 try {
-                    // Usamos la función segura parseJwt
                     const payload = parseJwt(response.credential);
                     if (payload) {
                         setUser({
@@ -340,11 +359,11 @@
                         });
                         setError(null);
                     } else {
-                        setError("No se pudo decodificar su información de inicio de sesión.");
+                        setError("No se pudo decodificar su información.");
                     }
                 } catch (e) {
                     console.error(e);
-                    setError("Error al procesar la autenticación.");
+                    setError("Error de autenticación interna.");
                 }
             };
 
@@ -358,34 +377,25 @@
                 setLoading(true);
                 setError(null);
                 try {
-                    // Llamada al script de Google Apps
                     const url = `${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}&id_token=${user.token}`;
-                    
                     const response = await fetch(url);
                     const result = await response.json();
 
                     if (result.success) {
                         setStatsResponse(result);
                     } else {
-                        // Si el error es específico, lo mostramos, si no, mensaje genérico
-                        setError(result.message || "No se pudieron cargar las estadísticas. Verifique permisos o intente de nuevo.");
+                        setError(result.message || "No se pudieron cargar las estadísticas.");
                     }
                 } catch (err) {
                     console.error(err);
-                    setError("Error de conexión con el servidor. Por favor revise su conexión a internet.");
+                    setError("Error de conexión con el servidor.");
                 } finally {
                     setLoading(false);
                 }
             };
 
-            if (!user) {
-                return <LoginScreen onLogin={handleLogin} error={error} />;
-            }
-
-            if (loading && !statsResponse) {
-                return <LoadingScreen />;
-            }
-
+            if (!user) return <LoginScreen onLogin={handleLogin} error={error} />;
+            if (loading && !statsResponse) return <LoadingScreen />;
             if (error) {
                 return (
                     <div className="container mx-auto p-8 text-center animate-fadeIn">
@@ -394,18 +404,8 @@
                             <h3 className="font-bold text-2xl mb-2 text-red-600">Error de Carga</h3>
                             <p className="text-lg mb-6">{error}</p>
                             <div className="flex justify-center gap-4">
-                                <button 
-                                    onClick={() => fetchStatistics(selectedPeriod)}
-                                    className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition shadow"
-                                >
-                                    Reintentar
-                                </button>
-                                <button 
-                                    onClick={() => { setUser(null); setError(null); }}
-                                    className="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 transition"
-                                >
-                                    Cerrar Sesión
-                                </button>
+                                <button onClick={() => fetchStatistics(selectedPeriod)} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition shadow">Reintentar</button>
+                                <button onClick={() => { setUser(null); setError(null); }} className="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 transition">Cerrar Sesión</button>
                             </div>
                         </div>
                     </div>
@@ -424,8 +424,25 @@
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        // Montaje seguro de React
+        try {
+            const rootElement = document.getElementById('root');
+            if (rootElement) {
+                const root = ReactDOM.createRoot(rootElement);
+                root.render(<App />);
+            } else {
+                console.error("Elemento root no encontrado");
+            }
+        } catch (error) {
+            console.error("Error crítico al montar React:", error);
+            document.getElementById('root').innerHTML = `
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-center mt-10" role="alert">
+                    <strong class="font-bold">Error de Inicialización:</strong>
+                    <span class="block sm:inline">No se pudo cargar la aplicación. Por favor, actualice su navegador.</span>
+                    <br><small>${error.message}</small>
+                </div>
+            `;
+        }
     </script>
 </body>
 </html>
