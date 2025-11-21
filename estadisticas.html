@@ -20,11 +20,10 @@
     
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
-    <!-- Librerías para Reportes (PDF, Excel, Captura) -->
+    <!-- Librerías para Reportes (PDF, Excel) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <!-- Google Identity -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -522,106 +521,6 @@
             );
         };
 
-        const PrintOptionsModal = ({ isOpen, onClose }) => {
-            const [isCapturing, setIsCapturing] = useState(false);
-
-            if (!isOpen) return null;
-
-            const handlePrintDirect = () => {
-                window.print();
-                onClose();
-            };
-
-            const handleSavePDF = async () => {
-                setIsCapturing(true);
-                const element = document.getElementById('dashboard-content');
-                if (!element) { alert("No se encontró el contenido."); setIsCapturing(false); return; }
-
-                try {
-                    // 1. Captura de pantalla de alta calidad
-                    const canvas = await html2canvas(element, { 
-                        scale: 2, 
-                        useCORS: true,
-                        logging: false,
-                        backgroundColor: '#fff8f0' // Fondo cálido suave para el PDF
-                    });
-
-                    const imgData = canvas.toDataURL('image/png');
-                    const { jsPDF } = window.jspdf;
-                    
-                    // 2. Configuración PDF (Landscape A4)
-                    const doc = new jsPDF('l', 'mm', 'a4');
-                    const pdfWidth = doc.internal.pageSize.getWidth();
-                    const pdfHeight = doc.internal.pageSize.getHeight();
-                    
-                    // Calcular ajuste de imagen
-                    const imgProps = doc.getImageProperties(imgData);
-                    const ratio = imgProps.width / imgProps.height;
-                    const renderWidth = pdfWidth - 20; // Margen 10mm
-                    const renderHeight = renderWidth / ratio;
-
-                    // Si es muy alto, ajustar por alto
-                    let finalWidth = renderWidth;
-                    let finalHeight = renderHeight;
-                    if (renderHeight > (pdfHeight - 30)) {
-                        finalHeight = pdfHeight - 30;
-                        finalWidth = finalHeight * ratio;
-                    }
-
-                    const x = (pdfWidth - finalWidth) / 2;
-                    
-                    // 3. Agregar Imagen
-                    doc.addImage(imgData, 'PNG', x, 10, finalWidth, finalHeight);
-
-                    // 4. Agregar Pie de Página Oficial Digitalmente
-                    doc.setFontSize(10);
-                    doc.setTextColor(50);
-                    doc.setFont("helvetica", "normal");
-                    const footerY = pdfHeight - 15;
-                    doc.text("© Coordinación de Actualización Docente", pdfWidth / 2, footerY, { align: "center" });
-                    doc.setFont("helvetica", "bold");
-                    doc.text("M.C. Alejandro Calderón Rentería", pdfWidth / 2, footerY + 5, { align: "center" });
-
-                    doc.save('Graficas_Estadisticas_ITD.pdf');
-                    onClose();
-
-                } catch (e) {
-                    console.error(e);
-                    alert("Error al generar el PDF visual.");
-                } finally {
-                    setIsCapturing(false);
-                }
-            };
-
-            return (
-                <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-4 backdrop-blur-sm no-print-modal">
-                    <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full animate-fadeIn border-t-4 border-[#D4AF37]">
-                        <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Opciones de Impresión</h3>
-                        <p className="text-sm text-gray-600 mb-6 text-center">¿Cómo desea obtener las gráficas?</p>
-                        
-                        <div className="space-y-3">
-                            <button 
-                                onClick={handleSavePDF} 
-                                disabled={isCapturing}
-                                className="w-full bg-[#1B396A] hover:bg-[#152d54] text-white py-3 px-4 rounded-lg font-bold shadow flex items-center justify-center gap-3 transition-transform hover:scale-105">
-                                {isCapturing ? <div className="animate-spin h-5 w-5 border-2 border-white rounded-full border-t-transparent"></div> : <span className="text-xl">📄</span>}
-                                Guardar como PDF
-                            </button>
-                            
-                            <button 
-                                onClick={handlePrintDirect}
-                                className="w-full bg-white border-2 border-gray-200 hover:border-gray-400 text-gray-700 py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-3 hover:bg-gray-50">
-                                <span className="text-xl">🖨️</span>
-                                Enviar a Impresora
-                            </button>
-                        </div>
-                        
-                        <button onClick={onClose} className="mt-6 text-sm text-gray-500 hover:text-red-500 w-full text-center underline decoration-dotted">Cancelar</button>
-                    </div>
-                </div>
-            );
-        };
-
         const PdfPreviewModal = ({ isOpen, onClose, pdfUrl, onDownload }) => {
             if (!isOpen) return null;
             return (
@@ -649,11 +548,18 @@
             );
         };
 
-        const ReportModal = ({ isOpen, onClose, departments, period, onGeneratePdf, onGenerateExcel }) => {
+        const ReportModal = ({ isOpen, onClose, departments, period, onGeneratePdf, onGenerateExcel, userEmail }) => {
             const [selectedDept, setSelectedDept] = useState('TODOS');
             const [loading, setLoading] = useState(false);
             const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
             const [showPreview, setShowPreview] = useState(false);
+
+            // Lista blanca de administradores para descargar Excel
+            const ADMIN_EMAILS = [
+                'alejandro.calderon@itdurango.edu.mx',
+                'desarrollo.academico@itdurango.edu.mx'
+            ];
+            const isAdmin = ADMIN_EMAILS.includes(userEmail);
 
             useEffect(() => {
                 if (isOpen) { setShowPreview(false); setPdfPreviewUrl(null); }
@@ -705,9 +611,13 @@
                             <button onClick={handlePreviewPdf} disabled={loading} className="bg-[#1B396A] hover:bg-[#152d54] text-white px-4 py-3 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">
                                 {loading ? '⏳ Generando...' : '👁️ Vista Previa PDF'}
                             </button>
-                            <button onClick={handleExcel} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">
-                                {loading ? '⏳' : '📊'} Descargar Excel
-                            </button>
+                            
+                            {isAdmin && (
+                                <button onClick={handleExcel} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">
+                                    {loading ? '⏳' : '📊'} Descargar Excel
+                                </button>
+                            )}
+                            
                             <button onClick={onClose} disabled={loading} className="mt-2 bg-gray-100 text-gray-600 px-4 py-2 rounded-lg font-bold hover:bg-gray-200">Cancelar</button>
                         </div>
                     </div>
@@ -719,7 +629,6 @@
             const [stats, setStats] = useState(null);
             const [loading, setLoading] = useState(true);
             const [showReportModal, setShowReportModal] = useState(false);
-            const [showPrintModal, setShowPrintModal] = useState(false);
             const [period, setPeriod] = useState('ACTUAL');
             const [availableYears, setAvailableYears] = useState([]);
 
@@ -864,13 +773,12 @@
                                     <p className="mb-6 opacity-90 text-sm font-bold">Generar reporte detallado de participantes del periodo <strong>{period}</strong>.</p>
                                     <div className="flex justify-center gap-4">
                                         <button onClick={() => setShowReportModal(true)} className="bg-white text-[#1B396A] px-8 py-3 rounded-full font-bold shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105">📄 Generar Reporte</button>
-                                        <button onClick={() => setShowPrintModal(true)} className="bg-[#D4AF37] text-white px-8 py-3 rounded-full font-bold shadow-md hover:bg-[#bfa13f] transition-transform transform hover:scale-105">🖨️ Imprimir Gráficas</button>
+                                        <button onClick={() => window.print()} className="bg-[#D4AF37] text-white px-8 py-3 rounded-full font-bold shadow-md hover:bg-[#bfa13f] transition-transform transform hover:scale-105">🖨️ Imprimir Gráficas</button>
                                     </div>
                                 </div>
                             </div>
 
-                            <ReportModal isOpen={showReportModal} onClose={() => setShowReportModal(false)} departments={stats.allDepartamentos || []} period={period} onGeneratePdf={handlePdf} onGenerateExcel={handleExcel} />
-                            <PrintOptionsModal isOpen={showPrintModal} onClose={() => setShowPrintModal(false)} />
+                            <ReportModal isOpen={showReportModal} onClose={() => setShowReportModal(false)} departments={stats.allDepartamentos || []} period={period} onGeneratePdf={handlePdf} onGenerateExcel={handleExcel} userEmail={user.email} />
                         </>
                     )}
                 </div>
