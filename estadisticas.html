@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,26 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estadísticas - Portal de Actualización Docente ITD</title>
     
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
     
     <!-- React y Babel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     
     <!-- Estilos y Utilidades -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-    <!-- Plugin para etiquetas de datos en gráficas -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <!-- Librerías para Reportes (PDF, Excel) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Google Identity -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -42,817 +31,338 @@
     <style>
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-        .markdown-body h1 { font-size: 1.5em; font-weight: bold; margin-bottom: 0.5em; color: #1B396A; }
-        .markdown-body h2 { font-size: 1.25em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; color: #9D2449; }
-        .markdown-body p { margin-bottom: 0.8em; line-height: 1.6; }
-        .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
-        .markdown-body li { margin-bottom: 0.3em; }
-        .markdown-body strong { color: #1B396A; }
-        
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
-
-        /* Elementos exclusivos de impresión */
-        .print-header-element, .print-footer-element { display: none; }
-
-        /* ========================================= */
-        /* ESTILOS DE IMPRESIÓN (MODO EJECUTIVO)     */
-        /* ========================================= */
-        @media print {
-            @page { 
-                size: letter portrait; 
-                margin: 1cm; 
-            }
-            
-            body { 
-                background: white !important; 
-                color: black !important; 
-                font-size: 10pt;
-                -webkit-print-color-adjust: exact !important; 
-                print-color-adjust: exact !important; 
-            }
-
-            /* Ocultar elementos de UI */
-            header, footer, #back-link, .no-print, button, select, .bg-gray-50.border, #dashboard-header-controls { 
-                display: none !important; 
-            }
-
-            /* Mostrar Encabezado Oficial */
-            .print-header-element { 
-                display: flex !important; 
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 10px;
-                border-bottom: 2px solid #1B396A;
-                padding-bottom: 5px;
-                width: 100%;
-            }
-            
-            .print-header-element h1 { font-size: 12pt !important; font-weight: 900 !important; margin-bottom: 2px; }
-            .print-header-element h2 { font-size: 9pt !important; font-weight: bold !important; margin-bottom: 2px; color: #333 !important; text-transform: uppercase; }
-            .print-header-element h3 { font-size: 14pt !important; font-weight: 900 !important; color: #1B396A !important; margin-top: 5px; }
-            
-            /* Pie de Página Oficial */
-            .print-footer-element {
-                display: block !important;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                text-align: center;
-                font-size: 8pt;
-                color: #555;
-                padding-top: 5px;
-                background: white;
-                border-top: 1px solid #eee;
-            }
-
-            /* Contenedor Principal */
-            #dashboard-content {
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            
-            /* Estilo Común de Tarjetas en Impresión */
-            .bg-white, .shadow-md, .shadow-xl, .rounded-xl { 
-                box-shadow: none !important; 
-                border: 1px solid #ccc !important;
-                border-radius: 4px !important;
-                padding: 8px !important;
-                margin-bottom: 10px !important;
-                break-inside: avoid !important; /* Evitar cortes */
-            }
-
-            /* REJILLA DE KPIs (Una fila) */
-            .grid.grid-cols-1.md\:grid-cols-4 {
-                display: flex !important;
-                flex-direction: row !important;
-                gap: 10px !important;
-                margin-bottom: 15px !important;
-            }
-            .grid.grid-cols-1.md\:grid-cols-4 > div {
-                flex: 1;
-                padding: 10px !important;
-                border: 1px solid #ddd !important;
-            }
-
-            /* FILA 1: Cursos (Izq) y Género (Der) */
-            /* Forzamos el comportamiento Flex para ponerlas lado a lado */
-            .lg\:grid-cols-12.gap-6.my-8 {
-                display: flex !important;
-                gap: 10px !important;
-                margin: 10px 0 !important;
-                height: auto !important;
-            }
-            /* Cursos - 60% ancho */
-            .lg\:col-span-7 {
-                width: 60% !important;
-                margin-right: 10px !important;
-            }
-            /* Género - 40% ancho */
-            .lg\:col-span-5 {
-                width: 40% !important;
-            }
-
-            /* FILA 2: Deptos (Izq) y Tipo (Der) */
-            .lg\:grid-cols-12.gap-6.mb-8 {
-                display: flex !important;
-                gap: 10px !important;
-                margin: 10px 0 !important;
-                height: auto !important;
-            }
-            /* Deptos - 75% ancho */
-            .lg\:col-span-9 {
-                width: 75% !important;
-                margin-right: 10px !important;
-            }
-            /* Tipo - 25% ancho */
-            .lg\:col-span-3 {
-                width: 25% !important;
-            }
-
-            /* Gráficas */
-            canvas {
-                /* Altura máxima controlada para que no ocupen toda la hoja */
-                max-height: 200px !important; 
-                width: 100% !important;
-            }
-            
-            /* Asegurar que el contenedor de la gráfica no crezca infinitamente */
-            .h-full { height: auto !important; }
-            
-            /* Títulos de gráficas más compactos */
-            h3 { font-size: 10pt !important; margin-bottom: 5px !important; }
-            
-            /* Textos */
-            h2, h3, p, span, div { color: #000 !important; }
-            .text-white { color: #000 !important; }
-            .bg-\[\#1B396A\] { background-color: transparent !important; color: black !important; border: 1px solid #000 !important; }
-        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen">
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 min-h-screen text-gray-800">
 
-    <!-- Encabezado EXCLUSIVO para Impresión -->
-    <div class="print-header-element container mx-auto px-4">
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 object-contain">
-        <div class="text-center">
-            <h1>INSTITUTO TECNOLÓGICO DE DURANGO</h1>
-            <h2>COORDINACIÓN DE ACTUALIZACIÓN DOCENTE</h2>
-            <h3>ESTADÍSTICAS</h3>
-        </div>
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 object-contain">
-    </div>
-
-    <!-- Header Web -->
-    <header class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A] no-print">
+    <!-- Header -->
+    <header class="bg-white shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
-                <div class="text-center flex-1 px-2 sm:px-4">
-                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#1B396A] leading-tight">PANEL DE ESTADÍSTICAS</h1>
-                    <p class="text-xs sm:text-sm md:text-base text-[#9D2449] mt-1 font-semibold">Desarrollo Académico</p>
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 object-contain">
+                <div class="text-center flex-1">
+                    <h1 class="text-lg sm:text-2xl font-bold text-blue-900">ESTADÍSTICAS</h1>
+                    <p class="text-xs sm:text-sm text-blue-700 font-semibold">Actualización Docente ITD</p>
                 </div>
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 object-contain">
             </div>
         </div>
     </header>
-    
-    <div id="back-link" class="container mx-auto px-4 py-4 no-print">
-        <a href="index.html" class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center gap-1 text-sm font-bold transition-colors">
-            ← Volver al Portal Principal
-        </a>
-    </div>
 
     <div id="root"></div>
 
-    <!-- Footer Web (No sale en impresión) -->
-    <footer class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449] no-print">
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
         <div class="container mx-auto px-4">
-             <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
-             <p class="text-xs sm:text-sm opacity-90">M.C. Alejandro Calderón Rentería</p>
-             <p id="copyright-year" class="text-xs sm:text-sm opacity-75 mt-1"></p>
+            <p class="font-bold text-sm">© Coordinación de Actualización Docente</p>
+            <p class="text-xs opacity-75 mt-1">Instituto Tecnológico de Durango</p>
         </div>
     </footer>
-    
-    <!-- Footer de Impresión -->
-    <div class="print-footer-element">
-        <p class="font-bold">© Coordinación de Actualización Docente</p>
-        <p>M.C. Alejandro Calderón Rentería</p>
-    </div>
 
+    <!-- LÓGICA REACT -->
     <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
+        const { useState, useEffect, useRef } = React;
 
         const CONFIG = {
-            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', 
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
+            // URL del Script de Google Apps (backend)
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
+            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
         };
 
-        const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
-        const VIBRANT_COLORS = [
-            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
-            '#8AC926', '#1982C4', '#6A4C93', '#F15BB5', '#E9C46A', '#2A9D8F', '#E76F51'
-        ];
+        // --- COMPONENTES VISUALES ---
 
-        // Mapeo de Departamentos a Siglas
-        const DEPT_ACRONYMS = {
-            "SISTEMAS Y COMPUTACION": "DSC",
-            "CIENCIAS ECONOMICO-ADMINISTRATIVAS": "DCEA",
-            "INGENIERÍA QUÍMICA-BIOQUÍMICA": "DIQB",
-            "QUIMICA-BIOQUIMICA": "DIQB",
-            "CIENCIAS DE LA TIERRA": "DCT",
-            "CIENCIAS BASICAS": "DCB",
-            "METAL-MECÁNICA": "DMM",
-            "METAL MECANICA": "DMM",
-            "INGENIERÍA INDUSTRIAL": "DII",
-            "INDUSTRIAL": "DII",
-            "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA": "DIEE",
-            "ELECTRICA Y ELECTRONICA": "DIEE",
-            "POSGRADO E INVESTIGACION": "DEPI",
-            "ADMINISTRATIVO": "ADMON",
-            "EXTERNO": "EXT",
-            "DESARROLLO ACADÉMICO": "DDA",
-            "GESTION TECNOLOGICA": "DGT"
-        };
+        const KpiCard = ({ title, value, icon, color }) => (
+            <div className={`bg-white p-6 rounded-xl shadow-md border-l-4 ${color} flex items-center justify-between transform transition hover:scale-105`}>
+                <div>
+                    <p className="text-sm text-gray-500 font-semibold uppercase tracking-wider">{title}</p>
+                    <p className="text-3xl font-bold text-gray-800 mt-1">{value}</p>
+                </div>
+                <div className="text-4xl opacity-30 grayscale">{icon}</div>
+            </div>
+        );
 
-        const getAcronym = (fullName) => {
-            if(!fullName) return "ND";
-            const nameUpper = fullName.toUpperCase()
-                .replace('DEPARTAMENTO DE ', '')
-                .replace('DIVISION DE ESTUDIOS DE ', '')
-                .replace('CENTRO DE ', '');
-            
-            for (const [key, val] of Object.entries(DEPT_ACRONYMS)) {
-                if (nameUpper.includes(key)) return val;
-            }
-            const words = nameUpper.split(' ');
-            if(words.length > 1) return words.map(w => w[0]).join('').substring(0,4);
-            return nameUpper.substring(0, 4) + ".";
-        };
-
-        const splitLabel = (label, maxLength = 45) => {
-            if (label.length <= maxLength) return label;
-            const words = label.split(' ');
-            const lines = [];
-            let currentLine = words[0];
-            for (let i = 1; i < words.length; i++) {
-                if (currentLine.length + 1 + words[i].length <= maxLength) {
-                    currentLine += " " + words[i];
-                } else {
-                    lines.push(currentLine);
-                    currentLine = words[i];
-                }
-            }
-            lines.push(currentLine);
-            return lines;
-        };
-
-        const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
-        const TECNM_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg';
-
-        const getImageDataFromURL = (url) => {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.crossOrigin = 'Anonymous';
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    resolve(canvas.toDataURL('image/png'));
-                };
-                img.onerror = (err) => { console.warn("Error cargando imagen PDF", err); resolve(null); };
-                img.src = url;
-            });
-        };
-
-        const generatePDFReport = async (data, meta, returnBlob = false) => {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
-
-            const [itdLogo, tecNmLogo] = await Promise.all([
-                getImageDataFromURL(ITD_LOGO_URL),
-                getImageDataFromURL(TECNM_LOGO_URL)
-            ]);
-
-            const drawHeader = (data) => {
-                if (tecNmLogo) doc.addImage(tecNmLogo, 'JPEG', 15, 10, 35, 16);
-                if (itdLogo) {
-                    const logoSize = 22; 
-                    doc.addImage(itdLogo, 'PNG', pageWidth - 15 - logoSize, 8, logoSize, logoSize);
-                }
-
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(12);
-                doc.setTextColor(27, 57, 106);
-                doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth / 2, 18, { align: "center" });
-                
-                doc.setFontSize(10);
-                doc.setTextColor(100);
-                doc.text("Coordinación de Actualización Docente", pageWidth / 2, 23, { align: "center" });
-                
-                doc.setFontSize(11);
-                doc.setTextColor(157, 36, 73);
-                doc.text(`REPORTE DE INSCRIPCIONES - PERIODO ${meta.period}`, pageWidth / 2, 32, { align: "center" });
-
-                doc.setFontSize(9);
-                doc.setTextColor(50);
-                doc.text(`Departamento Filtrado: ${meta.department}`, 15, 42);
-                doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString()}`, 15, 47);
-            };
-
-            const drawWatermark = () => {
-                if (itdLogo) {
-                    doc.saveGraphicsState();
-                    doc.setGState(new doc.GState({ opacity: 0.08 }));
-                    const w = 140;
-                    const h = 140;
-                    const x = (pageWidth - w) / 2;
-                    const y = (pageHeight - h) / 2;
-                    doc.addImage(itdLogo, 'PNG', x, y, w, h);
-                    doc.restoreGraphicsState();
-                }
-            };
-
-            const tableColumn = ["Docente", "Curso Inscrito", "Fechas", "Depto. que Ofrece"];
-            const tableRows = data.map(row => [
-                row.nombre,
-                row.curso,
-                row.fechas || 'N/A',
-                row.depto_oferente || 'N/A'
-            ]);
-
-            doc.autoTable({
-                head: [tableColumn],
-                body: tableRows,
-                startY: 52,
-                theme: 'grid',
-                headStyles: { fillColor: [27, 57, 106], textColor: 255, fontSize: 8, fontStyle: 'bold', halign: 'center' },
-                bodyStyles: { fontSize: 7 },
-                columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 30 }, 3: { cellWidth: 45 } },
-                alternateRowStyles: { fillColor: [245, 245, 245] },
-                margin: { top: 52, left: 15, right: 15 },
-                didDrawPage: function (data) { drawWatermark(); drawHeader(); }
-            });
-
-            const pageCount = doc.internal.getNumberOfPages();
-            for(let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
-                doc.setTextColor(150);
-                doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, 290, { align: "center" });
-            }
-
-            if (returnBlob) {
-                return doc.output('bloburl');
-            } else {
-                doc.save(`Reporte_ITD_${meta.period}_${meta.department.substring(0,10)}.pdf`);
-            }
-        };
-
-        const generateExcelReport = (data, meta) => {
-            if (typeof XLSX === 'undefined') { alert("La librería de Excel no se cargó correctamente."); return; }
-            const formattedData = data.map(row => ({ "Docente": row.nombre, "Curso Inscrito": row.curso, "Fechas del Curso": row.fechas || 'N/A', "Departamento que Ofrece": row.depto_oferente || 'N/A', "Folio": row.folio }));
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.json_to_sheet(formattedData);
-            const wscols = [{wch: 40}, {wch: 50}, {wch: 25}, {wch: 35}, {wch: 20}];
-            ws['!cols'] = wscols;
-            XLSX.utils.book_append_sheet(wb, ws, `Reporte ${meta.period}`);
-            XLSX.writeFile(wb, `Reporte_ITD_${meta.period}.xlsx`);
-        };
-
-        const StatsChart = ({ type, data, title, id, horizontal = false }) => {
-            const chartRef = useRef(null);
-            const canvasRef = useRef(null);
-            
-            const hasData = useMemo(() => {
-                if (!data) return false;
-                return Object.keys(data).length > 0;
-            }, [data]);
+        const Dashboard = ({ data, availableYears, selectedPeriod, onPeriodChange, user, onLogout }) => {
+            const chartsRef = useRef({});
 
             useEffect(() => {
-                if (!canvasRef.current || !hasData) return;
-                if (typeof window.Chart === 'undefined') return;
-                
-                if(window.ChartDataLabels) {
-                    window.Chart.register(window.ChartDataLabels);
+                if (!data) return;
+
+                // Limpiar gráficas previas
+                Object.values(chartsRef.current).forEach(chart => chart && chart.destroy());
+
+                const commonOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                };
+
+                // 1. Gráfica por Departamento (Barras)
+                // El backend ahora devuelve arrays [nombre, cantidad]
+                const deptLabels = data.topDepartamentos.map(d => d[0]);
+                const deptValues = data.topDepartamentos.map(d => d[1]);
+
+                const ctxDept = document.getElementById('chartDept')?.getContext('2d');
+                if (ctxDept) {
+                    chartsRef.current.dept = new Chart(ctxDept, {
+                        type: 'bar',
+                        data: {
+                            labels: deptLabels,
+                            datasets: [{
+                                label: 'Participantes',
+                                data: deptValues,
+                                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            ...commonOptions,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
                 }
 
-                if (chartRef.current) chartRef.current.destroy();
-                
-                try {
-                    const ctx = canvasRef.current.getContext('2d');
-                    const isPie = type === 'pie' || type === 'doughnut';
-                    const isHistory = id === 'chartHistory';
-                    
-                    let chartDataConfig = {};
-                    let chartType = type;
-                    let chartOptions = {
-                        responsive: true, 
-                        maintainAspectRatio: false,
-                        indexAxis: horizontal ? 'y' : 'x',
-                        plugins: { 
-                            legend: { 
-                                position: 'bottom', 
-                                display: isPie || isHistory,
-                                labels: { font: { weight: 'bold' } }
-                            },
-                            datalabels: {
-                                display: false
-                            }
-                        },
-                        scales: !isPie ? { 
-                            y: { 
-                                beginAtZero: true, 
-                                grid: { color: '#e0e0e0' },
-                                ticks: { font: { weight: 'bold' } }
-                            }, 
-                            x: { 
-                                beginAtZero: true, 
-                                grid: { display: false },
-                                ticks: { autoSkip: false, font: { weight: 'bold' } }
-                            } 
-                        } : {}
-                    };
+                // 2. Gráfica por Género (Doughnut)
+                const genderLabels = Object.keys(data.distribucionGenero);
+                const genderValues = Object.values(data.distribucionGenero);
 
-                    if (isHistory) {
-                        chartType = 'line';
-                        const labels = Object.keys(data).sort((a,b) => parseInt(a) - parseInt(b));
-                        const regData = labels.map(year => data[year].registros);
-                        const courseData = labels.map(year => data[year].cursos);
-                        
-                        chartDataConfig = {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    label: 'Docentes Inscritos', 
-                                    data: regData,
-                                    borderColor: '#36A2EB',
-                                    backgroundColor: '#36A2EB',
-                                    tension: 0.3,
-                                    pointRadius: 6,
-                                    pointHoverRadius: 8,
-                                    borderWidth: 3
-                                },
-                                {
-                                    label: 'Cursos Ofertados',
-                                    data: courseData,
-                                    borderColor: '#FF6384',
-                                    backgroundColor: '#FF6384',
-                                    tension: 0.3,
-                                    pointRadius: 6,
-                                    pointHoverRadius: 8,
-                                    borderWidth: 3
-                                }
-                            ]
-                        };
-
-                        chartOptions.plugins.datalabels = {
-                            display: true,
-                            color: '#333',
-                            font: { weight: 'bold', size: 11 },
-                            align: 'top',
-                            offset: 4,
-                            formatter: Math.round
-                        };
-
-                    } else {
-                        let backgroundColors = isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS;
-                        let labels = Object.keys(data);
-                        
-                        if (horizontal && id === 'chartCourse') {
-                            labels = labels.map(l => splitLabel(l));
-                        }
-
-                        let values = Object.values(data);
-
-                        chartDataConfig = {
-                            labels: labels,
+                const ctxGender = document.getElementById('chartGender')?.getContext('2d');
+                if (ctxGender) {
+                    chartsRef.current.gender = new Chart(ctxGender, {
+                        type: 'doughnut',
+                        data: {
+                            labels: genderLabels,
                             datasets: [{
-                                label: title || 'Valor',
-                                data: values,
-                                backgroundColor: backgroundColors,
-                                borderWidth: isPie ? 2 : 0,
-                                borderRadius: isPie ? 0 : 4
+                                data: genderValues,
+                                backgroundColor: ['#3B82F6', '#EC4899', '#9CA3AF'],
+                                borderWidth: 0
                             }]
-                        };
-                    }
+                        },
+                        options: commonOptions
+                    });
+                }
 
-                    const chartConfig = {
-                        type: chartType,
-                        data: chartDataConfig,
-                        options: chartOptions
-                    };
+                // 3. Top Cursos (Horizontal Bar)
+                const courseLabels = data.topCursos.map(c => c[0].length > 25 ? c[0].substring(0, 25) + '...' : c[0]);
+                const courseValues = data.topCursos.map(c => c[1]);
+                
+                const ctxCourses = document.getElementById('chartCourses')?.getContext('2d');
+                if (ctxCourses) {
+                    chartsRef.current.courses = new Chart(ctxCourses, {
+                        type: 'bar',
+                        data: {
+                            labels: courseLabels,
+                            datasets: [{
+                                label: 'Inscritos',
+                                data: courseValues,
+                                backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                                borderRadius: 4,
+                                indexAxis: 'y',
+                            }]
+                        },
+                        options: {
+                            ...commonOptions,
+                            indexAxis: 'y',
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
 
-                    chartRef.current = new window.Chart(ctx, chartConfig);
-                } catch (err) { console.error("Chart error:", err); }
-                return () => { if (chartRef.current) chartRef.current.destroy(); };
-            }, [data, type, title, hasData, horizontal, id]);
-
-            if (!hasData) return (
-                <div className="bg-white p-4 rounded-xl shadow-md h-full w-full flex flex-col items-center justify-center text-gray-400 border border-gray-100 min-h-[320px]">
-                    <div className="text-4xl mb-2">📊</div><p className="text-sm font-bold">Sin datos suficientes.</p>
-                </div>
-            );
+                return () => Object.values(chartsRef.current).forEach(c => c && c.destroy());
+            }, [data]);
 
             return (
-                <div className="bg-white p-6 rounded-xl shadow-md h-full w-full border-t-4 border-[#1B396A] flex flex-col">
-                    {title && <h3 className="text-lg font-bold text-gray-800 mb-4 text-center flex-shrink-0">{title}</h3>}
-                    <div className="flex-1 min-h-[300px] relative"><canvas ref={canvasRef} id={id}></canvas></div>
+                <div className="animate-fadeIn container mx-auto px-4 py-8 max-w-7xl">
+                    {/* Header del Dashboard */}
+                    <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                        <div>
+                            <h2 className="text-3xl font-bold text-gray-800">Tablero de Control</h2>
+                            <p className="text-gray-600">Bienvenido, {user.name}</p>
+                        </div>
+                        <div className="flex gap-2 items-center">
+                            <label className="text-sm font-semibold text-gray-600">Periodo:</label>
+                            <select 
+                                value={selectedPeriod}
+                                onChange={(e) => onPeriodChange(e.target.value)}
+                                className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                {availableYears.map(year => (
+                                    <option key={year} value={year}>{year === 'ACTUAL' ? 'Ciclo Actual' : `Ciclo ${year}`}</option>
+                                ))}
+                            </select>
+                            <button onClick={onLogout} className="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 font-bold transition shadow-sm ml-2">
+                                Salir
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* KPIs */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <KpiCard title="Total Inscripciones" value={data.totalInscripciones} icon="👥" color="border-blue-500" />
+                        <KpiCard title="Cobertura Docente" value={`${data.coberturaDocente?.porcentaje}%`} icon="📊" color="border-green-500" />
+                        <KpiCard title="Cursos Ofertados" value={data.historicalTrend?.[selectedPeriod === 'ACTUAL' ? new Date().getFullYear() : selectedPeriod]?.cursos || data.topCursos.length} icon="📚" color="border-purple-500" />
+                    </div>
+
+                    {/* Gráficas Principales */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <div className="bg-white p-6 rounded-xl shadow-md">
+                            <h3 className="text-lg font-bold text-gray-700 mb-4">Participación por Departamento (Top 5)</h3>
+                            <div className="h-64 relative"><canvas id="chartDept"></canvas></div>
+                        </div>
+                        <div className="bg-white p-6 rounded-xl shadow-md">
+                            <h3 className="text-lg font-bold text-gray-700 mb-4">Distribución por Género</h3>
+                            <div className="h-64 relative"><canvas id="chartGender"></canvas></div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-xl shadow-md">
+                        <h3 className="text-lg font-bold text-gray-700 mb-4">Top Cursos Más Solicitados</h3>
+                        <div className="h-80 relative"><canvas id="chartCourses"></canvas></div>
+                    </div>
                 </div>
             );
         };
 
-        const AIAnalysisPanel = ({ statsData, period }) => {
-            const [analysis, setAnalysis] = useState(null);
+        const LoginScreen = ({ onLogin, error }) => {
+            const btnRef = useRef(null);
+
+            useEffect(() => {
+                if (window.google && btnRef.current) {
+                    window.google.accounts.id.initialize({
+                        client_id: CONFIG.GOOGLE_CLIENT_ID,
+                        callback: onLogin
+                    });
+                    window.google.accounts.id.renderButton(btnRef.current, {
+                        theme: "filled_blue", size: "large", shape: "rectangular", width: 250
+                    });
+                }
+            }, [onLogin]);
+
+            return (
+                <div className="flex flex-col items-center justify-center py-20 animate-fadeIn px-4">
+                    <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full">
+                        <div className="text-6xl mb-4">🔒</div>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2">Acceso Restringido</h2>
+                        <p className="text-gray-600 mb-8">
+                            Esta sección es exclusiva para administradores. Por favor, inicie sesión.
+                        </p>
+                        
+                        {error && (
+                            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-6 border border-red-200">
+                                {error}
+                            </div>
+                        )}
+                        
+                        <div className="flex justify-center" ref={btnRef}></div>
+                        
+                        <div className="mt-8 pt-6 border-t border-gray-100">
+                            <a href="index.html" className="text-blue-600 hover:underline text-sm font-semibold">
+                                ← Volver al inicio
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const LoadingScreen = () => (
+            <div className="flex flex-col items-center justify-center h-96 animate-fadeIn">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
+                <p className="text-gray-600 font-semibold animate-pulse">Cargando datos del servidor...</p>
+            </div>
+        );
+
+        // --- COMPONENTE PRINCIPAL (APP) ---
+        const App = () => {
+            const [user, setUser] = useState(null);
+            const [statsResponse, setStatsResponse] = useState(null);
+            const [selectedPeriod, setSelectedPeriod] = useState('ACTUAL');
             const [loading, setLoading] = useState(false);
             const [error, setError] = useState(null);
 
-            const handleGenerateAnalysis = async () => {
-                setLoading(true); 
+            const handleLogin = async (response) => {
+                try {
+                    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                    setUser({
+                        name: payload.name,
+                        email: payload.email,
+                        picture: payload.picture,
+                        token: response.credential
+                    });
+                    setError(null);
+                } catch (e) {
+                    console.error(e);
+                    setError("Error al procesar la autenticación.");
+                }
+            };
+
+            useEffect(() => {
+                if (user) {
+                    fetchStatistics(selectedPeriod);
+                }
+            }, [user, selectedPeriod]);
+
+            const fetchStatistics = async (period) => {
+                setLoading(true);
                 setError(null);
                 try {
-                    const cleanStats = { 
-                        totalInscripciones: statsData.totalInscripciones,
-                        topDepartamentos: statsData.topDepartamentos,
-                        topCursos: statsData.topCursos,
-                        coberturaDocente: statsData.coberturaDocente
-                    };
-                    const promptText = `Actúa como analista académico. Analiza estos datos del periodo ${period}: ${JSON.stringify(cleanStats)}. Dame un resumen ejecutivo breve y profesional.`;
-                    const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'cors',
-                        redirect: 'follow',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action: 'generateAnalysis', prompt: promptText })
-                    });
+                    // Llamada al script de Google Apps
+                    // Se envía el token para que el backend pueda validar si es necesario
+                    const url = `${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}&id_token=${user.token}`;
+                    
+                    const response = await fetch(url);
                     const result = await response.json();
-                    if (!result.success) throw new Error(result.message || "Error en la respuesta del servidor");
-                    if (result.analysis) setAnalysis(result.analysis); 
-                    else throw new Error("El servidor no devolvió análisis.");
-                } catch (err) { 
-                    console.error("AI Error:", err); 
-                    let msg = err.message;
-                    if(msg.includes("quota") || msg.includes("429")) msg = "⏳ Límite de uso alcanzado. Por favor, espera 1 minuto e intenta de nuevo.";
-                    else if(msg.includes("permission")) msg = "⚠️ Error de permisos. Contacte al administrador.";
-                    setError(msg); 
-                } finally { setLoading(false); }
-            };
 
-            return (
-                <div className="mt-8 bg-white border border-gray-200 rounded-xl p-6 shadow-sm no-print">
-                    <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-                        <div className="flex items-center gap-2"><span className="text-2xl">✨</span><h3 className="text-lg font-bold text-[#1B396A]">Análisis Inteligente (IA)</h3></div>
-                        {!analysis && !loading && <button onClick={handleGenerateAnalysis} className="bg-[#9D2449] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md hover:bg-[#801d3b]">⚡ Generar Análisis</button>}
-                    </div>
-                    {loading && <div className="text-[#1B396A] p-4 animate-pulse font-bold">Analizando datos con IA...</div>}
-                    {error && <div className="text-amber-800 p-3 text-sm bg-amber-50 rounded border border-amber-200 font-bold">{error}</div>}
-                    {analysis && <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-[#D4AF37] markdown-body text-sm" dangerouslySetInnerHTML={{ __html: marked.parse(analysis) }} />}
-                </div>
-            );
-        };
-
-        const PdfPreviewModal = ({ isOpen, onClose, pdfUrl, onDownload }) => {
-            if (!isOpen) return null;
-            return (
-                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm no-print-modal">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col animate-fadeIn">
-                        <div className="flex justify-between items-center p-4 border-b border-gray-200">
-                            <h3 className="text-xl font-bold text-[#1B396A]">Vista Previa del Reporte</h3>
-                            <button onClick={onClose} className="text-gray-500 hover:text-red-500 text-2xl font-bold">&times;</button>
-                        </div>
-                        <div className="flex-1 bg-gray-100 p-1 overflow-hidden">
-                            {pdfUrl ? ( <iframe src={pdfUrl} className="w-full h-full border-0 rounded" title="Vista Previa PDF"></iframe> ) : ( <div className="flex justify-center items-center h-full"><div className="animate-spin h-10 w-10 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div> )}
-                        </div>
-                        <div className="p-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
-                            <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg font-bold hover:bg-gray-300">Cerrar</button>
-                            <button onClick={onDownload} className="px-6 py-2 bg-[#1B396A] text-white rounded-lg font-bold hover:bg-[#152d54] shadow-lg">🖨️ Imprimir / Descargar</button>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const ReportModal = ({ isOpen, onClose, departments, period, onGeneratePdf, onGenerateExcel, userEmail }) => {
-            const [selectedDept, setSelectedDept] = useState('TODOS');
-            const [loading, setLoading] = useState(false);
-            const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
-            const [showPreview, setShowPreview] = useState(false);
-
-            const ADMIN_EMAILS = ['alejandro.calderon@itdurango.edu.mx', 'desarrollo.academico@itdurango.edu.mx'];
-            const isAdmin = ADMIN_EMAILS.includes(userEmail);
-
-            useEffect(() => { if (isOpen) { setShowPreview(false); setPdfPreviewUrl(null); } }, [isOpen]);
-            if(!isOpen) return null;
-
-            const handlePreviewPdf = async () => {
-                setLoading(true);
-                try { const url = await onGeneratePdf(selectedDept, true); setPdfPreviewUrl(url); setShowPreview(true); } 
-                catch (e) { alert("Error al generar vista previa."); } 
-                finally { setLoading(false); }
-            };
-
-            const handleDownloadPdf = async () => { await onGeneratePdf(selectedDept, false); onClose(); };
-            const handleExcel = async () => { setLoading(true); await onGenerateExcel(selectedDept); setLoading(false); onClose(); };
-
-            if (showPreview) return <PdfPreviewModal isOpen={true} onClose={() => setShowPreview(false)} pdfUrl={pdfPreviewUrl} onDownload={handleDownloadPdf} />;
-
-            return (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm no-print-modal">
-                    <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full animate-fadeIn border-t-4 border-[#1B396A]">
-                        <h3 className="text-xl font-bold text-[#1B396A] mb-2">Generar Reporte</h3>
-                        <p className="text-sm text-gray-600 mb-6">Periodo: <strong>{period}</strong>.</p>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Filtrar por Departamento:</label>
-                        <select value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)} className="w-full border border-gray-300 rounded-lg p-3 mb-8 bg-gray-50 font-semibold">
-                            <option value="TODOS">-- TODOS LOS DEPARTAMENTOS --</option>
-                            {departments.map(d => <option key={d} value={d}>{d}</option>)}
-                        </select>
-                        <div className="grid grid-cols-1 gap-3">
-                            <button onClick={handlePreviewPdf} disabled={loading} className="bg-[#1B396A] hover:bg-[#152d54] text-white px-4 py-3 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">{loading ? '⏳ Generando...' : '👁️ Vista Previa PDF'}</button>
-                            {isAdmin && <button onClick={handleExcel} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">{loading ? '⏳' : '📊'} Descargar Excel</button>}
-                            <button onClick={onClose} disabled={loading} className="mt-2 bg-gray-100 text-gray-600 px-4 py-2 rounded-lg font-bold hover:bg-gray-200">Cancelar</button>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const Dashboard = ({ user, onLogout }) => {
-            const [stats, setStats] = useState(null);
-            const [loading, setLoading] = useState(true);
-            const [showReportModal, setShowReportModal] = useState(false);
-            const [period, setPeriod] = useState('ACTUAL');
-            const [availableYears, setAvailableYears] = useState([]);
-
-            useEffect(() => {
-                setLoading(true);
-                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}`)
-                    .then(r => r.json())
-                    .then(res => { if(res.success) { setStats(res.data); if(res.availableYears) setAvailableYears(res.availableYears); } })
-                    .finally(() => setLoading(false));
-            }, [period]);
-
-            const getReportData = async (dept) => {
-                try {
-                    const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getReportData&period=${period}&department=${encodeURIComponent(dept)}`);
-                    const json = await response.json();
-                    if(json.success) return json; else throw new Error(json.message);
-                } catch(e) { alert("Error obteniendo datos: " + e.toString()); return null; }
-            };
-
-            const handlePdf = async (dept, returnBlob = false) => { const res = await getReportData(dept); if(res) return await generatePDFReport(res.data, res.meta, returnBlob); };
-            const handleExcel = async (dept) => { const res = await getReportData(dept); if(res) generateExcelReport(res.data, res.meta); };
-
-            const processedDepts = useMemo(() => {
-                if (!stats?.topDepartamentos) return { chartData: {}, legend: [] };
-                const chartData = {};
-                const legend = [];
-                stats.topDepartamentos.forEach(([name, count]) => {
-                    const acronym = getAcronym(name);
-                    chartData[acronym] = count;
-                    legend.push({ acronym, name });
-                });
-                return { chartData, legend };
-            }, [stats]);
-
-            return (
-                <div className="container mx-auto px-4 py-8 max-w-7xl animate-fadeIn" id="dashboard-content">
-                    <div id="dashboard-header-controls" className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#1B396A] gap-4 no-print">
-                        <div className="flex-1">
-                            <h2 className="text-xl font-bold text-[#1B396A]">Dashboard de Resultados</h2>
-                            <p className="text-sm text-gray-500 font-bold">Usuario: <span className="font-extrabold text-gray-700">{user.name}</span></p>
-                        </div>
-                        <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-200">
-                            <span className="text-sm font-bold text-gray-700">Periodo:</span>
-                            <select value={period} onChange={(e) => setPeriod(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md font-bold block p-1.5" disabled={loading}>
-                                <option value="ACTUAL">🟢 Periodo Actual</option>
-                                {availableYears.map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
-                            </select>
-                        </div>
-                        <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm font-bold text-gray-700 border border-gray-300">Cerrar Sesión</button>
-                    </div>
-
-                    {loading ? <div className="flex justify-center p-20"><div className="animate-spin h-12 w-12 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div> : !stats ? <div className="text-center p-10 font-bold">Error de carga.</div> : (
-                        <>
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                                <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-[#1B396A]">
-                                    <div className="flex items-center gap-3">
-                                        <div className="text-3xl">📝</div>
-                                        <div><div className="text-2xl font-bold text-gray-800">{stats.totalInscripciones}</div><div className="text-[10px] font-bold text-gray-500 uppercase">Inscripciones Totales</div></div>
-                                    </div>
-                                </div>
-                                <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-[#D4AF37]">
-                                    <div className="flex items-center gap-3">
-                                        <div className="text-3xl">👩‍🏫</div>
-                                        <div><div className="text-2xl font-bold text-gray-800">{stats.coberturaDocente.actualizados}</div><div className="text-[10px] font-bold text-gray-500 uppercase">Docentes Únicos</div></div>
-                                    </div>
-                                </div>
-                                <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-[#9D2449]">
-                                    <div className="flex items-center gap-3">
-                                        <div className="text-3xl">🔁</div>
-                                        <div><div className="text-2xl font-bold text-gray-800">{stats.coberturaDocente.recurrentes}</div><div className="text-[10px] font-bold text-gray-500 uppercase">Docentes Recurrentes</div></div>
-                                    </div>
-                                </div>
-                                <div className="bg-white p-5 rounded-xl shadow-md border-b-4 border-gray-500">
-                                    <div className="flex items-center gap-3">
-                                        <div className="text-3xl">🎯</div>
-                                        <div><div className="text-2xl font-bold text-gray-800">{stats.coberturaDocente.porcentaje}%</div><div className="text-[10px] font-bold text-gray-500 uppercase">Cobertura Estimada</div></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <AIAnalysisPanel statsData={stats} period={period} />
-
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-8">
-                                <div className="lg:col-span-7 h-full">
-                                    <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" horizontal={true} />
-                                </div>
-                                <div className="lg:col-span-5 h-full">
-                                    <StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="chartGen" />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-                                <div className="lg:col-span-9 h-full flex flex-col bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
-                                    <div className="p-6 flex-1">
-                                        <div className="chart-container-print">
-                                            <StatsChart type="bar" data={processedDepts.chartData} title="Top 5 Departamentos" id="chartDept" horizontal={true} />
-                                        </div>
-                                    </div>
-                                    <div className="bg-gray-50 p-4 border-t border-gray-200 rounded-b-xl">
-                                        <p className="text-xs font-bold text-gray-500 mb-2 uppercase">Leyenda de Departamentos:</p>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-gray-600 max-h-32 overflow-y-auto custom-scrollbar">
-                                            {processedDepts.legend.map((item, idx) => (
-                                                <div key={idx} className="flex items-start gap-2">
-                                                    <span className="font-bold text-[#1B396A] min-w-[35px]">{item.acronym}:</span>
-                                                    <span className="truncate font-bold" title={item.name}>{item.name}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="lg:col-span-3 h-full">
-                                    <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={false} />
-                                </div>
-                            </div>
-
-                            <div className="mb-8">
-                                <StatsChart type="line" data={stats.historicalTrend || {}} title="Evolución de Inscripciones y Oferta por Año" id="chartHistory" horizontal={false} />
-                            </div>
-
-                            <div className="bg-[#1B396A] rounded-xl p-8 text-center text-white shadow-lg mb-12 relative overflow-hidden no-print">
-                                <div className="relative z-10">
-                                    <div className="text-4xl mb-4">📄</div>
-                                    <h3 className="text-2xl font-bold mb-2">Reporte Ejecutivo</h3>
-                                    <p className="mb-6 opacity-90 text-sm font-bold">Generar reporte detallado de participantes del periodo <strong>{period}</strong>.</p>
-                                    <div className="flex justify-center gap-4">
-                                        <button onClick={() => setShowReportModal(true)} className="bg-white text-[#1B396A] px-8 py-3 rounded-full font-bold shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105">📄 Generar Reporte</button>
-                                        <button onClick={() => window.print()} className="bg-[#D4AF37] text-white px-8 py-3 rounded-full font-bold shadow-md hover:bg-[#bfa13f] transition-transform transform hover:scale-105">🖨️ Imprimir Gráficas</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <ReportModal isOpen={showReportModal} onClose={() => setShowReportModal(false)} departments={stats.allDepartamentos || []} period={period} onGeneratePdf={handlePdf} onGenerateExcel={handleExcel} userEmail={user.email} />
-                        </>
-                    )}
-                </div>
-            );
-        };
-
-        const Login = ({ onLogin }) => {
-            const ref = useRef(null);
-            useEffect(() => {
-                if(window.google?.accounts) {
-                    window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
-                    window.google.accounts.id.renderButton(ref.current, { theme: "outline", size: "large", text: "signin_with" });
+                    if (result.success) {
+                        setStatsResponse(result);
+                    } else {
+                        setError(result.message || "No se pudieron cargar las estadísticas. Verifique permisos.");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    setError("Error de conexión con el servidor. Intente más tarde.");
+                } finally {
+                    setLoading(false);
                 }
-            }, [onLogin]);
-            return (
-                <div className="flex justify-center items-center py-20 animate-fadeIn">
-                    <div className="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-10 rounded-xl shadow-lg text-center max-w-md w-full border-t-4 border-[#9D2449]">
-                        <h2 className="text-2xl font-bold text-[#9D2449] mb-4">Acceso Restringido</h2>
-                        <p className="text-gray-600 mb-8 font-bold">Inicie sesión con su cuenta institucional.</p>
-                        <div className="flex justify-center" ref={ref}></div>
+            };
+
+            if (!user) {
+                return <LoginScreen onLogin={handleLogin} error={error} />;
+            }
+
+            if (loading && !statsResponse) {
+                return <LoadingScreen />;
+            }
+
+            if (error) {
+                return (
+                    <div className="container mx-auto p-8 text-center">
+                        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-6 rounded shadow-md inline-block max-w-2xl">
+                            <h3 className="font-bold text-lg mb-2">Error de Carga</h3>
+                            <p>{error}</p>
+                            <button 
+                                onClick={() => setUser(null)}
+                                className="mt-4 bg-white border border-red-300 text-red-700 px-4 py-2 rounded hover:bg-red-50 transition"
+                            >
+                                Volver a intentar
+                            </button>
+                        </div>
                     </div>
-                </div>
+                );
+            }
+
+            return (
+                <Dashboard 
+                    data={statsResponse ? statsResponse.data : null} 
+                    availableYears={statsResponse ? statsResponse.availableYears : ['ACTUAL']}
+                    selectedPeriod={selectedPeriod}
+                    onPeriodChange={setSelectedPeriod}
+                    user={user} 
+                    onLogout={() => setUser(null)} 
+                />
             );
         };
 
-        const App = () => {
-            const [user, setUser] = useState(null);
-            const handleLogin = (res) => { const p = JSON.parse(atob(res.credential.split('.')[1])); setUser({ name: p.name, email: p.email }); };
-            return user ? <Dashboard user={user} onLogout={() => setUser(null)} /> : <Login onLogin={handleLogin} />;
-        };
-
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-        document.addEventListener('DOMContentLoaded', () => document.getElementById('copyright-year').textContent = new Date().getFullYear());
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
