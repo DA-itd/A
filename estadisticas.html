@@ -31,9 +31,16 @@
     <style>
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+        
+        /* Colores Institucionales TecNM */
+        .text-tecnm-blue { color: #1B396A; }
+        .bg-tecnm-blue { background-color: #1B396A; }
+        .border-tecnm-guinda { border-color: #9D2449; }
+        .text-tecnm-guinda { color: #9D2449; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 min-h-screen text-gray-800">
+<!-- Fondo actualizado para coincidir con historial.html -->
+<body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800">
 
     <!-- Header -->
     <header class="bg-white shadow-xl sticky top-0 z-40">
@@ -41,17 +48,24 @@
             <div class="flex items-center justify-between gap-4">
                 <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 object-contain">
                 <div class="text-center flex-1">
-                    <h1 class="text-lg sm:text-2xl font-bold text-blue-900">ESTADÍSTICAS</h1>
+                    <h1 class="text-lg sm:text-2xl font-bold text-tecnm-blue">ESTADÍSTICAS</h1>
                     <p class="text-xs sm:text-sm text-blue-700 font-semibold">Actualización Docente ITD</p>
                 </div>
                 <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 object-contain">
             </div>
         </div>
     </header>
+    
+    <!-- Botón Volver -->
+    <div class="container mx-auto px-4 py-4 max-w-7xl">
+        <a href="index.html" class="text-indigo-800 hover:text-indigo-600 font-bold text-sm flex items-center gap-1">
+            ← Volver al Portal Principal
+        </a>
+    </div>
 
     <div id="root"></div>
 
-    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+    <footer class="bg-gradient-to-r from-orange-900 to-amber-900 text-white text-center py-6 mt-12">
         <div class="container mx-auto px-4">
             <p class="font-bold text-sm">© Coordinación de Actualización Docente</p>
             <p class="text-xs opacity-75 mt-1">Instituto Tecnológico de Durango</p>
@@ -67,6 +81,21 @@
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
         };
+
+        // Función segura para decodificar JWT (evita errores de atob con caracteres especiales)
+        function parseJwt(token) {
+            try {
+                var base64Url = token.split('.')[1];
+                var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                console.error("Error al decodificar token:", e);
+                return null;
+            }
+        }
 
         // --- COMPONENTES VISUALES ---
 
@@ -86,7 +115,7 @@
             useEffect(() => {
                 if (!data) return;
 
-                // Limpiar gráficas previas
+                // Limpiar gráficas previas para evitar superposición
                 Object.values(chartsRef.current).forEach(chart => chart && chart.destroy());
 
                 const commonOptions = {
@@ -96,12 +125,11 @@
                 };
 
                 // 1. Gráfica por Departamento (Barras)
-                // El backend ahora devuelve arrays [nombre, cantidad]
-                const deptLabels = data.topDepartamentos.map(d => d[0]);
-                const deptValues = data.topDepartamentos.map(d => d[1]);
+                const deptLabels = data.topDepartamentos ? data.topDepartamentos.map(d => d[0]) : [];
+                const deptValues = data.topDepartamentos ? data.topDepartamentos.map(d => d[1]) : [];
 
                 const ctxDept = document.getElementById('chartDept')?.getContext('2d');
-                if (ctxDept) {
+                if (ctxDept && deptLabels.length > 0) {
                     chartsRef.current.dept = new Chart(ctxDept, {
                         type: 'bar',
                         data: {
@@ -109,7 +137,7 @@
                             datasets: [{
                                 label: 'Participantes',
                                 data: deptValues,
-                                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                backgroundColor: 'rgba(27, 57, 106, 0.8)', // Azul TecNM
                                 borderRadius: 4
                             }]
                         },
@@ -121,18 +149,18 @@
                 }
 
                 // 2. Gráfica por Género (Doughnut)
-                const genderLabels = Object.keys(data.distribucionGenero);
-                const genderValues = Object.values(data.distribucionGenero);
+                const genderLabels = data.distribucionGenero ? Object.keys(data.distribucionGenero) : [];
+                const genderValues = data.distribucionGenero ? Object.values(data.distribucionGenero) : [];
 
                 const ctxGender = document.getElementById('chartGender')?.getContext('2d');
-                if (ctxGender) {
+                if (ctxGender && genderLabels.length > 0) {
                     chartsRef.current.gender = new Chart(ctxGender, {
                         type: 'doughnut',
                         data: {
                             labels: genderLabels,
                             datasets: [{
                                 data: genderValues,
-                                backgroundColor: ['#3B82F6', '#EC4899', '#9CA3AF'],
+                                backgroundColor: ['#1B396A', '#9D2449', '#9CA3AF'], // Azul y Guinda
                                 borderWidth: 0
                             }]
                         },
@@ -141,11 +169,11 @@
                 }
 
                 // 3. Top Cursos (Horizontal Bar)
-                const courseLabels = data.topCursos.map(c => c[0].length > 25 ? c[0].substring(0, 25) + '...' : c[0]);
-                const courseValues = data.topCursos.map(c => c[1]);
+                const courseLabels = data.topCursos ? data.topCursos.map(c => c[0].length > 25 ? c[0].substring(0, 25) + '...' : c[0]) : [];
+                const courseValues = data.topCursos ? data.topCursos.map(c => c[1]) : [];
                 
                 const ctxCourses = document.getElementById('chartCourses')?.getContext('2d');
-                if (ctxCourses) {
+                if (ctxCourses && courseLabels.length > 0) {
                     chartsRef.current.courses = new Chart(ctxCourses, {
                         type: 'bar',
                         data: {
@@ -153,7 +181,7 @@
                             datasets: [{
                                 label: 'Inscritos',
                                 data: courseValues,
-                                backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                                backgroundColor: 'rgba(157, 36, 73, 0.7)', // Guinda claro
                                 borderRadius: 4,
                                 indexAxis: 'y',
                             }]
@@ -170,50 +198,51 @@
             }, [data]);
 
             return (
-                <div className="animate-fadeIn container mx-auto px-4 py-8 max-w-7xl">
-                    {/* Header del Dashboard */}
-                    <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                <div className="animate-fadeIn container mx-auto px-4 py-4 max-w-7xl">
+                    
+                    {/* Tarjeta Principal con Línea Guinda (Estilo solicitado) */}
+                    <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-8 border-tecnm-guinda flex flex-col md:flex-row justify-between items-center gap-4">
                         <div>
-                            <h2 className="text-3xl font-bold text-gray-800">Tablero de Control</h2>
-                            <p className="text-gray-600">Bienvenido, {user.name}</p>
+                            <h2 className="text-3xl font-bold text-tecnm-blue">Tablero de Control</h2>
+                            <p className="text-gray-600">Bienvenido, <span className="font-semibold">{user.name}</span></p>
                         </div>
-                        <div className="flex gap-2 items-center">
+                        <div className="flex flex-col sm:flex-row gap-2 items-center">
                             <label className="text-sm font-semibold text-gray-600">Periodo:</label>
                             <select 
                                 value={selectedPeriod}
                                 onChange={(e) => onPeriodChange(e.target.value)}
-                                className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
                             >
                                 {availableYears.map(year => (
                                     <option key={year} value={year}>{year === 'ACTUAL' ? 'Ciclo Actual' : `Ciclo ${year}`}</option>
                                 ))}
                             </select>
-                            <button onClick={onLogout} className="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 font-bold transition shadow-sm ml-2">
-                                Salir
+                            <button onClick={onLogout} className="w-full sm:w-auto bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 font-bold transition shadow-sm ml-0 sm:ml-2">
+                                Cerrar Sesión
                             </button>
                         </div>
                     </div>
 
                     {/* KPIs */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <KpiCard title="Total Inscripciones" value={data.totalInscripciones} icon="👥" color="border-blue-500" />
-                        <KpiCard title="Cobertura Docente" value={`${data.coberturaDocente?.porcentaje}%`} icon="📊" color="border-green-500" />
-                        <KpiCard title="Cursos Ofertados" value={data.historicalTrend?.[selectedPeriod === 'ACTUAL' ? new Date().getFullYear() : selectedPeriod]?.cursos || data.topCursos.length} icon="📚" color="border-purple-500" />
+                        <KpiCard title="Total Inscripciones" value={data.totalInscripciones} icon="👥" color="border-blue-800" />
+                        <KpiCard title="Cobertura Docente" value={`${data.coberturaDocente?.porcentaje || 0}%`} icon="📊" color="border-yellow-500" />
+                        <KpiCard title="Cursos Ofertados" value={data.historicalTrend?.[selectedPeriod === 'ACTUAL' ? new Date().getFullYear() : selectedPeriod]?.cursos || (data.topCursos ? data.topCursos.length : 0)} icon="📚" color="border-tecnm-guinda" />
                     </div>
 
                     {/* Gráficas Principales */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                        <div className="bg-white p-6 rounded-xl shadow-md">
-                            <h3 className="text-lg font-bold text-gray-700 mb-4">Participación por Departamento (Top 5)</h3>
+                        <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-800">
+                            <h3 className="text-lg font-bold text-tecnm-blue mb-4">Participación por Departamento (Top 5)</h3>
                             <div className="h-64 relative"><canvas id="chartDept"></canvas></div>
                         </div>
-                        <div className="bg-white p-6 rounded-xl shadow-md">
-                            <h3 className="text-lg font-bold text-gray-700 mb-4">Distribución por Género</h3>
+                        <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-tecnm-guinda">
+                            <h3 className="text-lg font-bold text-tecnm-guinda mb-4">Distribución por Género</h3>
                             <div className="h-64 relative"><canvas id="chartGender"></canvas></div>
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-xl shadow-md">
+                    <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-gray-600">
                         <h3 className="text-lg font-bold text-gray-700 mb-4">Top Cursos Más Solicitados</h3>
                         <div className="h-80 relative"><canvas id="chartCourses"></canvas></div>
                     </div>
@@ -225,24 +254,47 @@
             const btnRef = useRef(null);
 
             useEffect(() => {
-                if (window.google && btnRef.current) {
-                    window.google.accounts.id.initialize({
-                        client_id: CONFIG.GOOGLE_CLIENT_ID,
-                        callback: onLogin
-                    });
-                    window.google.accounts.id.renderButton(btnRef.current, {
-                        theme: "filled_blue", size: "large", shape: "rectangular", width: 250
-                    });
+                // Función para intentar renderizar el botón con reintentos (Polling)
+                const renderGoogleButton = () => {
+                    if (window.google && window.google.accounts && btnRef.current) {
+                        try {
+                            window.google.accounts.id.initialize({
+                                client_id: CONFIG.GOOGLE_CLIENT_ID,
+                                callback: onLogin
+                            });
+                            window.google.accounts.id.renderButton(btnRef.current, {
+                                theme: "filled_blue", size: "large", shape: "rectangular", width: 280
+                            });
+                            return true;
+                        } catch (e) {
+                            console.error("Error renderizando botón Google:", e);
+                            return false;
+                        }
+                    }
+                    return false;
+                };
+
+                // Intento inmediato
+                if (!renderGoogleButton()) {
+                    // Si falla, intentar cada 500ms (máximo 10 veces)
+                    let attempts = 0;
+                    const interval = setInterval(() => {
+                        attempts++;
+                        if (renderGoogleButton() || attempts > 10) {
+                            clearInterval(interval);
+                        }
+                    }, 500);
+                    return () => clearInterval(interval);
                 }
             }, [onLogin]);
 
             return (
                 <div className="flex flex-col items-center justify-center py-20 animate-fadeIn px-4">
-                    <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full">
+                    <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full border-t-8 border-tecnm-blue">
                         <div className="text-6xl mb-4">🔒</div>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-2">Acceso Restringido</h2>
+                        <h2 className="text-2xl font-bold text-tecnm-blue mb-2">Acceso a Estadísticas</h2>
                         <p className="text-gray-600 mb-8">
-                            Esta sección es exclusiva para administradores. Por favor, inicie sesión.
+                            Esta sección muestra datos sensibles. Por favor, inicie sesión con su cuenta institucional.
                         </p>
                         
                         {error && (
@@ -251,12 +303,9 @@
                             </div>
                         )}
                         
-                        <div className="flex justify-center" ref={btnRef}></div>
-                        
-                        <div className="mt-8 pt-6 border-t border-gray-100">
-                            <a href="index.html" className="text-blue-600 hover:underline text-sm font-semibold">
-                                ← Volver al inicio
-                            </a>
+                        <div className="flex justify-center min-h-[50px]" ref={btnRef}>
+                            {/* El botón de Google se renderiza aquí */}
+                            <span className="text-gray-400 text-sm self-center">Cargando acceso...</span>
                         </div>
                     </div>
                 </div>
@@ -265,8 +314,8 @@
 
         const LoadingScreen = () => (
             <div className="flex flex-col items-center justify-center h-96 animate-fadeIn">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
-                <p className="text-gray-600 font-semibold animate-pulse">Cargando datos del servidor...</p>
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-tecnm-guinda mb-4"></div>
+                <p className="text-gray-600 font-semibold animate-pulse">Procesando datos del servidor...</p>
             </div>
         );
 
@@ -280,14 +329,19 @@
 
             const handleLogin = async (response) => {
                 try {
-                    const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                    setUser({
-                        name: payload.name,
-                        email: payload.email,
-                        picture: payload.picture,
-                        token: response.credential
-                    });
-                    setError(null);
+                    // Usamos la función segura parseJwt
+                    const payload = parseJwt(response.credential);
+                    if (payload) {
+                        setUser({
+                            name: payload.name,
+                            email: payload.email,
+                            picture: payload.picture,
+                            token: response.credential
+                        });
+                        setError(null);
+                    } else {
+                        setError("No se pudo decodificar su información de inicio de sesión.");
+                    }
                 } catch (e) {
                     console.error(e);
                     setError("Error al procesar la autenticación.");
@@ -305,7 +359,6 @@
                 setError(null);
                 try {
                     // Llamada al script de Google Apps
-                    // Se envía el token para que el backend pueda validar si es necesario
                     const url = `${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}&id_token=${user.token}`;
                     
                     const response = await fetch(url);
@@ -314,11 +367,12 @@
                     if (result.success) {
                         setStatsResponse(result);
                     } else {
-                        setError(result.message || "No se pudieron cargar las estadísticas. Verifique permisos.");
+                        // Si el error es específico, lo mostramos, si no, mensaje genérico
+                        setError(result.message || "No se pudieron cargar las estadísticas. Verifique permisos o intente de nuevo.");
                     }
                 } catch (err) {
                     console.error(err);
-                    setError("Error de conexión con el servidor. Intente más tarde.");
+                    setError("Error de conexión con el servidor. Por favor revise su conexión a internet.");
                 } finally {
                     setLoading(false);
                 }
@@ -334,16 +388,25 @@
 
             if (error) {
                 return (
-                    <div className="container mx-auto p-8 text-center">
-                        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-6 rounded shadow-md inline-block max-w-2xl">
-                            <h3 className="font-bold text-lg mb-2">Error de Carga</h3>
-                            <p>{error}</p>
-                            <button 
-                                onClick={() => setUser(null)}
-                                className="mt-4 bg-white border border-red-300 text-red-700 px-4 py-2 rounded hover:bg-red-50 transition"
-                            >
-                                Volver a intentar
-                            </button>
+                    <div className="container mx-auto p-8 text-center animate-fadeIn">
+                        <div className="bg-white border-l-8 border-red-500 text-gray-700 p-8 rounded shadow-xl inline-block max-w-2xl">
+                            <div className="text-5xl mb-4">⚠️</div>
+                            <h3 className="font-bold text-2xl mb-2 text-red-600">Error de Carga</h3>
+                            <p className="text-lg mb-6">{error}</p>
+                            <div className="flex justify-center gap-4">
+                                <button 
+                                    onClick={() => fetchStatistics(selectedPeriod)}
+                                    className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition shadow"
+                                >
+                                    Reintentar
+                                </button>
+                                <button 
+                                    onClick={() => { setUser(null); setError(null); }}
+                                    className="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 transition"
+                                >
+                                    Cerrar Sesión
+                                </button>
+                            </div>
                         </div>
                     </div>
                 );
