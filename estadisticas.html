@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -47,7 +48,7 @@
         .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
         .markdown-body li { margin-bottom: 0.3em; }
         .markdown-body strong { color: #1B396A; }
-        /* Scrollbar para la leyenda */
+        
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
@@ -57,12 +58,12 @@
         .print-header-element, .print-footer-element { display: none; }
 
         /* ========================================= */
-        /* ESTILOS DE IMPRESIÓN (FLUJO NATURAL)      */
+        /* ESTILOS DE IMPRESIÓN (MODO NATURAL)       */
         /* ========================================= */
         @media print {
             @page { 
                 size: letter portrait; 
-                margin: 10mm; 
+                margin: 1.5cm; 
             }
             
             body { 
@@ -70,7 +71,6 @@
                 color: black !important; 
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important; 
-                font-size: 10pt;
             }
 
             /* Ocultar elementos de UI */
@@ -83,16 +83,15 @@
                 display: flex !important; 
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 15px;
+                margin-bottom: 20px;
                 border-bottom: 2px solid #1B396A;
                 padding-bottom: 10px;
                 width: 100%;
             }
             
-            /* Ajuste de fuentes del encabezado */
-            .print-header-element h1 { font-size: 12pt !important; font-weight: 900 !important; margin-bottom: 4px; }
-            .print-header-element h2 { font-size: 9pt !important; font-weight: bold !important; margin-bottom: 4px; color: #333 !important; }
-            .print-header-element h3 { font-size: 14pt !important; font-weight: 900 !important; color: #1B396A !important; margin-top: 5px; }
+            .print-header-element h1 { font-size: 14pt !important; font-weight: 900 !important; margin-bottom: 5px; }
+            .print-header-element h2 { font-size: 10pt !important; font-weight: bold !important; margin-bottom: 5px; color: #333 !important; text-transform: uppercase; }
+            .print-header-element h3 { font-size: 16pt !important; font-weight: 900 !important; color: #1B396A !important; margin-top: 10px; }
             
             /* Mostrar Pie de Página Oficial */
             .print-footer-element {
@@ -102,74 +101,62 @@
                 left: 0;
                 width: 100%;
                 text-align: center;
-                font-size: 8pt;
+                font-size: 9pt;
                 color: #555;
-                padding-top: 5px;
+                padding-top: 10px;
                 background: white;
                 border-top: 1px solid #eee;
             }
 
-            /* --- CONTENIDO --- */
+            /* Contenedor Principal */
             #dashboard-content {
                 width: 100% !important;
-                max-width: none !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                /* Eliminamos el zoom agresivo para evitar problemas de layout */
-                zoom: 80%; 
+                zoom: 1; /* Sin zoom forzado para evitar deformaciones */
             }
             
             /* Tarjetas */
-            .shadow-md, .shadow-xl, .shadow-lg { 
+            .bg-white, .shadow-md, .shadow-xl { 
                 box-shadow: none !important; 
-                border: 1px solid #ddd !important; 
-                /* Evitar que las tarjetas se corten entre páginas */
-                break-inside: avoid !important;
-                page-break-inside: avoid !important;
-                margin-bottom: 15px !important;
+                border: 1px solid #ddd !important;
+                margin-bottom: 20px !important;
+                /* Evitar cortes feos */
+                break-inside: avoid;
             }
 
-            /* Ajuste de Grillas para que se vean bien */
-            .grid { display: block !important; } /* En impresión a veces block es más seguro que grid */
-            .grid-cols-1, .grid-cols-4, .grid-cols-12 { display: flex !important; flex-wrap: wrap !important; gap: 15px !important; }
-            
-            /* Forzar anchos en flex para simular el grid */
-            .md\:grid-cols-4 > div { width: 23% !important; flex: 0 0 23% !important; }
-            
-            /* Fila 1 */
-            .lg\:col-span-7 { width: 58% !important; flex: 0 0 58% !important; }
-            .lg\:col-span-5 { width: 40% !important; flex: 0 0 40% !important; }
-            
-            /* Fila 2 */
-            .lg\:col-span-9 { width: 73% !important; flex: 0 0 73% !important; }
-            .lg\:col-span-3 { width: 25% !important; flex: 0 0 25% !important; }
-
-            /* Altura automática para no deformar */
-            .h-64, .min-h-\[320px\], .min-h-\[240px\] {
-                height: auto !important;
-                min-height: 250px !important; 
+            /* Gráficas */
+            canvas {
+                max-width: 100% !important;
+                height: auto !important; 
             }
             
+            /* Layout: Usar bloque natural para evitar problemas de Grid en Chrome Print */
+            .grid { display: block !important; }
+            .grid > div { margin-bottom: 20px; width: 100% !important; }
+            
+            /* KPIS en una fila */
+            .md\:grid-cols-4 { display: flex !important; justify-content: space-between; gap: 10px; }
+            .md\:grid-cols-4 > div { flex: 1; margin-bottom: 20px; border: 1px solid #ccc !important; }
+
             /* Textos */
             h2, h3 { color: #000 !important; }
             .text-white { color: #000 !important; }
-            /* KPI Cards */
             .bg-\[\#1B396A\] { background-color: transparent !important; color: black !important; border: 1px solid #000 !important; }
         }
     </style>
 </head>
-<!-- FONDO CÁLIDO APLICADO -->
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen">
 
     <!-- Encabezado EXCLUSIVO para Impresión -->
     <div class="print-header-element container mx-auto px-4">
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-14 object-contain">
+        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-16 object-contain">
         <div class="text-center">
             <h1>INSTITUTO TECNOLÓGICO DE DURANGO</h1>
             <h2>COORDINACIÓN DE ACTUALIZACIÓN DOCENTE</h2>
             <h3>ESTADÍSTICAS</h3>
         </div>
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-14 object-contain">
+        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-16 object-contain">
     </div>
 
     <!-- Header Web -->
@@ -203,9 +190,9 @@
         </div>
     </footer>
     
-    <!-- Footer de Impresión (Solo sale al imprimir/PDF) -->
+    <!-- Footer de Impresión -->
     <div class="print-footer-element">
-        <p>© Coordinación de Actualización Docente</p>
+        <p class="font-bold">© Coordinación de Actualización Docente</p>
         <p>M.C. Alejandro Calderón Rentería</p>
     </div>
 
@@ -522,15 +509,15 @@
             }, [data, type, title, hasData, horizontal, id]);
 
             if (!hasData) return (
-                <div className="bg-white p-4 rounded-xl shadow-md h-full w-full flex flex-col items-center justify-center text-gray-400 border border-gray-100 min-h-[320px] chart-container-print">
+                <div className="bg-white p-4 rounded-xl shadow-md h-full w-full flex flex-col items-center justify-center text-gray-400 border border-gray-100 min-h-[320px]">
                     <div className="text-4xl mb-2">📊</div><p className="text-sm font-bold">Sin datos suficientes.</p>
                 </div>
             );
 
             return (
-                <div className="bg-white p-6 rounded-xl shadow-md h-full w-full border-t-4 border-[#1B396A] flex flex-col chart-container-print">
+                <div className="bg-white p-6 rounded-xl shadow-md h-full w-full border-t-4 border-[#1B396A] flex flex-col">
                     {title && <h3 className="text-lg font-bold text-gray-800 mb-4 text-center flex-shrink-0">{title}</h3>}
-                    <div className="flex-1 min-h-[240px] relative"><canvas ref={canvasRef} id={id}></canvas></div>
+                    <div className="flex-1 min-h-[300px] relative"><canvas ref={canvasRef} id={id}></canvas></div>
                 </div>
             );
         };
@@ -543,7 +530,6 @@
             const handleGenerateAnalysis = async () => {
                 setLoading(true); 
                 setError(null);
-                
                 try {
                     const cleanStats = { 
                         totalInscripciones: statsData.totalInscripciones,
@@ -551,40 +537,25 @@
                         topCursos: statsData.topCursos,
                         coberturaDocente: statsData.coberturaDocente
                     };
-                    
                     const promptText = `Actúa como analista académico. Analiza estos datos del periodo ${period}: ${JSON.stringify(cleanStats)}. Dame un resumen ejecutivo breve y profesional.`;
-                    
                     const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'cors',
                         redirect: 'follow',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ 
-                            action: 'generateAnalysis', 
-                            prompt: promptText 
-                        })
+                        body: JSON.stringify({ action: 'generateAnalysis', prompt: promptText })
                     });
-                    
                     const result = await response.json();
-                    
                     if (!result.success) throw new Error(result.message || "Error en la respuesta del servidor");
                     if (result.analysis) setAnalysis(result.analysis); 
                     else throw new Error("El servidor no devolvió análisis.");
-                    
                 } catch (err) { 
                     console.error("AI Error:", err); 
                     let msg = err.message;
-                    if(msg.includes("No cuentas con el permiso") || msg.includes("permissions") || msg.includes("Exception:")) {
-                        msg = "⚠️ EL SCRIPT NECESITA AUTORIZACIÓN: Ve al editor de Apps Script, ejecuta la función 'AUTHORIZE_PERMISSIONS', acepta los permisos y crea una Nueva Implementación (Deploy).";
-                    } else if(msg.includes("quota") || msg.includes("429") || msg.includes("Too Many Requests")) {
-                        msg = "⏳ Límite de uso alcanzado. El servicio gratuito de IA está saturado momentáneamente. Por favor, espera 1 minuto e intenta de nuevo.";
-                    } else if(msg.includes("bill") || msg.includes("payment")) {
-                        msg = "⚠️ Error de facturación en la cuenta de Google Cloud asociada a la API Key.";
-                    }
+                    if(msg.includes("quota") || msg.includes("429")) msg = "⏳ Límite de uso alcanzado. Por favor, espera 1 minuto e intenta de nuevo.";
+                    else if(msg.includes("permission")) msg = "⚠️ Error de permisos. Contacte al administrador.";
                     setError(msg); 
-                } finally { 
-                    setLoading(false); 
-                }
+                } finally { setLoading(false); }
             };
 
             return (
@@ -593,7 +564,7 @@
                         <div className="flex items-center gap-2"><span className="text-2xl">✨</span><h3 className="text-lg font-bold text-[#1B396A]">Análisis Inteligente (IA)</h3></div>
                         {!analysis && !loading && <button onClick={handleGenerateAnalysis} className="bg-[#9D2449] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md hover:bg-[#801d3b]">⚡ Generar Análisis</button>}
                     </div>
-                    {loading && <div className="text-[#1B396A] p-4 animate-pulse font-bold">Analizando datos con IA... Esto puede tomar unos segundos.</div>}
+                    {loading && <div className="text-[#1B396A] p-4 animate-pulse font-bold">Analizando datos con IA...</div>}
                     {error && <div className="text-amber-800 p-3 text-sm bg-amber-50 rounded border border-amber-200 font-bold">{error}</div>}
                     {analysis && <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-[#D4AF37] markdown-body text-sm" dangerouslySetInnerHTML={{ __html: marked.parse(analysis) }} />}
                 </div>
@@ -610,13 +581,7 @@
                             <button onClick={onClose} className="text-gray-500 hover:text-red-500 text-2xl font-bold">&times;</button>
                         </div>
                         <div className="flex-1 bg-gray-100 p-1 overflow-hidden">
-                            {pdfUrl ? (
-                                <iframe src={pdfUrl} className="w-full h-full border-0 rounded" title="Vista Previa PDF"></iframe>
-                            ) : (
-                                <div className="flex justify-center items-center h-full">
-                                    <div className="animate-spin h-10 w-10 border-4 border-[#1B396A] rounded-full border-t-transparent"></div>
-                                </div>
-                            )}
+                            {pdfUrl ? ( <iframe src={pdfUrl} className="w-full h-full border-0 rounded" title="Vista Previa PDF"></iframe> ) : ( <div className="flex justify-center items-center h-full"><div className="animate-spin h-10 w-10 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div> )}
                         </div>
                         <div className="p-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
                             <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg font-bold hover:bg-gray-300">Cerrar</button>
@@ -633,47 +598,23 @@
             const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
             const [showPreview, setShowPreview] = useState(false);
 
-            const ADMIN_EMAILS = [
-                'alejandro.calderon@itdurango.edu.mx',
-                'desarrollo.academico@itdurango.edu.mx'
-            ];
+            const ADMIN_EMAILS = ['alejandro.calderon@itdurango.edu.mx', 'desarrollo.academico@itdurango.edu.mx'];
             const isAdmin = ADMIN_EMAILS.includes(userEmail);
 
-            useEffect(() => {
-                if (isOpen) { setShowPreview(false); setPdfPreviewUrl(null); }
-            }, [isOpen]);
-
+            useEffect(() => { if (isOpen) { setShowPreview(false); setPdfPreviewUrl(null); } }, [isOpen]);
             if(!isOpen) return null;
 
             const handlePreviewPdf = async () => {
                 setLoading(true);
-                try {
-                    const url = await onGeneratePdf(selectedDept, true); 
-                    setPdfPreviewUrl(url);
-                    setShowPreview(true);
-                } catch (e) {
-                    console.error(e);
-                    alert("Error al generar vista previa.");
-                } finally {
-                    setLoading(false);
-                }
+                try { const url = await onGeneratePdf(selectedDept, true); setPdfPreviewUrl(url); setShowPreview(true); } 
+                catch (e) { alert("Error al generar vista previa."); } 
+                finally { setLoading(false); }
             };
 
-            const handleDownloadPdf = async () => {
-                 await onGeneratePdf(selectedDept, false); 
-                 onClose();
-            };
+            const handleDownloadPdf = async () => { await onGeneratePdf(selectedDept, false); onClose(); };
+            const handleExcel = async () => { setLoading(true); await onGenerateExcel(selectedDept); setLoading(false); onClose(); };
 
-            const handleExcel = async () => {
-                setLoading(true);
-                await onGenerateExcel(selectedDept);
-                setLoading(false);
-                onClose();
-            };
-
-            if (showPreview) {
-                return <PdfPreviewModal isOpen={true} onClose={() => setShowPreview(false)} pdfUrl={pdfPreviewUrl} onDownload={handleDownloadPdf} />;
-            }
+            if (showPreview) return <PdfPreviewModal isOpen={true} onClose={() => setShowPreview(false)} pdfUrl={pdfPreviewUrl} onDownload={handleDownloadPdf} />;
 
             return (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm no-print-modal">
@@ -686,16 +627,8 @@
                             {departments.map(d => <option key={d} value={d}>{d}</option>)}
                         </select>
                         <div className="grid grid-cols-1 gap-3">
-                            <button onClick={handlePreviewPdf} disabled={loading} className="bg-[#1B396A] hover:bg-[#152d54] text-white px-4 py-3 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">
-                                {loading ? '⏳ Generando...' : '👁️ Vista Previa PDF'}
-                            </button>
-                            
-                            {isAdmin && (
-                                <button onClick={handleExcel} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">
-                                    {loading ? '⏳' : '📊'} Descargar Excel
-                                </button>
-                            )}
-                            
+                            <button onClick={handlePreviewPdf} disabled={loading} className="bg-[#1B396A] hover:bg-[#152d54] text-white px-4 py-3 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">{loading ? '⏳ Generando...' : '👁️ Vista Previa PDF'}</button>
+                            {isAdmin && <button onClick={handleExcel} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2">{loading ? '⏳' : '📊'} Descargar Excel</button>}
                             <button onClick={onClose} disabled={loading} className="mt-2 bg-gray-100 text-gray-600 px-4 py-2 rounded-lg font-bold hover:bg-gray-200">Cancelar</button>
                         </div>
                     </div>
@@ -726,20 +659,13 @@
                 } catch(e) { alert("Error obteniendo datos: " + e.toString()); return null; }
             };
 
-            const handlePdf = async (dept, returnBlob = false) => { 
-                const res = await getReportData(dept); 
-                if(res) {
-                    return await generatePDFReport(res.data, res.meta, returnBlob);
-                }
-            };
-            
+            const handlePdf = async (dept, returnBlob = false) => { const res = await getReportData(dept); if(res) return await generatePDFReport(res.data, res.meta, returnBlob); };
             const handleExcel = async (dept) => { const res = await getReportData(dept); if(res) generateExcelReport(res.data, res.meta); };
 
             const processedDepts = useMemo(() => {
                 if (!stats?.topDepartamentos) return { chartData: {}, legend: [] };
                 const chartData = {};
                 const legend = [];
-                
                 stats.topDepartamentos.forEach(([name, count]) => {
                     const acronym = getAcronym(name);
                     chartData[acronym] = count;
@@ -796,7 +722,6 @@
 
                             <AIAnalysisPanel statsData={stats} period={period} />
 
-                            {/* FILA 1: CURSOS (Izq) y GÉNERO (Der) */}
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-8">
                                 <div className="lg:col-span-7 h-full">
                                     <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" horizontal={true} />
@@ -806,11 +731,10 @@
                                 </div>
                             </div>
 
-                            {/* FILA 2: DEPARTAMENTOS (Izq) y TIPO DE CURSO (Der) */}
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
                                 <div className="lg:col-span-9 h-full flex flex-col bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
                                     <div className="p-6 flex-1">
-                                        <div className="h-64 chart-container-print">
+                                        <div className="chart-container-print">
                                             <StatsChart type="bar" data={processedDepts.chartData} title="Top 5 Departamentos" id="chartDept" horizontal={true} />
                                         </div>
                                     </div>
@@ -831,7 +755,6 @@
                                 </div>
                             </div>
 
-                            {/* SECCIÓN DE TENDENCIA HISTÓRICA */}
                             <div className="mb-8">
                                 <StatsChart type="line" data={stats.historicalTrend || {}} title="Evolución de Inscripciones y Oferta por Año" id="chartHistory" horizontal={false} />
                             </div>
