@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -90,6 +91,22 @@
                 width: 100%;
             }
             
+            /* Títulos específicos de impresión */
+            .print-header-element h1 {
+                font-size: 16pt !important; 
+                font-weight: 900 !important;
+                text-transform: uppercase;
+                margin-bottom: 2px;
+            }
+            
+            .print-header-element h2 {
+                font-size: 10pt !important; 
+                font-weight: bold !important;
+                color: #444 !important;
+                text-transform: uppercase;
+                margin-top: 0;
+            }
+            
             /* Mostrar Pie de Página Oficial */
             .print-footer-element {
                 display: block !important;
@@ -111,7 +128,7 @@
                 max-width: none !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                zoom: 60%; /* Ajuste clave para que quepa en una hoja */
+                zoom: 55%; /* Reducido ligeramente para asegurar ajuste vertical */
             }
             
             /* Eliminar sombras y bordes gruesos */
@@ -121,24 +138,32 @@
             }
 
             /* Reducir espacios entre tarjetas */
-            .mb-8, .mb-12, .my-8 { margin-bottom: 10px !important; margin-top: 10px !important; }
-            .gap-4, .gap-6 { gap: 10px !important; }
-            .p-5, .p-6, .p-8 { padding: 8px !important; }
+            .mb-8, .mb-12, .my-8 { margin-bottom: 8px !important; margin-top: 8px !important; }
+            .gap-4, .gap-6 { gap: 8px !important; }
+            .p-5, .p-6, .p-8 { padding: 6px !important; }
 
             /* --- CORRECCIÓN DE DEFORMACIÓN DE GRÁFICAS --- */
-            /* Forzar altura fija en impresión para que no se estiren */
+            /* Altura estricta para evitar estiramiento */
             .chart-container-print {
-                height: 220px !important;
-                min-height: 220px !important;
-                max-height: 220px !important;
+                height: 200px !important;
+                min-height: 200px !important;
+                max-height: 200px !important;
                 display: block !important;
             }
             
-            /* Forzar layout en bloque para filas de gráficas si es necesario */
-            .grid-cols-12 { display: flex !important; flex-wrap: wrap; }
-            .lg\:col-span-7 { width: 58% !important; }
-            .lg\:col-span-5 { width: 40% !important; }
-            .lg\:col-span-9 { width: 73% !important; }
+            /* Forzar layout en bloque para filas de gráficas */
+            .grid-cols-12 { 
+                display: flex !important; 
+                flex-wrap: wrap !important; 
+                width: 100% !important;
+            }
+            
+            /* Fila 1: Cursos + Genero */
+            .lg\:col-span-7 { width: 63% !important; margin-right: 2% !important; }
+            .lg\:col-span-5 { width: 35% !important; }
+            
+            /* Fila 2: Deptos + Tipo */
+            .lg\:col-span-9 { width: 73% !important; margin-right: 2% !important; }
             .lg\:col-span-3 { width: 25% !important; }
 
             /* Ajustes de texto */
@@ -154,12 +179,12 @@
 
     <!-- Encabezado EXCLUSIVO para Impresión -->
     <div class="print-header-element container mx-auto px-4">
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 object-contain">
+        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-14 object-contain">
         <div class="text-center">
-            <h1 class="text-sm font-bold text-black uppercase tracking-wide">Instituto Tecnológico de Durango</h1>
-            <h2 class="text-xs font-bold text-gray-700 uppercase mt-1">Coordinación de Desarrollo Académico</h2>
+            <h1>INSTITUTO TECNOLÓGICO DE DURANGO</h1>
+            <h2>Coordinación de Actualización Docente</h2>
         </div>
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 object-contain">
+        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-14 object-contain">
     </div>
 
     <!-- Header Web -->
