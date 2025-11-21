@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -427,8 +428,8 @@
                    config.data = {
                        labels: sortedKeys,
                        datasets: [
-                           { label: 'Inscripciones', data: sortedKeys.map(k=>data[k].registros), borderColor: '#36A2EB', backgroundColor: '#36A2EB', tension: 0.3 },
-                           { label: 'Cursos', data: sortedKeys.map(k=>data[k].cursos), borderColor: '#FF6384', backgroundColor: '#FF6384', tension: 0.3 }
+                           { label: 'Docentes Inscritos', data: sortedKeys.map(k=>data[k].registros), borderColor: '#36A2EB', backgroundColor: '#36A2EB', tension: 0.3 },
+                           { label: '#Cursos', data: sortedKeys.map(k=>data[k].cursos), borderColor: '#FF6384', backgroundColor: '#FF6384', tension: 0.3 }
                        ]
                    };
                    config.options.plugins.datalabels = { display: true, align: 'top', font: {weight:'bold'} };
