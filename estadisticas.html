@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -85,26 +84,38 @@
                 display: flex !important; 
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 10px;
+                margin-bottom: 5px;
                 border-bottom: 2px solid #1B396A;
                 padding-bottom: 5px;
                 width: 100%;
             }
             
-            /* Títulos específicos de impresión */
+            /* Títulos específicos de impresión - AJUSTADOS */
             .print-header-element h1 {
-                font-size: 16pt !important; 
+                font-size: 12pt !important; /* Reducido para dar espacio */
                 font-weight: 900 !important;
                 text-transform: uppercase;
                 margin-bottom: 2px;
+                line-height: 1.1;
             }
             
             .print-header-element h2 {
-                font-size: 10pt !important; 
+                font-size: 9pt !important; 
                 font-weight: bold !important;
                 color: #444 !important;
                 text-transform: uppercase;
                 margin-top: 0;
+                margin-bottom: 2px;
+            }
+
+            .print-header-element h3 {
+                display: block !important;
+                font-size: 14pt !important;
+                font-weight: 900 !important;
+                color: #1B396A !important;
+                text-transform: uppercase;
+                margin-top: 2px;
+                letter-spacing: 1px;
             }
             
             /* Mostrar Pie de Página Oficial */
@@ -128,7 +139,7 @@
                 max-width: none !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                zoom: 55%; /* Reducido ligeramente para asegurar ajuste vertical */
+                zoom: 55%; /* Zoom ajustado para que quepa todo */
             }
             
             /* Eliminar sombras y bordes gruesos */
@@ -138,11 +149,12 @@
             }
 
             /* Reducir espacios entre tarjetas */
-            .mb-8, .mb-12, .my-8 { margin-bottom: 8px !important; margin-top: 8px !important; }
-            .gap-4, .gap-6 { gap: 8px !important; }
-            .p-5, .p-6, .p-8 { padding: 6px !important; }
+            .mb-8, .mb-12, .my-8 { margin-bottom: 6px !important; margin-top: 6px !important; }
+            .gap-4, .gap-6 { gap: 6px !important; }
+            .p-5, .p-6, .p-8 { padding: 5px !important; }
 
-            /* --- CORRECCIÓN DE DEFORMACIÓN DE GRÁFICAS --- */
+            /* --- CORRECCIÓN DE DEFORMACIÓN Y ALINEACIÓN (FLEXBOX STRICT) --- */
+            
             /* Altura estricta para evitar estiramiento */
             .chart-container-print {
                 height: 200px !important;
@@ -151,25 +163,44 @@
                 display: block !important;
             }
             
-            /* Forzar layout en bloque para filas de gráficas */
+            /* Convertir el GRID en FLEX para impresión para evitar saltos */
             .grid-cols-12 { 
                 display: flex !important; 
-                flex-wrap: wrap !important; 
+                flex-direction: row !important;
                 width: 100% !important;
+                gap: 10px !important;
             }
             
-            /* Fila 1: Cursos + Genero */
-            .lg\:col-span-7 { width: 63% !important; margin-right: 2% !important; }
-            .lg\:col-span-5 { width: 35% !important; }
+            /* Fila 1: Cursos (Izq) + Genero (Der) */
+            /* El selector .lg\\:col-span-7 escapa los dos puntos de la clase de Tailwind */
+            .lg\:col-span-7 { 
+                width: 60% !important; 
+                flex: 0 0 60% !important;
+                margin: 0 !important;
+            }
+            .lg\:col-span-5 { 
+                width: 40% !important; 
+                flex: 0 0 40% !important;
+                margin: 0 !important;
+            }
             
-            /* Fila 2: Deptos + Tipo */
-            .lg\:col-span-9 { width: 73% !important; margin-right: 2% !important; }
-            .lg\:col-span-3 { width: 25% !important; }
+            /* Fila 2: Deptos (Izq) + Tipo (Der) */
+            .lg\:col-span-9 { 
+                width: 75% !important; 
+                flex: 0 0 75% !important;
+                margin: 0 !important;
+            }
+            .lg\:col-span-3 { 
+                width: 25% !important; 
+                flex: 0 0 25% !important;
+                margin: 0 !important;
+            }
 
             /* Ajustes de texto */
             h2, h3 { color: #000 !important; font-size: 14pt !important; }
             .text-2xl { font-size: 16pt !important; }
             .text-white { color: #000 !important; }
+            /* Bordes de tarjetas de KPIs */
             .bg-\[\#1B396A\] { background-color: transparent !important; color: black !important; border: 1px solid black; }
         }
     </style>
@@ -182,7 +213,8 @@
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-14 object-contain">
         <div class="text-center">
             <h1>INSTITUTO TECNOLÓGICO DE DURANGO</h1>
-            <h2>Coordinación de Actualización Docente</h2>
+            <h2>COORDINACIÓN DE ACTUALIZACIÓN DOCENTE</h2>
+            <h3>ESTADÍSTICAS</h3>
         </div>
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-14 object-contain">
     </div>
