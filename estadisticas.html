@@ -145,7 +145,25 @@
         // DEPT_ACRONYMS y helpers
         const DEPT_ACRONYMS = { "SISTEMAS Y COMPUTACION": "DSC", "CIENCIAS ECONOMICO-ADMINISTRATIVAS": "DCEA", "INGENIERÍA QUÍMICA-BIOQUÍMICA": "DIQB", "QUIMICA-BIOQUIMICA": "DIQB", "CIENCIAS DE LA TIERRA": "DCT", "CIENCIAS BASICAS": "DCB", "METAL-MECÁNICA": "DMM", "METAL MECANICA": "DMM", "INGENIERÍA INDUSTRIAL": "DII", "INDUSTRIAL": "DII", "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA": "DIEE", "ELECTRICA Y ELECTRONICA": "DIEE", "POSGRADO E INVESTIGACION": "DEPI", "ADMINISTRATIVO": "ADMON", "EXTERNO": "EXT", "DESARROLLO ACADÉMICO": "DDA", "GESTION TECNOLOGICA": "DGT" };
         const getAcronym = (fullName) => { if(!fullName) return "ND"; const nameUpper = fullName.toUpperCase().replace('DEPARTAMENTO DE ', '').replace('DIVISION DE ESTUDIOS DE ', '').replace('CENTRO DE ', ''); for (const [key, val] of Object.entries(DEPT_ACRONYMS)) { if (nameUpper.includes(key)) return val; } const words = nameUpper.split(' '); if(words.length > 1) return words.map(w => w[0]).join('').substring(0,4); return nameUpper.substring(0, 4) + "."; };
-        const splitLabel = (label, maxLength = 45) => { if (label.length <= maxLength) return label; const words = label.split(' '); const lines = []; let currentLine = words[0]; for (let i = 1; i < words.length; i++) { if (currentLine.length + 1 + words[i].length <= maxLength) { currentLine += " " + words[i]; } else { lines.push(currentLine); currentLine = words[i]; } } lines.push(currentLine); return lines; };
+        
+        // Función para dividir etiquetas largas en múltiples líneas
+        const splitLabel = (label, maxLength = 30) => { 
+            if (!label || label.length <= maxLength) return label; 
+            const words = label.split(' '); 
+            const lines = []; 
+            let currentLine = words[0]; 
+            for (let i = 1; i < words.length; i++) { 
+                if (currentLine.length + 1 + words[i].length <= maxLength) { 
+                    currentLine += " " + words[i]; 
+                } else { 
+                    lines.push(currentLine); 
+                    currentLine = words[i]; 
+                } 
+            } 
+            lines.push(currentLine); 
+            return lines; 
+        };
+
         const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
         const TECNM_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg';
         const getImageDataFromURL = (url) => new Promise((resolve) => { const img = new Image(); img.crossOrigin = 'Anonymous'; img.onload = () => { const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0); resolve(canvas.toDataURL('image/png')); }; img.onerror = () => resolve(null); img.src = url; });
@@ -302,7 +320,7 @@
                             <span className="text-sm font-bold text-gray-700">Periodo:</span>
                             <select value={period} onChange={(e) => setPeriod(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md font-bold block p-1.5 outline-none focus:ring-2 focus:ring-[#1B396A]">
                                 <option value="ACTUAL">🟢 Periodo Actual</option>
-                                {availableYears.map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
+                                {availableYears.filter(y => y !== 'ACTUAL').map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
                             </select>
                         </div>
                         <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm font-bold text-gray-700 border border-gray-300 transition">Cerrar Sesión</button>
@@ -379,11 +397,15 @@
                 const ctx = canvasRef.current.getContext('2d');
                 const isPie = type === 'pie' || type === 'doughnut';
                 const isHistory = id === 'chartHistory';
+                
+                // Procesar etiquetas largas con splitLabel
+                const rawLabels = Object.keys(data);
+                const processedLabels = isPie || isHistory ? rawLabels : rawLabels.map(label => splitLabel(label, 30));
 
                 let config = {
                     type: isHistory ? 'line' : type,
                     data: {
-                        labels: Object.keys(data),
+                        labels: processedLabels,
                         datasets: [{
                             label: title,
                             data: Object.values(data),
