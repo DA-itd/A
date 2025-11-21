@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -35,10 +36,21 @@
         </div>
     </header>
 
+    <!-- Botón Volver -->
+    <div class="container mx-auto px-4 py-4">
+        <a href="index.html" class="text-indigo-800 hover:text-indigo-600 font-bold text-sm flex items-center gap-1">
+            ← Volver al Portal Principal
+        </a>
+    </div>
+
     <div id="root"></div>
 
     <footer class="bg-gradient-to-r from-orange-900 to-amber-900 text-white text-center py-6 mt-12">
-        <p class="text-sm">© Coordinación de Actualización Docente</p>
+        <div class="container mx-auto px-4">
+            <p class="font-bold text-sm mb-1">© Coordinación de Actualización Docente</p>
+            <p class="text-xs opacity-90 mb-1">M.C. Alejandro Calderón Rentería</p>
+            <p class="text-xs opacity-75">Todos los derechos reservados 2025</p>
+        </div>
     </footer>
 
     <script type="text/babel">
@@ -141,7 +153,6 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Logos (usamos los mismos de estadísticas si están disponibles, si no texto simple)
             doc.setFont("helvetica", "bold");
             doc.setFontSize(14);
             doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", 105, 20, { align: "center" });
@@ -171,7 +182,7 @@
                 body: tableRows,
                 startY: 60,
                 theme: 'grid',
-                headStyles: { fillColor: [234, 88, 12], textColor: 255 }, // Orange-600
+                headStyles: { fillColor: [234, 88, 12], textColor: 255 }, 
                 styles: { fontSize: 8 },
                 columnStyles: { 2: { cellWidth: 'auto' } }
             });
@@ -196,16 +207,40 @@
 
         const LoginScreen = ({ onLogin }) => {
             const ref = useRef(null);
+            
             useEffect(() => {
-                if(window.google?.accounts) {
-                    window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
-                    window.google.accounts.id.renderButton(ref.current, { theme: "filled_blue", size: "large", text: "continue_with" });
+                // Función para intentar renderizar el botón
+                const renderBtn = () => {
+                    if(window.google && window.google.accounts && ref.current) {
+                        window.google.accounts.id.initialize({ 
+                            client_id: CONFIG.GOOGLE_CLIENT_ID, 
+                            callback: onLogin 
+                        });
+                        window.google.accounts.id.renderButton(ref.current, { 
+                            theme: "filled_blue", 
+                            size: "large", 
+                            text: "continue_with" 
+                        });
+                        return true;
+                    }
+                    return false;
+                };
+
+                // Intentar renderizar inmediatamente
+                if(!renderBtn()) {
+                    // Si falla, intentar cada 500ms hasta que cargue la librería
+                    const interval = setInterval(() => {
+                        if(renderBtn()) clearInterval(interval);
+                    }, 500);
+                    return () => clearInterval(interval);
                 }
             }, [onLogin]);
+
             return (
                 <div className="text-center py-20 animate-fadeIn">
-                    <h2 className="text-2xl font-bold mb-4">Acceso a Historial</h2>
-                    <div className="flex justify-center" ref={ref}></div>
+                    <h2 className="text-2xl font-bold mb-4 text-gray-800">Acceso a Historial</h2>
+                    <p className="text-gray-600 mb-8">Por favor, inicie sesión para ver sus registros.</p>
+                    <div className="flex justify-center min-h-[50px]" ref={ref}></div>
                 </div>
             );
         };
@@ -222,7 +257,7 @@
                             <h2 className="text-2xl font-bold text-gray-800">Bienvenido, {user.name}</h2>
                             {isAdmin && <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded uppercase">Administrador</span>}
                         </div>
-                        <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded font-bold">Cerrar Sesión</button>
+                        <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded font-bold text-gray-700">Cerrar Sesión</button>
                     </div>
 
                     {/* BUSCADOR PARA ADMINS */}
