@@ -56,11 +56,13 @@
         /* Elementos exclusivos de impresión */
         .print-header-element, .print-footer-element { display: none; }
 
-        /* Estilos para Impresión Estricta */
+        /* ========================================= */
+        /* ESTILOS ESTRICTOS DE IMPRESIÓN (AJUSTADO) */
+        /* ========================================= */
         @media print {
             @page { 
                 size: letter portrait; 
-                margin: 10mm; 
+                margin: 5mm; /* Margen mínimo */
             }
             
             body { 
@@ -72,21 +74,23 @@
                 padding: 0;
             }
 
-            /* Ocultar elementos de navegación y UI */
+            /* Ocultar elementos de UI */
             header, footer, #back-link, .no-print, button, select, .bg-gray-50.border, #dashboard-header-controls { 
                 display: none !important; 
             }
 
-            /* Mostrar Encabezado y Pie de Página Oficiales */
+            /* Mostrar Encabezado Oficial */
             .print-header-element { 
                 display: flex !important; 
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 15px;
+                margin-bottom: 10px;
                 border-bottom: 2px solid #1B396A;
-                padding-bottom: 10px;
+                padding-bottom: 5px;
+                width: 100%;
             }
             
+            /* Mostrar Pie de Página Oficial */
             .print-footer-element {
                 display: block !important;
                 position: fixed;
@@ -94,35 +98,52 @@
                 left: 0;
                 width: 100%;
                 text-align: center;
-                font-size: 9pt;
+                font-size: 8pt;
                 color: #333;
-                padding-top: 10px;
+                padding-top: 5px;
                 background: white;
                 border-top: 1px solid #eee;
             }
 
-            /* Ajustar contenedor principal para que quepa en una hoja */
+            /* --- REESCALADO Y COMPACTACIÓN --- */
             #dashboard-content {
                 width: 100% !important;
                 max-width: none !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                /* Escalar contenido para ajustar a carta vertical */
-                zoom: 65%; 
+                zoom: 60%; /* Ajuste clave para que quepa en una hoja */
             }
             
+            /* Eliminar sombras y bordes gruesos */
             .shadow-md, .shadow-xl, .shadow-lg { 
                 box-shadow: none !important; 
                 border: 1px solid #ccc !important; 
             }
 
-            /* Asegurar que las gráficas se vean bien */
-            canvas {
-                max-width: 100% !important;
+            /* Reducir espacios entre tarjetas */
+            .mb-8, .mb-12, .my-8 { margin-bottom: 10px !important; margin-top: 10px !important; }
+            .gap-4, .gap-6 { gap: 10px !important; }
+            .p-5, .p-6, .p-8 { padding: 8px !important; }
+
+            /* --- CORRECCIÓN DE DEFORMACIÓN DE GRÁFICAS --- */
+            /* Forzar altura fija en impresión para que no se estiren */
+            .chart-container-print {
+                height: 220px !important;
+                min-height: 220px !important;
+                max-height: 220px !important;
+                display: block !important;
             }
             
-            /* Ajustes de texto para impresión */
-            h2, h3 { color: #000 !important; }
+            /* Forzar layout en bloque para filas de gráficas si es necesario */
+            .grid-cols-12 { display: flex !important; flex-wrap: wrap; }
+            .lg\:col-span-7 { width: 58% !important; }
+            .lg\:col-span-5 { width: 40% !important; }
+            .lg\:col-span-9 { width: 73% !important; }
+            .lg\:col-span-3 { width: 25% !important; }
+
+            /* Ajustes de texto */
+            h2, h3 { color: #000 !important; font-size: 14pt !important; }
+            .text-2xl { font-size: 16pt !important; }
             .text-white { color: #000 !important; }
             .bg-\[\#1B396A\] { background-color: transparent !important; color: black !important; border: 1px solid black; }
         }
@@ -228,7 +249,6 @@
             return nameUpper.substring(0, 4) + ".";
         };
 
-        // Función auxiliar para dividir texto largo en líneas
         const splitLabel = (label, maxLength = 45) => {
             if (label.length <= maxLength) return label;
             const words = label.split(' ');
@@ -492,13 +512,13 @@
             }, [data, type, title, hasData, horizontal, id]);
 
             if (!hasData) return (
-                <div className="bg-white p-4 rounded-xl shadow-md h-full w-full flex flex-col items-center justify-center text-gray-400 border border-gray-100 min-h-[320px]">
+                <div className="bg-white p-4 rounded-xl shadow-md h-full w-full flex flex-col items-center justify-center text-gray-400 border border-gray-100 min-h-[320px] chart-container-print">
                     <div className="text-4xl mb-2">📊</div><p className="text-sm font-bold">Sin datos suficientes.</p>
                 </div>
             );
 
             return (
-                <div className="bg-white p-6 rounded-xl shadow-md h-full w-full border-t-4 border-[#1B396A] flex flex-col">
+                <div className="bg-white p-6 rounded-xl shadow-md h-full w-full border-t-4 border-[#1B396A] flex flex-col chart-container-print">
                     {title && <h3 className="text-lg font-bold text-gray-800 mb-4 text-center flex-shrink-0">{title}</h3>}
                     <div className="flex-1 min-h-[240px] relative"><canvas ref={canvasRef} id={id}></canvas></div>
                 </div>
@@ -780,7 +800,7 @@
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
                                 <div className="lg:col-span-9 h-full flex flex-col bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
                                     <div className="p-6 flex-1">
-                                        <div className="h-64">
+                                        <div className="h-64 chart-container-print">
                                             <StatsChart type="bar" data={processedDepts.chartData} title="Top 5 Departamentos" id="chartDept" horizontal={true} />
                                         </div>
                                     </div>
