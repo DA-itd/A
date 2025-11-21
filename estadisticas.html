@@ -51,6 +51,17 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
+
+        /* Estilos para Impresión */
+        @media print {
+            header, footer, #back-link, button, .no-print { display: none !important; }
+            body { background: white !important; color: black !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .shadow-md, .shadow-xl, .shadow-lg { box-shadow: none !important; border: 1px solid #ddd !important; }
+            .container { max-width: 100% !important; width: 100% !important; padding: 0 !important; }
+            .bg-white { background-color: white !important; }
+            /* Forzar altura de gráficas para que quepan en hoja */
+            canvas { max-height: 400px !important; }
+        }
     </style>
 </head>
 <!-- FONDO CÁLIDO APLICADO -->
@@ -478,7 +489,7 @@
             };
 
             return (
-                <div className="mt-8 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div className="mt-8 bg-white border border-gray-200 rounded-xl p-6 shadow-sm no-print">
                     <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                         <div className="flex items-center gap-2"><span className="text-2xl">✨</span><h3 className="text-lg font-bold text-[#1B396A]">Análisis Inteligente (IA)</h3></div>
                         {!analysis && !loading && <button onClick={handleGenerateAnalysis} className="bg-[#9D2449] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md hover:bg-[#801d3b]">⚡ Generar Análisis</button>}
@@ -629,9 +640,13 @@
                 return { chartData, legend };
             }, [stats]);
 
+            const handlePrint = () => {
+                window.print();
+            };
+
             return (
                 <div className="container mx-auto px-4 py-8 max-w-7xl animate-fadeIn">
-                    <div className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#1B396A] gap-4">
+                    <div className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#1B396A] gap-4 no-print">
                         <div className="flex-1">
                             <h2 className="text-xl font-bold text-[#1B396A]">Dashboard de Resultados</h2>
                             <p className="text-sm text-gray-500 font-bold">Usuario: <span className="font-extrabold text-gray-700">{user.name}</span></p>
@@ -724,12 +739,15 @@
                                 <StatsChart type="line" data={stats.historicalTrend || {}} title="Evolución de Inscripciones y Oferta por Año" id="chartHistory" horizontal={false} />
                             </div>
 
-                            <div className="bg-[#1B396A] rounded-xl p-8 text-center text-white shadow-lg mb-12 relative overflow-hidden">
+                            <div className="bg-[#1B396A] rounded-xl p-8 text-center text-white shadow-lg mb-12 relative overflow-hidden no-print">
                                 <div className="relative z-10">
                                     <div className="text-4xl mb-4">📄</div>
                                     <h3 className="text-2xl font-bold mb-2">Reporte Ejecutivo</h3>
                                     <p className="mb-6 opacity-90 text-sm font-bold">Generar reporte detallado de participantes del periodo <strong>{period}</strong>.</p>
-                                    <button onClick={() => setShowReportModal(true)} className="bg-white text-[#1B396A] px-8 py-3 rounded-full font-bold shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105">📄 Generar Reporte</button>
+                                    <div className="flex justify-center gap-4">
+                                        <button onClick={() => setShowReportModal(true)} className="bg-white text-[#1B396A] px-8 py-3 rounded-full font-bold shadow-md hover:bg-gray-100 transition-transform transform hover:scale-105">📄 Generar Reporte</button>
+                                        <button onClick={handlePrint} className="bg-[#D4AF37] text-white px-8 py-3 rounded-full font-bold shadow-md hover:bg-[#bfa13f] transition-transform transform hover:scale-105">🖨️ Imprimir Gráficas</button>
+                                    </div>
                                 </div>
                             </div>
 
