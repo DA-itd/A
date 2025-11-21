@@ -5,12 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial Académico - Portal ITD</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <style>@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }</style>
+    
+    <!-- Librerías para Exportación -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } 
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen">
 
@@ -32,14 +42,161 @@
     </footer>
 
     <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
         const CONFIG = {
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
+            TEACHERS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv'
+        };
+
+        const ADMIN_EMAILS = [
+            'alejandro.calderon@itdurango.edu.mx',
+            'desarrollo.academico@itdurango.edu.mx'
+        ];
+
+        // --- UTILIDADES CSV ---
+        const parseCSVLine = (line) => {
+            const result = []; let current = ''; let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') { if (inQuotes && line[i + 1] === '"') { current += '"'; i++; } else { inQuotes = !inQuotes; } }
+                else if (char === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
+                else { current += char; }
+            }
+            result.push(current.trim());
+            return result;
+        };
+        const cleanCSVValue = (val) => { let c = val.trim(); if (c.startsWith('"') && c.endsWith('"')) c = c.substring(1, c.length - 1).replace(/""/g, '"'); return c; };
+        const removeAccents = (text) => text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+
+        const getTeachers = async () => {
+            try {
+                const response = await fetch(`${CONFIG.TEACHERS_CSV_URL}&_=${Date.now()}`);
+                const csvText = await response.text();
+                return csvText.trim().split(/\r?\n/).slice(1).map(line => {
+                    const v = parseCSVLine(line);
+                    return v.length >= 3 ? { nombreCompleto: cleanCSVValue(v[0]), email: cleanCSVValue(v[2]) } : null;
+                }).filter(Boolean);
+            } catch (e) { console.error("Error cargando docentes", e); return []; }
+        };
+
+        // --- COMPONENTE BUSCADOR ADMIN ---
+        const AdminTeacherSearch = ({ onSearch }) => {
+            const [teachers, setTeachers] = useState([]);
+            const [suggestions, setSuggestions] = useState([]);
+            const [query, setQuery] = useState('');
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                getTeachers().then(data => { setTeachers(data); setLoading(false); });
+            }, []);
+
+            const handleChange = (e) => {
+                const val = e.target.value;
+                setQuery(val);
+                if (val.length > 0) {
+                    const norm = removeAccents(val.toLowerCase());
+                    setSuggestions(teachers.filter(t => removeAccents(t.nombreCompleto.toLowerCase()).includes(norm)).slice(0, 5));
+                } else setSuggestions([]);
+            };
+
+            const handleSelect = (teacher) => {
+                setQuery(teacher.nombreCompleto);
+                setSuggestions([]);
+                onSearch(teacher.email);
+            };
+
+            return (
+                <div className="bg-indigo-50 border-l-4 border-indigo-600 p-6 mb-8 rounded-lg shadow-inner">
+                    <h3 className="text-indigo-800 font-bold mb-2 flex items-center gap-2">
+                        <span className="text-xl">👮</span> Panel Administrativo: Consultar Docente
+                    </h3>
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={query}
+                            onChange={handleChange}
+                            placeholder={loading ? "Cargando lista..." : "Escriba el nombre del docente..."}
+                            className="w-full p-3 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            disabled={loading}
+                        />
+                        {suggestions.length > 0 && (
+                            <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-xl max-h-60 overflow-auto">
+                                {suggestions.map((t, i) => (
+                                    <li key={i} onClick={() => handleSelect(t)} className="px-4 py-3 hover:bg-indigo-100 cursor-pointer border-b border-gray-100 last:border-0">
+                                        <div className="font-bold text-gray-800">{t.nombreCompleto}</div>
+                                        <div className="text-xs text-gray-500">{t.email}</div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- LOGICA EXPORTACIÓN ---
+        const exportToPdf = async (teacherName, courses) => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Logos (usamos los mismos de estadísticas si están disponibles, si no texto simple)
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", 105, 20, { align: "center" });
+            doc.setFontSize(10);
+            doc.text("Coordinación de Actualización Docente", 105, 26, { align: "center" });
+            
+            doc.setFontSize(12);
+            doc.setTextColor(200, 100, 0); // Naranja
+            doc.text("HISTORIAL ACADÉMICO", 105, 40, { align: "center" });
+            
+            doc.setTextColor(0);
+            doc.setFontSize(10);
+            doc.text(`Docente: ${teacherName}`, 14, 50);
+            doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, 14, 55);
+
+            const tableRows = courses.map(c => [
+                c.year,
+                c.folio,
+                c.courseName,
+                c.datesText || c.date,
+                c.hours,
+                c.type
+            ]);
+
+            doc.autoTable({
+                head: [['Año', 'Folio', 'Curso', 'Fechas', 'Hrs', 'Tipo']],
+                body: tableRows,
+                startY: 60,
+                theme: 'grid',
+                headStyles: { fillColor: [234, 88, 12], textColor: 255 }, // Orange-600
+                styles: { fontSize: 8 },
+                columnStyles: { 2: { cellWidth: 'auto' } }
+            });
+
+            doc.save(`Kardex_${teacherName.replace(/\s+/g, '_')}.pdf`);
+        };
+
+        const exportToExcel = (teacherName, courses) => {
+            const data = courses.map(c => ({
+                "Año": c.year,
+                "Folio": c.folio,
+                "Nombre del Curso": c.courseName,
+                "Fechas": c.datesText || c.date,
+                "Horas": c.hours,
+                "Tipo": c.type
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Historial");
+            XLSX.writeFile(wb, `Kardex_${teacherName.replace(/\s+/g, '_')}.xlsx`);
         };
 
         const LoginScreen = ({ onLogin }) => {
-            const ref = React.useRef(null);
-            React.useEffect(() => {
+            const ref = useRef(null);
+            useEffect(() => {
                 if(window.google?.accounts) {
                     window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
                     window.google.accounts.id.renderButton(ref.current, { theme: "filled_blue", size: "large", text: "continue_with" });
@@ -53,34 +210,59 @@
             );
         };
 
-        const Dashboard = ({ user, data, onLogout }) => {
+        const Dashboard = ({ user, data, onLogout, isAdmin, onAdminSearch }) => {
             const { teacher, courses } = data;
             const years = [...new Set(courses.map(c => c.year))].sort().reverse();
             
             return (
                 <div className="animate-fadeIn container mx-auto px-4 py-8 max-w-5xl">
-                    <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-orange-500 flex justify-between items-center">
+                    
+                    <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-orange-500 flex flex-col md:flex-row justify-between items-center gap-4">
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-800">{teacher.name}</h2>
-                            <p className="text-gray-600 text-sm">{teacher.dept}</p>
+                            <h2 className="text-2xl font-bold text-gray-800">Bienvenido, {user.name}</h2>
+                            {isAdmin && <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded uppercase">Administrador</span>}
                         </div>
-                        <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded font-bold">Salir</button>
+                        <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded font-bold">Cerrar Sesión</button>
                     </div>
 
-                    {courses.length === 0 ? <p className="text-center">No hay historial.</p> : 
+                    {/* BUSCADOR PARA ADMINS */}
+                    {isAdmin && <AdminTeacherSearch onSearch={onAdminSearch} />}
+
+                    {/* FICHA DEL DOCENTE VISUALIZADO */}
+                    <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-200 relative">
+                        <div className="absolute top-4 right-4 flex gap-2">
+                            <button onClick={() => exportToPdf(teacher.name, courses)} title="Descargar PDF" className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded transition">📄 PDF</button>
+                            <button onClick={() => exportToExcel(teacher.name, courses)} title="Descargar Excel" className="p-2 bg-green-100 hover:bg-green-200 text-green-700 rounded transition">📊 Excel</button>
+                        </div>
+                        <h3 className="text-gray-500 text-sm font-bold uppercase tracking-wider">Historial de:</h3>
+                        <h2 className="text-3xl font-bold text-orange-700 mt-1">{teacher.name || "Usuario"}</h2>
+                        <p className="text-gray-600">{teacher.dept || "Departamento no registrado"}</p>
+                        <div className="mt-4 flex gap-4 text-sm">
+                            <div className="bg-orange-50 px-3 py-1 rounded border border-orange-200">Total Cursos: <strong>{courses.length}</strong></div>
+                            <div className="bg-blue-50 px-3 py-1 rounded border border-blue-200">Total Horas: <strong>{courses.reduce((acc, c) => acc + (parseInt(c.hours)||0), 0)}</strong></div>
+                        </div>
+                    </div>
+
+                    {courses.length === 0 ? <p className="text-center text-gray-500 py-10 bg-white rounded-lg shadow">No se encontró historial de cursos para este usuario.</p> : 
                     <div className="space-y-8">
                         {years.map(year => (
                             <div key={year}>
                                 <div className="flex items-center mb-4">
-                                    <span className="bg-orange-600 text-white font-bold px-4 py-1 rounded-full text-sm z-10">Ciclo {year}</span>
+                                    <span className="bg-orange-600 text-white font-bold px-4 py-1 rounded-full text-sm z-10 shadow-md">Ciclo {year}</span>
                                     <div className="h-0.5 bg-orange-200 flex-grow ml-4"></div>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {courses.filter(c => c.year === year).map((c, i) => (
-                                        <div key={i} className="bg-white p-5 rounded shadow hover:shadow-lg border border-gray-100">
-                                            <div className="flex justify-between mb-2"><span className="bg-blue-100 text-blue-800 text-xs px-2 rounded">{c.type}</span><span className="text-xs text-gray-400 font-mono">{c.folio}</span></div>
-                                            <h3 className="font-bold mb-2">{c.courseName}</h3>
-                                            <p className="text-sm text-gray-600">📅 {c.datesText || c.date} | ⏱️ {c.hours} hrs</p>
+                                        <div key={i} className="bg-white p-5 rounded-lg shadow-sm hover:shadow-md border border-gray-100 transition-all">
+                                            <div className="flex justify-between mb-2">
+                                                <span className={`text-xs px-2 py-0.5 rounded font-bold ${c.type === 'Profesional' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-800'}`}>{c.type}</span>
+                                                <span className="text-xs text-gray-400 font-mono">{c.folio}</span>
+                                            </div>
+                                            <h3 className="font-bold text-gray-800 mb-2 leading-snug">{c.courseName}</h3>
+                                            <div className="text-sm text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
+                                                <span className="flex items-center gap-1">📅 {c.datesText || c.date}</span>
+                                                <span className="flex items-center gap-1">⏱️ {c.hours} hrs</span>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -92,16 +274,42 @@
         };
 
         const App = () => {
-            const [user, setUser] = React.useState(null);
-            const [data, setData] = React.useState(null);
+            const [user, setUser] = useState(null);
+            const [data, setData] = useState(null);
+            const [loading, setLoading] = useState(false);
+
+            const fetchData = async (token, targetEmail = null) => {
+                setLoading(true);
+                let url = `${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${token}`;
+                if (targetEmail) url += `&target_email=${encodeURIComponent(targetEmail)}`;
+                
+                try {
+                    const resp = await fetch(url);
+                    const json = await resp.json();
+                    if (json.success) setData(json.data);
+                    else alert("Error: " + json.message);
+                } catch (e) { console.error(e); }
+                finally { setLoading(false); }
+            };
+
             const handleLogin = async (res) => {
                 const token = res.credential;
                 const payload = JSON.parse(atob(token.split('.')[1]));
-                const resp = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${token}`);
-                const json = await resp.json();
-                if(json.success) { setData(json.data); setUser({ ...payload, token }); }
+                const userData = { ...payload, token };
+                setUser(userData);
+                fetchData(token);
             };
-            return user && data ? <Dashboard user={user} data={data} onLogout={() => {setUser(null); window.location.reload();}} /> : <LoginScreen onLogin={handleLogin} />;
+
+            const handleAdminSearch = (email) => {
+                if (user && user.token) fetchData(user.token, email);
+            };
+
+            const isAdmin = user && ADMIN_EMAILS.includes(user.email);
+
+            if (!user) return <LoginScreen onLogin={handleLogin} />;
+            if (!data || loading) return <div className="flex justify-center items-center min-h-screen"><div className="animate-spin h-12 w-12 border-4 border-orange-500 rounded-full border-t-transparent"></div></div>;
+
+            return <Dashboard user={user} data={data} onLogout={() => {setUser(null); window.location.reload();}} isAdmin={isAdmin} onAdminSearch={handleAdminSearch} />;
         };
 
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
