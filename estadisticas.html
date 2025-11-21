@@ -58,17 +58,18 @@
         .print-header-element, .print-footer-element { display: none; }
 
         /* ========================================= */
-        /* ESTILOS DE IMPRESIÓN (MODO NATURAL)       */
+        /* ESTILOS DE IMPRESIÓN (MODO EJECUTIVO)     */
         /* ========================================= */
         @media print {
             @page { 
                 size: letter portrait; 
-                margin: 1.5cm; 
+                margin: 1cm; 
             }
             
             body { 
                 background: white !important; 
                 color: black !important; 
+                font-size: 10pt;
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important; 
             }
@@ -83,17 +84,17 @@
                 display: flex !important; 
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 20px;
+                margin-bottom: 10px;
                 border-bottom: 2px solid #1B396A;
-                padding-bottom: 10px;
+                padding-bottom: 5px;
                 width: 100%;
             }
             
-            .print-header-element h1 { font-size: 14pt !important; font-weight: 900 !important; margin-bottom: 5px; }
-            .print-header-element h2 { font-size: 10pt !important; font-weight: bold !important; margin-bottom: 5px; color: #333 !important; text-transform: uppercase; }
-            .print-header-element h3 { font-size: 16pt !important; font-weight: 900 !important; color: #1B396A !important; margin-top: 10px; }
+            .print-header-element h1 { font-size: 12pt !important; font-weight: 900 !important; margin-bottom: 2px; }
+            .print-header-element h2 { font-size: 9pt !important; font-weight: bold !important; margin-bottom: 2px; color: #333 !important; text-transform: uppercase; }
+            .print-header-element h3 { font-size: 14pt !important; font-weight: 900 !important; color: #1B396A !important; margin-top: 5px; }
             
-            /* Mostrar Pie de Página Oficial */
+            /* Pie de Página Oficial */
             .print-footer-element {
                 display: block !important;
                 position: fixed;
@@ -101,9 +102,9 @@
                 left: 0;
                 width: 100%;
                 text-align: center;
-                font-size: 9pt;
+                font-size: 8pt;
                 color: #555;
-                padding-top: 10px;
+                padding-top: 5px;
                 background: white;
                 border-top: 1px solid #eee;
             }
@@ -113,34 +114,81 @@
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                zoom: 1; /* Sin zoom forzado para evitar deformaciones */
             }
             
-            /* Tarjetas */
-            .bg-white, .shadow-md, .shadow-xl { 
+            /* Estilo Común de Tarjetas en Impresión */
+            .bg-white, .shadow-md, .shadow-xl, .rounded-xl { 
                 box-shadow: none !important; 
+                border: 1px solid #ccc !important;
+                border-radius: 4px !important;
+                padding: 8px !important;
+                margin-bottom: 10px !important;
+                break-inside: avoid !important; /* Evitar cortes */
+            }
+
+            /* REJILLA DE KPIs (Una fila) */
+            .grid.grid-cols-1.md\:grid-cols-4 {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 10px !important;
+                margin-bottom: 15px !important;
+            }
+            .grid.grid-cols-1.md\:grid-cols-4 > div {
+                flex: 1;
+                padding: 10px !important;
                 border: 1px solid #ddd !important;
-                margin-bottom: 20px !important;
-                /* Evitar cortes feos */
-                break-inside: avoid;
+            }
+
+            /* FILA 1: Cursos (Izq) y Género (Der) */
+            /* Forzamos el comportamiento Flex para ponerlas lado a lado */
+            .lg\:grid-cols-12.gap-6.my-8 {
+                display: flex !important;
+                gap: 10px !important;
+                margin: 10px 0 !important;
+                height: auto !important;
+            }
+            /* Cursos - 60% ancho */
+            .lg\:col-span-7 {
+                width: 60% !important;
+                margin-right: 10px !important;
+            }
+            /* Género - 40% ancho */
+            .lg\:col-span-5 {
+                width: 40% !important;
+            }
+
+            /* FILA 2: Deptos (Izq) y Tipo (Der) */
+            .lg\:grid-cols-12.gap-6.mb-8 {
+                display: flex !important;
+                gap: 10px !important;
+                margin: 10px 0 !important;
+                height: auto !important;
+            }
+            /* Deptos - 75% ancho */
+            .lg\:col-span-9 {
+                width: 75% !important;
+                margin-right: 10px !important;
+            }
+            /* Tipo - 25% ancho */
+            .lg\:col-span-3 {
+                width: 25% !important;
             }
 
             /* Gráficas */
             canvas {
-                max-width: 100% !important;
-                height: auto !important; 
+                /* Altura máxima controlada para que no ocupen toda la hoja */
+                max-height: 200px !important; 
+                width: 100% !important;
             }
             
-            /* Layout: Usar bloque natural para evitar problemas de Grid en Chrome Print */
-            .grid { display: block !important; }
-            .grid > div { margin-bottom: 20px; width: 100% !important; }
+            /* Asegurar que el contenedor de la gráfica no crezca infinitamente */
+            .h-full { height: auto !important; }
             
-            /* KPIS en una fila */
-            .md\:grid-cols-4 { display: flex !important; justify-content: space-between; gap: 10px; }
-            .md\:grid-cols-4 > div { flex: 1; margin-bottom: 20px; border: 1px solid #ccc !important; }
-
+            /* Títulos de gráficas más compactos */
+            h3 { font-size: 10pt !important; margin-bottom: 5px !important; }
+            
             /* Textos */
-            h2, h3 { color: #000 !important; }
+            h2, h3, p, span, div { color: #000 !important; }
             .text-white { color: #000 !important; }
             .bg-\[\#1B396A\] { background-color: transparent !important; color: black !important; border: 1px solid #000 !important; }
         }
@@ -150,13 +198,13 @@
 
     <!-- Encabezado EXCLUSIVO para Impresión -->
     <div class="print-header-element container mx-auto px-4">
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-16 object-contain">
+        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 object-contain">
         <div class="text-center">
             <h1>INSTITUTO TECNOLÓGICO DE DURANGO</h1>
             <h2>COORDINACIÓN DE ACTUALIZACIÓN DOCENTE</h2>
             <h3>ESTADÍSTICAS</h3>
         </div>
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-16 object-contain">
+        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 object-contain">
     </div>
 
     <!-- Header Web -->
