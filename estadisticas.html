@@ -19,6 +19,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <!-- Librerías para Reportes (PDF, Excel) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -52,42 +53,96 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
 
-        /* Pie de página oculto en pantalla normal, visible al imprimir */
-        .print-footer-element { display: none; }
+        /* Elementos exclusivos de impresión */
+        .print-header-element, .print-footer-element { display: none; }
 
-        /* Estilos para Impresión */
+        /* Estilos para Impresión Estricta */
         @media print {
-            @page { margin: 10mm; size: landscape; } /* Forzar horizontal para que quepan las gráficas */
+            @page { 
+                size: letter portrait; 
+                margin: 10mm; 
+            }
             
-            header, footer, #back-link, button, .no-print, .no-print-modal { display: none !important; }
-            body { background: white !important; color: black !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            .shadow-md, .shadow-xl, .shadow-lg { box-shadow: none !important; border: 1px solid #ddd !important; }
-            .container { max-width: 100% !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
-            .bg-white { background-color: white !important; }
-            canvas { max-height: 400px !important; }
+            body { 
+                background: white !important; 
+                color: black !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Ocultar elementos de navegación y UI */
+            header, footer, #back-link, .no-print, button, select, .bg-gray-50.border, #dashboard-header-controls { 
+                display: none !important; 
+            }
+
+            /* Mostrar Encabezado y Pie de Página Oficiales */
+            .print-header-element { 
+                display: flex !important; 
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+                border-bottom: 2px solid #1B396A;
+                padding-bottom: 10px;
+            }
             
-            /* Mostrar pie de página oficial */
             .print-footer-element {
                 display: block !important;
                 position: fixed;
                 bottom: 0;
+                left: 0;
                 width: 100%;
                 text-align: center;
-                font-size: 10pt;
+                font-size: 9pt;
                 color: #333;
                 padding-top: 10px;
                 background: white;
-                font-weight: bold;
                 border-top: 1px solid #eee;
             }
+
+            /* Ajustar contenedor principal para que quepa en una hoja */
+            #dashboard-content {
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                /* Escalar contenido para ajustar a carta vertical */
+                zoom: 65%; 
+            }
+            
+            .shadow-md, .shadow-xl, .shadow-lg { 
+                box-shadow: none !important; 
+                border: 1px solid #ccc !important; 
+            }
+
+            /* Asegurar que las gráficas se vean bien */
+            canvas {
+                max-width: 100% !important;
+            }
+            
+            /* Ajustes de texto para impresión */
+            h2, h3 { color: #000 !important; }
+            .text-white { color: #000 !important; }
+            .bg-\[\#1B396A\] { background-color: transparent !important; color: black !important; border: 1px solid black; }
         }
     </style>
 </head>
 <!-- FONDO CÁLIDO APLICADO -->
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen">
 
-    <!-- Header -->
-    <header class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A]">
+    <!-- Encabezado EXCLUSIVO para Impresión -->
+    <div class="print-header-element container mx-auto px-4">
+        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 object-contain">
+        <div class="text-center">
+            <h1 class="text-sm font-bold text-black uppercase tracking-wide">Instituto Tecnológico de Durango</h1>
+            <h2 class="text-xs font-bold text-gray-700 uppercase mt-1">Coordinación de Desarrollo Académico</h2>
+        </div>
+        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 object-contain">
+    </div>
+
+    <!-- Header Web -->
+    <header class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A] no-print">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
@@ -100,7 +155,7 @@
         </div>
     </header>
     
-    <div id="back-link" class="container mx-auto px-4 py-4">
+    <div id="back-link" class="container mx-auto px-4 py-4 no-print">
         <a href="index.html" class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center gap-1 text-sm font-bold transition-colors">
             ← Volver al Portal Principal
         </a>
@@ -109,7 +164,7 @@
     <div id="root"></div>
 
     <!-- Footer Web (No sale en impresión) -->
-    <footer class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449]">
+    <footer class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449] no-print">
         <div class="container mx-auto px-4">
              <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
              <p class="text-xs sm:text-sm opacity-90">M.C. Alejandro Calderón Rentería</p>
@@ -321,7 +376,6 @@
                 if (!canvasRef.current || !hasData) return;
                 if (typeof window.Chart === 'undefined') return;
                 
-                // Registro de Plugin para Etiquetas en Puntos
                 if(window.ChartDataLabels) {
                     window.Chart.register(window.ChartDataLabels);
                 }
@@ -331,7 +385,7 @@
                 try {
                     const ctx = canvasRef.current.getContext('2d');
                     const isPie = type === 'pie' || type === 'doughnut';
-                    const isHistory = id === 'chartHistory'; // Flag para la gráfica de historia
+                    const isHistory = id === 'chartHistory';
                     
                     let chartDataConfig = {};
                     let chartType = type;
@@ -346,7 +400,7 @@
                                 labels: { font: { weight: 'bold' } }
                             },
                             datalabels: {
-                                display: false // Por defecto apagado
+                                display: false
                             }
                         },
                         scales: !isPie ? { 
@@ -363,9 +417,8 @@
                         } : {}
                     };
 
-                    // Lógica para Historial (LÍNEAS + PUNTOS + ETIQUETAS)
                     if (isHistory) {
-                        chartType = 'line'; // Forzamos tipo línea
+                        chartType = 'line';
                         const labels = Object.keys(data).sort((a,b) => parseInt(a) - parseInt(b));
                         const regData = labels.map(year => data[year].registros);
                         const courseData = labels.map(year => data[year].cursos);
@@ -376,9 +429,9 @@
                                 {
                                     label: 'Docentes Inscritos', 
                                     data: regData,
-                                    borderColor: '#36A2EB', // Azul
+                                    borderColor: '#36A2EB',
                                     backgroundColor: '#36A2EB',
-                                    tension: 0.3, // Curva suave
+                                    tension: 0.3,
                                     pointRadius: 6,
                                     pointHoverRadius: 8,
                                     borderWidth: 3
@@ -386,7 +439,7 @@
                                 {
                                     label: 'Cursos Ofertados',
                                     data: courseData,
-                                    borderColor: '#FF6384', // Rojo
+                                    borderColor: '#FF6384',
                                     backgroundColor: '#FF6384',
                                     tension: 0.3,
                                     pointRadius: 6,
@@ -396,7 +449,6 @@
                             ]
                         };
 
-                        // Configurar datalabels SOLO para esta gráfica
                         chartOptions.plugins.datalabels = {
                             display: true,
                             color: '#333',
@@ -407,11 +459,9 @@
                         };
 
                     } else {
-                        // Lógica para Gráficas Normales (Barras / Pastel)
                         let backgroundColors = isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS;
                         let labels = Object.keys(data);
                         
-                        // Dividir etiquetas largas en múltiples líneas para cursos horizontales
                         if (horizontal && id === 'chartCourse') {
                             labels = labels.map(l => splitLabel(l));
                         }
@@ -449,7 +499,6 @@
 
             return (
                 <div className="bg-white p-6 rounded-xl shadow-md h-full w-full border-t-4 border-[#1B396A] flex flex-col">
-                    {/* Título condicional */}
                     {title && <h3 className="text-lg font-bold text-gray-800 mb-4 text-center flex-shrink-0">{title}</h3>}
                     <div className="flex-1 min-h-[240px] relative"><canvas ref={canvasRef} id={id}></canvas></div>
                 </div>
@@ -524,7 +573,7 @@
         const PdfPreviewModal = ({ isOpen, onClose, pdfUrl, onDownload }) => {
             if (!isOpen) return null;
             return (
-                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm no-print-modal">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col animate-fadeIn">
                         <div className="flex justify-between items-center p-4 border-b border-gray-200">
                             <h3 className="text-xl font-bold text-[#1B396A]">Vista Previa del Reporte</h3>
@@ -554,7 +603,6 @@
             const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
             const [showPreview, setShowPreview] = useState(false);
 
-            // Lista blanca de administradores para descargar Excel
             const ADMIN_EMAILS = [
                 'alejandro.calderon@itdurango.edu.mx',
                 'desarrollo.academico@itdurango.edu.mx'
@@ -598,7 +646,7 @@
             }
 
             return (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm no-print-modal">
                     <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full animate-fadeIn border-t-4 border-[#1B396A]">
                         <h3 className="text-xl font-bold text-[#1B396A] mb-2">Generar Reporte</h3>
                         <p className="text-sm text-gray-600 mb-6">Periodo: <strong>{period}</strong>.</p>
@@ -657,7 +705,6 @@
             
             const handleExcel = async (dept) => { const res = await getReportData(dept); if(res) generateExcelReport(res.data, res.meta); };
 
-            // Datos procesados para departamentos con siglas
             const processedDepts = useMemo(() => {
                 if (!stats?.topDepartamentos) return { chartData: {}, legend: [] };
                 const chartData = {};
@@ -673,7 +720,7 @@
 
             return (
                 <div className="container mx-auto px-4 py-8 max-w-7xl animate-fadeIn" id="dashboard-content">
-                    <div className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#1B396A] gap-4 no-print">
+                    <div id="dashboard-header-controls" className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#1B396A] gap-4 no-print">
                         <div className="flex-1">
                             <h2 className="text-xl font-bold text-[#1B396A]">Dashboard de Resultados</h2>
                             <p className="text-sm text-gray-500 font-bold">Usuario: <span className="font-extrabold text-gray-700">{user.name}</span></p>
@@ -721,12 +768,9 @@
 
                             {/* FILA 1: CURSOS (Izq) y GÉNERO (Der) */}
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-8">
-                                {/* IZQUIERDA: Cursos Más Demandados (Barras horizontales) */}
                                 <div className="lg:col-span-7 h-full">
                                     <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" horizontal={true} />
                                 </div>
-
-                                {/* DERECHA: Distribución por Género */}
                                 <div className="lg:col-span-5 h-full">
                                     <StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="chartGen" />
                                 </div>
@@ -734,11 +778,9 @@
 
                             {/* FILA 2: DEPARTAMENTOS (Izq) y TIPO DE CURSO (Der) */}
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-                                {/* IZQUIERDA: Top Departamentos (Horizontal ahora para siglas) */}
                                 <div className="lg:col-span-9 h-full flex flex-col bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
                                     <div className="p-6 flex-1">
                                         <div className="h-64">
-                                            {/* TITULO AÑADIDO AQUI */}
                                             <StatsChart type="bar" data={processedDepts.chartData} title="Top 5 Departamentos" id="chartDept" horizontal={true} />
                                         </div>
                                     </div>
@@ -754,14 +796,12 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                {/* DERECHA: Tipo de Curso (CAMBIADO A VERTICAL) */}
                                 <div className="lg:col-span-3 h-full">
                                     <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={false} />
                                 </div>
                             </div>
 
-                            {/* SECCIÓN DE TENDENCIA HISTÓRICA (LÍNEA + PUNTOS + ETIQUETAS) */}
+                            {/* SECCIÓN DE TENDENCIA HISTÓRICA */}
                             <div className="mb-8">
                                 <StatsChart type="line" data={stats.historicalTrend || {}} title="Evolución de Inscripciones y Oferta por Año" id="chartHistory" horizontal={false} />
                             </div>
