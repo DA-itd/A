@@ -314,7 +314,14 @@
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800">
 
     <!-- Encabezado EXCLUSIVO para Impresión -->
-    <div class="print-header-element container mx-auto">
+<!-- REEMPLAZA ESTAS SECCIONES EN TU estadisticas.html -->
+
+<!-- ========================================== -->
+<!-- ENCABEZADO PARA IMPRESIÓN (busca: print-header-element) -->
+<!-- ========================================== -->
+<div class="print-header-element container mx-auto">
+    <!-- Fila superior: Logos y título -->
+    <div>
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM">
         <div class="text-center">
             <h1>INSTITUTO TECNOLÓGICO DE DURANGO</h1>
@@ -322,20 +329,22 @@
         </div>
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD">
     </div>
+    <!-- Fila inferior: Subtítulo descriptivo -->
+    <div>
+        Representación gráfica de los Cursos de Actualización Docente
+    </div>
+</div>
 
-    <!-- Header Web -->
-    <header class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A] no-print">
-        <div class="container mx-auto px-4 py-4 sm:py-6">
-            <div class="flex items-center justify-between gap-4">
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
-                <div class="text-center flex-1 px-2 sm:px-4">
-                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#1B396A] leading-tight">PANEL DE ESTADÍSTICAS</h1>
-                    <p class="text-xs sm:text-sm md:text-base text-[#9D2449] mt-1 font-semibold">Desarrollo Académico</p>
-                </div>
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
-            </div>
-        </div>
-    </header>
+<!-- ========================================== -->
+<!-- PIE DE PÁGINA PARA IMPRESIÓN (busca: print-footer-element) -->
+<!-- ========================================== -->
+<div class="print-footer-element">
+    <div class="footer-left">
+        <span>© Coordinación de Actualización Docente | Generado: <script>document.write(new Date().toLocaleDateString('es-MX', {year: 'numeric', month: 'long', day: 'numeric'}));</script></span>
+    </div>
+    <div class="footer-right">
+        <!-- El "Página X de 2" se inserta automáticamente vía CSS -->
+    </div>
     
     <div id="back-link" class="container mx-auto px-4 py-4 no-print">
         <a href="index.html" class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center gap-1 text-sm font-bold transition-colors">
