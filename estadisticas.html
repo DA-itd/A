@@ -524,19 +524,54 @@
                 };
                 
                 if(isHistory) {
+                   // Ordenar años correctamente
                    const sortedKeys = Object.keys(data).sort((a,b) => {
                        if (a === 'ACTUAL') return 1;
                        if (b === 'ACTUAL') return -1;
-                       return parseInt(a)-parseInt(b);
+                       return parseInt(a) - parseInt(b);
                    });
+                   
+                   // Extraer valores asegurando que existan
+                   const registrosData = sortedKeys.map(k => {
+                       const val = data[k] && data[k].registros !== undefined ? data[k].registros : 0;
+                       return val;
+                   });
+                   
+                   const cursosData = sortedKeys.map(k => {
+                       const val = data[k] && data[k].cursos !== undefined ? data[k].cursos : 0;
+                       return val;
+                   });
+                   
+                   // LOG para debugging en consola del navegador
+                   console.log('Años:', sortedKeys);
+                   console.log('Registros:', registrosData);
+                   console.log('Cursos:', cursosData);
+                   
                    config.data = {
                        labels: sortedKeys,
                        datasets: [
-                           { label: 'Docentes Inscritos', data: sortedKeys.map(k=>data[k].registros), borderColor: '#36A2EB', backgroundColor: '#36A2EB', tension: 0.3 },
-                           { label: 'Cursos Ofertados', data: sortedKeys.map(k=>data[k].cursos), borderColor: '#FF6384', backgroundColor: '#FF6384', tension: 0.3 }
+                           { 
+                               label: 'Docentes Inscritos', 
+                               data: registrosData,
+                               borderColor: '#36A2EB', 
+                               backgroundColor: '#36A2EB', 
+                               tension: 0.3 
+                           },
+                           { 
+                               label: 'Cursos Ofertados', 
+                               data: cursosData,
+                               borderColor: '#FF6384', 
+                               backgroundColor: '#FF6384', 
+                               tension: 0.3 
+                           }
                        ]
                    };
-                   config.options.plugins.datalabels = { display: true, align: 'top', font: {weight:'bold'} };
+                   config.options.plugins.datalabels = { 
+                       display: true, 
+                       align: 'top', 
+                       font: {weight:'bold'},
+                       formatter: (value) => value || ''
+                   };
                    // Aplicar escala al eje Y
                    config.options.scales = { y: commonScaleOptions };
                 }
