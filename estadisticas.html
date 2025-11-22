@@ -454,7 +454,7 @@
             );
         };
         
-        // --- CHART WRAPPER ---
+// --- CHART WRAPPER ---
         const StatsChart = ({ type, data, title, id, horizontal = false }) => {
             const chartRef = useRef(null);
             const canvasRef = useRef(null);
@@ -524,12 +524,16 @@
                 };
                 
                 if(isHistory) {
-                   const sortedKeys = Object.keys(data).sort((a,b) => parseInt(a)-parseInt(b));
+                   const sortedKeys = Object.keys(data).sort((a,b) => {
+                       if (a === 'ACTUAL') return 1;
+                       if (b === 'ACTUAL') return -1;
+                       return parseInt(a)-parseInt(b);
+                   });
                    config.data = {
                        labels: sortedKeys,
                        datasets: [
                            { label: 'Docentes Inscritos', data: sortedKeys.map(k=>data[k].registros), borderColor: '#36A2EB', backgroundColor: '#36A2EB', tension: 0.3 },
-                           { label: '#Cursos', data: sortedKeys.map(k=>data[k].cursos), borderColor: '#FF6384', backgroundColor: '#FF6384', tension: 0.3 }
+                           { label: 'Cursos Ofertados', data: sortedKeys.map(k=>data[k].cursos), borderColor: '#FF6384', backgroundColor: '#FF6384', tension: 0.3 }
                        ]
                    };
                    config.options.plugins.datalabels = { display: true, align: 'top', font: {weight:'bold'} };
@@ -550,7 +554,6 @@
                 </div>
             );
         };
-
         // --- MAIN APP ---
         const App = () => {
             const [user, setUser] = useState(null);
