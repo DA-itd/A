@@ -54,10 +54,16 @@
         /* Elementos exclusivos de impresión */
         .print-header-element, .print-footer-element { display: none; }
 
+      <!-- REEMPLAZA SOLO LA SECCIÓN @media print EN TU ARCHIVO estadisticas.html -->
+
+<style>
+        /* ... TUS ESTILOS ANTERIORES AQUÍ ... */
+
+        /* NUEVA SECCIÓN DE IMPRESIÓN OPTIMIZADA */
         @media print {
             @page { 
                 size: letter portrait; 
-                margin: 1.0cm; 
+                margin: 0.5cm 0.8cm; /* Márgenes reducidos */
             }
             
             body { 
@@ -65,13 +71,20 @@
                 color: black !important; 
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important; 
-                padding-top: 100px; /* Espacio para el header fijo */
-                padding-bottom: 50px;
+                padding-top: 60px; /* Header más pequeño */
+                padding-bottom: 30px;
+                font-size: 9pt !important; /* Texto más compacto */
             }
             
-            header, footer, #back-link, .no-print, button, select, .bg-gray-50.border, #dashboard-header-controls, .print-hide { display: none !important; }
+            /* Ocultar elementos innecesarios */
+            header, footer, #back-link, .no-print, button, select, 
+            .bg-gray-50.border, #dashboard-header-controls, .print-hide { 
+                display: none !important; 
+            }
             
-            /* Encabezado FIJO en todas las páginas */
+            /* ============================================ */
+            /* ENCABEZADO COMPACTO */
+            /* ============================================ */
             .print-header-element { 
                 display: flex !important; 
                 justify-content: space-between; 
@@ -80,19 +93,38 @@
                 top: 0;
                 left: 0;
                 right: 0;
-                height: 80px;
+                height: 50px; /* Reducido de 80px */
                 background: white;
                 z-index: 1000;
-                border-bottom: 2px solid #1B396A; 
-                padding-bottom: 10px; 
-                margin-bottom: 20px;
+                border-bottom: 1px solid #1B396A; 
+                padding: 5px 10px;
             }
-            .print-header-element img { height: 60px; object-fit: contain; }
-            .print-header-element .text-center { flex: 1; padding: 0 20px; }
-            .print-header-element h1 { font-size: 14pt !important; font-weight: 900 !important; margin: 0; color: #1B396A; line-height: 1.2; }
-            .print-header-element h2 { font-size: 11pt !important; font-weight: bold !important; margin: 5px 0 0 0; color: #333 !important; text-transform: uppercase; }
+            .print-header-element img { 
+                height: 40px; /* Reducido de 60px */
+                object-fit: contain; 
+            }
+            .print-header-element .text-center { 
+                flex: 1; 
+                padding: 0 15px; 
+            }
+            .print-header-element h1 { 
+                font-size: 11pt !important; /* Reducido */
+                font-weight: 900 !important; 
+                margin: 0; 
+                color: #1B396A; 
+                line-height: 1.1; 
+            }
+            .print-header-element h2 { 
+                font-size: 9pt !important; /* Reducido */
+                font-weight: bold !important; 
+                margin: 3px 0 0 0; 
+                color: #333 !important; 
+                text-transform: uppercase; 
+            }
             
-            /* Pie de página con numeración */
+            /* ============================================ */
+            /* PIE DE PÁGINA COMPACTO */
+            /* ============================================ */
             .print-footer-element { 
                 display: flex !important; 
                 justify-content: space-between;
@@ -100,43 +132,154 @@
                 bottom: 0; 
                 left: 0; 
                 width: 100%; 
-                font-size: 9pt; 
+                font-size: 7pt; /* Reducido */
                 color: #555; 
-                padding-top: 10px; 
+                padding: 5px 10px;
                 background: white; 
                 border-top: 1px solid #eee; 
             }
             .print-footer-element::after {
-                content: "Página " counter(page);
+                content: "Pág. " counter(page);
             }
             
-            #dashboard-content { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            /* ============================================ */
+            /* CONTENEDOR PRINCIPAL MÁS COMPACTO */
+            /* ============================================ */
+            #dashboard-content { 
+                width: 100% !important; 
+                margin: 0 !important; 
+                padding: 0 5px !important; /* Padding mínimo */
+            }
             
-            /* EVITAR CORTES EN GRÁFICAS */
+            /* ============================================ */
+            /* KPIs EN UNA SOLA FILA COMPACTA */
+            /* ============================================ */
+            .md\:grid-cols-4 { 
+                display: flex !important; 
+                flex-wrap: nowrap !important;
+                gap: 5px !important;
+                justify-content: space-between;
+                margin-bottom: 8px !important; /* Reducido */
+            }
+            .md\:grid-cols-4 > div { 
+                flex: 1 !important;
+                border: 1px solid #ddd !important; 
+                padding: 5px !important; /* Muy compacto */
+                margin: 0 !important;
+                min-height: 45px !important; /* Altura mínima */
+            }
+            .md\:grid-cols-4 > div .text-3xl {
+                font-size: 1.2rem !important; /* Iconos más pequeños */
+            }
+            .md\:grid-cols-4 > div .text-2xl {
+                font-size: 1.1rem !important; /* Números más pequeños */
+                margin: 2px 0 !important;
+            }
+            .md\:grid-cols-4 > div .text-\[10px\] {
+                font-size: 7pt !important; /* Labels más pequeños */
+            }
+            
+            /* ============================================ */
+            /* GRÁFICAS MÁS COMPACTAS */
+            /* ============================================ */
             .bg-white, .shadow-md, .shadow-xl, .grid > div { 
                 box-shadow: none !important; 
-                border: 1px solid #eee !important; 
-                margin-bottom: 20px !important; 
+                border: 1px solid #ddd !important; 
+                margin-bottom: 8px !important; /* Reducido de 20px */
+                padding: 5px !important; /* Reducido */
                 break-inside: avoid !important; 
                 page-break-inside: avoid !important;
             }
             
+            /* Contenedores de gráficas más pequeños */
             .chart-container-wrapper { 
-                height: 400px !important; /* Altura restaurada para mejor visibilidad */
+                height: 180px !important; /* Reducido de 400px */
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
             }
             
-            canvas { max-width: 100% !important; max-height: 100% !important; }
+            /* Títulos de gráficas más pequeños */
+            .bg-white h3 {
+                font-size: 9pt !important;
+                margin-bottom: 3px !important;
+                padding: 0 !important;
+            }
             
-            .grid { display: block !important; }
-            .grid > div { width: 100% !important; }
+            canvas { 
+                max-width: 100% !important; 
+                max-height: 100% !important; 
+            }
             
-            /* Ajuste para los KPIs en una fila */
-            .md\:grid-cols-4 { display: flex !important; flex-wrap: nowrap; gap: 10px; justify-content: space-between; }
-            .md\:grid-cols-4 > div { flex: 1; border: 1px solid #ddd !important; margin-bottom: 20px; padding: 10px !important; }
+            /* ============================================ */
+            /* LAYOUT EN 2 COLUMNAS PARA GRÁFICAS */
+            /* ============================================ */
+            .grid { 
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important; /* 2 columnas */
+                gap: 5px !important;
+            }
+            
+            /* Primera fila: 2 gráficas lado a lado */
+            .lg\:col-span-7, .lg\:col-span-5 {
+                grid-column: span 1 !important;
+            }
+            
+            /* Segunda fila: gráfica grande y pequeña */
+            .lg\:col-span-9 {
+                grid-column: span 1 !important;
+            }
+            .lg\:col-span-3 {
+                grid-column: span 1 !important;
+            }
+            
+            /* Leyenda de departamentos MÁS COMPACTA */
+            .bg-gray-50.p-4 {
+                padding: 5px !important;
+                max-height: 50px !important; /* Muy compacta */
+                overflow: hidden !important;
+            }
+            .bg-gray-50.p-4 .text-xs {
+                font-size: 6pt !important; /* Muy pequeño */
+                line-height: 1.1 !important;
+            }
+            .bg-gray-50.p-4 .grid {
+                grid-template-columns: 1fr 1fr 1fr !important; /* 3 columnas */
+                gap: 2px !important;
+            }
+            
+            /* ============================================ */
+            /* GRÁFICA HISTÓRICA EN ANCHO COMPLETO */
+            /* ============================================ */
+            .mb-8.h-96 {
+                height: 180px !important; /* Más compacta */
+                margin-bottom: 5px !important;
+                grid-column: span 2 !important; /* Ancho completo */
+            }
+            
+            /* ============================================ */
+            /* AJUSTES FINALES PARA REDUCIR ESPACIO */
+            /* ============================================ */
+            * {
+                line-height: 1.2 !important; /* Interlineado compacto */
+            }
+            
+            /* Eliminar espaciado extra */
+            .py-8, .py-6, .py-4 {
+                padding-top: 3px !important;
+                padding-bottom: 3px !important;
+            }
+            
+            .my-8, .my-6, .my-4 {
+                margin-top: 5px !important;
+                margin-bottom: 5px !important;
+            }
+            
+            /* Forzar todo en máximo 2 páginas */
+            #dashboard-content > * {
+                page-break-inside: avoid !important;
+            }
         }
-    </style>
+</style>
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800">
 
