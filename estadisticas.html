@@ -54,7 +54,7 @@
         /* Elementos exclusivos de impresión */
         .print-header-element, .print-footer-element { display: none; }
 
-       <!-- REEMPLAZA SOLO LA SECCIÓN @media print EN TU ARCHIVO estadisticas.html -->
+     <!-- REEMPLAZA SOLO LA SECCIÓN @media print EN TU ARCHIVO estadisticas.html -->
 
 <style>
         /* ... TUS ESTILOS ANTERIORES AQUÍ ... */
@@ -71,8 +71,8 @@
                 color: black !important; 
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important; 
-                padding-top: 60px; /* Header más pequeño */
-                padding-bottom: 30px;
+                padding-top: 80px; /* Espacio para header fijo */
+                padding-bottom: 40px; /* Espacio para footer */
                 font-size: 9pt !important; /* Texto más compacto */
             }
             
@@ -83,24 +83,31 @@
             }
             
             /* ============================================ */
-            /* ENCABEZADO COMPACTO */
+            /* ENCABEZADO FIJO EN TODAS LAS PÁGINAS */
             /* ============================================ */
             .print-header-element { 
                 display: flex !important; 
-                justify-content: space-between; 
-                align-items: center; 
+                flex-direction: column !important;
                 position: fixed;
                 top: 0;
                 left: 0;
                 right: 0;
-                height: 50px; /* Reducido de 80px */
                 background: white;
                 z-index: 1000;
-                border-bottom: 1px solid #1B396A; 
-                padding: 5px 10px;
+                border-bottom: 2px solid #1B396A; 
+                padding: 5px 10px 8px 10px;
             }
+            
+            /* Fila superior: logos y título */
+            .print-header-element > div:first-child {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                margin-bottom: 5px !important;
+            }
+            
             .print-header-element img { 
-                height: 40px; /* Reducido de 60px */
+                height: 40px; /* Reducido */
                 object-fit: contain; 
             }
             .print-header-element .text-center { 
@@ -122,24 +129,47 @@
                 text-transform: uppercase; 
             }
             
+            /* Fila inferior: subtítulo descriptivo */
+            .print-header-element > div:last-child {
+                text-align: center !important;
+                font-size: 8pt !important;
+                color: #555 !important;
+                font-style: italic !important;
+                padding-top: 3px !important;
+                border-top: 1px solid #eee !important;
+            }
+            
             /* ============================================ */
-            /* PIE DE PÁGINA COMPACTO */
+            /* PIE DE PÁGINA CON NUMERACIÓN */
             /* ============================================ */
             .print-footer-element { 
                 display: flex !important; 
-                justify-content: space-between;
+                justify-content: space-between !important;
+                align-items: center !important;
                 position: fixed; 
                 bottom: 0; 
                 left: 0; 
+                right: 0;
                 width: 100%; 
                 font-size: 7pt; /* Reducido */
                 color: #555; 
-                padding: 5px 10px;
+                padding: 8px 10px;
                 background: white; 
-                border-top: 1px solid #eee; 
+                border-top: 1px solid #ddd; 
             }
-            .print-footer-element::after {
-                content: "Pág. " counter(page);
+            
+            .print-footer-element .footer-left {
+                flex: 1;
+                text-align: left;
+            }
+            
+            .print-footer-element .footer-right {
+                flex: 1;
+                text-align: right;
+            }
+            
+            .print-footer-element .footer-right::after {
+                content: "Página " counter(page) " de 2";
             }
             
             /* ============================================ */
