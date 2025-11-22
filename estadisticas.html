@@ -1,3 +1,6 @@
+
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -39,12 +42,6 @@
     <style>
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-        .markdown-body h1 { font-size: 1.5em; font-weight: bold; margin-bottom: 0.5em; color: #1B396A; }
-        .markdown-body h2 { font-size: 1.25em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; color: #9D2449; }
-        .markdown-body p { margin-bottom: 0.8em; line-height: 1.6; }
-        .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
-        .markdown-body li { margin-bottom: 0.3em; }
-        .markdown-body strong { color: #1B396A; }
         
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -54,7 +51,7 @@
         /* Elementos exclusivos de impresión */
         .print-header-element, .print-footer-element { display: none; }
 
-     <!-- REEMPLAZA SOLO LA SECCIÓN @media print EN TU ARCHIVO estadisticas.html -->
+        <!-- REEMPLAZA SOLO LA SECCIÓN @media print EN TU ARCHIVO estadisticas.html -->
 
 <style>
         /* ... TUS ESTILOS ANTERIORES AQUÍ ... */
@@ -71,8 +68,8 @@
                 color: black !important; 
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important; 
-                padding-top: 80px; /* Espacio para header fijo */
-                padding-bottom: 40px; /* Espacio para footer */
+                padding-top: 60px; /* Header más pequeño */
+                padding-bottom: 30px;
                 font-size: 9pt !important; /* Texto más compacto */
             }
             
@@ -83,31 +80,24 @@
             }
             
             /* ============================================ */
-            /* ENCABEZADO FIJO EN TODAS LAS PÁGINAS */
+            /* ENCABEZADO COMPACTO */
             /* ============================================ */
             .print-header-element { 
                 display: flex !important; 
-                flex-direction: column !important;
+                justify-content: space-between; 
+                align-items: center; 
                 position: fixed;
                 top: 0;
                 left: 0;
                 right: 0;
+                height: 50px; /* Reducido de 80px */
                 background: white;
                 z-index: 1000;
-                border-bottom: 2px solid #1B396A; 
-                padding: 5px 10px 8px 10px;
+                border-bottom: 1px solid #1B396A; 
+                padding: 5px 10px;
             }
-            
-            /* Fila superior: logos y título */
-            .print-header-element > div:first-child {
-                display: flex !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-                margin-bottom: 5px !important;
-            }
-            
             .print-header-element img { 
-                height: 40px; /* Reducido */
+                height: 40px; /* Reducido de 60px */
                 object-fit: contain; 
             }
             .print-header-element .text-center { 
@@ -129,47 +119,24 @@
                 text-transform: uppercase; 
             }
             
-            /* Fila inferior: subtítulo descriptivo */
-            .print-header-element > div:last-child {
-                text-align: center !important;
-                font-size: 8pt !important;
-                color: #555 !important;
-                font-style: italic !important;
-                padding-top: 3px !important;
-                border-top: 1px solid #eee !important;
-            }
-            
             /* ============================================ */
-            /* PIE DE PÁGINA CON NUMERACIÓN */
+            /* PIE DE PÁGINA COMPACTO */
             /* ============================================ */
             .print-footer-element { 
                 display: flex !important; 
-                justify-content: space-between !important;
-                align-items: center !important;
+                justify-content: space-between;
                 position: fixed; 
                 bottom: 0; 
                 left: 0; 
-                right: 0;
                 width: 100%; 
                 font-size: 7pt; /* Reducido */
                 color: #555; 
-                padding: 8px 10px;
+                padding: 5px 10px;
                 background: white; 
-                border-top: 1px solid #ddd; 
+                border-top: 1px solid #eee; 
             }
-            
-            .print-footer-element .footer-left {
-                flex: 1;
-                text-align: left;
-            }
-            
-            .print-footer-element .footer-right {
-                flex: 1;
-                text-align: right;
-            }
-            
-            .print-footer-element .footer-right::after {
-                content: "Página " counter(page) " de 2";
+            .print-footer-element::after {
+                content: "Pág. " counter(page);
             }
             
             /* ============================================ */
@@ -313,7 +280,45 @@
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800">
 
- 
+    <!-- Encabezado EXCLUSIVO para Impresión -->
+    <div class="print-header-element container mx-auto">
+        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM">
+        <div class="text-center">
+            <h1>INSTITUTO TECNOLÓGICO DE DURANGO</h1>
+            <h2>COORDINACIÓN DE ACTUALIZACIÓN DOCENTE</h2>
+        </div>
+        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD">
+    </div>
+
+    <!-- Header Web -->
+    <header class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A] no-print">
+        <div class="container mx-auto px-4 py-4 sm:py-6">
+            <div class="flex items-center justify-between gap-4">
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
+                <div class="text-center flex-1 px-2 sm:px-4">
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#1B396A] leading-tight">PANEL DE ESTADÍSTICAS</h1>
+                    <p class="text-xs sm:text-sm md:text-base text-[#9D2449] mt-1 font-semibold">Desarrollo Académico</p>
+                </div>
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
+            </div>
+        </div>
+    </header>
+    
+    <div id="back-link" class="container mx-auto px-4 py-4 no-print">
+        <a href="index.html" class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center gap-1 text-sm font-bold transition-colors">
+            ← Volver al Portal Principal
+        </a>
+    </div>
+
+    <div id="root">
+        <!-- Mensaje de carga inicial por si React tarda en arrancar -->
+        <div class="flex justify-center items-center h-64">
+            <div class="text-center">
+                <div class="animate-spin h-10 w-10 border-4 border-[#1B396A] rounded-full border-t-transparent mx-auto mb-4"></div>
+                <p class="text-gray-600 font-semibold">Cargando sistema...</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer Web -->
     <footer class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449] no-print">
@@ -341,11 +346,9 @@
         const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
         const VIBRANT_COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC926', '#1982C4', '#6A4C93', '#F15BB5', '#E9C46A', '#2A9D8F', '#E76F51'];
         
-        // DEPT_ACRONYMS y helpers
         const DEPT_ACRONYMS = { "SISTEMAS Y COMPUTACION": "DSC", "CIENCIAS ECONOMICO-ADMINISTRATIVAS": "DCEA", "INGENIERÍA QUÍMICA-BIOQUÍMICA": "DIQB", "QUIMICA-BIOQUIMICA": "DIQB", "CIENCIAS DE LA TIERRA": "DCT", "CIENCIAS BASICAS": "DCB", "METAL-MECÁNICA": "DMM", "METAL MECANICA": "DMM", "INGENIERÍA INDUSTRIAL": "DII", "INDUSTRIAL": "DII", "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA": "DIEE", "ELECTRICA Y ELECTRONICA": "DIEE", "POSGRADO E INVESTIGACION": "DEPI", "ADMINISTRATIVO": "ADMON", "EXTERNO": "EXT", "DESARROLLO ACADÉMICO": "DDA", "GESTION TECNOLOGICA": "DGT" };
         const getAcronym = (fullName) => { if(!fullName) return "ND"; const nameUpper = fullName.toUpperCase().replace('DEPARTAMENTO DE ', '').replace('DIVISION DE ESTUDIOS DE ', '').replace('CENTRO DE ', ''); for (const [key, val] of Object.entries(DEPT_ACRONYMS)) { if (nameUpper.includes(key)) return val; } const words = nameUpper.split(' '); if(words.length > 1) return words.map(w => w[0]).join('').substring(0,4); return nameUpper.substring(0, 4) + "."; };
         
-        // Función para dividir etiquetas largas en múltiples líneas
         const splitLabel = (label, maxLength = 30) => { 
             if (!label || label.length <= maxLength) return label; 
             const words = label.split(' '); 
@@ -363,11 +366,6 @@
             return lines; 
         };
 
-        const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
-        const TECNM_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg';
-        const getImageDataFromURL = (url) => new Promise((resolve) => { const img = new Image(); img.crossOrigin = 'Anonymous'; img.onload = () => { const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0); resolve(canvas.toDataURL('image/png')); }; img.onerror = () => resolve(null); img.src = url; });
-
-        // --- LOGIN COMPONENT ---
         const Login = ({ onLogin, loginError }) => {
             const googleButtonRef = useRef(null);
 
@@ -376,30 +374,14 @@
                 const initGoogle = () => {
                     if (window.google && window.google.accounts && googleButtonRef.current) {
                         try {
-                            window.google.accounts.id.initialize({
-                                client_id: CONFIG.GOOGLE_CLIENT_ID,
-                                callback: onLogin
-                            });
-                            window.google.accounts.id.renderButton(googleButtonRef.current, {
-                                theme: "outline",
-                                size: "large",
-                                text: "signin_with"
-                            });
+                            window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
+                            window.google.accounts.id.renderButton(googleButtonRef.current, { theme: "outline", size: "large", text: "signin_with" });
                             return true;
-                        } catch (e) {
-                            console.error("Error initializing Google Sign-In", e);
-                            return false;
-                        }
+                        } catch (e) { console.error("Error initializing Google Sign-In", e); return false; }
                     }
                     return false;
                 };
-
-                if (!initGoogle()) {
-                    intervalId = setInterval(() => {
-                        if (initGoogle()) clearInterval(intervalId);
-                    }, 500);
-                }
-
+                if (!initGoogle()) { intervalId = setInterval(() => { if (initGoogle()) clearInterval(intervalId); }, 500); }
                 return () => { if(intervalId) clearInterval(intervalId); };
             }, [onLogin]);
 
@@ -408,29 +390,20 @@
                     <div className="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-10 rounded-xl shadow-lg text-center max-w-md w-full border-t-4 border-[#9D2449]">
                         <div className="text-4xl mb-4">🔒</div>
                         <h2 className="text-2xl font-bold text-[#9D2449] mb-4">Acceso Restringido</h2>
-                        <p className="text-gray-600 mb-8 font-bold">Inicie sesión con su cuenta institucional para ver las estadísticas.</p>
-                        
-                        {loginError && (
-                            <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-                                <span className="block sm:inline">{loginError}</span>
-                            </div>
-                        )}
-
+                        <p className="text-gray-600 mb-8 font-bold">Inicie sesión con su cuenta institucional.</p>
+                        {loginError && <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">{loginError}</div>}
                         <div className="flex justify-center min-h-[50px]" ref={googleButtonRef}></div>
-                        <p className="text-xs text-gray-500 mt-6">Si el botón no aparece, verifique su conexión a internet o recargue la página.</p>
                     </div>
                 </div>
             );
         };
 
-        // --- DASHBOARD COMPONENT ---
         const Dashboard = ({ user, onLogout }) => {
             const [stats, setStats] = useState(null);
             const [loading, setLoading] = useState(true);
             const [error, setError] = useState(null);
             const [period, setPeriod] = useState('ACTUAL');
             const [availableYears, setAvailableYears] = useState([]);
-            const [showReportModal, setShowReportModal] = useState(false);
 
             useEffect(() => {
                 let isMounted = true;
@@ -438,27 +411,16 @@
                 setError(null);
 
                 fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}`)
-                    .then(r => {
-                        if(!r.ok) throw new Error(`Error HTTP: ${r.status}`);
-                        return r.json();
-                    })
+                    .then(r => { if(!r.ok) throw new Error(`Error HTTP: ${r.status}`); return r.json(); })
                     .then(res => {
                         if (!isMounted) return;
                         if (res.success) {
                             setStats(res.data);
                             if (res.availableYears) setAvailableYears(res.availableYears);
-                        } else {
-                            throw new Error(res.message || "El servidor no devolvió datos válidos.");
-                        }
+                        } else throw new Error(res.message || "Error de datos.");
                     })
-                    .catch(err => {
-                        if (!isMounted) return;
-                        console.error("Fetch error:", err);
-                        setError(err.message);
-                    })
-                    .finally(() => {
-                        if (isMounted) setLoading(false);
-                    });
+                    .catch(err => { if (isMounted) setError(err.message); })
+                    .finally(() => { if (isMounted) setLoading(false); });
 
                 return () => { isMounted = false; };
             }, [period]);
@@ -474,66 +436,27 @@
                 return { chartData, legend };
             }, [stats]);
 
-            if (loading) {
-                return (
-                    <div className="flex flex-col justify-center items-center h-96 animate-fadeIn">
-                        <div className="animate-spin h-16 w-16 border-4 border-[#1B396A] rounded-full border-t-transparent mb-4"></div>
-                        <p className="text-[#1B396A] font-bold text-lg">Cargando estadísticas...</p>
-                    </div>
-                );
-            }
-
-            if (error) {
-                const isPeriodError = error.includes("Periodo no encontrado") || error.includes("sheet");
-                return (
-                    <div className="flex justify-center items-center py-20 px-4 animate-fadeIn">
-                         <div className="bg-red-50 border-l-4 border-red-500 p-8 rounded-lg shadow-md max-w-2xl text-center">
-                            <div className="text-4xl mb-4 text-red-500">⚠️</div>
-                            <h3 className="text-xl font-bold text-red-800 mb-2">Error de Carga</h3>
-                            <p className="text-red-700 mb-4">{error}</p>
-                            {isPeriodError && (
-                                <div className="bg-white p-3 rounded border border-red-200 text-sm text-gray-600 mb-6 text-left">
-                                    <p className="font-bold mb-1">Posible causa:</p>
-                                    <p>El sistema no encuentra la hoja de cálculo. Asegúrese de que en su archivo de Google Sheets exista una hoja llamada exactamente <strong>Inscripciones</strong> (o BD-202X para históricos).</p>
-                                </div>
-                            )}
-                            <button onClick={() => window.location.reload()} className="bg-red-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-red-700 transition">
-                                Intentar de nuevo
-                            </button>
-                        </div>
-                    </div>
-                );
-            }
-
+            if (loading) return <div className="flex justify-center items-center h-96"><div className="animate-spin h-16 w-16 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div>;
+            if (error) return <div className="flex justify-center items-center py-20"><div className="text-red-600 font-bold text-xl">Error: {error} <br/><button onClick={()=>window.location.reload()} className="text-sm text-blue-600 underline mt-2">Recargar</button></div></div>;
             if (!stats) return null;
 
             return (
                 <div className="container mx-auto px-4 py-8 max-w-7xl animate-fadeIn" id="dashboard-content">
-                    {/* Controls - Borde color guinda para consistencia */}
                     <div id="dashboard-header-controls" className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#9D2449] gap-4 no-print">
                         <div className="flex-1">
                             <h2 className="text-xl font-bold text-[#1B396A]">Dashboard de Resultados</h2>
                             <p className="text-sm text-gray-500 font-bold">Usuario: <span className="font-extrabold text-gray-700">{user.name}</span></p>
                         </div>
-                        
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-200">
-                                <span className="text-sm font-bold text-gray-700">Periodo:</span>
-                                <select value={period} onChange={(e) => setPeriod(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md font-bold block p-1.5 outline-none focus:ring-2 focus:ring-[#1B396A]">
-                                    <option value="ACTUAL">🟢 Periodo Actual</option>
-                                    {availableYears.filter(y => y !== 'ACTUAL').map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
-                                </select>
-                            </div>
-                            
-                            <button onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center gap-2">
-                                <span>🖨️</span> Imprimir Reporte
-                            </button>
-                            
+                            <select value={period} onChange={(e) => setPeriod(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md font-bold block p-1.5 outline-none focus:ring-2 focus:ring-[#1B396A]">
+                                <option value="ACTUAL">🟢 Periodo Actual</option>
+                                {availableYears.filter(y => y !== 'ACTUAL').map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
+                            </select>
+                            <button onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center gap-2"><span>🖨️</span> Imprimir Reporte</button>
                             <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm font-bold text-gray-700 border border-gray-300 transition">Cerrar Sesión</button>
                         </div>
                     </div>
 
-                    {/* KPIs */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                         {[
                             { icon: "📝", val: stats.totalInscripciones, label: "Docentes Inscritos", color: "border-[#1B396A]" },
@@ -543,43 +466,27 @@
                         ].map((kpi, idx) => (
                             <div key={idx} className={`bg-white p-5 rounded-xl shadow-md border-b-4 ${kpi.color} flex items-center gap-3`}>
                                 <div className="text-3xl">{kpi.icon}</div>
-                                <div>
-                                    <div className="text-2xl font-bold text-gray-800">{kpi.val}</div>
-                                    <div className="text-[10px] font-bold text-gray-500 uppercase">{kpi.label}</div>
-                                </div>
+                                <div><div className="text-2xl font-bold text-gray-800">{kpi.val}</div><div className="text-[10px] font-bold text-gray-500 uppercase">{kpi.label}</div></div>
                             </div>
                         ))}
                     </div>
 
-                    {/* Charts Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-8">
-                        <div className="lg:col-span-7 h-96 chart-container-wrapper">
-                            <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" horizontal={true} />
-                        </div>
-                        <div className="lg:col-span-5 h-96 chart-container-wrapper">
-                            <StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="chartGen" />
-                        </div>
+                        <div className="lg:col-span-7 h-96 chart-container-wrapper"><StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" horizontal={true} /></div>
+                        <div className="lg:col-span-5 h-96 chart-container-wrapper"><StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="chartGen" /></div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
                         <div className="lg:col-span-9 h-full flex flex-col bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
-                            <div className="p-6 flex-1 h-96 chart-container-wrapper">
-                                <StatsChart type="bar" data={processedDepts.chartData} title="Top 5 Departamentos" id="chartDept" horizontal={true} />
-                            </div>
+                            <div className="p-6 flex-1 h-96 chart-container-wrapper"><StatsChart type="bar" data={processedDepts.chartData} title="Top 5 Departamentos" id="chartDept" horizontal={true} /></div>
                             <div className="bg-gray-50 p-4 border-t border-gray-200 rounded-b-xl print-hide">
                                 <p className="text-xs font-bold text-gray-500 mb-2 uppercase">Leyenda:</p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-gray-600 max-h-32 overflow-y-auto custom-scrollbar">
-                                    {processedDepts.legend.map((item, idx) => (
-                                        <div key={idx} className="flex items-start gap-2"><span className="font-bold text-[#1B396A] min-w-[35px]">{item.acronym}:</span><span className="truncate" title={item.name}>{item.name}</span></div>
-                                    ))}
+                                    {processedDepts.legend.map((item, idx) => <div key={idx} className="flex items-start gap-2"><span className="font-bold text-[#1B396A] min-w-[35px]">{item.acronym}:</span><span className="truncate" title={item.name}>{item.name}</span></div>)}
                                 </div>
                             </div>
                         </div>
-                        <div className="lg:col-span-3 h-full">
-                             <div className="h-96 chart-container-wrapper">
-                                <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={false} />
-                             </div>
-                        </div>
+                        <div className="lg:col-span-3 h-full"><div className="h-96 chart-container-wrapper"><StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={false} /></div></div>
                     </div>
 
                      <div className="mb-8 h-96 chart-container-wrapper">
@@ -589,133 +496,52 @@
             );
         };
         
-// --- CHART WRAPPER ---
         const StatsChart = ({ type, data, title, id, horizontal = false }) => {
             const chartRef = useRef(null);
             const canvasRef = useRef(null);
 
             useEffect(() => {
-                if (!canvasRef.current || !data || Object.keys(data).length === 0) return;
+                if (!canvasRef.current || !data) return;
                 if (typeof window.Chart === 'undefined') return;
-                
                 if(window.ChartDataLabels) window.Chart.register(window.ChartDataLabels);
                 if (chartRef.current) chartRef.current.destroy();
 
                 const ctx = canvasRef.current.getContext('2d');
-                const isPie = type === 'pie' || type === 'doughnut';
                 const isHistory = id === 'chartHistory';
+                const isPie = type === 'pie' || type === 'doughnut';
                 
-                // Procesar etiquetas largas con splitLabel
-                const rawLabels = Object.keys(data);
-                const processedLabels = isPie || isHistory ? rawLabels : rawLabels.map(label => splitLabel(label, 30));
-                
-                // Lógica para escalas enteras y dinámicas
-                const dataValues = Object.values(data).map(v => isHistory && typeof v === 'object' ? Math.max(v.registros, v.cursos) : Number(v));
-                const maxValue = Math.max(...dataValues, 0);
-                // Añadir un margen (padding) superior para que se vea mejor: 20% extra o mínimo 5
-                const suggestedMax = maxValue > 0 ? Math.ceil(maxValue * 1.2) : 10;
-
-                // Configuración de Escalas para gráficos de barras/línea
-                const commonScaleOptions = {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1, precision: 0 }, // Forzar enteros
-                    suggestedMax: suggestedMax // Escala con margen
-                };
-
-                let scalesConfig = {};
-                
-                if (!isPie) {
-                     scalesConfig = {
-                        x: horizontal ? commonScaleOptions : { ticks: { autoSkip: false } },
-                        y: horizontal ? { 
-                            ticks: { autoSkip: false }, // No ocultar etiquetas en horizontal
-                            grid: { display: false }
-                        } : commonScaleOptions
-                     };
-                }
-
                 let config = {
                     type: isHistory ? 'line' : type,
-                    data: {
-                        labels: processedLabels,
-                        datasets: [{
-                            label: title,
-                            data: Object.values(data),
-                            backgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS,
-                            borderWidth: isPie ? 2 : 0,
-                            tension: 0.3
-                        }]
-                    },
+                    data: { labels: [], datasets: [] },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        indexAxis: horizontal ? 'y' : 'x',
-                        scales: scalesConfig,
-                        plugins: { 
-                            legend: { display: isPie || isHistory, position: 'bottom' }, 
-                            datalabels: { display: false } 
-                        }
+                        responsive: true, maintainAspectRatio: false, indexAxis: horizontal ? 'y' : 'x',
+                        scales: isPie ? {} : { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                        plugins: { legend: { display: isPie || isHistory, position: 'bottom' }, datalabels: { display: false } }
                     }
                 };
-                
-                if(isHistory) {
-                   // Ordenar años correctamente
-                   const sortedKeys = Object.keys(data).sort((a,b) => {
-                       if (a === 'ACTUAL') return 1;
-                       if (b === 'ACTUAL') return -1;
-                       return parseInt(a) - parseInt(b);
-                   });
-                   
-                   // Extraer valores asegurando que existan
-                   const registrosData = sortedKeys.map(k => {
-                       const val = data[k] && data[k].registros !== undefined ? data[k].registros : 0;
-                       return val;
-                   });
-                   
-                   const cursosData = sortedKeys.map(k => {
-                       const val = data[k] && data[k].cursos !== undefined ? data[k].cursos : 0;
-                       return val;
-                   });
-                   
-                   // LOG para debugging en consola del navegador
-                   console.log('Años:', sortedKeys);
-                   console.log('Registros:', registrosData);
-                   console.log('Cursos:', cursosData);
-                   
-                   config.data = {
-                       labels: sortedKeys,
-                       datasets: [
-                           { 
-                               label: 'Docentes Inscritos', 
-                               data: registrosData,
-                               borderColor: '#36A2EB', 
-                               backgroundColor: '#36A2EB', 
-                               tension: 0.3 
-                           },
-                           { 
-                               label: 'Cursos Ofertados', 
-                               data: cursosData,
-                               borderColor: '#FF6384', 
-                               backgroundColor: '#FF6384', 
-                               tension: 0.3 
-                           }
-                       ]
-                   };
-                   config.options.plugins.datalabels = { 
-                       display: true, 
-                       align: 'top', 
-                       font: {weight:'bold'},
-                       formatter: (value) => value || ''
-                   };
-                   // Aplicar escala al eje Y
-                   config.options.scales = { y: commonScaleOptions };
+
+                if (isHistory) {
+                    // Ordenar años
+                    const years = Object.keys(data).sort((a,b) => parseInt(a) - parseInt(b));
+                    config.data = {
+                        labels: years,
+                        datasets: [
+                            { label: 'Docentes Inscritos', data: years.map(y => data[y].registros), borderColor: '#36A2EB', backgroundColor: '#36A2EB', tension: 0.3 },
+                            { label: '#Cursos', data: years.map(y => data[y].cursos), borderColor: '#FF6384', backgroundColor: '#FF6384', tension: 0.3 }
+                        ]
+                    };
+                    config.options.plugins.datalabels = { display: true, align: 'top', font: { weight: 'bold' } };
+                } else {
+                    const labels = Object.keys(data);
+                    config.data = {
+                        labels: labels.map(l => horizontal ? splitLabel(l, 30) : l),
+                        datasets: [{ label: title, data: Object.values(data), backgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS }]
+                    };
                 }
 
                 chartRef.current = new window.Chart(ctx, config);
                 return () => { if (chartRef.current) chartRef.current.destroy(); };
             }, [data, type, title, horizontal, id]);
-
-            if (!data || Object.keys(data).length === 0) return <div className="bg-white p-6 rounded-xl shadow-md h-full flex items-center justify-center text-gray-400">Sin datos</div>;
 
             return (
                 <div className="bg-white p-4 rounded-xl shadow-md h-full flex flex-col border border-gray-100">
@@ -724,61 +550,21 @@
                 </div>
             );
         };
-        
-        // --- MAIN APP ---
+
         const App = () => {
             const [user, setUser] = useState(null);
             const [loginError, setLoginError] = useState(null);
-
             const handleLogin = (res) => {
                 try {
                     const p = JSON.parse(atob(res.credential.split('.')[1]));
                     setUser({ name: p.name, email: p.email });
-                    setLoginError(null);
-                } catch (e) {
-                    console.error("Login parse error", e);
-                    setLoginError("Error al procesar la cuenta. Intente de nuevo.");
-                }
+                } catch (e) { setLoginError("Error de acceso."); }
             };
-
-            return user ? (
-                <Dashboard user={user} onLogout={() => setUser(null)} />
-            ) : (
-                <Login onLogin={handleLogin} loginError={loginError} />
-            );
+            return user ? <Dashboard user={user} onLogout={() => setUser(null)} /> : <Login onLogin={handleLogin} loginError={loginError} />;
         };
 
-        // Render seguro con Error Boundary simple
-        class ErrorBoundary extends React.Component {
-            constructor(props) { super(props); this.state = { hasError: false }; }
-            static getDerivedStateFromError(error) { return { hasError: true }; }
-            render() {
-                if (this.state.hasError) {
-                    return (
-                        <div className="flex justify-center items-center h-screen bg-gray-100">
-                            <div className="text-center p-8 bg-white rounded-xl shadow-xl">
-                                <h1 className="text-2xl font-bold text-red-600 mb-4">Algo salió mal.</h1>
-                                <p className="text-gray-600 mb-6">Ocurrió un error inesperado en la aplicación.</p>
-                                <button onClick={() => window.location.reload()} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Recargar Página</button>
-                            </div>
-                        </div>
-                    );
-                }
-                return this.props.children; 
-            }
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(
-            <ErrorBoundary>
-                <App />
-            </ErrorBoundary>
-        );
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const el = document.getElementById('copyright-year');
-            if(el) el.textContent = new Date().getFullYear();
-        });
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+        document.addEventListener('DOMContentLoaded', () => { const el = document.getElementById('copyright-year'); if(el) el.textContent = new Date().getFullYear(); });
     </script>
 </body>
 </html>
