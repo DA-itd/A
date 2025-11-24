@@ -101,8 +101,8 @@
         // --- Servicio Gemini ---
         const generateLessonPlan = async (request) => {
             try {
-                // IMPORTANT: Replace process.env.API_KEY with your actual API key for this static HTML file to work locally.
-                const apiKey = process.env.API_KEY; 
+                // Configurada API KEY proporcionada
+                const apiKey = 'AIzaSyD_iCCo2H0VUo1U6NYO8mNjygvC4QddPl8'; 
                 if (!apiKey) throw new Error("API Key no configurada");
                 
                 const ai = new GoogleGenAI({ apiKey });
