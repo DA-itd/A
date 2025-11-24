@@ -1,0 +1,291 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutor Pedagógico IA - ITD</title>
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM UMD -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Marked for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Lucide Icons Global -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Markdown Styles for Chat */
+        .prose p { margin-bottom: 0.5em; line-height: 1.5; }
+        .prose ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 0.5em; }
+        .prose strong { font-weight: 600; }
+        .bg-indigo-600 .prose p, .bg-indigo-600 .prose strong { color: white; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-xl sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
+            <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-10 sm:h-14 object-contain">
+            <div class="text-center flex-1">
+                <h1 class="text-lg sm:text-2xl font-bold text-blue-900">TUTOR VIRTUAL</h1>
+                <p class="text-xs sm:text-sm text-blue-700 font-semibold">Socio Pedagógico ITD</p>
+            </div>
+            <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-10 sm:h-14 object-contain">
+        </div>
+    </header>
+
+    <!-- Botón Volver -->
+    <div class="container mx-auto px-4 py-4">
+        <a href="index.html" class="text-indigo-800 hover:text-indigo-600 font-bold text-sm flex items-center gap-1">
+            ← Volver al Portal Principal
+        </a>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div id="root" class="flex-1 container mx-auto px-4 pb-8 h-[calc(100vh-180px)]"></div>
+
+    <script type="text/babel" data-type="module">
+        import { GoogleGenAI } from "https://esm.run/@google/genai";
+
+        // Access React and ReactDOM from global window object to avoid ReferenceError
+        const { useState, useRef, useEffect } = window.React;
+        const { createRoot } = window.ReactDOM;
+
+        // Componente de Icono usando Lucide Global
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const svgRef = useRef(null);
+            
+            useEffect(() => {
+                if (svgRef.current && lucide && lucide.icons[name]) {
+                    svgRef.current.innerHTML = lucide.icons[name].toSvg({ 
+                        class: className, 
+                        width: size, 
+                        height: size,
+                        "stroke-width": 2
+                    });
+                }
+            }, [name, size, className]);
+
+            return <span ref={svgRef} className={`inline-flex items-center justify-center ${className}`} />;
+        };
+
+        // --- Servicio Gemini ---
+        const chatWithTutor = async (history, newMessage) => {
+            try {
+                // IMPORTANT: Replace process.env.API_KEY with your actual API key for this static HTML file to work locally.
+                const apiKey = process.env.API_KEY;
+                if (!apiKey) throw new Error("API Key no configurada");
+
+                const ai = new GoogleGenAI({ apiKey });
+                
+                const chat = ai.chats.create({
+                  model: 'gemini-2.5-flash',
+                  config: {
+                    systemInstruction: `Eres "Socio Pedagógico", un asistente experto en educación y pedagogía para el Instituto Tecnológico de Durango. 
+                    Tu tono es profesional, empático y motivador. 
+                    Ayudas a los profesores a entender conceptos complejos, sugerir estrategias de aula y resolver dudas sobre procesos educativos.
+                    Responde siempre en español. Sé conciso pero útil.`,
+                  },
+                  history: history.filter(msg => !msg.isError).map(msg => ({
+                    role: msg.role,
+                    parts: [{ text: msg.text }],
+                  })),
+                });
+
+                const response = await chat.sendMessage({ message: newMessage });
+                return response.text || "Lo siento, no pude generar una respuesta.";
+            } catch (error) {
+                console.error("Error calling Gemini:", error);
+                throw error;
+            }
+        };
+
+        // --- Componente Markdown Renderer ---
+        const MarkdownRenderer = ({ content, className }) => {
+            const htmlContent = marked.parse(content);
+            return <div className={`prose prose-sm max-w-none ${className}`} dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+        };
+
+        // --- Componente Principal ---
+        const AITutorApp = () => {
+            const [messages, setMessages] = useState([
+                {
+                  id: '1',
+                  role: 'model',
+                  text: '¡Hola docente! Soy tu Socio Pedagógico del ITD. ¿En qué puedo apoyarte hoy? Podemos hablar sobre estrategias didácticas, evaluación o tecnologías educativas.',
+                  timestamp: new Date()
+                }
+            ]);
+            const [input, setInput] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+            const messagesEndRef = useRef(null);
+
+            const scrollToBottom = () => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            useEffect(() => {
+                scrollToBottom();
+            }, [messages]);
+
+            const handleSend = async () => {
+                if (!input.trim() || isLoading) return;
+
+                const userMessage = {
+                  id: Date.now().toString(),
+                  role: 'user',
+                  text: input,
+                  timestamp: new Date()
+                };
+
+                setMessages(prev => [...prev, userMessage]);
+                setInput('');
+                setIsLoading(true);
+
+                try {
+                  const responseText = await chatWithTutor(messages, input);
+                  
+                  const botMessage = {
+                    id: (Date.now() + 1).toString(),
+                    role: 'model',
+                    text: responseText,
+                    timestamp: new Date()
+                  };
+                  
+                  setMessages(prev => [...prev, botMessage]);
+                } catch (error) {
+                  const errorMessage = {
+                    id: (Date.now() + 1).toString(),
+                    role: 'model',
+                    text: 'Lo siento, hubo un error al conectar con el servidor. Verifica tu conexión o tu API Key.',
+                    timestamp: new Date(),
+                    isError: true
+                  };
+                  setMessages(prev => [...prev, errorMessage]);
+                } finally {
+                  setIsLoading(false);
+                }
+            };
+
+            const handleKeyDown = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+            };
+
+            return (
+                <div className="h-full flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-fade-in max-w-4xl mx-auto">
+                    {/* Header del Chat */}
+                    <div className="p-4 border-b border-slate-100 flex items-center gap-4 bg-indigo-50/80 backdrop-blur-sm">
+                        <div className="bg-indigo-600 p-2.5 rounded-xl text-white shadow-lg shadow-indigo-200">
+                          <Icon name="Bot" size={28} />
+                        </div>
+                        <div>
+                          <h2 className="font-bold text-lg text-slate-800">Chat de Asistencia Docente</h2>
+                          <p className="text-xs text-indigo-600 font-medium flex items-center gap-1">
+                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            En línea • Potenciado por IA
+                          </p>
+                        </div>
+                    </div>
+
+                    {/* Área de Mensajes */}
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-slate-50 custom-scrollbar">
+                        {messages.map((msg) => (
+                          <div 
+                            key={msg.id} 
+                            className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                          >
+                            {msg.role === 'model' && (
+                              <div className="w-8 h-8 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center flex-shrink-0 mt-1">
+                                <span className="text-indigo-600"><Icon name="Sparkles" size={16} /></span>
+                              </div>
+                            )}
+                            
+                            <div 
+                              className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 text-sm sm:text-base shadow-sm ${
+                                msg.role === 'user' 
+                                  ? 'bg-indigo-600 text-white rounded-tr-none' 
+                                  : 'bg-white text-slate-700 rounded-tl-none border border-slate-200'
+                              } ${msg.isError ? 'bg-red-50 text-red-600 border-red-200' : ''}`}
+                            >
+                              <MarkdownRenderer content={msg.text} className={msg.role === 'user' ? 'text-white' : 'text-slate-700'} />
+                              <div className={`text-[10px] mt-2 opacity-70 text-right font-medium`}>
+                                {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+
+                            {msg.role === 'user' && (
+                              <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center flex-shrink-0 mt-1">
+                                <span className="text-slate-600"><Icon name="User" size={16} /></span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        
+                        {isLoading && (
+                          <div className="flex gap-3 justify-start animate-pulse">
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 mt-1">
+                              <span className="text-indigo-600"><Icon name="Sparkles" size={16} /></span>
+                            </div>
+                            <div className="bg-white rounded-2xl rounded-tl-none p-4 border border-slate-200 flex items-center gap-3 shadow-sm">
+                               <div className="animate-spin text-indigo-500"><Icon name="Loader2" size={18} /></div>
+                               <span className="text-sm text-slate-500 font-medium">Analizando consulta...</span>
+                            </div>
+                          </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* Input */}
+                    <div className="p-4 sm:p-5 border-t border-slate-200 bg-white">
+                        <div className="relative flex items-center gap-2 max-w-4xl mx-auto">
+                          <input
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Escribe tu consulta pedagógica aquí..."
+                            className="flex-1 py-3.5 px-5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent pr-14 bg-slate-50 focus:bg-white transition-all shadow-inner"
+                            disabled={isLoading}
+                            autoFocus
+                          />
+                          <button
+                            onClick={handleSend}
+                            disabled={isLoading || !input.trim()}
+                            className="absolute right-2 p-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:hover:bg-indigo-600 transition-colors shadow-md"
+                          >
+                            <Icon name="Send" size={20} />
+                          </button>
+                        </div>
+                        <p className="text-center text-xs text-slate-400 mt-3 font-medium">
+                          DocentePro AI puede cometer errores. Verifica la información importante.
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<AITutorApp />);
+    </script>
+</body>
+</html>

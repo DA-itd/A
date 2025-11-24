@@ -1,0 +1,309 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planificador de Clases IA - ITD</title>
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM UMD -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Marked for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Lucide Icons Global -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Markdown Styles */
+        .prose h1 { font-size: 1.5em; font-weight: 700; margin-bottom: 0.5em; color: #312e81; }
+        .prose h2 { font-size: 1.25em; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; color: #3730a3; }
+        .prose h3 { font-size: 1.1em; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; color: #4338ca; }
+        .prose p { margin-bottom: 0.8em; line-height: 1.6; color: #334155; }
+        .prose ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 0.8em; }
+        .prose ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 0.8em; }
+        .prose strong { font-weight: 600; color: #1e293b; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-xl sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
+            <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 object-contain">
+            <div class="text-center flex-1">
+                <h1 class="text-lg sm:text-2xl font-bold text-blue-900">PLANIFICADOR DE CLASES</h1>
+                <p class="text-xs sm:text-sm text-blue-700 font-semibold">Asistente Pedagógico con IA</p>
+            </div>
+            <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 object-contain">
+        </div>
+    </header>
+
+    <!-- Botón Volver -->
+    <div class="container mx-auto px-4 py-4">
+        <a href="index.html" class="text-indigo-800 hover:text-indigo-600 font-bold text-sm flex items-center gap-1">
+            ← Volver al Portal Principal
+        </a>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div id="root" class="flex-1 container mx-auto px-4 pb-8"></div>
+
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 mt-auto">
+        <div class="container mx-auto px-4">
+            <p class="font-bold text-sm mb-1">© Coordinación de Actualización Docente</p>
+            <p class="text-xs opacity-90">Potenciado por Gemini 2.5</p>
+        </div>
+    </footer>
+
+    <script type="text/babel" data-type="module">
+        import { GoogleGenAI } from "https://esm.run/@google/genai";
+
+        // Access React and ReactDOM from global window object to avoid ReferenceError
+        const { useState, useEffect, useRef } = window.React;
+        const { createRoot } = window.ReactDOM;
+
+        // Componente de Icono usando Lucide Global
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const svgRef = useRef(null);
+            
+            useEffect(() => {
+                if (svgRef.current && lucide && lucide.icons[name]) {
+                    // Limpiar y establecer nuevo SVG
+                    svgRef.current.innerHTML = lucide.icons[name].toSvg({ 
+                        class: className, 
+                        width: size, 
+                        height: size,
+                        "stroke-width": 2
+                    });
+                }
+            }, [name, size, className]);
+
+            return <span ref={svgRef} className={`inline-flex items-center justify-center ${className}`} />;
+        };
+
+        // --- Servicio Gemini ---
+        const generateLessonPlan = async (request) => {
+            try {
+                // IMPORTANT: Replace process.env.API_KEY with your actual API key for this static HTML file to work locally.
+                const apiKey = process.env.API_KEY; 
+                if (!apiKey) throw new Error("API Key no configurada");
+                
+                const ai = new GoogleGenAI({ apiKey });
+                
+                const prompt = `
+                  Genera un plan de clase detallado en formato Markdown para docentes del Tecnológico Nacional de México.
+                  Tema: ${request.topic}
+                  Nivel Educativo: ${request.gradeLevel}
+                  Duración de la clase: ${request.duration}
+                  Objetivos de aprendizaje: ${request.objectives}
+
+                  El formato debe incluir:
+                  1. Título de la Sesión
+                  2. Objetivos Específicos (Taxonomía de Bloom sugerida)
+                  3. Materiales y Recursos Didácticos necesarios
+                  4. Estructura de la clase:
+                     - Inicio (Apertura/Enganche) - Tiempo sugerido
+                     - Desarrollo (Explicación/Práctica) - Tiempo sugerido
+                     - Cierre (Evaluación/Retroalimentación) - Tiempo sugerido
+                  5. Actividad de evaluación sugerida (Rúbrica simple o lista de cotejo).
+                  
+                  Usa un tono profesional, académico y estructura clara con negritas y listas.
+                `;
+
+                const response = await ai.models.generateContent({
+                  model: 'gemini-2.5-flash',
+                  contents: prompt,
+                });
+
+                return response.text || "No se pudo generar el plan de clase.";
+            } catch (error) {
+                console.error("Error generating lesson plan:", error);
+                throw error;
+            }
+        };
+
+        // --- Componente Markdown Renderer ---
+        const MarkdownRenderer = ({ content }) => {
+            const htmlContent = marked.parse(content);
+            return <div className="prose prose-sm sm:prose-base max-w-none" dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+        };
+
+        // --- Componente Principal ---
+        const LessonPlannerApp = () => {
+            const [formData, setFormData] = useState({
+                topic: '',
+                gradeLevel: '',
+                duration: '',
+                objectives: ''
+            });
+            const [generatedPlan, setGeneratedPlan] = useState('');
+            const [isGenerating, setIsGenerating] = useState(false);
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setIsGenerating(true);
+                try {
+                    const plan = await generateLessonPlan(formData);
+                    setGeneratedPlan(plan);
+                } catch (error) {
+                    setGeneratedPlan('Error al generar el plan. Por favor verifica tu API KEY y conexión.');
+                } finally {
+                    setIsGenerating(false);
+                }
+            };
+
+            const handleCopy = () => {
+                navigator.clipboard.writeText(generatedPlan);
+                alert("Plan copiado al portapapeles");
+            };
+
+            return (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full animate-fade-in">
+                    {/* Input Form */}
+                    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-100">
+                        <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                            <div className="p-3 bg-indigo-100 text-indigo-600 rounded-xl">
+                                <Icon name="FileText" size={28} />
+                            </div>
+                            <div>
+                                <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Diseñador de Secuencias</h2>
+                                <p className="text-sm text-slate-500">Completa los datos para generar tu planeación</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Tema o Unidad</label>
+                                <input
+                                    type="text"
+                                    name="topic"
+                                    value={formData.topic}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow"
+                                    placeholder="Ej: Cálculo Integral, Ética Profesional..."
+                                    required
+                                />
+                            </div>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Semestre / Grupo</label>
+                                    <input
+                                        type="text"
+                                        name="gradeLevel"
+                                        value={formData.gradeLevel}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow"
+                                        placeholder="Ej: 3er Semestre Ingeniería"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Duración (min)</label>
+                                    <input
+                                        type="text"
+                                        name="duration"
+                                        value={formData.duration}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow"
+                                        placeholder="Ej: 50 minutos"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Objetivo de la Sesión</label>
+                                <textarea
+                                    name="objectives"
+                                    value={formData.objectives}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none h-32 resize-none transition-shadow"
+                                    placeholder="¿Qué competencia debe desarrollar el estudiante?"
+                                    required
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isGenerating}
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] shadow-md disabled:opacity-70 disabled:hover:scale-100"
+                            >
+                                {isGenerating ? (
+                                    <>
+                                        <div className="animate-spin"><Icon name="Loader2" size={22} /></div>
+                                        Diseñando Planeación...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Icon name="Sparkles" size={22} />
+                                        Generar Plan con IA
+                                    </>
+                                )}
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Output Display */}
+                    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col min-h-[500px] lg:h-auto">
+                        <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-4">
+                            <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                                <span className="text-indigo-600"><Icon name="GraduationCap" size={20}/></span>
+                                Resultado Generado
+                            </h3>
+                            {generatedPlan && (
+                                <div className="flex gap-2">
+                                    <button onClick={handleCopy} className="flex items-center gap-1 px-3 py-1.5 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors text-sm font-medium" title="Copiar texto">
+                                        <Icon name="Copy" size={16} /> Copiar
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                            {generatedPlan ? (
+                                <MarkdownRenderer content={generatedPlan} />
+                            ) : (
+                                <div className="h-full flex flex-col items-center justify-center text-slate-400 p-8 text-center">
+                                    <div className="bg-slate-50 p-6 rounded-full mb-4 border border-slate-100">
+                                        <span className="text-indigo-300"><Icon name="Sparkles" size={48} /></span>
+                                    </div>
+                                    <h4 className="text-lg font-semibold text-slate-600 mb-2">Listo para Crear</h4>
+                                    <p className="max-w-xs">
+                                        Completa el formulario y deja que la Inteligencia Artificial estructure tu clase en segundos.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<LessonPlannerApp />);
+    </script>
+</body>
+</html>

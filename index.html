@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
 <head>
@@ -80,6 +81,8 @@
         .delay-500 { animation-delay: 0.5s; opacity: 0; }
         .delay-600 { animation-delay: 0.6s; opacity: 0; }
         .delay-700 { animation-delay: 0.7s; opacity: 0; }
+        .delay-800 { animation-delay: 0.8s; opacity: 0; }
+        .delay-900 { animation-delay: 0.9s; opacity: 0; }
         
         @keyframes pulse-slow {
             0%, 100% { transform: scale(1); }
@@ -101,6 +104,20 @@
             border-radius: 12px;
             font-weight: bold;
             box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-new {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+            animation: pulse-slow 2s infinite;
         }
 
         .weather-icon {
@@ -152,9 +169,13 @@
 <script type="importmap">
 {
   "imports": {
-    "vite": "https://aistudiocdn.com/vite@^7.1.12",
-    "path": "https://aistudiocdn.com/path@^0.12.7",
-    "process": "https://aistudiocdn.com/process@^0.11.10"
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0"
   }
 }
 </script>
@@ -198,6 +219,13 @@
                     <!-- Menú Desktop -->
                     <div class="hidden md:flex space-x-4">
                         <a href="#inicio" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Inicio</a>
+                        <!-- Accesos directos a Herramientas IA -->
+                        <a href="planificador.html" class="px-3 py-3 text-sm font-bold text-yellow-300 hover:text-white hover:bg-blue-700 rounded-md transition-colors flex items-center gap-1">
+                            ✨ Planificador IA
+                        </a>
+                        <a href="tutor.html" class="px-3 py-3 text-sm font-bold text-cyan-300 hover:text-white hover:bg-blue-700 rounded-md transition-colors flex items-center gap-1">
+                            🤖 Tutor IA
+                        </a>
                         <a href="#servicios" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Servicios</a>
                         <a href="#informacion" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Información</a>
                         <a href="#enlaces" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Enlaces y Contacto</a>
@@ -213,6 +241,8 @@
              <!-- Menú Desplegable Móvil -->
             <div id="mobile-menu" class="hidden md:hidden">
                 <a href="#inicio" class="block px-4 py-3 text-sm hover:bg-blue-700">Inicio</a>
+                <a href="planificador.html" class="block px-4 py-3 text-sm font-bold text-yellow-300 hover:bg-blue-700">✨ Planificador IA</a>
+                <a href="tutor.html" class="block px-4 py-3 text-sm font-bold text-cyan-300 hover:bg-blue-700">🤖 Tutor IA</a>
                 <a href="#servicios" class="block px-4 py-3 text-sm hover:bg-blue-700">Servicios</a>
                 <a href="#informacion" class="block px-4 py-3 text-sm hover:bg-blue-700">Información</a>
                 <a href="#enlaces" class="block px-4 py-3 text-sm hover:bg-blue-700">Enlaces y Contacto</a>
@@ -284,9 +314,41 @@
         <!-- Grid de Opciones -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
             
+            <!-- Opción: Planificador de Clases (NUEVO) -->
+            <a href="planificador.html" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-500 animate-fadeInUp delay-100 relative group">
+                <div class="badge-new">¡NUEVO!</div>
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">✨</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    Planificador de Clases
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Diseña secuencias didácticas con IA
+                </p>
+                <div class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    Herramienta IA
+                </div>
+            </a>
+
+            <!-- Opción: Tutor Virtual (NUEVO) -->
+            <a href="tutor.html" 
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-500 animate-fadeInUp delay-200 relative group">
+                <div class="badge-new">¡NUEVO!</div>
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">🤖</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    Tutor Pedagógico
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Resuelve dudas pedagógicas con IA
+                </p>
+                <div class="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    Asistente IA
+                </div>
+            </a>
+
             <!-- Opción 1: Inscripción a Cursos -->
             <a href="inscripciones.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp delay-100">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp delay-300">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📝</div>
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Inscripción a Cursos
@@ -299,9 +361,9 @@
                 </div>
             </a>
 
-            <!-- Opción 2: Historial de Cursos (AHORA DISPONIBLE) -->
+            <!-- Opción 2: Historial de Cursos -->
             <a href="historial.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-orange-400 animate-fadeInUp delay-200">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-orange-400 animate-fadeInUp delay-400">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Historial de Cursos
@@ -316,7 +378,7 @@
 
             <!-- Opción 3: Formatos Oficiales -->
             <a href="formatos.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-300">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-500">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📋</div>
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Formatos Oficiales
@@ -331,7 +393,7 @@
 
             <!-- Opción 4: Validación de Constancias -->
             <a href="verificador.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-400">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-600">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">✅</div>
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Validación de Constancias
@@ -346,7 +408,7 @@
 
             <!-- Opción 5: Área para Instructores -->
             <a href="instructores.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-500">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-700">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Área para Instructores
@@ -361,7 +423,7 @@
 
             <!-- Opción 6: Encuestas de Opinión -->
             <a href="encuestas.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 animate-fadeInUp delay-600">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 animate-fadeInUp delay-800">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📊</div>
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Encuestas de Opinión
@@ -376,7 +438,7 @@
             
             <!-- Opción 7: Estadísticas -->
             <a href="estadisticas.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-700">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-900">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📈</div>
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Estadísticas
