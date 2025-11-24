@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -47,13 +48,6 @@
 
         /* Elementos exclusivos de impresión */
         .print-header-element, .print-footer-element { display: none; }
-
-        <!-- REEMPLAZA SOLO LA SECCIÓN @media print EN TU ARCHIVO estadisticas.html -->
-
-<!-- REEMPLAZA SOLO LA SECCIÓN @media print EN TU ARCHIVO estadisticas.html -->
-
-<style>
-        /* ... TUS ESTILOS ANTERIORES AQUÍ ... */
 
         /* NUEVA SECCIÓN DE IMPRESIÓN OPTIMIZADA */
         @media print {
@@ -502,7 +496,15 @@
             useEffect(() => {
                 if (!canvasRef.current || !data) return;
                 if (typeof window.Chart === 'undefined') return;
-                if(window.ChartDataLabels) window.Chart.register(window.ChartDataLabels);
+                
+                // Asegurar que el plugin de DataLabels esté registrado
+                if(window.ChartDataLabels) {
+                    // Evitar registrarlo múltiples veces si ya está
+                    if (!window.Chart.registry.plugins.get('datalabels')) {
+                         window.Chart.register(window.ChartDataLabels);
+                    }
+                }
+                
                 if (chartRef.current) chartRef.current.destroy();
 
                 const ctx = canvasRef.current.getContext('2d');
@@ -515,21 +517,59 @@
                     options: {
                         responsive: true, maintainAspectRatio: false, indexAxis: horizontal ? 'y' : 'x',
                         scales: isPie ? {} : { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
-                        plugins: { legend: { display: isPie || isHistory, position: 'bottom' }, datalabels: { display: false } }
+                        plugins: { 
+                            legend: { display: isPie || isHistory, position: 'bottom' }, 
+                            datalabels: { display: false } // Default off
+                        },
+                        layout: {
+                            padding: isHistory ? { top: 30 } : 0 // Espacio extra para las etiquetas en histórica
+                        }
                     }
                 };
 
                 if (isHistory) {
-                    // Ordenar años
+                    // Configuración específica para Evolución Histórica
                     const years = Object.keys(data).sort((a,b) => parseInt(a) - parseInt(b));
                     config.data = {
                         labels: years,
                         datasets: [
-                            { label: 'Docentes Inscritos', data: years.map(y => data[y].registros), borderColor: '#36A2EB', backgroundColor: '#36A2EB', tension: 0.3 },
-                            { label: '#Cursos', data: years.map(y => data[y].cursos), borderColor: '#FF6384', backgroundColor: '#FF6384', tension: 0.3 }
+                            { 
+                                label: 'Docentes Inscritos', 
+                                data: years.map(y => data[y].registros), 
+                                borderColor: '#36A2EB', 
+                                backgroundColor: '#36A2EB', 
+                                tension: 0.3,
+                                datalabels: {
+                                    align: 'end',
+                                    anchor: 'end'
+                                }
+                            },
+                            { 
+                                label: '# Cursos', 
+                                data: years.map(y => data[y].cursos), 
+                                borderColor: '#FF6384', 
+                                backgroundColor: '#FF6384', 
+                                tension: 0.3,
+                                datalabels: {
+                                    align: 'end',
+                                    anchor: 'end',
+                                    offset: 4
+                                }
+                            }
                         ]
                     };
-                    config.options.plugins.datalabels = { display: true, align: 'top', font: { weight: 'bold' } };
+                    // Activar DataLabels para esta gráfica específica con alta visibilidad
+                    config.options.plugins.datalabels = { 
+                        display: true, 
+                        color: '#444',
+                        font: {
+                            weight: 'bold',
+                            size: 11
+                        },
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        borderRadius: 4,
+                        padding: 4
+                    };
                 } else {
                     const labels = Object.keys(data);
                     config.data = {
