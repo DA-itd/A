@@ -328,7 +328,9 @@
     </div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo, useCallback } = React;
+        // Fix: Explicitly access global React/ReactDOM to avoid ReferenceError
+        const { useState, useEffect, useRef, useMemo, useCallback } = window.React;
+        const ReactDOM = window.ReactDOM;
 
         const CONFIG = {
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', 
