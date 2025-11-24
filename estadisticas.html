@@ -181,11 +181,12 @@
             }
             
             /* Contenedores de gráficas más pequeños */
-            .chart-container-wrapper { 
-                height: 180px !important; /* Reducido de 400px */
-                break-inside: avoid !important;
-                page-break-inside: avoid !important;
-            }
+.chart-container-wrapper { 
+    height: 250px !important; /* AUMENTADO a 250px */
+    min-height: 250px !important; /* AÑADIDO para asegurar espacio */
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+}
             
             /* Títulos de gráficas más pequeños */
             .bg-white h3 {
@@ -236,15 +237,14 @@
                 gap: 2px !important;
             }
             
-            /* ============================================ */
-            /* GRÁFICA HISTÓRICA EN ANCHO COMPLETO */
-            /* ============================================ */
-            .mb-8.h-96 {
-                height: 180px !important; /* Más compacta */
-                margin-bottom: 5px !important;
-                grid-column: span 2 !important; /* Ancho completo */
-            }
-            
+       /* GRÁFICA HISTÓRICA EN ANCHO COMPLETO */
+/* ... */
+.mb-8.h-96 {
+    height: 250px !important; /* AUMENTADO a 250px */
+    margin-bottom: 5px !important;
+    grid-column: span 2 !important; /* Ancho completo */
+}
+                   
             /* ============================================ */
             /* AJUSTES FINALES PARA REDUCIR ESPACIO */
             /* ============================================ */
