@@ -17,9 +17,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
-    <!-- PDF y Excel -->
+    <!-- PDF y Captura -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <!-- Google Sign-In -->
@@ -35,9 +34,6 @@
     </script>
 
     <style>
-        /* ====================================================================== */
-        /* ESTILOS WEB GENERALES */
-        /* ====================================================================== */
         @keyframes fadeIn { 
             from { opacity: 0; transform: translateY(10px); } 
             to { opacity: 1; transform: translateY(0); } 
@@ -49,319 +45,52 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
 
-        /* Elementos exclusivos de impresión - ocultos en pantalla */
+        /* Ocultar elementos de impresión en pantalla */
         .print-only { display: none !important; }
-
-        /* ====================================================================== */
-        /* ESTILOS DE IMPRESIÓN - LAYOUT PROFESIONAL */
-        /* ====================================================================== */
-        @media print {
-            /* Configuración de página */
-            @page { 
-                size: letter portrait; 
-                margin: 8mm 10mm 12mm 10mm;
-            }
-            
-            /* Reset general */
-            *, *::before, *::after {
-                box-sizing: border-box !important;
-            }
-            
-            html, body { 
-                width: 100% !important;
-                height: auto !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: white !important;
-                font-size: 10pt !important;
-                line-height: 1.2 !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                color-adjust: exact !important;
-            }
-            
-            /* ============================================ */
-            /* OCULTAR ELEMENTOS WEB */
-            /* ============================================ */
-            .no-print,
-            #web-header,
-            #web-footer,
-            #back-link,
-            #dashboard-controls,
-            button,
-            select,
-            .animate-spin {
-                display: none !important;
-            }
-            
-            /* ============================================ */
-            /* MOSTRAR ELEMENTOS DE IMPRESIÓN */
-            /* ============================================ */
-            .print-only {
-                display: block !important;
-            }
-            
-            /* ============================================ */
-            /* ENCABEZADO DE IMPRESIÓN */
-            /* ============================================ */
-            #print-header {
-                display: flex !important;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0 0 8px 0;
-                margin-bottom: 10px;
-                border-bottom: 3px solid #1B396A;
-            }
-            
-            #print-header img {
-                height: 45px !important;
-                width: auto !important;
-            }
-            
-            #print-header .print-title {
-                text-align: center;
-                flex: 1;
-                padding: 0 15px;
-            }
-            
-            #print-header h1 {
-                font-size: 14pt !important;
-                font-weight: 900 !important;
-                color: #1B396A !important;
-                margin: 0 !important;
-                letter-spacing: 0.5px;
-            }
-            
-            #print-header h2 {
-                font-size: 10pt !important;
-                font-weight: 600 !important;
-                color: #9D2449 !important;
-                margin: 3px 0 0 0 !important;
-            }
-            
-            /* ============================================ */
-            /* CONTENEDOR PRINCIPAL - ESTRUCTURA FIJA */
-            /* ============================================ */
-            #dashboard-content {
-                display: block !important;
-                width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            
-            /* Eliminar estilos visuales web */
-            #dashboard-content * {
-                box-shadow: none !important;
-                text-shadow: none !important;
-            }
-            
-            /* ============================================ */
-            /* SECCIÓN: KPIs - FILA COMPACTA */
-            /* ============================================ */
-            #print-kpis {
-                display: grid !important;
-                grid-template-columns: repeat(4, 1fr) !important;
-                gap: 8px !important;
-                margin-bottom: 12px !important;
-                page-break-inside: avoid !important;
-            }
-            
-            .print-kpi-card {
-                display: flex !important;
-                align-items: center !important;
-                gap: 8px !important;
-                padding: 8px 10px !important;
-                border: 1.5px solid #ddd !important;
-                border-radius: 6px !important;
-                background: #fafafa !important;
-                border-left: 4px solid #1B396A !important;
-            }
-            
-            .print-kpi-card:nth-child(2) { border-left-color: #D4AF37 !important; }
-            .print-kpi-card:nth-child(3) { border-left-color: #9D2449 !important; }
-            .print-kpi-card:nth-child(4) { border-left-color: #546E7A !important; }
-            
-            .print-kpi-card .kpi-icon {
-                font-size: 20pt !important;
-            }
-            
-            .print-kpi-card .kpi-value {
-                font-size: 16pt !important;
-                font-weight: 800 !important;
-                color: #1f2937 !important;
-                line-height: 1 !important;
-            }
-            
-            .print-kpi-card .kpi-label {
-                font-size: 7pt !important;
-                font-weight: 600 !important;
-                color: #6b7280 !important;
-                text-transform: uppercase !important;
-                letter-spacing: 0.3px !important;
-            }
-            
-            /* ============================================ */
-            /* SECCIÓN: GRÁFICAS - GRID 2x2 */
-            /* ============================================ */
-            #print-charts-row1,
-            #print-charts-row2 {
-                display: grid !important;
-                gap: 10px !important;
-                margin-bottom: 10px !important;
-                page-break-inside: avoid !important;
-            }
-            
-            #print-charts-row1 {
-                grid-template-columns: 58% 40% !important;
-                height: 180px !important;
-            }
-            
-            #print-charts-row2 {
-                grid-template-columns: 65% 33% !important;
-                height: 180px !important;
-            }
-            
-            /* Contenedor individual de gráfica */
-            .print-chart-box {
-                border: 1.5px solid #e5e7eb !important;
-                border-radius: 6px !important;
-                background: white !important;
-                padding: 6px !important;
-                display: flex !important;
-                flex-direction: column !important;
-                overflow: hidden !important;
-                height: 100% !important;
-            }
-            
-            .print-chart-box h3 {
-                font-size: 9pt !important;
-                font-weight: 700 !important;
-                color: #1B396A !important;
-                text-align: center !important;
-                margin: 0 0 4px 0 !important;
-                padding: 0 !important;
-                flex-shrink: 0 !important;
-                border-bottom: 1px solid #e5e7eb !important;
-                padding-bottom: 4px !important;
-            }
-            
-            .print-chart-box .chart-canvas-wrapper {
-                flex: 1 !important;
-                min-height: 0 !important;
-                position: relative !important;
-                width: 100% !important;
-            }
-            
-            .print-chart-box canvas {
-                width: 100% !important;
-                height: 100% !important;
-                max-width: 100% !important;
-                max-height: 100% !important;
-            }
-            
-            /* ============================================ */
-            /* SECCIÓN: HISTÓRICO - ANCHO COMPLETO */
-            /* ============================================ */
-            #print-chart-history {
-                height: 160px !important;
-                margin-bottom: 8px !important;
-                page-break-inside: avoid !important;
-            }
-            
-            /* ============================================ */
-            /* LEYENDA DE DEPARTAMENTOS */
-            /* ============================================ */
-            .print-legend {
-                background: #f9fafb !important;
-                border-top: 1px solid #e5e7eb !important;
-                padding: 4px 6px !important;
-                margin-top: 4px !important;
-                flex-shrink: 0 !important;
-            }
-            
-            .print-legend p {
-                font-size: 6pt !important;
-                font-weight: 700 !important;
-                color: #6b7280 !important;
-                margin: 0 0 2px 0 !important;
-                text-transform: uppercase !important;
-            }
-            
-            .print-legend .legend-grid {
-                display: grid !important;
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 2px 8px !important;
-            }
-            
-            .print-legend .legend-item {
-                font-size: 6pt !important;
-                color: #374151 !important;
-                display: flex !important;
-                gap: 3px !important;
-            }
-            
-            .print-legend .legend-item strong {
-                color: #1B396A !important;
-                min-width: 28px !important;
-            }
-            
-            /* ============================================ */
-            /* PIE DE PÁGINA */
-            /* ============================================ */
-            #print-footer {
-                position: fixed !important;
-                bottom: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                display: flex !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-                padding: 6px 10mm !important;
-                font-size: 7pt !important;
-                color: #6b7280 !important;
-                border-top: 1px solid #e5e7eb !important;
-                background: white !important;
-            }
-            
-            /* ============================================ */
-            /* UTILIDADES DE IMPRESIÓN */
-            /* ============================================ */
-            .rounded-xl,
-            .rounded-lg,
-            .shadow-md,
-            .shadow-xl,
-            .shadow-lg,
-            .shadow-sm {
-                border-radius: 6px !important;
-                box-shadow: none !important;
-            }
-            
-            /* Evitar cortes */
-            .page-break-avoid {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-            }
+        
+        /* Estilos para el modal de generación de PDF */
+        .pdf-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .pdf-modal {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+        
+        .pdf-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #e5e7eb;
+            border-top-color: #1B396A;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800">
 
     <!-- ================================================================== -->
-    <!-- ENCABEZADO PARA IMPRESIÓN -->
-    <!-- ================================================================== -->
-    <div id="print-header" class="print-only">
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM">
-        <div class="print-title">
-            <h1>INSTITUTO TECNOLÓGICO DE DURANGO</h1>
-            <h2>Coordinación de Actualización Docente - Reporte Estadístico</h2>
-        </div>
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD">
-    </div>
-
-    <!-- ================================================================== -->
     <!-- HEADER WEB -->
     <!-- ================================================================== -->
-    <header id="web-header" class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A] no-print">
+    <header id="web-header" class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A]">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
@@ -375,7 +104,7 @@
     </header>
     
     <!-- ENLACE DE NAVEGACIÓN -->
-    <div id="back-link" class="container mx-auto px-4 py-4 no-print">
+    <div id="back-link" class="container mx-auto px-4 py-4">
         <a href="index.html" 
            onclick="event.preventDefault(); window.location.href = 'index.html';" 
            class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center gap-1 text-sm font-bold transition-colors">
@@ -398,66 +127,19 @@
     <!-- ================================================================== -->
     <!-- FOOTER WEB -->
     <!-- ================================================================== -->
-    <footer id="web-footer" class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449] no-print">
+    <footer id="web-footer" class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449]">
         <div class="container mx-auto px-4">
              <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
              <p class="text-xs sm:text-sm opacity-90">M.C. Alejandro Calderón Rentería</p>
              <p id="copyright-year" class="text-xs sm:text-sm opacity-75 mt-1"></p>
         </div>
     </footer>
-    
-    <!-- PIE DE PÁGINA PARA IMPRESIÓN -->
-    <div id="print-footer" class="print-only">
-        <span>© Coordinación de Actualización Docente - ITD</span>
-        <span id="print-date-footer"></span>
-    </div>
 
     <!-- ================================================================== -->
-    <!-- SCRIPT DE PREPARACIÓN PARA IMPRESIÓN -->
+    <!-- SCRIPT DE INICIALIZACIÓN -->
     <!-- ================================================================== -->
     <script>
-        // Variable global para almacenar instancias de Chart.js
-        window.chartInstances = {};
-        
-        // Función para preparar la impresión
-        function prepareForPrint() {
-            console.log('🖨️ Preparando impresión profesional...');
-            
-            // Redimensionar todas las gráficas
-            Object.values(window.chartInstances).forEach(function(chart) {
-                if (chart && typeof chart.resize === 'function') {
-                    chart.resize();
-                }
-            });
-            
-            // Forzar re-render de canvas
-            setTimeout(function() {
-                var canvases = document.querySelectorAll('canvas');
-                canvases.forEach(function(canvas) {
-                    var chart = Chart.getChart(canvas);
-                    if (chart) {
-                        chart.resize();
-                        chart.update('none');
-                    }
-                });
-            }, 100);
-        }
-        
-        // Eventos de impresión
-        window.addEventListener('beforeprint', prepareForPrint);
-        
-        // Establecer fecha
         document.addEventListener('DOMContentLoaded', function() {
-            var dateEl = document.getElementById('print-date-footer');
-            if (dateEl) {
-                var today = new Date();
-                dateEl.textContent = 'Generado: ' + today.toLocaleDateString('es-MX', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            }
-            
             var yearEl = document.getElementById('copyright-year');
             if (yearEl) {
                 yearEl.textContent = new Date().getFullYear();
@@ -586,6 +268,7 @@
             const [error, setError] = React.useState(null);
             const [period, setPeriod] = React.useState('ACTUAL');
             const [availableYears, setAvailableYears] = React.useState([]);
+            const [generatingPDF, setGeneratingPDF] = React.useState(false);
 
             React.useEffect(() => {
                 let isMounted = true;
@@ -622,11 +305,227 @@
                 return { chartData, legend };
             }, [stats]);
 
-            const handlePrint = () => {
-                // Dar tiempo para que las gráficas se ajusten
-                setTimeout(() => {
-                    window.print();
-                }, 200);
+            // ================================================================
+            // FUNCIÓN: Generar PDF Profesional
+            // ================================================================
+            const generatePDF = async () => {
+                setGeneratingPDF(true);
+                
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('portrait', 'mm', 'letter');
+                    
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const margin = 10;
+                    const contentWidth = pageWidth - (margin * 2);
+                    
+                    let yPos = margin;
+                    
+                    // ========== ENCABEZADO ==========
+                    // Logo TecNM (izquierda)
+                    try {
+                        const logoTecNM = await loadImage('https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg');
+                        pdf.addImage(logoTecNM, 'JPEG', margin, yPos, 25, 12);
+                    } catch(e) { console.log('Logo TecNM no cargado'); }
+                    
+                    // Logo ITD (derecha)
+                    try {
+                        const logoITD = await loadImage('https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png');
+                        pdf.addImage(logoITD, 'PNG', pageWidth - margin - 20, yPos, 20, 12);
+                    } catch(e) { console.log('Logo ITD no cargado'); }
+                    
+                    // Título centrado
+                    pdf.setFontSize(14);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(27, 57, 106);
+                    pdf.text('INSTITUTO TECNOLÓGICO DE DURANGO', pageWidth / 2, yPos + 5, { align: 'center' });
+                    
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(157, 36, 73);
+                    pdf.text('Coordinación de Actualización Docente - Reporte Estadístico', pageWidth / 2, yPos + 10, { align: 'center' });
+                    
+                    yPos += 18;
+                    
+                    // Línea separadora
+                    pdf.setDrawColor(27, 57, 106);
+                    pdf.setLineWidth(0.8);
+                    pdf.line(margin, yPos, pageWidth - margin, yPos);
+                    
+                    yPos += 8;
+                    
+                    // ========== KPIs ==========
+                    const kpiData = [
+                        { icon: '📝', value: stats.totalInscripciones, label: 'Docentes Inscritos' },
+                        { icon: '👩‍🏫', value: stats.coberturaDocente.actualizados, label: 'Docentes Únicos' },
+                        { icon: '🔁', value: stats.coberturaDocente.recurrentes, label: 'Recurrentes' },
+                        { icon: '🎯', value: `${stats.coberturaDocente.porcentaje}%`, label: 'Cobertura' }
+                    ];
+                    
+                    const kpiWidth = (contentWidth - 12) / 4;
+                    kpiData.forEach((kpi, idx) => {
+                        const x = margin + (idx * (kpiWidth + 4));
+                        
+                        // Fondo del KPI
+                        pdf.setFillColor(250, 250, 250);
+                        pdf.setDrawColor(200, 200, 200);
+                        pdf.roundedRect(x, yPos, kpiWidth, 18, 2, 2, 'FD');
+                        
+                        // Borde izquierdo de color
+                        const colors = [[27,57,106], [212,175,55], [157,36,73], [84,110,122]];
+                        pdf.setFillColor(...colors[idx]);
+                        pdf.rect(x, yPos, 2, 18, 'F');
+                        
+                        // Texto
+                        pdf.setFontSize(16);
+                        pdf.setTextColor(50, 50, 50);
+                        pdf.text(String(kpi.value), x + kpiWidth/2 + 2, yPos + 8, { align: 'center' });
+                        
+                        pdf.setFontSize(6);
+                        pdf.setTextColor(100, 100, 100);
+                        pdf.text(kpi.label.toUpperCase(), x + kpiWidth/2 + 2, yPos + 14, { align: 'center' });
+                    });
+                    
+                    yPos += 25;
+                    
+                    // ========== GRÁFICAS ==========
+                    const chartHeight = 55;
+                    
+                    // Fila 1: Cursos + Género
+                    const coursesCanvas = document.getElementById('chartCourses');
+                    const genderCanvas = document.getElementById('chartGender');
+                    
+                    if (coursesCanvas) {
+                        const coursesImg = coursesCanvas.toDataURL('image/png', 1.0);
+                        
+                        // Título
+                        pdf.setFontSize(9);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setTextColor(27, 57, 106);
+                        pdf.text('📚 Cursos Más Demandados', margin, yPos);
+                        
+                        // Marco
+                        pdf.setDrawColor(220, 220, 220);
+                        pdf.setLineWidth(0.3);
+                        pdf.roundedRect(margin, yPos + 2, contentWidth * 0.68, chartHeight, 2, 2, 'S');
+                        
+                        pdf.addImage(coursesImg, 'PNG', margin + 2, yPos + 4, contentWidth * 0.68 - 4, chartHeight - 6);
+                    }
+                    
+                    if (genderCanvas) {
+                        const genderImg = genderCanvas.toDataURL('image/png', 1.0);
+                        const genderX = margin + contentWidth * 0.70;
+                        
+                        // Título
+                        pdf.text('👥 Género', genderX, yPos);
+                        
+                        // Marco
+                        pdf.roundedRect(genderX, yPos + 2, contentWidth * 0.30, chartHeight, 2, 2, 'S');
+                        
+                        pdf.addImage(genderImg, 'PNG', genderX + 2, yPos + 4, contentWidth * 0.30 - 4, chartHeight - 6);
+                    }
+                    
+                    yPos += chartHeight + 10;
+                    
+                    // Fila 2: Departamentos + Tipo
+                    const deptsCanvas = document.getElementById('chartDepts');
+                    const typeCanvas = document.getElementById('chartType');
+                    
+                    if (deptsCanvas) {
+                        const deptsImg = deptsCanvas.toDataURL('image/png', 1.0);
+                        
+                        pdf.text('🏢 Top 5 Departamentos', margin, yPos);
+                        pdf.roundedRect(margin, yPos + 2, contentWidth * 0.65, chartHeight, 2, 2, 'S');
+                        pdf.addImage(deptsImg, 'PNG', margin + 2, yPos + 4, contentWidth * 0.65 - 4, chartHeight - 6);
+                        
+                        // Leyenda de departamentos
+                        const legendY = yPos + chartHeight + 4;
+                        pdf.setFontSize(6);
+                        pdf.setFont('helvetica', 'normal');
+                        pdf.setTextColor(80, 80, 80);
+                        
+                        processedDepts.legend.forEach((item, idx) => {
+                            const col = idx % 3;
+                            const row = Math.floor(idx / 3);
+                            const lx = margin + (col * 45);
+                            const ly = legendY + (row * 4);
+                            pdf.setFont('helvetica', 'bold');
+                            pdf.text(`${item.acronym}:`, lx, ly);
+                            pdf.setFont('helvetica', 'normal');
+                            const shortName = item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name;
+                            pdf.text(shortName, lx + 12, ly);
+                        });
+                    }
+                    
+                    if (typeCanvas) {
+                        const typeImg = typeCanvas.toDataURL('image/png', 1.0);
+                        const typeX = margin + contentWidth * 0.67;
+                        
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setFontSize(9);
+                        pdf.setTextColor(27, 57, 106);
+                        pdf.text('📋 Tipo de Curso', typeX, yPos);
+                        pdf.roundedRect(typeX, yPos + 2, contentWidth * 0.33, chartHeight, 2, 2, 'S');
+                        pdf.addImage(typeImg, 'PNG', typeX + 2, yPos + 4, contentWidth * 0.33 - 4, chartHeight - 6);
+                    }
+                    
+                    yPos += chartHeight + 18;
+                    
+                    // Fila 3: Histórico
+                    const historyCanvas = document.getElementById('chartHistory');
+                    
+                    if (historyCanvas) {
+                        const historyImg = historyCanvas.toDataURL('image/png', 1.0);
+                        
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setFontSize(9);
+                        pdf.setTextColor(27, 57, 106);
+                        pdf.text('📈 Evolución Histórica de Participación', margin, yPos);
+                        pdf.roundedRect(margin, yPos + 2, contentWidth, chartHeight + 10, 2, 2, 'S');
+                        pdf.addImage(historyImg, 'PNG', margin + 2, yPos + 4, contentWidth - 4, chartHeight + 6);
+                    }
+                    
+                    // ========== PIE DE PÁGINA ==========
+                    pdf.setFontSize(7);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setTextColor(120, 120, 120);
+                    
+                    const today = new Date().toLocaleDateString('es-MX', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    
+                    pdf.text('© Coordinación de Actualización Docente - ITD', margin, pageHeight - 8);
+                    pdf.text(`Generado: ${today}`, pageWidth - margin, pageHeight - 8, { align: 'right' });
+                    
+                    // Guardar PDF
+                    pdf.save(`Reporte_Estadisticas_${period}_${new Date().toISOString().split('T')[0]}.pdf`);
+                    
+                } catch (err) {
+                    console.error('Error generando PDF:', err);
+                    alert('Error al generar el PDF. Por favor intente de nuevo.');
+                } finally {
+                    setGeneratingPDF(false);
+                }
+            };
+            
+            // Función auxiliar para cargar imágenes
+            const loadImage = (url) => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        resolve(canvas.toDataURL('image/png'));
+                    };
+                    img.onerror = reject;
+                    img.src = url;
+                });
             };
 
             if (loading && !stats) {
@@ -651,12 +550,23 @@
             if (!stats) return null;
 
             return (
-                <div className="container mx-auto px-4 py-6 max-w-7xl animate-fadeIn" id="dashboard-content">
+                <div className="container mx-auto px-4 py-6 max-w-7xl animate-fadeIn">
+                    
+                    {/* Modal de generación de PDF */}
+                    {generatingPDF && (
+                        <div className="pdf-overlay">
+                            <div className="pdf-modal">
+                                <div className="pdf-spinner"></div>
+                                <p className="text-lg font-bold text-gray-700">Generando PDF...</p>
+                                <p className="text-sm text-gray-500 mt-2">Por favor espere</p>
+                            </div>
+                        </div>
+                    )}
                     
                     {/* ============================================ */}
-                    {/* CONTROLES DEL DASHBOARD - Solo Web */}
+                    {/* CONTROLES DEL DASHBOARD */}
                     {/* ============================================ */}
-                    <div id="dashboard-controls" className="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#9D2449] gap-4 no-print">
+                    <div className="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#9D2449] gap-4">
                         <div className="flex-1">
                             <h2 className="text-xl font-bold text-[#1B396A]">Dashboard de Resultados</h2>
                             <p className="text-sm text-gray-500 font-bold">Usuario: <span className="font-extrabold text-gray-700">{user.name}</span></p>
@@ -666,8 +576,12 @@
                                 <option value="ACTUAL">🟢 Periodo Actual</option>
                                 {availableYears.filter(y => y !== 'ACTUAL').map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
                             </select>
-                            <button onClick={handlePrint} className="bg-[#1B396A] hover:bg-[#152d54] text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-md">
-                                <span>🖨️</span> Imprimir / PDF
+                            <button 
+                                onClick={generatePDF} 
+                                disabled={generatingPDF}
+                                className="bg-[#1B396A] hover:bg-[#152d54] text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-md disabled:opacity-50"
+                            >
+                                <span>📄</span> Descargar PDF
                             </button>
                             <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold text-gray-700 border border-gray-300 transition">
                                 Cerrar Sesión
@@ -675,47 +589,51 @@
                         </div>
                     </div>
                     
-                    {loading && <div className="flex justify-center items-center h-16 text-blue-600 font-bold no-print">Actualizando datos...</div>}
+                    {loading && <div className="flex justify-center items-center h-16 text-blue-600 font-bold">Actualizando datos...</div>}
 
                     {/* ============================================ */}
                     {/* SECCIÓN 1: KPIs */}
                     {/* ============================================ */}
-                    <div id="print-kpis" className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         {[
                             { icon: "📝", val: stats.totalInscripciones, label: "Docentes Inscritos", color: "border-[#1B396A]" },
                             { icon: "👩‍🏫", val: stats.coberturaDocente.actualizados, label: "Docentes Únicos", color: "border-[#D4AF37]" },
                             { icon: "🔁", val: stats.coberturaDocente.recurrentes, label: "Docentes Recurrentes", color: "border-[#9D2449]" },
                             { icon: "🎯", val: `${stats.coberturaDocente.porcentaje}%`, label: "Cobertura Estimada", color: "border-gray-500" }
                         ].map((kpi, idx) => (
-                            <div key={idx} className={`print-kpi-card bg-white p-4 rounded-xl shadow-md border-b-4 ${kpi.color} flex items-center gap-3`}>
-                                <div className="text-3xl kpi-icon">{kpi.icon}</div>
+                            <div key={idx} className={`bg-white p-4 rounded-xl shadow-md border-b-4 ${kpi.color} flex items-center gap-3`}>
+                                <div className="text-3xl">{kpi.icon}</div>
                                 <div>
-                                    <div className="text-2xl font-bold text-gray-800 kpi-value">{kpi.val}</div>
-                                    <div className="text-[10px] font-bold text-gray-500 uppercase kpi-label">{kpi.label}</div>
+                                    <div className="text-2xl font-bold text-gray-800">{kpi.val}</div>
+                                    <div className="text-[10px] font-bold text-gray-500 uppercase">{kpi.label}</div>
                                 </div>
                             </div>
                         ))}
                     </div>
 
                     {/* ============================================ */}
-                    {/* SECCIÓN 2: CURSOS + GÉNERO */}
+                    {/* SECCIÓN 2: CURSOS (más grande) + GÉNERO (más pequeño) */}
                     {/* ============================================ */}
-                    <div id="print-charts-row1" className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
-                        <div className="lg:col-span-7 print-chart-box">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+                        {/* Cursos - 9 columnas (75%) */}
+                        <div className="lg:col-span-9">
                             <ChartBox 
                                 type="bar" 
                                 data={Object.fromEntries(stats.topCursos||[])} 
                                 title="📚 Cursos Más Demandados" 
                                 id="chartCourses" 
-                                horizontal={true} 
+                                horizontal={true}
+                                minHeight="380px"
                             />
                         </div>
-                        <div className="lg:col-span-5 print-chart-box">
+                        {/* Género - 3 columnas (25%) */}
+                        <div className="lg:col-span-3">
                             <ChartBox 
                                 type="doughnut" 
                                 data={stats.distribucionGenero} 
                                 title="👥 Distribución por Género" 
-                                id="chartGender" 
+                                id="chartGender"
+                                minHeight="380px"
                             />
                         </div>
                     </div>
@@ -723,8 +641,8 @@
                     {/* ============================================ */}
                     {/* SECCIÓN 3: DEPARTAMENTOS + TIPO */}
                     {/* ============================================ */}
-                    <div id="print-charts-row2" className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
-                        <div className="lg:col-span-8 print-chart-box">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+                        <div className="lg:col-span-8">
                             <ChartBox 
                                 type="bar" 
                                 data={processedDepts.chartData} 
@@ -732,15 +650,17 @@
                                 id="chartDepts" 
                                 horizontal={true}
                                 legend={processedDepts.legend}
+                                minHeight="320px"
                             />
                         </div>
-                        <div className="lg:col-span-4 print-chart-box">
+                        <div className="lg:col-span-4">
                             <ChartBox 
                                 type="bar" 
                                 data={stats.distribucionTipo} 
                                 title="📋 Tipo de Curso" 
                                 id="chartType" 
-                                horizontal={false} 
+                                horizontal={false}
+                                minHeight="320px"
                             />
                         </div>
                     </div>
@@ -748,12 +668,13 @@
                     {/* ============================================ */}
                     {/* SECCIÓN 4: EVOLUCIÓN HISTÓRICA */}
                     {/* ============================================ */}
-                    <div id="print-chart-history" className="print-chart-box mb-6">
+                    <div className="mb-6">
                         <ChartBox 
                             type="line" 
                             data={stats.historicalTrend || {}} 
                             title="📈 Evolución Histórica de Participación" 
-                            id="chartHistory" 
+                            id="chartHistory"
+                            minHeight="350px"
                         />
                     </div>
                 </div>
@@ -763,7 +684,7 @@
         // ====================================================================
         // COMPONENTE: ChartBox (Contenedor de Gráfica)
         // ====================================================================
-        const ChartBox = ({ type, data, title, id, horizontal = false, legend = null }) => {
+        const ChartBox = ({ type, data, title, id, horizontal = false, legend = null, minHeight = "320px" }) => {
             const chartRef = React.useRef(null);
             const canvasRef = React.useRef(null);
 
@@ -771,7 +692,7 @@
                 if (!canvasRef.current || !data || Object.keys(data).length === 0) return;
                 if (typeof window.Chart === 'undefined') return;
                 
-                // Registrar plugin de datalabels si existe
+                // Registrar plugin de datalabels
                 if(window.ChartDataLabels && !window.Chart.registry.plugins.get('datalabels')) {
                     window.Chart.register(window.ChartDataLabels);
                 }
@@ -799,7 +720,7 @@
                                 ticks: { 
                                     stepSize: 1, 
                                     color: '#374151',
-                                    font: { size: 10, weight: '600' }
+                                    font: { size: 11, weight: '600' }
                                 },
                                 grid: { color: '#f3f4f6' }
                             },
@@ -808,7 +729,7 @@
                                 ticks: { 
                                     stepSize: 1,
                                     color: '#374151',
-                                    font: { size: 10, weight: '600' }
+                                    font: { size: 11, weight: '600' }
                                 },
                                 grid: { color: '#f3f4f6' }
                             }
@@ -819,21 +740,21 @@
                                 position: 'bottom',
                                 labels: { 
                                     color: '#374151',
-                                    font: { size: 11, weight: '600' },
-                                    padding: 12,
+                                    font: { size: 12, weight: '600' },
+                                    padding: 15,
                                     usePointStyle: true
                                 }
                             },
                             tooltip: {
                                 backgroundColor: '#1f2937',
-                                titleFont: { size: 12 },
-                                bodyFont: { size: 11 },
-                                padding: 10,
-                                cornerRadius: 6
+                                titleFont: { size: 13 },
+                                bodyFont: { size: 12 },
+                                padding: 12,
+                                cornerRadius: 8
                             },
                             datalabels: { display: false }
                         },
-                        layout: { padding: { top: 5, bottom: 5, left: 5, right: 5 } }
+                        layout: { padding: { top: 10, bottom: 10, left: 10, right: 10 } }
                     }
                 };
                 
@@ -847,7 +768,7 @@
                     config.options.plugins.datalabels = { 
                         display: true, 
                         color: '#fff',
-                        font: { weight: 'bold', size: 12 },
+                        font: { weight: 'bold', size: 14 },
                         formatter: (value, context) => {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = Math.round((value / total) * 100);
@@ -866,77 +787,75 @@
                                 label: 'Docentes Inscritos', 
                                 data: years.map(y => data[y]?.registros || 0), 
                                 borderColor: '#36A2EB', 
-                                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.15)',
                                 fill: true,
                                 tension: 0.4,
-                                pointRadius: 5,
-                                pointBackgroundColor: '#36A2EB'
+                                pointRadius: 6,
+                                pointBackgroundColor: '#36A2EB',
+                                borderWidth: 3
                             },
                             { 
                                 label: 'Cursos Ofertados', 
                                 data: years.map(y => data[y]?.cursos || 0), 
                                 borderColor: '#FF6384', 
-                                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.15)',
                                 fill: true,
                                 tension: 0.4,
-                                pointRadius: 5,
-                                pointBackgroundColor: '#FF6384'
+                                pointRadius: 6,
+                                pointBackgroundColor: '#FF6384',
+                                borderWidth: 3
                             }
                         ]
                     };
                     config.options.plugins.datalabels = { 
                         display: true, 
                         color: '#374151',
-                        font: { weight: 'bold', size: 10 },
+                        font: { weight: 'bold', size: 11 },
                         align: 'top',
-                        offset: 5,
-                        backgroundColor: 'rgba(255,255,255,0.8)',
+                        offset: 6,
+                        backgroundColor: 'rgba(255,255,255,0.9)',
                         borderRadius: 4,
-                        padding: 3
+                        padding: 4
                     };
                 } else {
                     // Configuración para otras gráficas
                     const labels = Object.keys(data);
                     config.data = {
-                        labels: labels.map(l => horizontal ? splitLabel(l, 25) : l),
+                        labels: labels.map(l => horizontal ? splitLabel(l, 28) : l),
                         datasets: [{ 
                             label: title.replace(/[📚👥🏢📋📈]/g, '').trim(), 
                             data: Object.values(data), 
                             backgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS,
                             borderColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS.map(c => c),
                             borderWidth: 1,
-                            borderRadius: isPie ? 0 : 4
+                            borderRadius: isPie ? 0 : 6
                         }]
                     };
                 }
 
                 chartRef.current = new window.Chart(ctx, config);
                 
-                // Guardar referencia global para impresión
-                window.chartInstances[id] = chartRef.current;
-                
                 return () => { 
                     if (chartRef.current) {
                         chartRef.current.destroy();
-                        delete window.chartInstances[id];
                     }
                 };
             }, [data, type, title, horizontal, id]);
 
             return (
-                <div className="bg-white p-4 rounded-xl shadow-md h-full flex flex-col border border-gray-100 min-h-[280px] lg:min-h-[320px]">
-                    <h3 className="text-gray-700 font-bold mb-3 text-center text-sm border-b border-gray-100 pb-2">{title}</h3>
-                    <div className="chart-canvas-wrapper flex-1 relative min-h-[200px]">
+                <div className="bg-white p-5 rounded-xl shadow-md h-full flex flex-col border border-gray-100" style={{ minHeight }}>
+                    <h3 className="text-gray-700 font-bold mb-4 text-center text-base border-b border-gray-100 pb-3">{title}</h3>
+                    <div className="flex-1 relative" style={{ minHeight: '200px' }}>
                         <canvas ref={canvasRef} id={id}></canvas>
                     </div>
                     {/* Leyenda de departamentos */}
                     {legend && legend.length > 0 && (
-                        <div className="print-legend bg-gray-50 p-3 border-t border-gray-100 mt-3 rounded-b-lg">
+                        <div className="bg-gray-50 p-3 border-t border-gray-100 mt-4 rounded-b-lg">
                             <p className="text-xs font-bold text-gray-500 mb-2 uppercase">Leyenda de Siglas:</p>
-                            <div className="legend-grid grid grid-cols-2 lg:grid-cols-3 gap-1 text-xs text-gray-600">
+                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-gray-600">
                                 {legend.map((item, idx) => (
-                                    <div key={idx} className="legend-item flex items-start gap-1">
-                                        <strong className="text-[#1B396A] min-w-[35px]">{item.acronym}:</strong>
+                                    <div key={idx} className="flex items-start gap-1">
+                                        <strong className="text-[#1B396A] min-w-[40px]">{item.acronym}:</strong>
                                         <span className="truncate" title={item.name}>{item.name}</span>
                                     </div>
                                 ))}
