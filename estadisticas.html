@@ -45,96 +45,76 @@
         .print-header-element, .print-footer-element { display: none; }
 
      <!-- INSTRUCCIONES: Reemplaza TODA la sección <style> que contiene @media print en tu HTML -->
-
-<style>
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-
-.custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
-
-.print-header-element, .print-footer-element { display: none; }
-
 /* ====================================================================== */
-/* IMPRESIÓN OPTIMIZADA - VERSIÓN FORZADA */
+/* ESTILOS DE IMPRESIÓN OPTIMIZADOS - SOLUCIÓN DEFINITIVA */
 /* ====================================================================== */
+
 @media print {
     @page { 
         size: letter portrait; 
-        margin: 0.5cm 0.8cm;
-    }
-    
-    * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        margin: 0.4cm 0.6cm;
     }
     
     html, body { 
         width: 100% !important;
         height: auto !important;
         background: white !important; 
-        color: black !important; 
         margin: 0 !important;
         padding: 0 !important;
-        font-size: 8.5pt !important;
-        line-height: 1.2 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
     
-    /* Ocultar elementos web */
+    body {
+        font-size: 8pt !important;
+        line-height: 1.1 !important;
+        color: #000 !important;
+    }
+    
+    /* ============================================ */
+    /* OCULTAR ELEMENTOS WEB */
+    /* ============================================ */
     header:not(.print-header-element), 
     footer:not(.print-footer-element), 
     #back-link, 
-    .no-print, 
     button, 
-    select, 
-    #dashboard-header-controls, 
-    .print-hide { 
+    select { 
         display: none !important; 
-        visibility: hidden !important;
-        height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
     }
     
     /* ============================================ */
-    /* ENCABEZADO */
+    /* ENCABEZADO DE IMPRESIÓN */
     /* ============================================ */
     .print-header-element { 
         display: flex !important; 
-        visibility: visible !important;
         justify-content: space-between; 
         align-items: center; 
-        height: 45px !important;
-        background: white !important;
+        height: 40px !important;
         border-bottom: 2px solid #1B396A !important; 
-        padding: 5px 10px !important;
-        margin: 0 0 8px 0 !important;
+        padding: 4px 8px !important;
+        margin-bottom: 6px !important;
         page-break-after: avoid !important;
     }
+    
     .print-header-element img { 
-        height: 38px !important;
+        height: 35px !important;
         width: auto !important;
-        object-fit: contain !important;
     }
-    .print-header-element .text-center { 
-        flex: 1 !important;
-        padding: 0 15px !important;
-    }
+    
     .print-header-element h1 { 
-        font-size: 10pt !important; 
+        font-size: 9pt !important; 
         font-weight: 900 !important; 
         margin: 0 !important;
-        padding: 0 !important;
         color: #1B396A !important;
+        line-height: 1.1 !important;
     }
+    
     .print-header-element h2 { 
-        font-size: 8pt !important; 
+        font-size: 7.5pt !important; 
         font-weight: bold !important; 
-        margin: 2px 0 0 0 !important; 
-        padding: 0 !important;
+        margin: 2px 0 0 0 !important;
         color: #333 !important;
+        line-height: 1.1 !important;
     }
     
     /* ============================================ */
@@ -142,292 +122,226 @@
     /* ============================================ */
     .print-footer-element { 
         display: flex !important; 
-        visibility: visible !important;
         justify-content: space-between !important;
         position: fixed !important;
         bottom: 0 !important;
         left: 0 !important;
-        right: 0 !important;
         width: 100% !important;
-        font-size: 7pt !important;
-        color: #555 !important;
-        padding: 5px 10px !important;
+        font-size: 6.5pt !important;
+        color: #666 !important;
+        padding: 4px 10px !important;
         background: white !important;
         border-top: 1px solid #ddd !important;
-        z-index: 9999 !important;
     }
+    
     .print-footer-element::after {
-        content: "Pág. " counter(page) !important;
+        content: "Pág. " counter(page);
     }
     
     /* ============================================ */
-    /* CONTENEDOR PRINCIPAL */
+    /* CONTENEDOR PRINCIPAL - ESTRUCTURA FIJA */
     /* ============================================ */
     #dashboard-content { 
         display: block !important;
-        width: 100% !important; 
-        max-width: 100% !important;
-        margin: 0 !important; 
-        padding: 0 8px 40px 8px !important;
-    }
-    
-    /* ============================================ */
-    /* RESETEAR TODO TAILWIND/WEB */
-    /* ============================================ */
-    #dashboard-content * {
-        box-sizing: border-box !important;
-    }
-    
-    #dashboard-content .grid,
-    #dashboard-content > div,
-    #dashboard-content .bg-white,
-    #dashboard-content .shadow-md,
-    #dashboard-content .shadow-xl,
-    #dashboard-content .rounded-xl {
-        box-shadow: none !important;
-        border-radius: 4px !important;
-    }
-    
-    /* Resetear alturas web */
-    #dashboard-content .h-96,
-    #dashboard-content .h-full,
-    #dashboard-content .flex-1,
-    #dashboard-content .min-h-\[200px\] {
-        height: auto !important;
-        min-height: 0 !important;
-        flex: none !important;
-    }
-    
-    /* Resetear columnas web */
-    #dashboard-content .lg\:col-span-3,
-    #dashboard-content .lg\:col-span-5,
-    #dashboard-content .lg\:col-span-7,
-    #dashboard-content .lg\:col-span-9,
-    #dashboard-content .lg\:col-span-12 {
-        grid-column: auto !important;
-    }
-    
-    /* ============================================ */
-    /* KPIs - FILA ÚNICA */
-    /* ============================================ */
-    #dashboard-content > div:first-of-type,
-    #dashboard-content > .grid:first-child,
-    #dashboard-content .md\:grid-cols-4 { 
-        display: flex !important; 
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        gap: 4px !important;
         width: 100% !important;
-        margin: 0 0 8px 0 !important;
-        padding: 0 !important;
-        page-break-inside: avoid !important;
+        padding: 0 6px 35px 6px !important;
+        margin: 0 !important;
     }
     
-    #dashboard-content .md\:grid-cols-4 > div,
-    #dashboard-content > div:first-of-type > div { 
-        flex: 1 1 25% !important;
+    /* Eliminar todos los espaciados extra */
+    #dashboard-content * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+    
+    #dashboard-content .py-8,
+    #dashboard-content .py-6,
+    #dashboard-content .py-4,
+    #dashboard-content .my-8,
+    #dashboard-content .my-6,
+    #dashboard-content .my-4,
+    #dashboard-content .mb-8 {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* ============================================ */
+    /* SECCIÓN 1: KPIs (4 COLUMNAS) */
+    /* ============================================ */
+    #dashboard-content > div:nth-child(1) {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 4px !important;
+        margin-bottom: 6px !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
+    }
+    
+    #dashboard-content > div:nth-child(1) > div {
         display: flex !important;
         align-items: center !important;
-        gap: 4px !important;
-        border: 1px solid #ddd !important; 
+        gap: 6px !important;
+        padding: 4px 6px !important;
+        height: 34px !important;
+        border: 1px solid #ddd !important;
         background: white !important;
-        padding: 4px 6px !important; 
-        margin: 0 !important;
-        height: 36px !important;
-        min-height: 36px !important;
-        max-height: 36px !important;
     }
     
-    #dashboard-content .md\:grid-cols-4 > div > div:first-child {
-        font-size: 18px !important;
-        line-height: 1 !important;
+    #dashboard-content > div:nth-child(1) .text-3xl {
+        font-size: 16px !important;
     }
     
-    #dashboard-content .md\:grid-cols-4 .text-3xl {
-        font-size: 0.9rem !important;
-        line-height: 1 !important;
-    }
-    
-    #dashboard-content .md\:grid-cols-4 .text-2xl {
-        font-size: 0.85rem !important;
+    #dashboard-content > div:nth-child(1) .text-2xl {
+        font-size: 0.8rem !important;
         font-weight: bold !important;
-        margin: 0 !important;
         line-height: 1 !important;
     }
     
-    #dashboard-content .md\:grid-cols-4 .text-\[10px\] {
+    #dashboard-content > div:nth-child(1) .text-\[10px\] {
         font-size: 6pt !important;
         line-height: 1.1 !important;
-        margin: 0 !important;
     }
     
     /* ============================================ */
-    /* PRIMER GRID: CURSOS + GÉNERO */
+    /* SECCIÓN 2: CURSOS + GÉNERO (2 COLUMNAS) */
     /* ============================================ */
-    #dashboard-content > .my-8:first-of-type,
-    #dashboard-content > div.grid:nth-of-type(2) {
+    #dashboard-content > div:nth-child(2) {
         display: grid !important;
-        grid-template-columns: 1.4fr 1fr !important;
-        gap: 6px !important;
-        width: 100% !important;
-        height: 220px !important;
-        margin: 0 0 8px 0 !important;
-        padding: 0 !important;
+        grid-template-columns: 60% 38% !important;
+        gap: 5px !important;
+        height: 215px !important;
+        margin-bottom: 6px !important;
         page-break-inside: avoid !important;
+        page-break-after: avoid !important;
     }
     
-    /* Cursos Más Demandados */
-    #dashboard-content > .my-8:first-of-type > div:first-child,
-    #dashboard-content > div.grid:nth-of-type(2) > div:first-child {
-        grid-column: 1 !important;
-        height: 220px !important;
-        width: 100% !important;
-        padding: 4px !important;
-        margin: 0 !important;
+    #dashboard-content > div:nth-child(2) > div:nth-child(1) {
+        height: 215px !important;
+        padding: 3px !important;
+        border: 1px solid #ddd !important;
+        background: white !important;
     }
     
-    /* Distribución por Género */
-    #dashboard-content > .my-8:first-of-type > div:last-child,
-    #dashboard-content > div.grid:nth-of-type(2) > div:last-child {
-        grid-column: 2 !important;
-        height: 220px !important;
-        width: 100% !important;
-        padding: 4px !important;
-        margin: 0 !important;
+    #dashboard-content > div:nth-child(2) > div:nth-child(2) {
+        height: 215px !important;
+        padding: 3px !important;
+        border: 1px solid #ddd !important;
+        background: white !important;
     }
     
     /* ============================================ */
-    /* SEGUNDO GRID: DEPARTAMENTOS + TIPO */
+    /* SECCIÓN 3: DEPARTAMENTOS + TIPO (2 COLUMNAS) */
     /* ============================================ */
-    #dashboard-content > .mb-8:first-of-type,
-    #dashboard-content > div.grid:nth-of-type(3) {
+    #dashboard-content > div:nth-child(3) {
         display: grid !important;
-        grid-template-columns: 2fr 1fr !important;
-        gap: 6px !important;
-        width: 100% !important;
-        margin: 0 0 8px 0 !important;
-        padding: 0 !important;
+        grid-template-columns: 67% 31% !important;
+        gap: 5px !important;
+        margin-bottom: 6px !important;
         page-break-inside: avoid !important;
+        page-break-after: avoid !important;
     }
     
-    /* Top 5 Departamentos (contenedor con leyenda) */
-    #dashboard-content > .mb-8:first-of-type > div:first-child,
-    #dashboard-content > div.grid:nth-of-type(3) > div:first-child {
-        grid-column: 1 !important;
+    /* Departamentos con leyenda */
+    #dashboard-content > div:nth-child(3) > div:nth-child(1) {
         display: flex !important;
         flex-direction: column !important;
-        height: auto !important;
-        width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
+        border: 1px solid #ddd !important;
+        background: white !important;
+        overflow: hidden !important;
     }
     
     /* Gráfica de departamentos */
-    #dashboard-content > .mb-8:first-of-type > div:first-child > div:first-child,
-    #dashboard-content > div.grid:nth-of-type(3) > div:first-child > div:first-child {
-        height: 200px !important;
-        width: 100% !important;
-        padding: 4px !important;
+    #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) {
+        height: 195px !important;
+        padding: 3px !important;
         flex-shrink: 0 !important;
     }
     
-    /* Leyenda departamentos */
-    #dashboard-content .bg-gray-50 {
-        height: 50px !important;
-        max-height: 50px !important;
-        min-height: 0 !important;
-        overflow: hidden !important;
-        padding: 4px !important;
+    /* Leyenda */
+    #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) {
+        height: 48px !important;
+        max-height: 48px !important;
+        padding: 3px 5px !important;
         background: #f9fafb !important;
         border-top: 1px solid #e5e7eb !important;
+        overflow: hidden !important;
         flex-shrink: 0 !important;
     }
     
-    #dashboard-content .bg-gray-50 p {
+    #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) p {
         font-size: 6pt !important;
-        margin: 0 0 2px 0 !important;
         font-weight: bold !important;
+        margin: 0 0 2px 0 !important;
     }
     
-    #dashboard-content .bg-gray-50 .grid {
+    #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) .grid {
         display: grid !important;
         grid-template-columns: 1fr 1fr 1fr !important;
         gap: 2px !important;
     }
     
-    #dashboard-content .bg-gray-50 .text-xs {
+    #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) .text-xs {
         font-size: 5.5pt !important;
-        line-height: 1.2 !important;
+        line-height: 1.15 !important;
     }
     
-    /* Tipo de Curso */
-    #dashboard-content > .mb-8:first-of-type > div:last-child,
-    #dashboard-content > div.grid:nth-of-type(3) > div:last-child {
-        grid-column: 2 !important;
-        height: 200px !important;
-        width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
+    /* Tipo de curso */
+    #dashboard-content > div:nth-child(3) > div:nth-child(2) {
+        height: 243px !important;
+        padding: 3px !important;
+        border: 1px solid #ddd !important;
+        background: white !important;
     }
     
-    #dashboard-content > .mb-8:first-of-type > div:last-child > div,
-    #dashboard-content > div.grid:nth-of-type(3) > div:last-child > div {
-        height: 200px !important;
-        padding: 4px !important;
+    #dashboard-content > div:nth-child(3) > div:nth-child(2) > div {
+        height: 100% !important;
     }
     
     /* ============================================ */
-    /* GRÁFICA HISTÓRICA - ANCHO COMPLETO */
+    /* SECCIÓN 4: EVOLUCIÓN HISTÓRICA (ANCHO COMPLETO) */
     /* ============================================ */
-    #dashboard-content > .mb-8:last-of-type {
+    #dashboard-content > div:nth-child(4) {
         display: block !important;
         width: 100% !important;
-        height: 200px !important;
-        margin: 8px 0 0 0 !important;
-        padding: 0 !important;
+        height: 195px !important;
+        padding: 3px !important;
+        margin-top: 6px !important;
+        border: 1px solid #ddd !important;
+        background: white !important;
         page-break-before: auto !important;
         page-break-inside: avoid !important;
     }
     
-    #dashboard-content > .mb-8:last-of-type > div {
-        height: 200px !important;
-        width: 100% !important;
-        padding: 4px !important;
+    #dashboard-content > div:nth-child(4) > div {
+        height: 100% !important;
     }
     
     /* ============================================ */
-    /* WRAPPERS DE GRÁFICAS */
+    /* GRÁFICAS: ESTRUCTURA INTERNA */
     /* ============================================ */
-    .chart-container-wrapper,
+    
+    /* Todos los contenedores de gráficas */
     #dashboard-content .bg-white {
         display: flex !important;
         flex-direction: column !important;
         height: 100% !important;
         width: 100% !important;
-        padding: 4px !important;
-        margin: 0 !important;
-        background: white !important;
-        border: 1px solid #e5e7eb !important;
-        border-radius: 4px !important;
+        padding: 3px !important;
         overflow: hidden !important;
-        page-break-inside: avoid !important;
     }
     
-    /* Títulos */
-    .chart-container-wrapper h3,
+    /* Títulos de gráficas */
     #dashboard-content .bg-white h3 {
-        font-size: 8pt !important;
+        font-size: 7.5pt !important;
         font-weight: bold !important;
         color: #1f2937 !important;
-        margin: 0 0 3px 0 !important;
-        padding: 0 !important;
         text-align: center !important;
+        margin: 0 0 2px 0 !important;
+        padding: 0 !important;
         flex-shrink: 0 !important;
     }
     
-    /* Contenedor de canvas */
-    .chart-container-wrapper > div:last-child,
-    .chart-container-wrapper .relative,
+    /* Contenedor del canvas */
     #dashboard-content .bg-white > div:last-child {
         flex: 1 !important;
         min-height: 0 !important;
@@ -436,7 +350,7 @@
     }
     
     /* Canvas */
-    canvas {
+    #dashboard-content canvas {
         display: block !important;
         width: 100% !important;
         height: 100% !important;
@@ -445,47 +359,190 @@
     }
     
     /* ============================================ */
+    /* PREVENIR SALTOS DE PÁGINA */
+    /* ============================================ */
+    #dashboard-content > div {
+        page-break-inside: avoid !important;
+    }
+    
+    /* Forzar página 1: Header + KPIs + Cursos/Género + Deptos/Tipo */
+    #dashboard-content > div:nth-child(3) {
+        page-break-after: auto !important;
+    }
+    
+    /* Página 2: Histórica */
+    #dashboard-content > div:nth-child(4) {
+        page-break-before: auto !important;
+    }
+    
+    /* ============================================ */
     /* AJUSTES FINALES */
     /* ============================================ */
-    .py-8, .py-6, .py-4 {
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
+    
+    /* Eliminar clases web problemáticas */
+    .shadow-md,
+    .shadow-xl,
+    .shadow-lg,
+    .rounded-xl,
+    .rounded-lg {
+        box-shadow: none !important;
+        border-radius: 3px !important;
     }
     
-    .my-8, .my-6, .my-4 {
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
+    /* Resetear flex/grid de Tailwind */
+    .flex-1 {
+        flex: 1 !important;
     }
     
-    .gap-6, .gap-4 {
-        gap: 6px !important;
+    .gap-6,
+    .gap-4 {
+        gap: 5px !important;
     }
     
-    /* Prevenir saltos */
-    #dashboard-content > * {
-        page-break-inside: avoid !important;
+    /* Asegurar contraste de texto */
+    * {
+        color: #000 !important;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        color: #1f2937 !important;
+    }
+    
+    .text-gray-500,
+    .text-gray-600,
+    .text-gray-700 {
+        color: #4b5563 !important;
     }
 }
 </style>
-
-<!-- 
-✅ CAMBIOS CRÍTICOS:
-1. Reseteo agresivo de TODAS las clases Tailwind
-2. Selectores múltiples para capturar divs dinámicos
-3. Alturas fijas absolutas con !important
-4. Grid específico: nth-of-type(2) para primer grid, nth-of-type(3) para segundo
-5. Histórica usando :last-of-type para capturarla siempre
-
-📋 IMPLEMENTACIÓN:
-1. REEMPLAZA toda la etiqueta <style> (líneas 22-258 aprox)
-2. Borra desde "<style>" hasta "</style>"
-3. Pega este código completo
-4. Guarda (Ctrl+S)
-5. Recarga página (Ctrl+F5)
-6. Prueba impresión (Ctrl+P)
--->
-</style>
 </head>
+    // ====================================================================
+// SCRIPT PARA FORZAR LAYOUT DE IMPRESIÓN
+// Agrégalo ANTES del cierre </body> en tu HTML
+// ====================================================================
+
+// Interceptar el evento de impresión
+window.addEventListener('beforeprint', function() {
+    console.log('🖨️ Preparando impresión...');
+    
+    // 1. Forzar recálculo de gráficas
+    const charts = document.querySelectorAll('canvas');
+    charts.forEach(canvas => {
+        if (canvas && canvas.style) {
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+        }
+    });
+    
+    // 2. Aplicar estilos directamente a contenedores
+    const dashboardContent = document.getElementById('dashboard-content');
+    if (dashboardContent) {
+        const children = Array.from(dashboardContent.children);
+        
+        // KPIs (primer hijo)
+        if (children[0]) {
+            children[0].style.cssText = `
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 4px !important;
+                margin-bottom: 6px !important;
+            `;
+        }
+        
+        // Cursos + Género (segundo hijo)
+        if (children[1]) {
+            children[1].style.cssText = `
+                display: grid !important;
+                grid-template-columns: 60% 38% !important;
+                gap: 5px !important;
+                height: 215px !important;
+                margin-bottom: 6px !important;
+            `;
+        }
+        
+        // Departamentos + Tipo (tercer hijo)
+        if (children[2]) {
+            children[2].style.cssText = `
+                display: grid !important;
+                grid-template-columns: 67% 31% !important;
+                gap: 5px !important;
+                margin-bottom: 6px !important;
+            `;
+            
+            // Contenedor de departamentos con leyenda
+            const deptContainer = children[2].children[0];
+            if (deptContainer) {
+                deptContainer.style.cssText = `
+                    display: flex !important;
+                    flex-direction: column !important;
+                `;
+                
+                // Gráfica
+                if (deptContainer.children[0]) {
+                    deptContainer.children[0].style.height = '195px';
+                }
+                
+                // Leyenda
+                if (deptContainer.children[1]) {
+                    deptContainer.children[1].style.cssText = `
+                        height: 48px !important;
+                        max-height: 48px !important;
+                        overflow: hidden !important;
+                    `;
+                }
+            }
+            
+            // Tipo de curso
+            if (children[2].children[1]) {
+                children[2].children[1].style.height = '243px';
+            }
+        }
+        
+        // Histórica (cuarto hijo)
+        if (children[3]) {
+            children[3].style.cssText = `
+                display: block !important;
+                width: 100% !important;
+                height: 195px !important;
+                margin-top: 6px !important;
+            `;
+        }
+    }
+    
+    console.log('✅ Layout de impresión aplicado');
+});
+
+// Restaurar después de imprimir
+window.addEventListener('afterprint', function() {
+    console.log('🔄 Restaurando vista web...');
+    
+    // Limpiar estilos inline
+    const dashboardContent = document.getElementById('dashboard-content');
+    if (dashboardContent) {
+        const children = Array.from(dashboardContent.children);
+        children.forEach(child => {
+            if (child && child.style) {
+                child.style.cssText = '';
+            }
+        });
+    }
+    
+    console.log('✅ Vista web restaurada');
+});
+
+// También agregar listener al botón de imprimir si existe
+document.addEventListener('DOMContentLoaded', function() {
+    // Buscar botones de imprimir (por texto o icono)
+    const printButtons = document.querySelectorAll('button');
+    printButtons.forEach(button => {
+        const buttonText = button.textContent || '';
+        if (buttonText.includes('Imprimir') || buttonText.includes('🖨️')) {
+            button.addEventListener('click', function() {
+                setTimeout(() => window.print(), 100);
+            });
+        }
+    });
+});
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800">
 
     <div class="print-header-element container mx-auto">
