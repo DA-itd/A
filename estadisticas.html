@@ -44,11 +44,21 @@
         /* Elementos exclusivos de impresión */
         .print-header-element, .print-footer-element { display: none; }
 
-     <!-- INSTRUCCIONES: Reemplaza la sección @media print { ... } en tu archivo estadisticas.html con este código -->
+     <!-- INSTRUCCIONES: Reemplaza TODA la sección <style> que contiene @media print en tu HTML -->
 
 <style>
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
+
+.print-header-element, .print-footer-element { display: none; }
+
 /* ====================================================================== */
-/* SECCIÓN DE IMPRESIÓN OPTIMIZADA - VERSIÓN CORREGIDA V2 */
+/* IMPRESIÓN OPTIMIZADA - VERSIÓN FORZADA */
 /* ====================================================================== */
 @media print {
     @page { 
@@ -56,57 +66,75 @@
         margin: 0.5cm 0.8cm;
     }
     
-    body { 
-        background: white !important; 
-        color: black !important; 
-        -webkit-print-color-adjust: exact !important; 
-        print-color-adjust: exact !important; 
-        padding-top: 0px !important; 
-        padding-bottom: 40px !important;
-        font-size: 8.5pt !important;
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
     
-    /* Ocultar elementos innecesarios */
-    header, footer, #back-link, .no-print, button, select, 
-    #dashboard-header-controls, .print-hide { 
+    html, body { 
+        width: 100% !important;
+        height: auto !important;
+        background: white !important; 
+        color: black !important; 
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 8.5pt !important;
+        line-height: 1.2 !important;
+    }
+    
+    /* Ocultar elementos web */
+    header:not(.print-header-element), 
+    footer:not(.print-footer-element), 
+    #back-link, 
+    .no-print, 
+    button, 
+    select, 
+    #dashboard-header-controls, 
+    .print-hide { 
         display: none !important; 
+        visibility: hidden !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
     
     /* ============================================ */
-    /* ENCABEZADO COMPACTO */
+    /* ENCABEZADO */
     /* ============================================ */
     .print-header-element { 
         display: flex !important; 
+        visibility: visible !important;
         justify-content: space-between; 
         align-items: center; 
-        position: static !important; 
-        height: 45px; 
-        background: white;
-        border-bottom: 1px solid #1B396A; 
-        padding: 5px 10px;
-        margin-bottom: 8px;
+        height: 45px !important;
+        background: white !important;
+        border-bottom: 2px solid #1B396A !important; 
+        padding: 5px 10px !important;
+        margin: 0 0 8px 0 !important;
+        page-break-after: avoid !important;
     }
     .print-header-element img { 
-        height: 38px; 
-        object-fit: contain; 
+        height: 38px !important;
+        width: auto !important;
+        object-fit: contain !important;
     }
     .print-header-element .text-center { 
-        flex: 1; 
-        padding: 0 15px; 
+        flex: 1 !important;
+        padding: 0 15px !important;
     }
     .print-header-element h1 { 
-        font-size: 9.5pt !important; 
+        font-size: 10pt !important; 
         font-weight: 900 !important; 
-        margin: 0; 
-        color: #1B396A; 
-        line-height: 1.1; 
+        margin: 0 !important;
+        padding: 0 !important;
+        color: #1B396A !important;
     }
     .print-header-element h2 { 
         font-size: 8pt !important; 
         font-weight: bold !important; 
-        margin: 2px 0 0 0; 
-        color: #333 !important; 
-        text-transform: uppercase; 
+        margin: 2px 0 0 0 !important; 
+        padding: 0 !important;
+        color: #333 !important;
     }
     
     /* ============================================ */
@@ -114,288 +142,347 @@
     /* ============================================ */
     .print-footer-element { 
         display: flex !important; 
-        justify-content: space-between;
-        position: fixed; 
-        bottom: 0; 
-        left: 0; 
-        width: 100%; 
-        font-size: 7pt; 
-        color: #555; 
-        padding: 5px 10px;
-        background: white; 
-        border-top: 1px solid #eee; 
-        z-index: 9999;
+        visibility: visible !important;
+        justify-content: space-between !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        font-size: 7pt !important;
+        color: #555 !important;
+        padding: 5px 10px !important;
+        background: white !important;
+        border-top: 1px solid #ddd !important;
+        z-index: 9999 !important;
     }
     .print-footer-element::after {
-        content: "Pág. " counter(page);
+        content: "Pág. " counter(page) !important;
     }
     
     /* ============================================ */
     /* CONTENEDOR PRINCIPAL */
     /* ============================================ */
     #dashboard-content { 
+        display: block !important;
         width: 100% !important; 
         max-width: 100% !important;
         margin: 0 !important; 
-        padding: 0 5px !important;
-        padding-bottom: 35px !important;
+        padding: 0 8px 40px 8px !important;
     }
     
     /* ============================================ */
-    /* KPIs EN UNA SOLA FILA COMPACTA */
+    /* RESETEAR TODO TAILWIND/WEB */
     /* ============================================ */
-    .md\:grid-cols-4 { 
-        display: flex !important; 
-        flex-wrap: nowrap !important;
-        gap: 4px !important;
-        justify-content: space-between;
-        margin-bottom: 8px !important; 
-        page-break-inside: avoid !important;
-    }
-    .md\:grid-cols-4 > div { 
-        flex: 1 !important;
-        border: 1px solid #ddd !important; 
-        padding: 4px 6px !important; 
-        margin: 0 !important;
-        min-height: 38px !important; 
-        max-height: 38px !important;
-    }
-    .md\:grid-cols-4 > div .text-3xl {
-        font-size: 1.0rem !important; 
-    }
-    .md\:grid-cols-4 > div .text-2xl {
-        font-size: 0.95rem !important; 
-        margin: 1px 0 !important;
-    }
-    .md\:grid-cols-4 > div .text-\[10px\] {
-        font-size: 6.5pt !important; 
+    #dashboard-content * {
+        box-sizing: border-box !important;
     }
     
-    /* ============================================ */
-    /* RESETEAR CLASES DE ALTURA WEB */
-    /* ============================================ */
-    .h-96, .h-full, .flex-1 {
-        height: auto !important; 
+    #dashboard-content .grid,
+    #dashboard-content > div,
+    #dashboard-content .bg-white,
+    #dashboard-content .shadow-md,
+    #dashboard-content .shadow-xl,
+    #dashboard-content .rounded-xl {
+        box-shadow: none !important;
+        border-radius: 4px !important;
+    }
+    
+    /* Resetear alturas web */
+    #dashboard-content .h-96,
+    #dashboard-content .h-full,
+    #dashboard-content .flex-1,
+    #dashboard-content .min-h-\[200px\] {
+        height: auto !important;
         min-height: 0 !important;
         flex: none !important;
     }
     
-    /* ============================================ */
-    /* CONTENEDORES DE GRÁFICAS - SIN BORDES */
-    /* ============================================ */
-    .bg-white, .shadow-md, .shadow-xl { 
-        box-shadow: none !important; 
-        border: none !important;
-        padding: 3px !important; 
-        break-inside: avoid !important; 
-        page-break-inside: avoid !important;
+    /* Resetear columnas web */
+    #dashboard-content .lg\:col-span-3,
+    #dashboard-content .lg\:col-span-5,
+    #dashboard-content .lg\:col-span-7,
+    #dashboard-content .lg\:col-span-9,
+    #dashboard-content .lg\:col-span-12 {
+        grid-column: auto !important;
     }
     
     /* ============================================ */
-    /* ESTRUCTURA DE GRIDS - FORZAR LAYOUT CORRECTO */
+    /* KPIs - FILA ÚNICA */
     /* ============================================ */
+    #dashboard-content > div:first-of-type,
+    #dashboard-content > .grid:first-child,
+    #dashboard-content .md\:grid-cols-4 { 
+        display: flex !important; 
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 4px !important;
+        width: 100% !important;
+        margin: 0 0 8px 0 !important;
+        padding: 0 !important;
+        page-break-inside: avoid !important;
+    }
     
-    /* Todos los grids principales */
-    #dashboard-content > .grid {
+    #dashboard-content .md\:grid-cols-4 > div,
+    #dashboard-content > div:first-of-type > div { 
+        flex: 1 1 25% !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        border: 1px solid #ddd !important; 
+        background: white !important;
+        padding: 4px 6px !important; 
+        margin: 0 !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        max-height: 36px !important;
+    }
+    
+    #dashboard-content .md\:grid-cols-4 > div > div:first-child {
+        font-size: 18px !important;
+        line-height: 1 !important;
+    }
+    
+    #dashboard-content .md\:grid-cols-4 .text-3xl {
+        font-size: 0.9rem !important;
+        line-height: 1 !important;
+    }
+    
+    #dashboard-content .md\:grid-cols-4 .text-2xl {
+        font-size: 0.85rem !important;
+        font-weight: bold !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+    }
+    
+    #dashboard-content .md\:grid-cols-4 .text-\[10px\] {
+        font-size: 6pt !important;
+        line-height: 1.1 !important;
+        margin: 0 !important;
+    }
+    
+    /* ============================================ */
+    /* PRIMER GRID: CURSOS + GÉNERO */
+    /* ============================================ */
+    #dashboard-content > .my-8:first-of-type,
+    #dashboard-content > div.grid:nth-of-type(2) {
         display: grid !important;
+        grid-template-columns: 1.4fr 1fr !important;
         gap: 6px !important;
-        margin-bottom: 6px !important;
+        width: 100% !important;
+        height: 220px !important;
+        margin: 0 0 8px 0 !important;
+        padding: 0 !important;
         page-break-inside: avoid !important;
     }
     
-    /* PRIMER GRID: Cursos + Género (2 columnas) */
-    #dashboard-content > .grid:nth-of-type(1) {
-        grid-template-columns: 58% 40% !important;
-        height: 230px !important;
+    /* Cursos Más Demandados */
+    #dashboard-content > .my-8:first-of-type > div:first-child,
+    #dashboard-content > div.grid:nth-of-type(2) > div:first-child {
+        grid-column: 1 !important;
+        height: 220px !important;
+        width: 100% !important;
+        padding: 4px !important;
+        margin: 0 !important;
     }
     
-    #dashboard-content > .grid:nth-of-type(1) > div:nth-child(1) {
-        grid-column: 1 / 2 !important;
-        height: 230px !important;
+    /* Distribución por Género */
+    #dashboard-content > .my-8:first-of-type > div:last-child,
+    #dashboard-content > div.grid:nth-of-type(2) > div:last-child {
+        grid-column: 2 !important;
+        height: 220px !important;
+        width: 100% !important;
+        padding: 4px !important;
+        margin: 0 !important;
     }
     
-    #dashboard-content > .grid:nth-of-type(1) > div:nth-child(2) {
-        grid-column: 2 / 3 !important;
-        height: 230px !important;
+    /* ============================================ */
+    /* SEGUNDO GRID: DEPARTAMENTOS + TIPO */
+    /* ============================================ */
+    #dashboard-content > .mb-8:first-of-type,
+    #dashboard-content > div.grid:nth-of-type(3) {
+        display: grid !important;
+        grid-template-columns: 2fr 1fr !important;
+        gap: 6px !important;
+        width: 100% !important;
+        margin: 0 0 8px 0 !important;
+        padding: 0 !important;
+        page-break-inside: avoid !important;
     }
     
-    /* SEGUNDO GRID: Departamentos + Tipo (2 columnas) */
-    #dashboard-content > .grid:nth-of-type(2) {
-        grid-template-columns: 68% 30% !important;
-        min-height: 260px !important;
-    }
-    
-    /* Departamentos con leyenda */
-    #dashboard-content > .grid:nth-of-type(2) > div:nth-child(1) {
-        grid-column: 1 / 2 !important;
+    /* Top 5 Departamentos (contenedor con leyenda) */
+    #dashboard-content > .mb-8:first-of-type > div:first-child,
+    #dashboard-content > div.grid:nth-of-type(3) > div:first-child {
+        grid-column: 1 !important;
         display: flex !important;
         flex-direction: column !important;
         height: auto !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
     
-    /* Área de gráfica de departamentos */
-    #dashboard-content > .grid:nth-of-type(2) > div:nth-child(1) > div:first-child {
+    /* Gráfica de departamentos */
+    #dashboard-content > .mb-8:first-of-type > div:first-child > div:first-child,
+    #dashboard-content > div.grid:nth-of-type(3) > div:first-child > div:first-child {
         height: 200px !important;
+        width: 100% !important;
+        padding: 4px !important;
         flex-shrink: 0 !important;
     }
     
-    /* Tipo de curso */
-    #dashboard-content > .grid:nth-of-type(2) > div:nth-child(2) {
-        grid-column: 2 / 3 !important;
-        height: 200px !important;
+    /* Leyenda departamentos */
+    #dashboard-content .bg-gray-50 {
+        height: 50px !important;
+        max-height: 50px !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        padding: 4px !important;
+        background: #f9fafb !important;
+        border-top: 1px solid #e5e7eb !important;
+        flex-shrink: 0 !important;
     }
     
-    /* GRÁFICA HISTÓRICA: Ancho completo, después del segundo grid */
-    #dashboard-content > .mb-8 {
+    #dashboard-content .bg-gray-50 p {
+        font-size: 6pt !important;
+        margin: 0 0 2px 0 !important;
+        font-weight: bold !important;
+    }
+    
+    #dashboard-content .bg-gray-50 .grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 2px !important;
+    }
+    
+    #dashboard-content .bg-gray-50 .text-xs {
+        font-size: 5.5pt !important;
+        line-height: 1.2 !important;
+    }
+    
+    /* Tipo de Curso */
+    #dashboard-content > .mb-8:first-of-type > div:last-child,
+    #dashboard-content > div.grid:nth-of-type(3) > div:last-child {
+        grid-column: 2 !important;
+        height: 200px !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    #dashboard-content > .mb-8:first-of-type > div:last-child > div,
+    #dashboard-content > div.grid:nth-of-type(3) > div:last-child > div {
+        height: 200px !important;
+        padding: 4px !important;
+    }
+    
+    /* ============================================ */
+    /* GRÁFICA HISTÓRICA - ANCHO COMPLETO */
+    /* ============================================ */
+    #dashboard-content > .mb-8:last-of-type {
+        display: block !important;
         width: 100% !important;
         height: 200px !important;
-        margin-bottom: 6px !important;
+        margin: 8px 0 0 0 !important;
+        padding: 0 !important;
         page-break-before: auto !important;
         page-break-inside: avoid !important;
+    }
+    
+    #dashboard-content > .mb-8:last-of-type > div {
+        height: 200px !important;
+        width: 100% !important;
+        padding: 4px !important;
     }
     
     /* ============================================ */
     /* WRAPPERS DE GRÁFICAS */
     /* ============================================ */
-    .chart-container-wrapper { 
-        height: 100% !important; 
-        width: 100% !important;
-        padding: 3px !important; 
-        box-shadow: none !important;
-        border: none !important;
-        page-break-inside: avoid !important;
-        overflow: hidden !important;
-    }
-    
-    /* Contenedor interno de canvas */
-    .chart-container-wrapper > div {
-        height: 100% !important;
+    .chart-container-wrapper,
+    #dashboard-content .bg-white {
         display: flex !important;
         flex-direction: column !important;
-    }
-    
-    /* Área del canvas específicamente */
-    .chart-container-wrapper .relative {
-        flex: 1 !important;
-        min-height: 0 !important;
-        height: calc(100% - 22px) !important;
-    }
-    
-    /* ============================================ */
-    /* CANVAS - MANTENER PROPORCIONES */
-    /* ============================================ */
-    canvas { 
-        max-width: 100% !important; 
-        max-height: 100% !important; 
-        width: 100% !important;
         height: 100% !important;
-        display: block !important;
-    }
-    
-    /* ============================================ */
-    /* LEYENDA DE DEPARTAMENTOS COMPACTA */
-    /* ============================================ */
-    .bg-gray-50.p-4 {
-        padding: 5px !important; 
-        max-height: 50px !important; 
-        min-height: 0 !important;
+        width: 100% !important;
+        padding: 4px !important;
+        margin: 0 !important;
+        background: white !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 4px !important;
         overflow: hidden !important;
-        border: none !important;
-        background: #f9fafb !important;
-        border-top: 1px solid #e5e7eb !important;
-        flex-shrink: 0 !important;
-    }
-    .bg-gray-50.p-4 .text-xs {
-        font-size: 6pt !important; 
-        line-height: 1.15 !important;
-    }
-    .bg-gray-50.p-4 .grid {
-        grid-template-columns: 1fr 1fr 1fr !important; 
-        gap: 2px !important;
-    }
-    .bg-gray-50.p-4 p {
-        margin-bottom: 2px !important;
+        page-break-inside: avoid !important;
     }
     
-    /* ============================================ */
-    /* TÍTULOS DE GRÁFICAS */
-    /* ============================================ */
-    .bg-white h3, .chart-container-wrapper h3 {
-        font-size: 8.5pt !important; 
-        margin-bottom: 2px !important; 
-        margin-top: 0 !important;
-        padding: 0 !important;
+    /* Títulos */
+    .chart-container-wrapper h3,
+    #dashboard-content .bg-white h3 {
+        font-size: 8pt !important;
         font-weight: bold !important;
         color: #1f2937 !important;
+        margin: 0 0 3px 0 !important;
+        padding: 0 !important;
+        text-align: center !important;
+        flex-shrink: 0 !important;
+    }
+    
+    /* Contenedor de canvas */
+    .chart-container-wrapper > div:last-child,
+    .chart-container-wrapper .relative,
+    #dashboard-content .bg-white > div:last-child {
+        flex: 1 !important;
+        min-height: 0 !important;
+        width: 100% !important;
+        position: relative !important;
+    }
+    
+    /* Canvas */
+    canvas {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
     }
     
     /* ============================================ */
-    /* AJUSTES FINALES PARA COMPACTACIÓN */
+    /* AJUSTES FINALES */
     /* ============================================ */
-    * {
-        line-height: 1.15 !important; 
-    }
-    
     .py-8, .py-6, .py-4 {
-        padding-top: 2px !important; 
-        padding-bottom: 2px !important; 
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
     }
     
     .my-8, .my-6, .my-4 {
-        margin-top: 4px !important; 
-        margin-bottom: 4px !important; 
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
     }
     
-    /* Forzar todas las columnas web a auto */
-    .lg\:col-span-7, .lg\:col-span-5, 
-    .lg\:col-span-9, .lg\:col-span-3 {
-        grid-column: auto !important;
+    .gap-6, .gap-4 {
+        gap: 6px !important;
     }
     
-    /* Prevenir desbordamiento */
-    #dashboard-content, #dashboard-content * {
-        overflow: visible !important;
-        max-width: 100% !important;
-    }
-    
-    /* Asegurar que el segundo grid no fuerce salto */
-    #dashboard-content > .grid:nth-of-type(2) {
-        page-break-after: avoid !important;
-    }
-    
-    /* Forzar histórica a estar en la misma o siguiente página sin cortes */
-    #dashboard-content > .mb-8:last-of-type {
-        page-break-before: auto !important;
-        margin-top: 6px !important;
+    /* Prevenir saltos */
+    #dashboard-content > * {
+        page-break-inside: avoid !important;
     }
 }
-
-/* ====================================================================== */
-/* FIN SECCIÓN DE IMPRESIÓN */
-/* ====================================================================== */
 </style>
 
 <!-- 
-INSTRUCCIONES DE IMPLEMENTACIÓN:
+✅ CAMBIOS CRÍTICOS:
+1. Reseteo agresivo de TODAS las clases Tailwind
+2. Selectores múltiples para capturar divs dinámicos
+3. Alturas fijas absolutas con !important
+4. Grid específico: nth-of-type(2) para primer grid, nth-of-type(3) para segundo
+5. Histórica usando :last-of-type para capturarla siempre
 
-1. Abre tu archivo estadisticas.html
-2. Busca la sección "@media print {"
-3. Reemplaza TODO desde "@media print {" hasta el "}" de cierre
-4. Pega este código completo
-5. Guarda y prueba
-
-CORRECCIONES APLICADAS:
-✅ Grid selectores específicos usando nth-of-type(1) y nth-of-type(2)
-✅ Alturas fijas para evitar colapsos (230px, 200px)
-✅ Proporciones de columnas balanceadas (58%-40%, 68%-30%)
-✅ Histórica con altura controlada (200px) y sin saltos de página forzados
-✅ Leyenda de departamentos limitada a 50px máximo
-✅ KPIs con altura máxima de 38px
-✅ Eliminación de overlapping mediante overflow: hidden
-
-RESULTADO ESPERADO:
-- Página 1: Encabezado + KPIs + Cursos/Género + Departamentos/Tipo
-- Página 2: Evolución Histórica completa sin cortes
+📋 IMPLEMENTACIÓN:
+1. REEMPLAZA toda la etiqueta <style> (líneas 22-258 aprox)
+2. Borra desde "<style>" hasta "</style>"
+3. Pega este código completo
+4. Guarda (Ctrl+S)
+5. Recarga página (Ctrl+F5)
+6. Prueba impresión (Ctrl+P)
 -->
 </style>
 </head>
