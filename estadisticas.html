@@ -54,7 +54,29 @@
                 size: letter portrait; 
                 margin: 0.5cm 0.8cm; /* Márgenes reducidos */
             }
-            
+            @media print {
+    
+    /* Reducir el tamaño y márgenes del título principal (ITD, Coordinación) */
+    .header-container h1, .header-container h2 { /* Asumiendo que hay un contenedor 'header-container' o similar */
+        margin: 5pt 0 !important;
+        padding: 0 !important;
+        font-size: 14pt !important;
+    }
+    
+    /* Reducir el margen del contenedor de las tarjetas de estadísticas (los números grandes) */
+    .grid.grid-cols-4.gap-4.mb-8 {
+        margin-bottom: 5px !important; /* Reducir de 'mb-8' (mucho espacio) a un pequeño margen */
+        padding-top: 5px !important; /* Asegurar que no haya mucho padding arriba */
+    }
+    
+    /* Ajustar el margen del contenedor principal de la página */
+    .container.mx-auto.px-4.py-4 {
+        padding-top: 5px !important; 
+        padding-bottom: 5px !important;
+    }
+    
+    /* ... Las reglas de gráficas modificadas ... */
+}
             body { 
                 background: white !important; 
                 color: black !important; 
@@ -70,46 +92,36 @@
             .bg-gray-50.border, #dashboard-header-controls, .print-hide { 
                 display: none !important; 
             }
-            
-            /* ============================================ */
-            /* ENCABEZADO COMPACTO */
-            /* ============================================ */
-            .print-header-element { 
-                display: flex !important; 
-                justify-content: space-between; 
-                align-items: center; 
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 50px; /* Reducido de 80px */
-                background: white;
-                z-index: 1000;
-                border-bottom: 1px solid #1B396A; 
-                padding: 5px 10px;
-            }
-            .print-header-element img { 
-                height: 40px; /* Reducido de 60px */
-                object-fit: contain; 
-            }
-            .print-header-element .text-center { 
-                flex: 1; 
-                padding: 0 15px; 
-            }
-            .print-header-element h1 { 
-                font-size: 11pt !important; /* Reducido */
-                font-weight: 900 !important; 
-                margin: 0; 
-                color: #1B396A; 
-                line-height: 1.1; 
-            }
-            .print-header-element h2 { 
-                font-size: 9pt !important; /* Reducido */
-                font-weight: bold !important; 
-                margin: 3px 0 0 0; 
-                color: #333 !important; 
-                text-transform: uppercase; 
-            }
+           
+     
+/* GRÁFICAS MÁS COMPACTAS Y ALTAS */
+/* ============================================ */
+
+/* [IMPORTANTE: Eliminar o comentar la línea 'height: 250px !important;' que aplicamos al .chart-container-wrapper anteriormente] */
+
+/* Gráficas Largas (Cursos Más Demandados y Top 5 Departamentos) - Posiciones 1 y 3 en la cuadrícula */
+.grid > div:nth-child(1) .chart-container-wrapper, 
+.grid > div:nth-child(3) .chart-container-wrapper {
+    height: 300px !important; /* MÁS LARGA */
+    min-height: 300px !important;
+}
+
+/* Gráficas Cortas (Distribución por Género y Tipo de Curso) - Posiciones 2 y 4 en la cuadrícula */
+.grid > div:nth-child(2) .chart-container-wrapper, 
+.grid > div:nth-child(4) .chart-container-wrapper {
+    height: 200px !important; /* MÁS CORTA (mantenemos un mínimo seguro para evitar empalme) */
+    min-height: 200px !important;
+}
+
+/* Gráfica Evolución Histórica (mantener el ajuste anterior) */
+.mb-8.h-96 {
+    height: 250px !important;
+    margin-bottom: 5px !important; 
+    grid-column: span 2 !important; 
+}
+
+/* Mantenemos el resto de estilos de impresión que evitan sombras y cortes de página */
+        
             
             /* ============================================ */
             /* PIE DE PÁGINA COMPACTO */
