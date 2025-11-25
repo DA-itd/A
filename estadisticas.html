@@ -44,266 +44,303 @@
         /* Elementos exclusivos de impresión */
         .print-header-element, .print-footer-element { display: none; }
 
-        /* SECCIÓN DE IMPRESIÓN OPTIMIZADA (Para Ctrl+P - Mejor Calidad) */
-        @media print {
-            @page { 
-                size: letter portrait; 
-                margin: 0.5cm 0.8cm; /* Márgenes reducidos */
-            }
-            
-            body { 
-                background: white !important; 
-                color: black !important; 
-                -webkit-print-color-adjust: exact !important; 
-                print-color-adjust: exact !important; 
-                padding-top: 0px !important; 
-                padding-bottom: 30px;
-                font-size: 8.5pt !important; /* Ligeramente más pequeño para más compactación */
-            }
-            
-            /* Ocultar elementos innecesarios */
-            header, footer, #back-link, .no-print, button, select, 
-            #dashboard-header-controls, .print-hide { 
-                display: none !important; 
-            }
-            
-            /* ============================================ */
-            /* ENCABEZADO COMPACTO - NO FIJO */
-            /* ============================================ */
-            .print-header-element { 
-                display: flex !important; 
-                justify-content: space-between; 
-                align-items: center; 
-                position: static !important; 
-                top: auto;
-                left: 0;
-                right: 0;
-                height: 50px; 
-                background: white;
-                z-index: 1000;
-                border-bottom: 1px solid #1B396A; 
-                padding: 5px 10px;
-            }
-            .print-header-element img { 
-                height: 40px; 
-                object-fit: contain; 
-            }
-            .print-header-element .text-center { 
-                flex: 1; 
-                padding: 0 15px; 
-            }
-            .print-header-element h1 { 
-                font-size: 10pt !important; 
-                font-weight: 900 !important; 
-                margin: 0; 
-                color: #1B396A; 
-                line-height: 1.1; 
-            }
-            .print-header-element h2 { 
-                font-size: 8.5pt !important; 
-                font-weight: bold !important; 
-                margin: 3px 0 0 0; 
-                color: #333 !important; 
-                text-transform: uppercase; 
-            }
-            
-            /* ============================================ */
-            /* PIE DE PÁGINA COMPACTO - FIJO */
-            /* ============================================ */
-            .print-footer-element { 
-                display: flex !important; 
-                justify-content: space-between;
-                position: fixed; 
-                bottom: 0; 
-                left: 0; 
-                width: 100%; 
-                font-size: 7pt; 
-                color: #555; 
-                padding: 5px 10px;
-                background: white; 
-                border-top: 1px solid #eee; 
-            }
-            .print-footer-element::after {
-                content: "Pág. " counter(page);
-            }
-            
-            /* ============================================ */
-            /* CONTENEDOR PRINCIPAL Y MARGENES */
-            /* ============================================ */
-            #dashboard-content { 
-                width: 100% !important; 
-                margin: 0 !important; 
-                padding: 0 5px !important; 
-                padding-top: 5px !important; 
-                padding-bottom: 0px !important; 
-            }
+       <!-- INSTRUCCIONES: Reemplaza la sección @media print { ... } en tu archivo estadisticas.html con este código -->
 
-            /* FIX CRÍTICO: Restaurar márgenes normales */
-            #dashboard-content > .grid,
-            #dashboard-content > .mb-8.h-96 {
-                margin-top: 5px !important; 
-                margin-bottom: 5px !important; 
-                page-break-inside: avoid !important;
-            }
-            
-            /* ============================================ */
-            /* KPIs EN UNA SOLA FILA COMPACTA */
-            /* ============================================ */
-            .md\:grid-cols-4 { 
-                display: flex !important; 
-                flex-wrap: nowrap !important;
-                gap: 5px !important;
-                justify-content: space-between;
-                margin-top: 10px !important; 
-                margin-bottom: 10px !important; 
-            }
-            .md\:grid-cols-4 > div { 
-                flex: 1 !important;
-                border: 1px solid #ddd !important; 
-                padding: 4px !important; 
-                margin: 0 !important;
-                min-height: 40px !important; 
-            }
-            .md\:grid-cols-4 > div .text-3xl {
-                font-size: 1.1rem !important; 
-            }
-            .md\:grid-cols-4 > div .text-2xl {
-                font-size: 1.0rem !important; 
-                margin: 1px 0 !important;
-            }
-            .md\:grid-cols-4 > div .text-\[10px\] {
-                font-size: 7pt !important; 
-            }
-            
-            /* ============================================ */
-            /* GRÁFICAS SIN BORDES VISIBLES (Aspecto de Informe) */
-            /* ============================================ */
-            .bg-white, .shadow-md, .shadow-xl, .grid > div { 
-                box-shadow: none !important; 
-                border: none !important; /* ELIMINADO EL BORDE DEL CONTENEDOR GRANDE */
-                padding: 5px !important; 
-                break-inside: avoid !important; 
-                page-break-inside: avoid !important;
-            }
-            
-            /* Resetear la altura web (h-96) para poder reasignar la altura de impresión */
-            .h-96 {
-                height: auto !important; 
-                min-height: 0 !important;
-            }
-            
-            /* 1. GRÁFICAS LARGAS (Izquierda: Cursos Más Demandados) */
-            .grid > .lg\:col-span-7 {
-                height: 300px !important; 
-            }
+<style>
+/* ====================================================================== */
+/* SECCIÓN DE IMPRESIÓN OPTIMIZADA - VERSIÓN CORREGIDA */
+/* ====================================================================== */
+@media print {
+    @page { 
+        size: letter portrait; 
+        margin: 0.5cm 0.8cm;
+    }
+    
+    body { 
+        background: white !important; 
+        color: black !important; 
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important; 
+        padding-top: 0px !important; 
+        padding-bottom: 30px;
+        font-size: 8.5pt !important;
+    }
+    
+    /* Ocultar elementos innecesarios */
+    header, footer, #back-link, .no-print, button, select, 
+    #dashboard-header-controls, .print-hide { 
+        display: none !important; 
+    }
+    
+    /* ============================================ */
+    /* ENCABEZADO COMPACTO */
+    /* ============================================ */
+    .print-header-element { 
+        display: flex !important; 
+        justify-content: space-between; 
+        align-items: center; 
+        position: static !important; 
+        height: 50px; 
+        background: white;
+        border-bottom: 1px solid #1B396A; 
+        padding: 5px 10px;
+        margin-bottom: 10px;
+    }
+    .print-header-element img { 
+        height: 40px; 
+        object-fit: contain; 
+    }
+    .print-header-element .text-center { 
+        flex: 1; 
+        padding: 0 15px; 
+    }
+    .print-header-element h1 { 
+        font-size: 10pt !important; 
+        font-weight: 900 !important; 
+        margin: 0; 
+        color: #1B396A; 
+        line-height: 1.1; 
+    }
+    .print-header-element h2 { 
+        font-size: 8.5pt !important; 
+        font-weight: bold !important; 
+        margin: 3px 0 0 0; 
+        color: #333 !important; 
+        text-transform: uppercase; 
+    }
+    
+    /* ============================================ */
+    /* PIE DE PÁGINA */
+    /* ============================================ */
+    .print-footer-element { 
+        display: flex !important; 
+        justify-content: space-between;
+        position: fixed; 
+        bottom: 0; 
+        left: 0; 
+        width: 100%; 
+        font-size: 7pt; 
+        color: #555; 
+        padding: 5px 10px;
+        background: white; 
+        border-top: 1px solid #eee; 
+    }
+    .print-footer-element::after {
+        content: "Pág. " counter(page);
+    }
+    
+    /* ============================================ */
+    /* CONTENEDOR PRINCIPAL */
+    /* ============================================ */
+    #dashboard-content { 
+        width: 100% !important; 
+        margin: 0 !important; 
+        padding: 0 5px !important;
+        padding-bottom: 30px !important;
+    }
+    
+    /* ============================================ */
+    /* KPIs EN UNA SOLA FILA COMPACTA */
+    /* ============================================ */
+    .md\:grid-cols-4 { 
+        display: flex !important; 
+        flex-wrap: nowrap !important;
+        gap: 5px !important;
+        justify-content: space-between;
+        margin-bottom: 10px !important; 
+        page-break-inside: avoid !important;
+    }
+    .md\:grid-cols-4 > div { 
+        flex: 1 !important;
+        border: 1px solid #ddd !important; 
+        padding: 4px !important; 
+        margin: 0 !important;
+        min-height: 40px !important; 
+    }
+    .md\:grid-cols-4 > div .text-3xl {
+        font-size: 1.1rem !important; 
+    }
+    .md\:grid-cols-4 > div .text-2xl {
+        font-size: 1.0rem !important; 
+        margin: 1px 0 !important;
+    }
+    .md\:grid-cols-4 > div .text-\[10px\] {
+        font-size: 7pt !important; 
+    }
+    
+    /* ============================================ */
+    /* CONTENEDORES DE GRÁFICAS - SIN BORDES */
+    /* ============================================ */
+    .bg-white, .shadow-md, .shadow-xl { 
+        box-shadow: none !important; 
+        border: none !important;
+        padding: 5px !important; 
+        break-inside: avoid !important; 
+        page-break-inside: avoid !important;
+    }
+    
+    .chart-container-wrapper { 
+        height: 100% !important; 
+        padding: 4px !important; 
+        box-shadow: none !important;
+        border: none !important;
+        page-break-inside: avoid !important;
+    }
+    
+    /* ============================================ */
+    /* LAYOUT EN 2 COLUMNAS BALANCEADO */
+    /* ============================================ */
+    
+    /* Resetear alturas automáticas de la web */
+    .h-96, .h-full {
+        height: auto !important; 
+        min-height: 0 !important;
+    }
+    
+    /* Grid principal: 2 columnas iguales */
+    .grid.gap-6 { 
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    /* FILA 1: Cursos (izq) + Género (der) */
+    .grid.gap-6:first-of-type .lg\:col-span-7 {
+        grid-column: 1 / 2 !important;
+        height: 280px !important;
+    }
+    
+    .grid.gap-6:first-of-type .lg\:col-span-5 {
+        grid-column: 2 / 3 !important;
+        height: 280px !important;
+    }
+    
+    /* FILA 2: Departamentos (izq) + Tipo (der) */
+    .grid.gap-6:nth-of-type(2) .lg\:col-span-9 {
+        grid-column: 1 / 2 !important;
+        height: 300px !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .grid.gap-6:nth-of-type(2) .lg\:col-span-3 {
+        grid-column: 2 / 3 !important;
+        height: 300px !important;
+    }
+    
+    /* Ajuste específico para el contenedor de departamentos */
+    .grid.gap-6:nth-of-type(2) .lg\:col-span-9 > .p-6 {
+        flex: 1 !important;
+        min-height: 240px !important;
+    }
+    
+    /* GRÁFICA HISTÓRICA: Ancho completo */
+    .mb-8.h-96 {
+        height: 240px !important; 
+        width: 100% !important;
+        grid-column: 1 / -1 !important;
+        page-break-before: auto !important;
+    }
+    
+    /* ============================================ */
+    /* CANVAS - MANTENER PROPORCIONES */
+    /* ============================================ */
+    canvas { 
+        max-width: 100% !important; 
+        max-height: 100% !important; 
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    /* Contenedor relativo del canvas */
+    .chart-container-wrapper > .flex-1.relative {
+        height: calc(100% - 25px) !important;
+        position: relative !important;
+    }
+    
+    /* ============================================ */
+    /* LEYENDA DE DEPARTAMENTOS COMPACTA */
+    /* ============================================ */
+    .bg-gray-50.p-4 {
+        padding: 6px !important; 
+        max-height: 60px !important; 
+        overflow: hidden !important;
+        border: none !important;
+        background: #f9fafb !important;
+        border-top: 1px solid #e5e7eb !important;
+    }
+    .bg-gray-50.p-4 .text-xs {
+        font-size: 6.5pt !important; 
+        line-height: 1.2 !important;
+    }
+    .bg-gray-50.p-4 .grid {
+        grid-template-columns: 1fr 1fr 1fr !important; 
+        gap: 3px !important;
+    }
+    
+    /* ============================================ */
+    /* TÍTULOS DE GRÁFICAS */
+    /* ============================================ */
+    .bg-white h3, .chart-container-wrapper h3 {
+        font-size: 9pt !important; 
+        margin-bottom: 3px !important; 
+        padding: 0 !important;
+        font-weight: bold !important;
+        color: #1f2937 !important;
+    }
+    
+    /* ============================================ */
+    /* AJUSTES FINALES PARA COMPACTACIÓN */
+    /* ============================================ */
+    * {
+        line-height: 1.2 !important; 
+    }
+    
+    .py-8, .py-6, .py-4 {
+        padding-top: 3px !important; 
+        padding-bottom: 3px !important; 
+    }
+    
+    .my-8, .my-6, .my-4 {
+        margin-top: 5px !important; 
+        margin-bottom: 5px !important; 
+    }
+    
+    /* Prevenir saltos de página inapropiados */
+    .grid, .chart-container-wrapper, .bg-white {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+    
+    /* Forzar división en páginas solo entre secciones principales */
+    #dashboard-content > .grid:nth-of-type(2) {
+        page-break-after: auto !important;
+    }
+}
 
-            /* Top 5 Departamentos */
-            .grid > .lg\:col-span-9 {
-                 height: 350px !important; 
-            }
-            .grid > .lg\:col-span-9 > div:first-child {
-                 height: 300px !important; 
-            }
+/* ====================================================================== */
+/* FIN SECCIÓN DE IMPRESIÓN */
+/* ====================================================================== */
+</style>
 
-            /* 2. GRÁFICAS CORTAS (Derecha: Distribución por Género y Tipo de Curso) */
-            .grid > .lg\:col-span-5 {
-                height: 150px !important; 
-            }
+<!-- 
+INSTRUCCIONES DE IMPLEMENTACIÓN:
 
-            /* Tipo de Curso */
-            .grid > .lg\:col-span-3 {
-                height: 150px !important; 
-            }
-            .grid > .lg\:col-span-3 > div:first-child {
-                height: 100% !important;
-            }
+1. Abre tu archivo estadisticas.html
+2. Busca la sección que dice "@media print {"
+3. Reemplaza TODO el contenido desde "@media print {" hasta el cierre "}"
+4. Pega este código CSS completo
+5. Guarda y prueba con Ctrl+P o Imprimir
 
-            /* 3. GRÁFICA HISTÓRICA (Ancho completo) */
-            .mb-8.h-96 {
-                height: 250px !important; 
-                grid-column: span 2 !important; 
-            }
-            
-            /* 4. Asegurar que los contenedores internos usen el 100% de la nueva altura de impresión */
-            .chart-container-wrapper { 
-                height: 100% !important; 
-                padding: 4px !important; 
-                box-shadow: none !important;
-                border: none !important; /* ELIMINADO EL BORDE DE LA GRÁFICA INDIVIDUAL */
-            }
-            .chart-container-wrapper > .flex-1.relative {
-                height: calc(100% - 20px) !important; 
-            }
-            
-            /* Forzar canvas a ocupar su contenedor */
-            canvas { 
-                width: 100% !important; 
-                height: 100% !important; 
-                max-width: 100% !important; 
-                max-height: 100% !important; 
-            }
-
-            /* Títulos de gráficas más pequeños */
-            .bg-white h3 {
-                font-size: 8.5pt !important; 
-                margin-bottom: 2px !important; 
-                padding: 0 !important;
-            }
-            
-            /* ============================================ */
-            /* LAYOUT EN 2 COLUMNAS PARA GRÁFICAS */
-            /* ============================================ */
-            .grid { 
-                display: grid !important;
-                grid-template-columns: 1fr 1fr !important; /* 2 columnas */
-                gap: 5px !important;
-            }
-            
-            /* Forzar a que las gráficas usen 1 columna */
-            .lg\:col-span-7, .lg\:col-span-5, .lg\:col-span-9, .lg\:col-span-3 {
-                grid-column: span 1 !important;
-            }
-            
-            /* Leyenda de departamentos MÁS COMPACTA */
-            .bg-gray-50.p-4 {
-                padding: 4px !important; 
-                max-height: 50px !important; 
-                overflow: hidden !important;
-                border: none !important;
-                background: white !important; /* Para que no se imprima el gris */
-            }
-            .bg-gray-50.p-4 .text-xs {
-                font-size: 6pt !important; 
-                line-height: 1.1 !important;
-            }
-            .bg-gray-50.p-4 .grid {
-                grid-template-columns: 1fr 1fr 1fr !important; 
-                gap: 2px !important;
-            }
-            
-            /* ============================================ */
-            /* AJUSTES FINALES PARA REDUCIR ESPACIO */
-            /* ============================================ */
-            * {
-                line-height: 1.1 !important; 
-            }
-            
-            /* Eliminar espaciado extra */
-            .py-8, .py-6, .py-4 {
-                padding-top: 2px !important; 
-                padding-bottom: 2px !important; 
-            }
-            
-            .my-8, .my-6, .my-4 {
-                margin-top: 4px !important; 
-                margin-bottom: 4px !important; 
-            }
-            
-            /* Forzar todo en máximo 2 páginas */
-            #dashboard-content > * {
-                page-break-inside: avoid !important;
-            }
-        }
+CAMBIOS PRINCIPALES:
+✅ Alturas fijas y proporcionales para todas las gráficas
+✅ Grid de 2 columnas balanceado
+✅ Canvas mantiene aspect ratio correcto
+✅ Prevención de saltos de página entre elementos relacionados
+✅ Márgenes y espaciado optimizado para 2 páginas máximo
+✅ Títulos y leyendas legibles sin deformación
+-->
 </style>
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800">
