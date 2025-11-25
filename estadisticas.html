@@ -55,7 +55,7 @@
                 color: black !important; 
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important; 
-                padding-top: 30px !important; /* FIX: Reducido de 60px a 30px para subir el encabezado y dejar espacio profesional */
+                padding-top: 0px !important; /* FIX: Lo ponemos a 0 para que el #dashboard-content controle el espacio */
                 padding-bottom: 30px;
                 font-size: 9pt !important; /* Texto más compacto */
             }
@@ -67,7 +67,7 @@
             }
             
             /* ============================================ */
-            /* ENCABEZADO COMPACTO */
+            /* ENCABEZADO COMPACTO (ELEMENTO FIJO) */
             /* ============================================ */
             .print-header-element { 
                 display: flex !important; 
@@ -77,14 +77,14 @@
                 top: 0;
                 left: 0;
                 right: 0;
-                height: 50px; /* Reducido de 80px */
+                height: 50px; 
                 background: white;
                 z-index: 1000;
                 border-bottom: 1px solid #1B396A; 
                 padding: 5px 10px;
             }
             .print-header-element img { 
-                height: 40px; /* Reducido de 60px */
+                height: 40px; 
                 object-fit: contain; 
             }
             .print-header-element .text-center { 
@@ -92,14 +92,14 @@
                 padding: 0 15px; 
             }
             .print-header-element h1 { 
-                font-size: 11pt !important; /* Reducido */
+                font-size: 11pt !important; 
                 font-weight: 900 !important; 
                 margin: 0; 
                 color: #1B396A; 
                 line-height: 1.1; 
             }
             .print-header-element h2 { 
-                font-size: 9pt !important; /* Reducido */
+                font-size: 9pt !important; 
                 font-weight: bold !important; 
                 margin: 3px 0 0 0; 
                 color: #333 !important; 
@@ -116,7 +116,7 @@
                 bottom: 0; 
                 left: 0; 
                 width: 100%; 
-                font-size: 7pt; /* Reducido */
+                font-size: 7pt; 
                 color: #555; 
                 padding: 5px 10px;
                 background: white; 
@@ -132,7 +132,9 @@
             #dashboard-content { 
                 width: 100% !important; 
                 margin: 0 !important; 
-                padding: 0 5px !important; /* Padding mínimo */
+                padding: 0 5px !important; 
+                padding-top: 60px !important; /* FIX: AUMENTADO para bajar todo el contenido debajo del encabezado fijo (50px + margen) */
+                padding-bottom: 0px !important; /* Quitamos padding inferior para optimizar espacio */
             }
             
             /* ============================================ */
@@ -143,24 +145,24 @@
                 flex-wrap: nowrap !important;
                 gap: 5px !important;
                 justify-content: space-between;
-                margin-bottom: 12px !important; /* AUMENTADO para bajar más el contenido */
+                margin-bottom: 12px !important; 
             }
             .md\:grid-cols-4 > div { 
                 flex: 1 !important;
                 border: 1px solid #ddd !important; 
-                padding: 5px !important; /* Muy compacto */
+                padding: 5px !important; 
                 margin: 0 !important;
-                min-height: 45px !important; /* Altura mínima */
+                min-height: 45px !important; 
             }
             .md\:grid-cols-4 > div .text-3xl {
-                font-size: 1.2rem !important; /* Iconos más pequeños */
+                font-size: 1.2rem !important; 
             }
             .md\:grid-cols-4 > div .text-2xl {
-                font-size: 1.1rem !important; /* Números más pequeños */
+                font-size: 1.1rem !important; 
                 margin: 2px 0 !important;
             }
             .md\:grid-cols-4 > div .text-\[10px\] {
-                font-size: 7pt !important; /* Labels más pequeños */
+                font-size: 7pt !important; 
             }
             
             /* ============================================ */
@@ -169,15 +171,15 @@
             .bg-white, .shadow-md, .shadow-xl, .grid > div { 
                 box-shadow: none !important; 
                 border: 1px solid #ddd !important; 
-                margin-bottom: 8px !important; /* Reducido de 20px */
-                padding: 5px !important; /* Reducido */
+                margin-bottom: 8px !important; 
+                padding: 5px !important; 
                 break-inside: avoid !important; 
                 page-break-inside: avoid !important;
             }
             
             /* Contenedor General, solo evita cortes */
             .chart-container-wrapper { 
-                min-height: 180px !important; /* Mantenemos un mínimo seguro */
+                min-height: 160px !important; /* Mantenemos un mínimo de seguridad */
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
             }
@@ -185,13 +187,13 @@
             /* GRÁFICAS LARGAS (Izquierda: Cursos Más Demandados y Top 5 Departamentos) */
             .lg\:col-span-7 .chart-container-wrapper,
             .lg\:col-span-9 .chart-container-wrapper {
-                height: 280px !important; /* Larga */
+                height: 350px !important; /* FIX: MUCHO MÁS LARGAS */
             }
 
             /* GRÁFICAS CORTAS (Derecha: Distribución por Género y Tipo de Curso) */
             .lg\:col-span-5 .chart-container-wrapper,
             .lg\:col-span-3 .chart-container-wrapper {
-                height: 200px !important; /* Corta */
+                height: 180px !important; /* FIX: MÁS CORTAS */
             }
 
             /* Títulos de gráficas más pequeños */
@@ -215,31 +217,23 @@
                 gap: 5px !important;
             }
             
-            /* Primera fila: 2 gráficas lado a lado */
-            .lg\:col-span-7, .lg\:col-span-5 {
-                grid-column: span 1 !important;
-            }
-            
-            /* Segunda fila: gráfica grande y pequeña */
-            .lg\:col-span-9 {
-                grid-column: span 1 !important;
-            }
-            .lg\:col-span-3 {
+            /* Forzar a que las gráficas usen 1 columna */
+            .lg\:col-span-7, .lg\:col-span-5, .lg\:col-span-9, .lg\:col-span-3 {
                 grid-column: span 1 !important;
             }
             
             /* Leyenda de departamentos MÁS COMPACTA */
             .bg-gray-50.p-4 {
                 padding: 5px !important;
-                max-height: 50px !important; /* Muy compacta */
+                max-height: 50px !important; 
                 overflow: hidden !important;
             }
             .bg-gray-50.p-4 .text-xs {
-                font-size: 6pt !important; /* Muy pequeño */
+                font-size: 6pt !important; 
                 line-height: 1.1 !important;
             }
             .bg-gray-50.p-4 .grid {
-                grid-template-columns: 1fr 1fr 1fr !important; /* 3 columnas */
+                grid-template-columns: 1fr 1fr 1fr !important; 
                 gap: 2px !important;
             }
             
@@ -247,7 +241,7 @@
             /* GRÁFICA HISTÓRICA EN ANCHO COMPLETO */
             /* ============================================ */
             .mb-8.h-96 {
-                height: 250px !important; /* Altura segura para esta gráfica de línea */
+                height: 280px !important; /* FIX: Un poco más alta */
                 margin-bottom: 5px !important;
                 grid-column: span 2 !important; /* Ancho completo */
             }
@@ -256,7 +250,7 @@
             /* AJUSTES FINALES PARA REDUCIR ESPACIO */
             /* ============================================ */
             * {
-                line-height: 1.2 !important; /* Interlineado compacto */
+                line-height: 1.2 !important; 
             }
             
             /* Eliminar espaciado extra */
