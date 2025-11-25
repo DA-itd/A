@@ -44,7 +44,7 @@
         /* Elementos exclusivos de impresión */
         .print-header-element, .print-footer-element { display: none; }
 
-        /* SECCIÓN DE IMPRESIÓN OPTIMIZADA (Para Ctrl+P) */
+        /* SECCIÓN DE IMPRESIÓN OPTIMIZADA (Para Ctrl+P - Mejor Calidad) */
         @media print {
             @page { 
                 size: letter portrait; 
@@ -93,14 +93,14 @@
                 padding: 0 15px; 
             }
             .print-header-element h1 { 
-                font-size: 10pt !important; /* Reducido */
+                font-size: 10pt !important; 
                 font-weight: 900 !important; 
                 margin: 0; 
                 color: #1B396A; 
                 line-height: 1.1; 
             }
             .print-header-element h2 { 
-                font-size: 8.5pt !important; /* Reducido */
+                font-size: 8.5pt !important; 
                 font-weight: bold !important; 
                 margin: 3px 0 0 0; 
                 color: #333 !important; 
@@ -141,8 +141,8 @@
             /* FIX CRÍTICO: Restaurar márgenes normales */
             #dashboard-content > .grid,
             #dashboard-content > .mb-8.h-96 {
-                margin-top: 5px !important; /* REDUCIDO de 8px */
-                margin-bottom: 5px !important; /* REDUCIDO de 8px */
+                margin-top: 5px !important; 
+                margin-bottom: 5px !important; 
                 page-break-inside: avoid !important;
             }
             
@@ -154,21 +154,21 @@
                 flex-wrap: nowrap !important;
                 gap: 5px !important;
                 justify-content: space-between;
-                margin-top: 10px !important; /* REDUCIDO de 12px */
-                margin-bottom: 10px !important; /* REDUCIDO de 12px */
+                margin-top: 10px !important; 
+                margin-bottom: 10px !important; 
             }
             .md\:grid-cols-4 > div { 
                 flex: 1 !important;
                 border: 1px solid #ddd !important; 
-                padding: 4px !important; /* REDUCIDO de 5px */
+                padding: 4px !important; 
                 margin: 0 !important;
-                min-height: 40px !important; /* REDUCIDO de 45px */
+                min-height: 40px !important; 
             }
             .md\:grid-cols-4 > div .text-3xl {
-                font-size: 1.1rem !important; /* REDUCIDO */
+                font-size: 1.1rem !important; 
             }
             .md\:grid-cols-4 > div .text-2xl {
-                font-size: 1.0rem !important; /* REDUCIDO */
+                font-size: 1.0rem !important; 
                 margin: 1px 0 !important;
             }
             .md\:grid-cols-4 > div .text-\[10px\] {
@@ -176,11 +176,11 @@
             }
             
             /* ============================================ */
-            /* GRÁFICAS MÁS COMPACTAS Y PROFESIONALES - ALTURAS REDUCIDAS */
+            /* GRÁFICAS SIN BORDES VISIBLES (Aspecto de Informe) */
             /* ============================================ */
             .bg-white, .shadow-md, .shadow-xl, .grid > div { 
                 box-shadow: none !important; 
-                border: 1px solid #ddd !important; 
+                border: none !important; /* ELIMINADO EL BORDE DEL CONTENEDOR GRANDE */
                 padding: 5px !important; 
                 break-inside: avoid !important; 
                 page-break-inside: avoid !important;
@@ -194,25 +194,25 @@
             
             /* 1. GRÁFICAS LARGAS (Izquierda: Cursos Más Demandados) */
             .grid > .lg\:col-span-7 {
-                height: 300px !important; /* AJUSTE CLAVE: Reducido de 400px a 300px */
+                height: 300px !important; 
             }
 
             /* Top 5 Departamentos */
             .grid > .lg\:col-span-9 {
-                 height: 350px !important; /* Reducido de 450px a 350px (Incluye leyenda) */
+                 height: 350px !important; 
             }
             .grid > .lg\:col-span-9 > div:first-child {
-                 height: 300px !important; /* AJUSTE CLAVE: Reducido de 400px a 300px (Solo gráfica) */
+                 height: 300px !important; 
             }
 
             /* 2. GRÁFICAS CORTAS (Derecha: Distribución por Género y Tipo de Curso) */
             .grid > .lg\:col-span-5 {
-                height: 150px !important; /* AJUSTE CLAVE: Reducido de 180px a 150px */
+                height: 150px !important; 
             }
 
             /* Tipo de Curso */
             .grid > .lg\:col-span-3 {
-                height: 150px !important; /* AJUSTE CLAVE: Reducido de 180px a 150px */
+                height: 150px !important; 
             }
             .grid > .lg\:col-span-3 > div:first-child {
                 height: 100% !important;
@@ -220,18 +220,19 @@
 
             /* 3. GRÁFICA HISTÓRICA (Ancho completo) */
             .mb-8.h-96 {
-                height: 250px !important; /* AJUSTE CLAVE: Reducido de 300px a 250px */
+                height: 250px !important; 
                 grid-column: span 2 !important; 
             }
             
             /* 4. Asegurar que los contenedores internos usen el 100% de la nueva altura de impresión */
             .chart-container-wrapper { 
                 height: 100% !important; 
-                padding: 4px !important; /* REDUCIDO de 5px */
+                padding: 4px !important; 
                 box-shadow: none !important;
+                border: none !important; /* ELIMINADO EL BORDE DE LA GRÁFICA INDIVIDUAL */
             }
             .chart-container-wrapper > .flex-1.relative {
-                height: calc(100% - 20px) !important; /* Ajuste para un título más pequeño */
+                height: calc(100% - 20px) !important; 
             }
             
             /* Forzar canvas a ocupar su contenedor */
@@ -244,8 +245,8 @@
 
             /* Títulos de gráficas más pequeños */
             .bg-white h3 {
-                font-size: 8.5pt !important; /* REDUCIDO de 9pt */
-                margin-bottom: 2px !important; /* REDUCIDO de 3px */
+                font-size: 8.5pt !important; 
+                margin-bottom: 2px !important; 
                 padding: 0 !important;
             }
             
@@ -265,9 +266,11 @@
             
             /* Leyenda de departamentos MÁS COMPACTA */
             .bg-gray-50.p-4 {
-                padding: 4px !important; /* REDUCIDO de 5px */
+                padding: 4px !important; 
                 max-height: 50px !important; 
                 overflow: hidden !important;
+                border: none !important;
+                background: white !important; /* Para que no se imprima el gris */
             }
             .bg-gray-50.p-4 .text-xs {
                 font-size: 6pt !important; 
@@ -282,18 +285,18 @@
             /* AJUSTES FINALES PARA REDUCIR ESPACIO */
             /* ============================================ */
             * {
-                line-height: 1.1 !important; /* Reducido para mayor compactación */
+                line-height: 1.1 !important; 
             }
             
             /* Eliminar espaciado extra */
             .py-8, .py-6, .py-4 {
-                padding-top: 2px !important; /* Reducido de 3px */
-                padding-bottom: 2px !important; /* Reducido de 3px */
+                padding-top: 2px !important; 
+                padding-bottom: 2px !important; 
             }
             
             .my-8, .my-6, .my-4 {
-                margin-top: 4px !important; /* Reducido de 5px */
-                margin-bottom: 4px !important; /* Reducido de 5px */
+                margin-top: 4px !important; 
+                margin-bottom: 4px !important; 
             }
             
             /* Forzar todo en máximo 2 páginas */
@@ -428,60 +431,10 @@
             const [period, setPeriod] = useState('ACTUAL');
             const [availableYears, setAvailableYears] = useState([]);
 
-            const generateReportPDF = async () => {
-                if(loading) return;
-                setLoading(true);
-                
-                // Ocultar controles, selectores, etc.
-                const dashboardContent = document.getElementById('dashboard-content');
-                const controls = document.getElementById('dashboard-header-controls');
-                const header = document.querySelector('header');
-                
-                controls.classList.add('hidden');
-                header.classList.add('hidden');
-                
-                // Esperar un momento para que el DOM oculte los elementos
-                await new Promise(resolve => setTimeout(resolve, 50));
-
-                const { jsPDF } = window.jspdf;
-                
-                try {
-                    // 1. Captura el contenido como un canvas (la "captura de pantalla")
-                    const canvas = await html2canvas(dashboardContent, {
-                        scale: 3, // Aumentado para más nitidez
-                        logging: false,
-                        useCORS: true,
-                        backgroundColor: '#f9fafb' 
-                    });
-
-                    // 2. Convierte el canvas a imagen (usando PNG, que es lossless)
-                    const imgData = canvas.toDataURL('image/png'); // PNG para cero pérdida de calidad
-                    
-                    // 3. Crea el documento PDF
-                    const pdf = new jsPDF('p', 'mm', 'letter');
-                    const imgProps = pdf.getImageProperties(imgData);
-                    
-                    // Dimensiones de la hoja Carta con márgenes de 10mm
-                    const margin = 10;
-                    const pdfWidth = pdf.internal.pageSize.getWidth() - (2 * margin);
-                    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width; 
-
-                    // 4. Agrega la imagen al PDF (la captura)
-                    pdf.addImage(imgData, 'PNG', margin, margin, pdfWidth, pdfHeight); 
-                    
-                    // 5. Guarda el archivo
-                    pdf.save('Reporte_Estadisticas_ITD_Captura.pdf');
-
-                } catch (e) {
-                    console.error("Error al generar PDF:", e);
-                    alert("Error al generar el PDF de captura. Intente de nuevo.");
-                } finally {
-                    // 6. Muestra los controles y header de nuevo
-                    controls.classList.remove('hidden');
-                    header.classList.remove('hidden');
-                    setLoading(false);
-                }
-            };
+            // **********************************************
+            // ELIMINACIÓN DE LA FUNCIÓN generateReportPDF por baja calidad
+            // **********************************************
+            // const generateReportPDF = async () => {...}
 
             useEffect(() => {
                 let isMounted = true;
@@ -530,9 +483,7 @@
                                 <option value="ACTUAL">🟢 Periodo Actual</option>
                                 {availableYears.filter(y => y !== 'ACTUAL').map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
                             </select>
-                            <button onClick={generateReportPDF} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center gap-2" disabled={loading}>
-                                {loading ? 'Generando...' : <span>🖼️ Generar PDF (Captura)</span>}
-                            </button>
+                            {/* BOTÓN DE CAPTURA ELIMINADO POR BAJA CALIDAD */}
                             <button onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center gap-2"><span>🖨️</span> Imprimir Reporte</button>
                             <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm font-bold text-gray-700 border border-gray-300 transition">Cerrar Sesión</button>
                         </div>
@@ -588,7 +539,6 @@
                 if (!canvasRef.current || !data) return;
                 if (typeof window.Chart === 'undefined') return;
                 
-                // Asegurar que el plugin de DataLabels esté registrado
                 if(window.ChartDataLabels) {
                     if (!window.Chart.registry.plugins.get('datalabels')) {
                          window.Chart.register(window.ChartDataLabels);
@@ -605,24 +555,52 @@
                     type: isHistory ? 'line' : type,
                     data: { labels: [], datasets: [] },
                     options: {
-                        responsive: true, maintainAspectRatio: false, indexAxis: horizontal ? 'y' : 'x',
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        indexAxis: horizontal ? 'y' : 'x',
+                        
+                        // CONFIGURACIÓN DE ESCALAS PARA IMPRESIÓN (Texto más pequeño y claro)
                         scales: isPie ? {} : { 
                             y: { 
                                 beginAtZero: true, 
-                                ticks: { stepSize: 1 },
-                                barPercentage: horizontal ? 0.9 : 1, /* Ayuda a que las barras se vean mejor */
-                                categoryPercentage: horizontal ? 0.9 : 1 /* Ayuda a que las barras se vean mejor */
+                                ticks: { 
+                                    stepSize: 1, 
+                                    color: '#000000', // Texto negro
+                                    font: { 
+                                        size: window.matchMedia('print').matches ? 8 : 10, /* 8pt para impresión */
+                                        weight: 'bold' 
+                                    },
+                                },
+                                barPercentage: horizontal ? 0.9 : 1, 
+                                categoryPercentage: horizontal ? 0.9 : 1 
                             },
                             x: isPie ? {} : {
                                 beginAtZero: true, 
-                                ticks: { stepSize: 1 },
-                                barPercentage: horizontal ? 0.9 : 1, /* Ayuda a que las barras se vean mejor */
-                                categoryPercentage: horizontal ? 0.9 : 1 /* Ayuda a que las barras se vean mejor */
+                                ticks: { 
+                                    stepSize: 1,
+                                    color: '#000000',
+                                    font: { 
+                                        size: window.matchMedia('print').matches ? 8 : 10, /* 8pt para impresión */
+                                        weight: 'bold' 
+                                    },
+                                },
+                                barPercentage: horizontal ? 0.9 : 1, 
+                                categoryPercentage: horizontal ? 0.9 : 1 
                             }
                         },
                         plugins: { 
-                            legend: { display: isPie || isHistory, position: 'bottom' }, 
-                            datalabels: { display: false } // Default off
+                            legend: { 
+                                display: isPie || isHistory, 
+                                position: 'bottom', 
+                                labels: { 
+                                    color: '#000000', // Texto de leyenda negro
+                                    font: {
+                                        size: window.matchMedia('print').matches ? 8 : 12, /* 8pt para impresión */
+                                        weight: 'bold'
+                                    }
+                                }
+                            }, 
+                            datalabels: { display: false } 
                         },
                         layout: {
                             padding: isHistory ? { top: 30 } : 0 
@@ -632,16 +610,27 @@
                 
                 // Ajuste específico para barras horizontales (Cursos más demandados y Top 5 Deptos)
                 if (horizontal) {
-                    config.options.scales.x.ticks = { stepSize: 1 };
-                    config.options.scales.y.barPercentage = 0.9;
-                    config.options.scales.y.categoryPercentage = 0.9;
+                    // Forzar a que las etiquetas de cursos/departamentos sean legibles
+                    config.options.scales.y.ticks.autoSkip = false;
+                    config.options.scales.y.ticks.maxRotation = 0;
+                    config.options.scales.y.ticks.minRotation = 0;
                 }
                 
-                // Ajuste específico para barras verticales (Tipo de Curso)
-                if (type === 'bar' && !horizontal) {
-                    config.options.scales.y.ticks = { stepSize: 1 };
-                    config.options.scales.x.barPercentage = 0.8;
-                    config.options.scales.x.categoryPercentage = 0.9;
+                // Ajuste específico para Doughnut (para asegurar la leyenda)
+                if (isPie) {
+                    config.options.plugins.datalabels = { 
+                        display: true, 
+                        color: '#fff',
+                        formatter: (value, context) => {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return percentage + '%';
+                        },
+                        font: {
+                            weight: 'bold',
+                            size: window.matchMedia('print').matches ? 8 : 12
+                        }
+                    };
                 }
 
 
@@ -657,10 +646,7 @@
                                 borderColor: '#36A2EB', 
                                 backgroundColor: '#36A2EB', 
                                 tension: 0.3,
-                                datalabels: {
-                                    align: 'end',
-                                    anchor: 'end'
-                                }
+                                datalabels: { align: 'end', anchor: 'end' }
                             },
                             { 
                                 label: '# Cursos', 
@@ -668,11 +654,7 @@
                                 borderColor: '#FF6384', 
                                 backgroundColor: '#FF6384', 
                                 tension: 0.3,
-                                datalabels: {
-                                    align: 'end',
-                                    anchor: 'end',
-                                    offset: 4
-                                }
+                                datalabels: { align: 'end', anchor: 'end', offset: 4 }
                             }
                         ]
                     };
@@ -682,7 +664,7 @@
                         color: '#444',
                         font: {
                             weight: 'bold',
-                            size: 11
+                            size: window.matchMedia('print').matches ? 7 : 11
                         },
                         backgroundColor: 'rgba(255, 255, 255, 0.7)',
                         borderRadius: 4,
@@ -717,7 +699,7 @@
                     setUser({ name: p.name, email: p.email });
                 } catch (e) { setLoginError("Error de acceso."); }
             };
-            return user ? <Dashboard user={user} onLogout={() => setUser(null)} /> : <Login onLogin={handleLogin} loginError={loginError} />;
+            return user ? <Dashboard user={user} onLogout={() => setUser(null)} /> : <Login onLogin={handleLogin} loginError={loginError} />;\
         };
 
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
