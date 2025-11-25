@@ -20,6 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -43,7 +44,7 @@
         /* Elementos exclusivos de impresión */
         .print-header-element, .print-footer-element { display: none; }
 
-        /* NUEVA SECCIÓN DE IMPRESIÓN OPTIMIZADA */
+        /* NUEVA SECCIÓN DE IMPRESIÓN OPTIMIZADA (Para Ctrl+P) */
         @media print {
             @page { 
                 size: letter portrait; 
@@ -62,7 +63,7 @@
             
             /* Ocultar elementos innecesarios */
             header, footer, #back-link, .no-print, button, select, 
-            .bg-gray-50.border, #dashboard-header-controls, .print-hide { 
+            #dashboard-header-controls, .print-hide { 
                 display: none !important; 
             }
             
@@ -143,8 +144,6 @@
                 margin-top: 60px !important; 
                 margin-bottom: 8px !important; 
                 page-break-inside: avoid !important;
-                /* El navegador aplica este margen sin importar en qué página inicie el bloque,
-                   resolviendo el problema de superposición del header fixed. */
             }
             
             /* Revertir el margen superior del primer grid (KPIs) para que solo tenga el margen del bloque */
@@ -201,26 +200,29 @@
             /* 1. GRÁFICAS LARGAS (Izquierda: Cursos Más Demandados y Top 5 Departamentos) - 400px */
             /* Cursos Más Demandados (lg:col-span-7) */
             .grid > .lg\:col-span-7 {
-                height: 400px !important; /* FIX: Altura aumentada */
+                height: 400px !important; /* Altura aumentada */
             }
 
             /* Top 5 Departamentos (lg:col-span-9) - Estructura anidada: target el contenedor flex dentro */
             .grid > .lg\:col-span-9 {
-                 height: 450px !important; /* Damos un poco más de margen para la leyenda y el contenedor flex */
+                 height: 450px !important; 
             }
             .grid > .lg\:col-span-9 > div:first-child {
-                 height: 400px !important; /* El contenedor de la gráfica en sí */
+                 height: 400px !important; 
             }
 
             /* 2. GRÁFICAS CORTAS (Derecha: Distribución por Género y Tipo de Curso) - 180px */
             /* Distribución por Género (lg:col-span-5) */
             .grid > .lg\:col-span-5 {
-                height: 180px !important; /* FIX: Altura corta */
+                height: 180px !important; /* Altura corta */
             }
 
             /* Tipo de Curso (lg:col-span-3) - Estructura anidada */
+            .grid > .lg\:col-span-3 {
+                height: 180px !important;
+            }
             .grid > .lg\:col-span-3 > div:first-child {
-                height: 180px !important; /* FIX: Altura corta */
+                height: 100% !important; /* Asegurar que el contenido interno use el 100% de la altura de la columna */
             }
 
             /* 3. GRÁFICA HISTÓRICA (Ancho completo) */
@@ -239,16 +241,19 @@
                 height: calc(100% - 25px) !important; /* Restar espacio del título (h3) */
             }
             
+            /* ** FIX EXTREMO ** Forzar canvas a ocupar su contenedor */
+            canvas { 
+                width: 100% !important; 
+                height: 100% !important; 
+                max-width: 100% !important; 
+                max-height: 100% !important; 
+            }
+
             /* Títulos de gráficas más pequeños */
             .bg-white h3 {
                 font-size: 9pt !important;
                 margin-bottom: 3px !important;
                 padding: 0 !important;
-            }
-            
-            canvas { 
-                max-width: 100% !important; 
-                max-height: 100% !important; 
             }
             
             /* ============================================ */
@@ -430,6 +435,61 @@
             const [period, setPeriod] = useState('ACTUAL');
             const [availableYears, setAvailableYears] = useState([]);
 
+            const generateReportPDF = async () => {
+                if(loading) return;
+                setLoading(true);
+                
+                // Ocultar controles, selectores, etc.
+                const dashboardContent = document.getElementById('dashboard-content');
+                const controls = document.getElementById('dashboard-header-controls');
+                const header = document.querySelector('header');
+                
+                controls.classList.add('hidden');
+                header.classList.add('hidden');
+                
+                // Esperar un momento para que el DOM oculte los elementos
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+                const { jsPDF } = window.jspdf;
+                
+                try {
+                    // 1. Captura el contenido como un canvas (la "captura de pantalla")
+                    const canvas = await html2canvas(dashboardContent, {
+                        scale: 2, // Aumenta la resolución
+                        logging: false,
+                        useCORS: true,
+                        backgroundColor: '#f9fafb' // Asegura el fondo claro
+                    });
+
+                    // 2. Convierte el canvas a imagen
+                    const imgData = canvas.toDataURL('image/jpeg', 0.9);
+                    
+                    // 3. Crea el documento PDF
+                    const pdf = new jsPDF('p', 'mm', 'letter');
+                    const imgProps = pdf.getImageProperties(imgData);
+                    
+                    // Dimensiones de la hoja Carta con márgenes de 10mm
+                    const margin = 10;
+                    const pdfWidth = pdf.internal.pageSize.getWidth() - (2 * margin);
+                    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width; 
+
+                    // 4. Agrega la imagen al PDF (la captura)
+                    pdf.addImage(imgData, 'JPEG', margin, margin, pdfWidth, pdfHeight);
+
+                    // 5. Guarda el archivo
+                    pdf.save('Reporte_Estadisticas_ITD_Captura.pdf');
+
+                } catch (e) {
+                    console.error("Error al generar PDF:", e);
+                    alert("Error al generar el PDF de captura. Intente de nuevo.");
+                } finally {
+                    // 6. Muestra los controles y header de nuevo
+                    controls.classList.remove('hidden');
+                    header.classList.remove('hidden');
+                    setLoading(false);
+                }
+            };
+
             useEffect(() => {
                 let isMounted = true;
                 setLoading(true);
@@ -461,7 +521,7 @@
                 return { chartData, legend };
             }, [stats]);
 
-            if (loading) return <div className="flex justify-center items-center h-96"><div className="animate-spin h-16 w-16 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div>;
+            if (loading && !stats) return <div className="flex justify-center items-center h-96"><div className="animate-spin h-16 w-16 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div>;
             if (error) return <div className="flex justify-center items-center py-20"><div className="text-red-600 font-bold text-xl">Error: {error} <br/><button onClick={()=>window.location.reload()} className="text-sm text-blue-600 underline mt-2">Recargar</button></div></div>;
             if (!stats) return null;
 
@@ -477,10 +537,16 @@
                                 <option value="ACTUAL">🟢 Periodo Actual</option>
                                 {availableYears.filter(y => y !== 'ACTUAL').map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
                             </select>
+                            <button onClick={generateReportPDF} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center gap-2" disabled={loading}>
+                                {loading ? 'Generando...' : <span>🖼️ Generar PDF (Captura)</span>}
+                            </button>
                             <button onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center gap-2"><span>🖨️</span> Imprimir Reporte</button>
                             <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm font-bold text-gray-700 border border-gray-300 transition">Cerrar Sesión</button>
                         </div>
                     </div>
+                    
+                    {loading && <div className="flex justify-center items-center h-20 text-blue-600 font-bold">Cargando datos...</div>}
+
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                         {[
@@ -531,7 +597,6 @@
                 
                 // Asegurar que el plugin de DataLabels esté registrado
                 if(window.ChartDataLabels) {
-                    // Evitar registrarlo múltiples veces si ya está
                     if (!window.Chart.registry.plugins.get('datalabels')) {
                          window.Chart.register(window.ChartDataLabels);
                     }
