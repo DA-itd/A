@@ -133,24 +133,24 @@
                 width: 100% !important; 
                 margin: 0 !important; 
                 padding: 0 5px !important; 
-                padding-top: 5px !important; /* Mínimo padding del padre */
+                padding-top: 5px !important; 
                 padding-bottom: 0px !important; 
             }
 
-            /* FIX CRÍTICO: Empujar TODOS los bloques principales 60px hacia abajo. 
-               Esto aplica a los KPIs (1er bloque), y a los bloques de gráficas 
-               que inicien en la página 1 o 2, forzando un espacio debajo del encabezado fijo. */
+            /* FIX CRÍTICO: Empujar TODOS los bloques principales 60px hacia abajo. */
             #dashboard-content > .grid,
             #dashboard-content > .mb-8.h-96 {
-                margin-top: 60px !important; /* FIX: Margen para respetar el header FIXED (50px + 10px de espacio) */
-                margin-bottom: 8px !important; /* Margen inferior normalizado */
+                margin-top: 60px !important; 
+                margin-bottom: 8px !important; 
                 page-break-inside: avoid !important;
+                /* El navegador aplica este margen sin importar en qué página inicie el bloque,
+                   resolviendo el problema de superposición del header fixed. */
             }
             
             /* Revertir el margen superior del primer grid (KPIs) para que solo tenga el margen del bloque */
             .md\:grid-cols-4 {
                  margin-top: 60px !important; 
-                 margin-bottom: 12px !important; /* Más margen abajo de KPIs */
+                 margin-bottom: 12px !important; 
             }
             
             
@@ -192,25 +192,53 @@
                 page-break-inside: avoid !important;
             }
             
-            /* Contenedor General, solo evita cortes */
-            .chart-container-wrapper { 
-                min-height: 160px !important; 
-                break-inside: avoid !important;
-                page-break-inside: avoid !important;
+            /* Resetear la altura web (h-96) para poder reasignar la altura de impresión */
+            .h-96 {
+                height: auto !important; 
+                min-height: 0 !important;
             }
             
-            /* GRÁFICAS LARGAS (Izquierda: Cursos Más Demandados y Top 5 Departamentos) */
-            .lg\:col-span-7 .chart-container-wrapper,
-            .lg\:col-span-9 .chart-container-wrapper {
-                height: 380px !important; /* FIX: MUCHO MÁS LARGAS */
+            /* 1. GRÁFICAS LARGAS (Izquierda: Cursos Más Demandados y Top 5 Departamentos) - 400px */
+            /* Cursos Más Demandados (lg:col-span-7) */
+            .grid > .lg\:col-span-7 {
+                height: 400px !important; /* FIX: Altura aumentada */
             }
 
-            /* GRÁFICAS CORTAS (Derecha: Distribución por Género y Tipo de Curso) */
-            .lg\:col-span-5 .chart-container-wrapper,
-            .lg\:col-span-3 .chart-container-wrapper {
-                height: 180px !important; /* FIX: MÁS CORTAS */
+            /* Top 5 Departamentos (lg:col-span-9) - Estructura anidada: target el contenedor flex dentro */
+            .grid > .lg\:col-span-9 {
+                 height: 450px !important; /* Damos un poco más de margen para la leyenda y el contenedor flex */
+            }
+            .grid > .lg\:col-span-9 > div:first-child {
+                 height: 400px !important; /* El contenedor de la gráfica en sí */
             }
 
+            /* 2. GRÁFICAS CORTAS (Derecha: Distribución por Género y Tipo de Curso) - 180px */
+            /* Distribución por Género (lg:col-span-5) */
+            .grid > .lg\:col-span-5 {
+                height: 180px !important; /* FIX: Altura corta */
+            }
+
+            /* Tipo de Curso (lg:col-span-3) - Estructura anidada */
+            .grid > .lg\:col-span-3 > div:first-child {
+                height: 180px !important; /* FIX: Altura corta */
+            }
+
+            /* 3. GRÁFICA HISTÓRICA (Ancho completo) */
+            .mb-8.h-96 {
+                height: 300px !important; 
+                grid-column: span 2 !important; /* Ancho completo */
+            }
+            
+            /* 4. Asegurar que los contenedores internos usen el 100% de la nueva altura de impresión */
+            .chart-container-wrapper { 
+                height: 100% !important; 
+                padding: 5px !important;
+                box-shadow: none !important;
+            }
+            .chart-container-wrapper > .flex-1.relative {
+                height: calc(100% - 25px) !important; /* Restar espacio del título (h3) */
+            }
+            
             /* Títulos de gráficas más pequeños */
             .bg-white h3 {
                 font-size: 9pt !important;
@@ -250,15 +278,6 @@
             .bg-gray-50.p-4 .grid {
                 grid-template-columns: 1fr 1fr 1fr !important; 
                 gap: 2px !important;
-            }
-            
-            /* ============================================ */
-            /* GRÁFICA HISTÓRICA EN ANCHO COMPLETO */
-            /* ============================================ */
-            .mb-8.h-96 {
-                height: 300px !important; /* FIX: Un poco más alta */
-                margin-bottom: 5px !important;
-                grid-column: span 2 !important; /* Ancho completo */
             }
             
             /* ============================================ */
