@@ -85,11 +85,12 @@
                 padding-top: 10px; /* Header más pequeño */
                 padding-bottom: 30px;
                 font-size: 9pt !important; /* Texto más compacto */
-            }
             
-            /* Ocultar elementos innecesarios */
+            
+           /* Ocultar elementos innecesarios */
             header, footer, #back-link, .no-print, button, select, 
-            .bg-gray-50.border, #dashboard-header-controls, .print-hide { 
+            .bg-gray-50.border, #dashboard-header-controls, .print-hide 
+            {
                 display: none !important; 
             }
            
@@ -193,7 +194,9 @@
             }
             
             /* Contenedores de gráficas más pequeños */
-.chart-container-wrapper {
+.chart-container-wrapper { 
+    height: 250px !important; /* RESTAURADO: Necesario para que Chart.js se renderice sin deformarse */
+    min-height: 250px !important; /* RESTAURADO: Necesario para que Chart.js se renderice sin deformarse */
     break-inside: avoid !important;
     page-break-inside: avoid !important;
 }
@@ -248,8 +251,8 @@
             }
             
        /* GRÁFICA HISTÓRICA EN ANCHO COMPLETO */
-/* ... */
 .mb-8.h-96 {
+    height: 250px !important; /* RESTAURADO: Necesario para que Chart.js se renderice sin deformarse */
     margin-bottom: 5px !important;
     grid-column: span 2 !important; /* Ancho completo */
 }
