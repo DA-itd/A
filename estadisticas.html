@@ -472,10 +472,12 @@
                     }
                     
                     if (genderImg) {
-                        // Centrar verticalmente la gráfica circular
+                        // Gráfica circular con proporción más alta para evitar achatamiento
                         const genderX = margin + coursesWidth + 3;
-                        const genderY = yPos + (row1Height - genderHeight) / 2;
-                        pdf.addImage(genderImg, 'PNG', genderX, genderY, genderWidth, genderHeight);
+                        const adjustedGenderWidth = 40;
+                        const adjustedGenderHeight = 52; // Más alta que ancha para compensar
+                        const genderY = yPos + (row1Height - adjustedGenderHeight) / 2;
+                        pdf.addImage(genderImg, 'PNG', genderX, genderY, adjustedGenderWidth, adjustedGenderHeight);
                     }
                     
                     yPos += row1Height + 4;
@@ -541,7 +543,7 @@
                     pdf.setFontSize(7);
                     pdf.setFont('helvetica', 'normal');
                     pdf.setTextColor(255, 255, 255);
-                    pdf.text('Coordinacion de Actualizacion Docente - Derechos Reservado Alejandro Calderon Rentería', pageWidth / 2, pageHeight - 3, { align: 'center' });
+                    pdf.text('Coordinacion de Actualizacion Docente - Instituto Tecnologico de Durango', pageWidth / 2, pageHeight - 3, { align: 'center' });
                     
                     // Crear blob para preview
                     const pdfBlob = pdf.output('blob');
