@@ -17,13 +17,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
-    <!-- Markdown -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    
     <!-- PDF y Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <!-- Google Sign-In -->
@@ -40,7 +36,7 @@
 
     <style>
         /* ====================================================================== */
-        /* ANIMACIONES Y SCROLLBAR */
+        /* ESTILOS WEB GENERALES */
         /* ====================================================================== */
         @keyframes fadeIn { 
             from { opacity: 0; transform: translateY(10px); } 
@@ -53,316 +49,210 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
 
-        /* ====================================================================== */
-        /* ELEMENTOS EXCLUSIVOS DE IMPRESIÓN (ocultos en pantalla) */
-        /* ====================================================================== */
-        .print-header-element, 
-        .print-footer-element { 
-            display: none; 
-        }
+        /* Elementos exclusivos de impresión - ocultos en pantalla */
+        .print-only { display: none !important; }
 
         /* ====================================================================== */
-        /* ESTILOS DE IMPRESIÓN OPTIMIZADOS */
+        /* ESTILOS DE IMPRESIÓN - LAYOUT PROFESIONAL */
         /* ====================================================================== */
         @media print {
+            /* Configuración de página */
             @page { 
                 size: letter portrait; 
-                margin: 0.4cm 0.6cm;
+                margin: 8mm 10mm 12mm 10mm;
+            }
+            
+            /* Reset general */
+            *, *::before, *::after {
+                box-sizing: border-box !important;
             }
             
             html, body { 
                 width: 100% !important;
                 height: auto !important;
-                background: white !important; 
                 margin: 0 !important;
                 padding: 0 !important;
+                background: white !important;
+                font-size: 10pt !important;
+                line-height: 1.2 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-            }
-            
-            body {
-                font-size: 8pt !important;
-                line-height: 1.1 !important;
-                color: #000 !important;
+                color-adjust: exact !important;
             }
             
             /* ============================================ */
             /* OCULTAR ELEMENTOS WEB */
             /* ============================================ */
-            header:not(.print-header-element), 
-            footer:not(.print-footer-element), 
-            #back-link, 
-            #dashboard-header-controls,
-            button, 
+            .no-print,
+            #web-header,
+            #web-footer,
+            #back-link,
+            #dashboard-controls,
+            button,
             select,
-            .no-print { 
-                display: none !important; 
+            .animate-spin {
+                display: none !important;
+            }
+            
+            /* ============================================ */
+            /* MOSTRAR ELEMENTOS DE IMPRESIÓN */
+            /* ============================================ */
+            .print-only {
+                display: block !important;
             }
             
             /* ============================================ */
             /* ENCABEZADO DE IMPRESIÓN */
             /* ============================================ */
-            .print-header-element { 
-                display: flex !important; 
-                justify-content: space-between; 
-                align-items: center; 
-                height: 40px !important;
-                border-bottom: 2px solid #1B396A !important; 
-                padding: 4px 8px !important;
-                margin-bottom: 6px !important;
-                page-break-after: avoid !important;
+            #print-header {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0 0 8px 0;
+                margin-bottom: 10px;
+                border-bottom: 3px solid #1B396A;
             }
             
-            .print-header-element img { 
-                height: 35px !important;
+            #print-header img {
+                height: 45px !important;
                 width: auto !important;
             }
             
-            .print-header-element h1 { 
-                font-size: 9pt !important; 
-                font-weight: 900 !important; 
-                margin: 0 !important;
+            #print-header .print-title {
+                text-align: center;
+                flex: 1;
+                padding: 0 15px;
+            }
+            
+            #print-header h1 {
+                font-size: 14pt !important;
+                font-weight: 900 !important;
                 color: #1B396A !important;
-                line-height: 1.1 !important;
+                margin: 0 !important;
+                letter-spacing: 0.5px;
             }
             
-            .print-header-element h2 { 
-                font-size: 7.5pt !important; 
-                font-weight: bold !important; 
-                margin: 2px 0 0 0 !important;
-                color: #333 !important;
-                line-height: 1.1 !important;
-            }
-            
-            /* ============================================ */
-            /* PIE DE PÁGINA */
-            /* ============================================ */
-            .print-footer-element { 
-                display: flex !important; 
-                justify-content: space-between !important;
-                position: fixed !important;
-                bottom: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                font-size: 6.5pt !important;
-                color: #666 !important;
-                padding: 4px 10px !important;
-                background: white !important;
-                border-top: 1px solid #ddd !important;
-            }
-            
-            .print-footer-element::after {
-                content: "Pág. " counter(page);
+            #print-header h2 {
+                font-size: 10pt !important;
+                font-weight: 600 !important;
+                color: #9D2449 !important;
+                margin: 3px 0 0 0 !important;
             }
             
             /* ============================================ */
-            /* CONTENEDOR PRINCIPAL */
+            /* CONTENEDOR PRINCIPAL - ESTRUCTURA FIJA */
             /* ============================================ */
-            #dashboard-content { 
+            #dashboard-content {
                 display: block !important;
                 width: 100% !important;
-                padding: 0 6px 35px 6px !important;
+                padding: 0 !important;
                 margin: 0 !important;
             }
             
+            /* Eliminar estilos visuales web */
             #dashboard-content * {
                 box-shadow: none !important;
                 text-shadow: none !important;
             }
             
-            #dashboard-content .py-8,
-            #dashboard-content .py-6,
-            #dashboard-content .py-4,
-            #dashboard-content .my-8,
-            #dashboard-content .my-6,
-            #dashboard-content .my-4,
-            #dashboard-content .mb-8 {
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            
             /* ============================================ */
-            /* SECCIÓN 1: KPIs (4 COLUMNAS) */
+            /* SECCIÓN: KPIs - FILA COMPACTA */
             /* ============================================ */
-            #dashboard-content > div:nth-child(1) {
+            #print-kpis {
                 display: grid !important;
                 grid-template-columns: repeat(4, 1fr) !important;
-                gap: 4px !important;
-                margin-bottom: 6px !important;
+                gap: 8px !important;
+                margin-bottom: 12px !important;
                 page-break-inside: avoid !important;
-                page-break-after: avoid !important;
             }
             
-            #dashboard-content > div:nth-child(1) > div {
+            .print-kpi-card {
                 display: flex !important;
                 align-items: center !important;
-                gap: 6px !important;
-                padding: 4px 6px !important;
-                height: 34px !important;
-                border: 1px solid #ddd !important;
-                background: white !important;
+                gap: 8px !important;
+                padding: 8px 10px !important;
+                border: 1.5px solid #ddd !important;
+                border-radius: 6px !important;
+                background: #fafafa !important;
+                border-left: 4px solid #1B396A !important;
             }
             
-            #dashboard-content > div:nth-child(1) .text-3xl {
-                font-size: 16px !important;
+            .print-kpi-card:nth-child(2) { border-left-color: #D4AF37 !important; }
+            .print-kpi-card:nth-child(3) { border-left-color: #9D2449 !important; }
+            .print-kpi-card:nth-child(4) { border-left-color: #546E7A !important; }
+            
+            .print-kpi-card .kpi-icon {
+                font-size: 20pt !important;
             }
             
-            #dashboard-content > div:nth-child(1) .text-2xl {
-                font-size: 0.8rem !important;
-                font-weight: bold !important;
+            .print-kpi-card .kpi-value {
+                font-size: 16pt !important;
+                font-weight: 800 !important;
+                color: #1f2937 !important;
                 line-height: 1 !important;
             }
             
-            #dashboard-content > div:nth-child(1) .text-\[10px\] {
-                font-size: 6pt !important;
-                line-height: 1.1 !important;
+            .print-kpi-card .kpi-label {
+                font-size: 7pt !important;
+                font-weight: 600 !important;
+                color: #6b7280 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.3px !important;
             }
             
             /* ============================================ */
-            /* SECCIÓN 2: CURSOS + GÉNERO (2 COLUMNAS) */
+            /* SECCIÓN: GRÁFICAS - GRID 2x2 */
             /* ============================================ */
-            #dashboard-content > div:nth-child(2) {
+            #print-charts-row1,
+            #print-charts-row2 {
                 display: grid !important;
-                grid-template-columns: 60% 38% !important;
-                gap: 5px !important;
-                height: 215px !important;
-                margin-bottom: 6px !important;
+                gap: 10px !important;
+                margin-bottom: 10px !important;
                 page-break-inside: avoid !important;
-                page-break-after: avoid !important;
             }
             
-            #dashboard-content > div:nth-child(2) > div:nth-child(1) {
-                height: 215px !important;
-                padding: 3px !important;
-                border: 1px solid #ddd !important;
+            #print-charts-row1 {
+                grid-template-columns: 58% 40% !important;
+                height: 180px !important;
+            }
+            
+            #print-charts-row2 {
+                grid-template-columns: 65% 33% !important;
+                height: 180px !important;
+            }
+            
+            /* Contenedor individual de gráfica */
+            .print-chart-box {
+                border: 1.5px solid #e5e7eb !important;
+                border-radius: 6px !important;
                 background: white !important;
-            }
-            
-            #dashboard-content > div:nth-child(2) > div:nth-child(2) {
-                height: 215px !important;
-                padding: 3px !important;
-                border: 1px solid #ddd !important;
-                background: white !important;
-            }
-            
-            /* ============================================ */
-            /* SECCIÓN 3: DEPARTAMENTOS + TIPO (2 COLUMNAS) */
-            /* ============================================ */
-            #dashboard-content > div:nth-child(3) {
-                display: grid !important;
-                grid-template-columns: 67% 31% !important;
-                gap: 5px !important;
-                margin-bottom: 6px !important;
-                page-break-inside: avoid !important;
-                page-break-after: avoid !important;
-            }
-            
-            /* Departamentos con leyenda */
-            #dashboard-content > div:nth-child(3) > div:nth-child(1) {
+                padding: 6px !important;
                 display: flex !important;
                 flex-direction: column !important;
-                border: 1px solid #ddd !important;
-                background: white !important;
                 overflow: hidden !important;
-            }
-            
-            /* Gráfica de departamentos */
-            #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) {
-                height: 195px !important;
-                padding: 3px !important;
-                flex-shrink: 0 !important;
-            }
-            
-            /* Leyenda */
-            #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) {
-                height: 48px !important;
-                max-height: 48px !important;
-                padding: 3px 5px !important;
-                background: #f9fafb !important;
-                border-top: 1px solid #e5e7eb !important;
-                overflow: hidden !important;
-                flex-shrink: 0 !important;
-            }
-            
-            #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) p {
-                font-size: 6pt !important;
-                font-weight: bold !important;
-                margin: 0 0 2px 0 !important;
-            }
-            
-            #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) .grid {
-                display: grid !important;
-                grid-template-columns: 1fr 1fr 1fr !important;
-                gap: 2px !important;
-            }
-            
-            #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) .text-xs {
-                font-size: 5.5pt !important;
-                line-height: 1.15 !important;
-            }
-            
-            /* Tipo de curso */
-            #dashboard-content > div:nth-child(3) > div:nth-child(2) {
-                height: 243px !important;
-                padding: 3px !important;
-                border: 1px solid #ddd !important;
-                background: white !important;
-            }
-            
-            #dashboard-content > div:nth-child(3) > div:nth-child(2) > div {
                 height: 100% !important;
             }
             
-            /* ============================================ */
-            /* SECCIÓN 4: EVOLUCIÓN HISTÓRICA */
-            /* ============================================ */
-            #dashboard-content > div:nth-child(4) {
-                display: block !important;
-                width: 100% !important;
-                height: 195px !important;
-                padding: 3px !important;
-                margin-top: 6px !important;
-                border: 1px solid #ddd !important;
-                background: white !important;
-                page-break-before: auto !important;
-                page-break-inside: avoid !important;
-            }
-            
-            #dashboard-content > div:nth-child(4) > div {
-                height: 100% !important;
-            }
-            
-            /* ============================================ */
-            /* GRÁFICAS: ESTRUCTURA INTERNA */
-            /* ============================================ */
-            #dashboard-content .bg-white {
-                display: flex !important;
-                flex-direction: column !important;
-                height: 100% !important;
-                width: 100% !important;
-                padding: 3px !important;
-                overflow: hidden !important;
-            }
-            
-            #dashboard-content .bg-white h3 {
-                font-size: 7.5pt !important;
-                font-weight: bold !important;
-                color: #1f2937 !important;
+            .print-chart-box h3 {
+                font-size: 9pt !important;
+                font-weight: 700 !important;
+                color: #1B396A !important;
                 text-align: center !important;
-                margin: 0 0 2px 0 !important;
+                margin: 0 0 4px 0 !important;
                 padding: 0 !important;
                 flex-shrink: 0 !important;
+                border-bottom: 1px solid #e5e7eb !important;
+                padding-bottom: 4px !important;
             }
             
-            #dashboard-content .bg-white > div:last-child {
+            .print-chart-box .chart-canvas-wrapper {
                 flex: 1 !important;
                 min-height: 0 !important;
-                width: 100% !important;
                 position: relative !important;
+                width: 100% !important;
             }
             
-            #dashboard-content canvas {
-                display: block !important;
+            .print-chart-box canvas {
                 width: 100% !important;
                 height: 100% !important;
                 max-width: 100% !important;
@@ -370,71 +260,108 @@
             }
             
             /* ============================================ */
-            /* PREVENIR SALTOS DE PÁGINA */
+            /* SECCIÓN: HISTÓRICO - ANCHO COMPLETO */
             /* ============================================ */
-            #dashboard-content > div {
+            #print-chart-history {
+                height: 160px !important;
+                margin-bottom: 8px !important;
                 page-break-inside: avoid !important;
             }
             
-            #dashboard-content > div:nth-child(3) {
-                page-break-after: auto !important;
+            /* ============================================ */
+            /* LEYENDA DE DEPARTAMENTOS */
+            /* ============================================ */
+            .print-legend {
+                background: #f9fafb !important;
+                border-top: 1px solid #e5e7eb !important;
+                padding: 4px 6px !important;
+                margin-top: 4px !important;
+                flex-shrink: 0 !important;
             }
             
-            #dashboard-content > div:nth-child(4) {
-                page-break-before: auto !important;
+            .print-legend p {
+                font-size: 6pt !important;
+                font-weight: 700 !important;
+                color: #6b7280 !important;
+                margin: 0 0 2px 0 !important;
+                text-transform: uppercase !important;
+            }
+            
+            .print-legend .legend-grid {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 2px 8px !important;
+            }
+            
+            .print-legend .legend-item {
+                font-size: 6pt !important;
+                color: #374151 !important;
+                display: flex !important;
+                gap: 3px !important;
+            }
+            
+            .print-legend .legend-item strong {
+                color: #1B396A !important;
+                min-width: 28px !important;
             }
             
             /* ============================================ */
-            /* AJUSTES FINALES */
+            /* PIE DE PÁGINA */
             /* ============================================ */
+            #print-footer {
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                padding: 6px 10mm !important;
+                font-size: 7pt !important;
+                color: #6b7280 !important;
+                border-top: 1px solid #e5e7eb !important;
+                background: white !important;
+            }
+            
+            /* ============================================ */
+            /* UTILIDADES DE IMPRESIÓN */
+            /* ============================================ */
+            .rounded-xl,
+            .rounded-lg,
             .shadow-md,
             .shadow-xl,
             .shadow-lg,
-            .rounded-xl,
-            .rounded-lg {
+            .shadow-sm {
+                border-radius: 6px !important;
                 box-shadow: none !important;
-                border-radius: 3px !important;
             }
             
-            .flex-1 {
-                flex: 1 !important;
-            }
-            
-            .gap-6,
-            .gap-4 {
-                gap: 5px !important;
-            }
-            
-            * {
-                color: #000 !important;
-            }
-            
-            h1, h2, h3, h4, h5, h6 {
-                color: #1f2937 !important;
-            }
-            
-            .text-gray-500,
-            .text-gray-600,
-            .text-gray-700 {
-                color: #4b5563 !important;
+            /* Evitar cortes */
+            .page-break-avoid {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
         }
     </style>
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800">
 
+    <!-- ================================================================== -->
     <!-- ENCABEZADO PARA IMPRESIÓN -->
-    <div class="print-header-element container mx-auto">
+    <!-- ================================================================== -->
+    <div id="print-header" class="print-only">
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM">
-        <div class="text-center">
+        <div class="print-title">
             <h1>INSTITUTO TECNOLÓGICO DE DURANGO</h1>
-            <h2>COORDINACIÓN DE ACTUALIZACIÓN DOCENTE</h2>
+            <h2>Coordinación de Actualización Docente - Reporte Estadístico</h2>
         </div>
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD">
     </div>
 
+    <!-- ================================================================== -->
     <!-- HEADER WEB -->
-    <header class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A] no-print">
+    <!-- ================================================================== -->
+    <header id="web-header" class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A] no-print">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
@@ -456,7 +383,9 @@
         </a>
     </div>
 
+    <!-- ================================================================== -->
     <!-- CONTENEDOR PRINCIPAL DE REACT -->
+    <!-- ================================================================== -->
     <div id="root">
         <div class="flex justify-center items-center h-64">
             <div class="text-center">
@@ -466,8 +395,10 @@
         </div>
     </div>
 
+    <!-- ================================================================== -->
     <!-- FOOTER WEB -->
-    <footer class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449] no-print">
+    <!-- ================================================================== -->
+    <footer id="web-footer" class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449] no-print">
         <div class="container mx-auto px-4">
              <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
              <p class="text-xs sm:text-sm opacity-90">M.C. Alejandro Calderón Rentería</p>
@@ -476,104 +407,68 @@
     </footer>
     
     <!-- PIE DE PÁGINA PARA IMPRESIÓN -->
-    <div class="print-footer-element">
-        <span>© Coordinación de Actualización Docente | Reporte Generado: <span id="print-date"></span></span>
+    <div id="print-footer" class="print-only">
+        <span>© Coordinación de Actualización Docente - ITD</span>
+        <span id="print-date-footer"></span>
     </div>
 
-    <!-- SCRIPT PARA MANEJO DE IMPRESIÓN -->
+    <!-- ================================================================== -->
+    <!-- SCRIPT DE PREPARACIÓN PARA IMPRESIÓN -->
+    <!-- ================================================================== -->
     <script>
-        // Establecer fecha en el footer de impresión
-        document.addEventListener('DOMContentLoaded', function() {
-            var printDateEl = document.getElementById('print-date');
-            if (printDateEl) {
-                printDateEl.textContent = new Date().toLocaleDateString();
-            }
-        });
-
-        // Interceptar el evento de impresión
-        window.addEventListener('beforeprint', function() {
-            console.log('🖨️ Preparando impresión...');
+        // Variable global para almacenar instancias de Chart.js
+        window.chartInstances = {};
+        
+        // Función para preparar la impresión
+        function prepareForPrint() {
+            console.log('🖨️ Preparando impresión profesional...');
             
-            // 1. Forzar recálculo de gráficas
-            var charts = document.querySelectorAll('canvas');
-            charts.forEach(function(canvas) {
-                if (canvas && canvas.style) {
-                    canvas.style.width = '100%';
-                    canvas.style.height = '100%';
+            // Redimensionar todas las gráficas
+            Object.values(window.chartInstances).forEach(function(chart) {
+                if (chart && typeof chart.resize === 'function') {
+                    chart.resize();
                 }
             });
             
-            // 2. Aplicar estilos directamente a contenedores
-            var dashboardContent = document.getElementById('dashboard-content');
-            if (dashboardContent) {
-                var children = Array.from(dashboardContent.children);
-                
-                // KPIs (primer hijo)
-                if (children[0]) {
-                    children[0].style.cssText = 'display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 4px !important; margin-bottom: 6px !important;';
-                }
-                
-                // Cursos + Género (segundo hijo)
-                if (children[1]) {
-                    children[1].style.cssText = 'display: grid !important; grid-template-columns: 60% 38% !important; gap: 5px !important; height: 215px !important; margin-bottom: 6px !important;';
-                }
-                
-                // Departamentos + Tipo (tercer hijo)
-                if (children[2]) {
-                    children[2].style.cssText = 'display: grid !important; grid-template-columns: 67% 31% !important; gap: 5px !important; margin-bottom: 6px !important;';
-                    
-                    // Contenedor de departamentos con leyenda
-                    var deptContainer = children[2].children[0];
-                    if (deptContainer) {
-                        deptContainer.style.cssText = 'display: flex !important; flex-direction: column !important;';
-                        
-                        // Gráfica
-                        if (deptContainer.children[0]) {
-                            deptContainer.children[0].style.height = '195px';
-                        }
-                        
-                        // Leyenda
-                        if (deptContainer.children[1]) {
-                            deptContainer.children[1].style.cssText = 'height: 48px !important; max-height: 48px !important; overflow: hidden !important;';
-                        }
+            // Forzar re-render de canvas
+            setTimeout(function() {
+                var canvases = document.querySelectorAll('canvas');
+                canvases.forEach(function(canvas) {
+                    var chart = Chart.getChart(canvas);
+                    if (chart) {
+                        chart.resize();
+                        chart.update('none');
                     }
-                    
-                    // Tipo de curso
-                    if (children[2].children[1]) {
-                        children[2].children[1].style.height = '243px';
-                    }
-                }
-                
-                // Histórica (cuarto hijo)
-                if (children[3]) {
-                    children[3].style.cssText = 'display: block !important; width: 100% !important; height: 195px !important; margin-top: 6px !important;';
-                }
-            }
-            
-            console.log('✅ Layout de impresión aplicado');
-        });
-
-        // Restaurar después de imprimir
-        window.addEventListener('afterprint', function() {
-            console.log('🔄 Restaurando vista web...');
-            
-            var dashboardContent = document.getElementById('dashboard-content');
-            if (dashboardContent) {
-                var children = Array.from(dashboardContent.children);
-                children.forEach(function(child) {
-                    if (child && child.style) {
-                        child.style.cssText = '';
-                    }
+                });
+            }, 100);
+        }
+        
+        // Eventos de impresión
+        window.addEventListener('beforeprint', prepareForPrint);
+        
+        // Establecer fecha
+        document.addEventListener('DOMContentLoaded', function() {
+            var dateEl = document.getElementById('print-date-footer');
+            if (dateEl) {
+                var today = new Date();
+                dateEl.textContent = 'Generado: ' + today.toLocaleDateString('es-MX', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                 });
             }
             
-            console.log('✅ Vista web restaurada');
+            var yearEl = document.getElementById('copyright-year');
+            if (yearEl) {
+                yearEl.textContent = new Date().getFullYear();
+            }
         });
     </script>
 
+    <!-- ================================================================== -->
     <!-- APLICACIÓN REACT -->
+    <!-- ================================================================== -->
     <script type="text/babel">
-        // Acceso seguro a React y ReactDOM
         const React = window.React;
         const ReactDOM = window.ReactDOM;
 
@@ -583,7 +478,7 @@
         };
 
         const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
-        const VIBRANT_COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC926', '#1982C4', '#6A4C93', '#F15BB5', '#E9C46A', '#2A9D8F', '#E76F51'];
+        const VIBRANT_COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC926', '#1982C4'];
         
         const DEPT_ACRONYMS = { 
             "SISTEMAS Y COMPUTACION": "DSC", 
@@ -613,10 +508,10 @@
             } 
             const words = nameUpper.split(' '); 
             if(words.length > 1) return words.map(w => w[0]).join('').substring(0,4); 
-            return nameUpper.substring(0, 4) + "."; 
+            return nameUpper.substring(0, 4); 
         };
         
-        const splitLabel = (label, maxLength = 30) => { 
+        const splitLabel = (label, maxLength = 25) => { 
             if (!label || label.length <= maxLength) return label; 
             const words = label.split(' '); 
             const lines = []; 
@@ -671,7 +566,7 @@
 
             return (
                 <div className="flex flex-col justify-center items-center py-20 animate-fadeIn px-4">
-                    <div className="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-10 rounded-xl shadow-lg text-center max-w-md w-full border-t-4 border-[#9D2449]">
+                    <div className="bg-white p-10 rounded-xl shadow-lg text-center max-w-md w-full border-t-4 border-[#9D2449]">
                         <div className="text-4xl mb-4">🔒</div>
                         <h2 className="text-2xl font-bold text-[#9D2449] mb-4">Acceso Restringido</h2>
                         <p className="text-gray-600 mb-8 font-bold">Inicie sesión con su cuenta institucional.</p>
@@ -727,6 +622,13 @@
                 return { chartData, legend };
             }, [stats]);
 
+            const handlePrint = () => {
+                // Dar tiempo para que las gráficas se ajusten
+                setTimeout(() => {
+                    window.print();
+                }, 200);
+            };
+
             if (loading && !stats) {
                 return (
                     <div className="flex justify-center items-center h-96">
@@ -738,7 +640,7 @@
             if (error) {
                 return (
                     <div className="flex justify-center items-center py-20">
-                        <div className="text-red-600 font-bold text-xl">
+                        <div className="text-red-600 font-bold text-xl text-center">
                             Error: {error} <br/>
                             <button onClick={() => window.location.reload()} className="text-sm text-blue-600 underline mt-2">Recargar</button>
                         </div>
@@ -749,197 +651,212 @@
             if (!stats) return null;
 
             return (
-                <div className="container mx-auto px-4 py-8 max-w-7xl animate-fadeIn" id="dashboard-content">
-                    {/* CONTROLES DEL DASHBOARD */}
-                    <div id="dashboard-header-controls" className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#9D2449] gap-4 no-print">
+                <div className="container mx-auto px-4 py-6 max-w-7xl animate-fadeIn" id="dashboard-content">
+                    
+                    {/* ============================================ */}
+                    {/* CONTROLES DEL DASHBOARD - Solo Web */}
+                    {/* ============================================ */}
+                    <div id="dashboard-controls" className="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#9D2449] gap-4 no-print">
                         <div className="flex-1">
                             <h2 className="text-xl font-bold text-[#1B396A]">Dashboard de Resultados</h2>
                             <p className="text-sm text-gray-500 font-bold">Usuario: <span className="font-extrabold text-gray-700">{user.name}</span></p>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <select value={period} onChange={(e) => setPeriod(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md font-bold block p-1.5 outline-none focus:ring-2 focus:ring-[#1B396A]">
+                        <div className="flex items-center gap-3 flex-wrap justify-center">
+                            <select value={period} onChange={(e) => setPeriod(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md font-bold block p-2 outline-none focus:ring-2 focus:ring-[#1B396A]">
                                 <option value="ACTUAL">🟢 Periodo Actual</option>
                                 {availableYears.filter(y => y !== 'ACTUAL').map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
                             </select>
-                            <button onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center gap-2">
-                                <span>🖨️</span> Imprimir Reporte
+                            <button onClick={handlePrint} className="bg-[#1B396A] hover:bg-[#152d54] text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-md">
+                                <span>🖨️</span> Imprimir / PDF
                             </button>
-                            <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm font-bold text-gray-700 border border-gray-300 transition">
+                            <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold text-gray-700 border border-gray-300 transition">
                                 Cerrar Sesión
                             </button>
                         </div>
                     </div>
                     
-                    {loading && <div className="flex justify-center items-center h-20 text-blue-600 font-bold">Cargando datos...</div>}
+                    {loading && <div className="flex justify-center items-center h-16 text-blue-600 font-bold no-print">Actualizando datos...</div>}
 
+                    {/* ============================================ */}
                     {/* SECCIÓN 1: KPIs */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    {/* ============================================ */}
+                    <div id="print-kpis" className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         {[
                             { icon: "📝", val: stats.totalInscripciones, label: "Docentes Inscritos", color: "border-[#1B396A]" },
                             { icon: "👩‍🏫", val: stats.coberturaDocente.actualizados, label: "Docentes Únicos", color: "border-[#D4AF37]" },
                             { icon: "🔁", val: stats.coberturaDocente.recurrentes, label: "Docentes Recurrentes", color: "border-[#9D2449]" },
                             { icon: "🎯", val: `${stats.coberturaDocente.porcentaje}%`, label: "Cobertura Estimada", color: "border-gray-500" }
                         ].map((kpi, idx) => (
-                            <div key={idx} className={`bg-white p-5 rounded-xl shadow-md border-b-4 ${kpi.color} flex items-center gap-3`}>
-                                <div className="text-3xl">{kpi.icon}</div>
+                            <div key={idx} className={`print-kpi-card bg-white p-4 rounded-xl shadow-md border-b-4 ${kpi.color} flex items-center gap-3`}>
+                                <div className="text-3xl kpi-icon">{kpi.icon}</div>
                                 <div>
-                                    <div className="text-2xl font-bold text-gray-800">{kpi.val}</div>
-                                    <div className="text-[10px] font-bold text-gray-500 uppercase">{kpi.label}</div>
+                                    <div className="text-2xl font-bold text-gray-800 kpi-value">{kpi.val}</div>
+                                    <div className="text-[10px] font-bold text-gray-500 uppercase kpi-label">{kpi.label}</div>
                                 </div>
                             </div>
                         ))}
                     </div>
 
+                    {/* ============================================ */}
                     {/* SECCIÓN 2: CURSOS + GÉNERO */}
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-8">
-                        <div className="lg:col-span-7 h-96 chart-container-wrapper">
-                            <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" horizontal={true} />
+                    {/* ============================================ */}
+                    <div id="print-charts-row1" className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+                        <div className="lg:col-span-7 print-chart-box">
+                            <ChartBox 
+                                type="bar" 
+                                data={Object.fromEntries(stats.topCursos||[])} 
+                                title="📚 Cursos Más Demandados" 
+                                id="chartCourses" 
+                                horizontal={true} 
+                            />
                         </div>
-                        <div className="lg:col-span-5 h-96 chart-container-wrapper">
-                            <StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="chartGen" />
+                        <div className="lg:col-span-5 print-chart-box">
+                            <ChartBox 
+                                type="doughnut" 
+                                data={stats.distribucionGenero} 
+                                title="👥 Distribución por Género" 
+                                id="chartGender" 
+                            />
                         </div>
                     </div>
 
+                    {/* ============================================ */}
                     {/* SECCIÓN 3: DEPARTAMENTOS + TIPO */}
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-                        <div className="lg:col-span-9 h-full flex flex-col bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
-                            <div className="p-6 flex-1 h-96 chart-container-wrapper">
-                                <StatsChart type="bar" data={processedDepts.chartData} title="Top 5 Departamentos" id="chartDept" horizontal={true} />
-                            </div>
-                            <div className="bg-gray-50 p-4 border-t border-gray-200 rounded-b-xl">
-                                <p className="text-xs font-bold text-gray-500 mb-2 uppercase">Leyenda:</p>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-gray-600 max-h-32 overflow-y-auto custom-scrollbar">
-                                    {processedDepts.legend.map((item, idx) => (
-                                        <div key={idx} className="flex items-start gap-2">
-                                            <span className="font-bold text-[#1B396A] min-w-[35px]">{item.acronym}:</span>
-                                            <span className="truncate" title={item.name}>{item.name}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                    {/* ============================================ */}
+                    <div id="print-charts-row2" className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+                        <div className="lg:col-span-8 print-chart-box">
+                            <ChartBox 
+                                type="bar" 
+                                data={processedDepts.chartData} 
+                                title="🏢 Top 5 Departamentos" 
+                                id="chartDepts" 
+                                horizontal={true}
+                                legend={processedDepts.legend}
+                            />
                         </div>
-                        <div className="lg:col-span-3 h-full">
-                            <div className="h-96 chart-container-wrapper">
-                                <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={false} />
-                            </div>
+                        <div className="lg:col-span-4 print-chart-box">
+                            <ChartBox 
+                                type="bar" 
+                                data={stats.distribucionTipo} 
+                                title="📋 Tipo de Curso" 
+                                id="chartType" 
+                                horizontal={false} 
+                            />
                         </div>
                     </div>
 
+                    {/* ============================================ */}
                     {/* SECCIÓN 4: EVOLUCIÓN HISTÓRICA */}
-                    <div className="mb-8 h-96 chart-container-wrapper">
-                        <StatsChart type="line" data={stats.historicalTrend || {}} title="Evolución Histórica" id="chartHistory" horizontal={false} />
+                    {/* ============================================ */}
+                    <div id="print-chart-history" className="print-chart-box mb-6">
+                        <ChartBox 
+                            type="line" 
+                            data={stats.historicalTrend || {}} 
+                            title="📈 Evolución Histórica de Participación" 
+                            id="chartHistory" 
+                        />
                     </div>
                 </div>
             );
         };
         
         // ====================================================================
-        // COMPONENTE: StatsChart
+        // COMPONENTE: ChartBox (Contenedor de Gráfica)
         // ====================================================================
-        const StatsChart = ({ type, data, title, id, horizontal = false }) => {
+        const ChartBox = ({ type, data, title, id, horizontal = false, legend = null }) => {
             const chartRef = React.useRef(null);
             const canvasRef = React.useRef(null);
 
             React.useEffect(() => {
-                if (!canvasRef.current || !data) return;
+                if (!canvasRef.current || !data || Object.keys(data).length === 0) return;
                 if (typeof window.Chart === 'undefined') return;
                 
-                if(window.ChartDataLabels) {
-                    if (!window.Chart.registry.plugins.get('datalabels')) {
-                         window.Chart.register(window.ChartDataLabels);
-                    }
+                // Registrar plugin de datalabels si existe
+                if(window.ChartDataLabels && !window.Chart.registry.plugins.get('datalabels')) {
+                    window.Chart.register(window.ChartDataLabels);
                 }
                 
-                if (chartRef.current) chartRef.current.destroy();
+                // Destruir gráfica anterior
+                if (chartRef.current) {
+                    chartRef.current.destroy();
+                }
 
                 const ctx = canvasRef.current.getContext('2d');
                 const isHistory = id === 'chartHistory';
                 const isPie = type === 'pie' || type === 'doughnut';
-                
-                const isPrinting = window.matchMedia && window.matchMedia('print').matches;
-                const printFontSize = 8;
-                const screenFontSize = 10;
-                const pieLabelFontSize = isPrinting ? 8 : 12;
-                const historyLabelFontSize = isPrinting ? 7 : 11;
                 
                 let config = {
                     type: isHistory ? 'line' : type,
                     data: { labels: [], datasets: [] },
                     options: {
                         responsive: true, 
-                        maintainAspectRatio: false, 
+                        maintainAspectRatio: false,
                         indexAxis: horizontal ? 'y' : 'x',
-                        
+                        animation: { duration: 400 },
                         scales: isPie ? {} : { 
                             y: { 
                                 beginAtZero: true, 
                                 ticks: { 
                                     stepSize: 1, 
-                                    color: '#000000',
-                                    font: { 
-                                        size: isPrinting ? printFontSize : screenFontSize,
-                                        weight: 'bold' 
-                                    },
+                                    color: '#374151',
+                                    font: { size: 10, weight: '600' }
                                 },
-                                barPercentage: horizontal ? 0.9 : 1, 
-                                categoryPercentage: horizontal ? 0.9 : 1 
+                                grid: { color: '#f3f4f6' }
                             },
-                            x: isPie ? {} : {
+                            x: {
                                 beginAtZero: true, 
                                 ticks: { 
                                     stepSize: 1,
-                                    color: '#000000',
-                                    font: { 
-                                        size: isPrinting ? printFontSize : screenFontSize,
-                                        weight: 'bold' 
-                                    },
+                                    color: '#374151',
+                                    font: { size: 10, weight: '600' }
                                 },
-                                barPercentage: horizontal ? 0.9 : 1, 
-                                categoryPercentage: horizontal ? 0.9 : 1 
+                                grid: { color: '#f3f4f6' }
                             }
                         },
                         plugins: { 
                             legend: { 
                                 display: isPie || isHistory, 
-                                position: 'bottom', 
+                                position: 'bottom',
                                 labels: { 
-                                    color: '#000000',
-                                    font: {
-                                        size: pieLabelFontSize,
-                                        weight: 'bold'
-                                    }
+                                    color: '#374151',
+                                    font: { size: 11, weight: '600' },
+                                    padding: 12,
+                                    usePointStyle: true
                                 }
-                            }, 
-                            datalabels: { display: false } 
+                            },
+                            tooltip: {
+                                backgroundColor: '#1f2937',
+                                titleFont: { size: 12 },
+                                bodyFont: { size: 11 },
+                                padding: 10,
+                                cornerRadius: 6
+                            },
+                            datalabels: { display: false }
                         },
-                        layout: {
-                            padding: isHistory ? { top: 30 } : 0 
-                        }
+                        layout: { padding: { top: 5, bottom: 5, left: 5, right: 5 } }
                     }
                 };
                 
+                // Configuración para barras horizontales
                 if (horizontal) {
                     config.options.scales.y.ticks.autoSkip = false;
-                    config.options.scales.y.ticks.maxRotation = 0;
-                    config.options.scales.y.ticks.minRotation = 0;
                 }
                 
+                // Configuración para gráfica de pastel
                 if (isPie) {
                     config.options.plugins.datalabels = { 
                         display: true, 
                         color: '#fff',
+                        font: { weight: 'bold', size: 12 },
                         formatter: (value, context) => {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = Math.round((value / total) * 100);
-                            return percentage + '%';
-                        },
-                        font: {
-                            weight: 'bold',
-                            size: pieLabelFontSize 
+                            return percentage > 5 ? percentage + '%' : '';
                         }
                     };
                 }
 
+                // Configuración para gráfica histórica
                 if (isHistory) {
                     const years = Object.keys(data).sort((a,b) => parseInt(a) - parseInt(b));
                     config.data = {
@@ -947,55 +864,85 @@
                         datasets: [
                             { 
                                 label: 'Docentes Inscritos', 
-                                data: years.map(y => data[y].registros), 
+                                data: years.map(y => data[y]?.registros || 0), 
                                 borderColor: '#36A2EB', 
-                                backgroundColor: '#36A2EB', 
-                                tension: 0.3,
-                                datalabels: { align: 'end', anchor: 'end' }
+                                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 5,
+                                pointBackgroundColor: '#36A2EB'
                             },
                             { 
-                                label: '# Cursos', 
-                                data: years.map(y => data[y].cursos), 
+                                label: 'Cursos Ofertados', 
+                                data: years.map(y => data[y]?.cursos || 0), 
                                 borderColor: '#FF6384', 
-                                backgroundColor: '#FF6384', 
-                                tension: 0.3,
-                                datalabels: { align: 'end', anchor: 'end', offset: 4 }
+                                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 5,
+                                pointBackgroundColor: '#FF6384'
                             }
                         ]
                     };
                     config.options.plugins.datalabels = { 
                         display: true, 
-                        color: '#444',
-                        font: {
-                            weight: 'bold',
-                            size: historyLabelFontSize
-                        },
-                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        color: '#374151',
+                        font: { weight: 'bold', size: 10 },
+                        align: 'top',
+                        offset: 5,
+                        backgroundColor: 'rgba(255,255,255,0.8)',
                         borderRadius: 4,
-                        padding: 4
+                        padding: 3
                     };
                 } else {
+                    // Configuración para otras gráficas
                     const labels = Object.keys(data);
                     config.data = {
-                        labels: labels.map(l => horizontal ? splitLabel(l, 30) : l),
+                        labels: labels.map(l => horizontal ? splitLabel(l, 25) : l),
                         datasets: [{ 
-                            label: title, 
+                            label: title.replace(/[📚👥🏢📋📈]/g, '').trim(), 
                             data: Object.values(data), 
-                            backgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS 
+                            backgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS,
+                            borderColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS.map(c => c),
+                            borderWidth: 1,
+                            borderRadius: isPie ? 0 : 4
                         }]
                     };
                 }
 
                 chartRef.current = new window.Chart(ctx, config);
-                return () => { if (chartRef.current) chartRef.current.destroy(); };
+                
+                // Guardar referencia global para impresión
+                window.chartInstances[id] = chartRef.current;
+                
+                return () => { 
+                    if (chartRef.current) {
+                        chartRef.current.destroy();
+                        delete window.chartInstances[id];
+                    }
+                };
             }, [data, type, title, horizontal, id]);
 
             return (
-                <div className="bg-white p-4 rounded-xl shadow-md h-full flex flex-col border border-gray-100">
-                    <h3 className="text-gray-700 font-bold mb-2 text-center">{title}</h3>
-                    <div className="flex-1 relative min-h-[200px]">
+                <div className="bg-white p-4 rounded-xl shadow-md h-full flex flex-col border border-gray-100 min-h-[280px] lg:min-h-[320px]">
+                    <h3 className="text-gray-700 font-bold mb-3 text-center text-sm border-b border-gray-100 pb-2">{title}</h3>
+                    <div className="chart-canvas-wrapper flex-1 relative min-h-[200px]">
                         <canvas ref={canvasRef} id={id}></canvas>
                     </div>
+                    {/* Leyenda de departamentos */}
+                    {legend && legend.length > 0 && (
+                        <div className="print-legend bg-gray-50 p-3 border-t border-gray-100 mt-3 rounded-b-lg">
+                            <p className="text-xs font-bold text-gray-500 mb-2 uppercase">Leyenda de Siglas:</p>
+                            <div className="legend-grid grid grid-cols-2 lg:grid-cols-3 gap-1 text-xs text-gray-600">
+                                {legend.map((item, idx) => (
+                                    <div key={idx} className="legend-item flex items-start gap-1">
+                                        <strong className="text-[#1B396A] min-w-[35px]">{item.acronym}:</strong>
+                                        <span className="truncate" title={item.name}>{item.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
@@ -1025,11 +972,6 @@
         // INICIALIZACIÓN
         // ====================================================================
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-        
-        document.addEventListener('DOMContentLoaded', () => { 
-            const el = document.getElementById('copyright-year'); 
-            if(el) el.textContent = new Date().getFullYear(); 
-        });
     </script>
 </body>
 </html>
