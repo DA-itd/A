@@ -7,23 +7,29 @@
     
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
     
+    <!-- React y Babel -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
+    <!-- Tailwind CSS y Chart.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
+    <!-- Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
+    <!-- PDF y Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
+    <!-- Google Sign-In -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -33,7 +39,13 @@
     </script>
 
     <style>
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* ====================================================================== */
+        /* ANIMACIONES Y SCROLLBAR */
+        /* ====================================================================== */
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
         
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
@@ -41,510 +53,377 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
 
-        /* Elementos exclusivos de impresión */
-        .print-header-element, .print-footer-element { display: none; }
-
-     <!-- INSTRUCCIONES: Reemplaza TODA la sección <style> que contiene @media print en tu HTML -->
-/* ====================================================================== */
-/* ESTILOS DE IMPRESIÓN OPTIMIZADOS - SOLUCIÓN DEFINITIVA */
-/* ====================================================================== */
-
-@media print {
-    @page { 
-        size: letter portrait; 
-        margin: 0.4cm 0.6cm;
-    }
-    
-    html, body { 
-        width: 100% !important;
-        height: auto !important;
-        background: white !important; 
-        margin: 0 !important;
-        padding: 0 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    body {
-        font-size: 8pt !important;
-        line-height: 1.1 !important;
-        color: #000 !important;
-    }
-    
-    /* ============================================ */
-    /* OCULTAR ELEMENTOS WEB */
-    /* ============================================ */
-    header:not(.print-header-element), 
-    footer:not(.print-footer-element), 
-    #back-link, 
-    button, 
-    select { 
-        display: none !important; 
-    }
-    
-    /* ============================================ */
-    /* ENCABEZADO DE IMPRESIÓN */
-    /* ============================================ */
-    .print-header-element { 
-        display: flex !important; 
-        justify-content: space-between; 
-        align-items: center; 
-        height: 40px !important;
-        border-bottom: 2px solid #1B396A !important; 
-        padding: 4px 8px !important;
-        margin-bottom: 6px !important;
-        page-break-after: avoid !important;
-    }
-    
-    .print-header-element img { 
-        height: 35px !important;
-        width: auto !important;
-    }
-    
-    .print-header-element h1 { 
-        font-size: 9pt !important; 
-        font-weight: 900 !important; 
-        margin: 0 !important;
-        color: #1B396A !important;
-        line-height: 1.1 !important;
-    }
-    
-    .print-header-element h2 { 
-        font-size: 7.5pt !important; 
-        font-weight: bold !important; 
-        margin: 2px 0 0 0 !important;
-        color: #333 !important;
-        line-height: 1.1 !important;
-    }
-    
-    /* ============================================ */
-    /* PIE DE PÁGINA */
-    /* ============================================ */
-    .print-footer-element { 
-        display: flex !important; 
-        justify-content: space-between !important;
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        font-size: 6.5pt !important;
-        color: #666 !important;
-        padding: 4px 10px !important;
-        background: white !important;
-        border-top: 1px solid #ddd !important;
-    }
-    
-    .print-footer-element::after {
-        content: "Pág. " counter(page);
-    }
-    
-    /* ============================================ */
-    /* CONTENEDOR PRINCIPAL - ESTRUCTURA FIJA */
-    /* ============================================ */
-    #dashboard-content { 
-        display: block !important;
-        width: 100% !important;
-        padding: 0 6px 35px 6px !important;
-        margin: 0 !important;
-    }
-    
-    /* Eliminar todos los espaciados extra */
-    #dashboard-content * {
-        box-shadow: none !important;
-        text-shadow: none !important;
-    }
-    
-    #dashboard-content .py-8,
-    #dashboard-content .py-6,
-    #dashboard-content .py-4,
-    #dashboard-content .my-8,
-    #dashboard-content .my-6,
-    #dashboard-content .my-4,
-    #dashboard-content .mb-8 {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    
-    /* ============================================ */
-    /* SECCIÓN 1: KPIs (4 COLUMNAS) */
-    /* ============================================ */
-    #dashboard-content > div:nth-child(1) {
-        display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 4px !important;
-        margin-bottom: 6px !important;
-        page-break-inside: avoid !important;
-        page-break-after: avoid !important;
-    }
-    
-    #dashboard-content > div:nth-child(1) > div {
-        display: flex !important;
-        align-items: center !important;
-        gap: 6px !important;
-        padding: 4px 6px !important;
-        height: 34px !important;
-        border: 1px solid #ddd !important;
-        background: white !important;
-    }
-    
-    #dashboard-content > div:nth-child(1) .text-3xl {
-        font-size: 16px !important;
-    }
-    
-    #dashboard-content > div:nth-child(1) .text-2xl {
-        font-size: 0.8rem !important;
-        font-weight: bold !important;
-        line-height: 1 !important;
-    }
-    
-    #dashboard-content > div:nth-child(1) .text-\[10px\] {
-        font-size: 6pt !important;
-        line-height: 1.1 !important;
-    }
-    
-    /* ============================================ */
-    /* SECCIÓN 2: CURSOS + GÉNERO (2 COLUMNAS) */
-    /* ============================================ */
-    #dashboard-content > div:nth-child(2) {
-        display: grid !important;
-        grid-template-columns: 60% 38% !important;
-        gap: 5px !important;
-        height: 215px !important;
-        margin-bottom: 6px !important;
-        page-break-inside: avoid !important;
-        page-break-after: avoid !important;
-    }
-    
-    #dashboard-content > div:nth-child(2) > div:nth-child(1) {
-        height: 215px !important;
-        padding: 3px !important;
-        border: 1px solid #ddd !important;
-        background: white !important;
-    }
-    
-    #dashboard-content > div:nth-child(2) > div:nth-child(2) {
-        height: 215px !important;
-        padding: 3px !important;
-        border: 1px solid #ddd !important;
-        background: white !important;
-    }
-    
-    /* ============================================ */
-    /* SECCIÓN 3: DEPARTAMENTOS + TIPO (2 COLUMNAS) */
-    /* ============================================ */
-    #dashboard-content > div:nth-child(3) {
-        display: grid !important;
-        grid-template-columns: 67% 31% !important;
-        gap: 5px !important;
-        margin-bottom: 6px !important;
-        page-break-inside: avoid !important;
-        page-break-after: avoid !important;
-    }
-    
-    /* Departamentos con leyenda */
-    #dashboard-content > div:nth-child(3) > div:nth-child(1) {
-        display: flex !important;
-        flex-direction: column !important;
-        border: 1px solid #ddd !important;
-        background: white !important;
-        overflow: hidden !important;
-    }
-    
-    /* Gráfica de departamentos */
-    #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) {
-        height: 195px !important;
-        padding: 3px !important;
-        flex-shrink: 0 !important;
-    }
-    
-    /* Leyenda */
-    #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) {
-        height: 48px !important;
-        max-height: 48px !important;
-        padding: 3px 5px !important;
-        background: #f9fafb !important;
-        border-top: 1px solid #e5e7eb !important;
-        overflow: hidden !important;
-        flex-shrink: 0 !important;
-    }
-    
-    #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) p {
-        font-size: 6pt !important;
-        font-weight: bold !important;
-        margin: 0 0 2px 0 !important;
-    }
-    
-    #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) .grid {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr 1fr !important;
-        gap: 2px !important;
-    }
-    
-    #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) .text-xs {
-        font-size: 5.5pt !important;
-        line-height: 1.15 !important;
-    }
-    
-    /* Tipo de curso */
-    #dashboard-content > div:nth-child(3) > div:nth-child(2) {
-        height: 243px !important;
-        padding: 3px !important;
-        border: 1px solid #ddd !important;
-        background: white !important;
-    }
-    
-    #dashboard-content > div:nth-child(3) > div:nth-child(2) > div {
-        height: 100% !important;
-    }
-    
-    /* ============================================ */
-    /* SECCIÓN 4: EVOLUCIÓN HISTÓRICA (ANCHO COMPLETO) */
-    /* ============================================ */
-    #dashboard-content > div:nth-child(4) {
-        display: block !important;
-        width: 100% !important;
-        height: 195px !important;
-        padding: 3px !important;
-        margin-top: 6px !important;
-        border: 1px solid #ddd !important;
-        background: white !important;
-        page-break-before: auto !important;
-        page-break-inside: avoid !important;
-    }
-    
-    #dashboard-content > div:nth-child(4) > div {
-        height: 100% !important;
-    }
-    
-    /* ============================================ */
-    /* GRÁFICAS: ESTRUCTURA INTERNA */
-    /* ============================================ */
-    
-    /* Todos los contenedores de gráficas */
-    #dashboard-content .bg-white {
-        display: flex !important;
-        flex-direction: column !important;
-        height: 100% !important;
-        width: 100% !important;
-        padding: 3px !important;
-        overflow: hidden !important;
-    }
-    
-    /* Títulos de gráficas */
-    #dashboard-content .bg-white h3 {
-        font-size: 7.5pt !important;
-        font-weight: bold !important;
-        color: #1f2937 !important;
-        text-align: center !important;
-        margin: 0 0 2px 0 !important;
-        padding: 0 !important;
-        flex-shrink: 0 !important;
-    }
-    
-    /* Contenedor del canvas */
-    #dashboard-content .bg-white > div:last-child {
-        flex: 1 !important;
-        min-height: 0 !important;
-        width: 100% !important;
-        position: relative !important;
-    }
-    
-    /* Canvas */
-    #dashboard-content canvas {
-        display: block !important;
-        width: 100% !important;
-        height: 100% !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-    }
-    
-    /* ============================================ */
-    /* PREVENIR SALTOS DE PÁGINA */
-    /* ============================================ */
-    #dashboard-content > div {
-        page-break-inside: avoid !important;
-    }
-    
-    /* Forzar página 1: Header + KPIs + Cursos/Género + Deptos/Tipo */
-    #dashboard-content > div:nth-child(3) {
-        page-break-after: auto !important;
-    }
-    
-    /* Página 2: Histórica */
-    #dashboard-content > div:nth-child(4) {
-        page-break-before: auto !important;
-    }
-    
-    /* ============================================ */
-    /* AJUSTES FINALES */
-    /* ============================================ */
-    
-    /* Eliminar clases web problemáticas */
-    .shadow-md,
-    .shadow-xl,
-    .shadow-lg,
-    .rounded-xl,
-    .rounded-lg {
-        box-shadow: none !important;
-        border-radius: 3px !important;
-    }
-    
-    /* Resetear flex/grid de Tailwind */
-    .flex-1 {
-        flex: 1 !important;
-    }
-    
-    .gap-6,
-    .gap-4 {
-        gap: 5px !important;
-    }
-    
-    /* Asegurar contraste de texto */
-    * {
-        color: #000 !important;
-    }
-    
-    h1, h2, h3, h4, h5, h6 {
-        color: #1f2937 !important;
-    }
-    
-    .text-gray-500,
-    .text-gray-600,
-    .text-gray-700 {
-        color: #4b5563 !important;
-    }
-}
-</style>
-</head>
-    // ====================================================================
-// SCRIPT PARA FORZAR LAYOUT DE IMPRESIÓN
-// Agrégalo ANTES del cierre </body> en tu HTML
-// ====================================================================
-
-// Interceptar el evento de impresión
-window.addEventListener('beforeprint', function() {
-    console.log('🖨️ Preparando impresión...');
-    
-    // 1. Forzar recálculo de gráficas
-    const charts = document.querySelectorAll('canvas');
-    charts.forEach(canvas => {
-        if (canvas && canvas.style) {
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
+        /* ====================================================================== */
+        /* ELEMENTOS EXCLUSIVOS DE IMPRESIÓN (ocultos en pantalla) */
+        /* ====================================================================== */
+        .print-header-element, 
+        .print-footer-element { 
+            display: none; 
         }
-    });
-    
-    // 2. Aplicar estilos directamente a contenedores
-    const dashboardContent = document.getElementById('dashboard-content');
-    if (dashboardContent) {
-        const children = Array.from(dashboardContent.children);
-        
-        // KPIs (primer hijo)
-        if (children[0]) {
-            children[0].style.cssText = `
+
+        /* ====================================================================== */
+        /* ESTILOS DE IMPRESIÓN OPTIMIZADOS */
+        /* ====================================================================== */
+        @media print {
+            @page { 
+                size: letter portrait; 
+                margin: 0.4cm 0.6cm;
+            }
+            
+            html, body { 
+                width: 100% !important;
+                height: auto !important;
+                background: white !important; 
+                margin: 0 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            body {
+                font-size: 8pt !important;
+                line-height: 1.1 !important;
+                color: #000 !important;
+            }
+            
+            /* ============================================ */
+            /* OCULTAR ELEMENTOS WEB */
+            /* ============================================ */
+            header:not(.print-header-element), 
+            footer:not(.print-footer-element), 
+            #back-link, 
+            #dashboard-header-controls,
+            button, 
+            select,
+            .no-print { 
+                display: none !important; 
+            }
+            
+            /* ============================================ */
+            /* ENCABEZADO DE IMPRESIÓN */
+            /* ============================================ */
+            .print-header-element { 
+                display: flex !important; 
+                justify-content: space-between; 
+                align-items: center; 
+                height: 40px !important;
+                border-bottom: 2px solid #1B396A !important; 
+                padding: 4px 8px !important;
+                margin-bottom: 6px !important;
+                page-break-after: avoid !important;
+            }
+            
+            .print-header-element img { 
+                height: 35px !important;
+                width: auto !important;
+            }
+            
+            .print-header-element h1 { 
+                font-size: 9pt !important; 
+                font-weight: 900 !important; 
+                margin: 0 !important;
+                color: #1B396A !important;
+                line-height: 1.1 !important;
+            }
+            
+            .print-header-element h2 { 
+                font-size: 7.5pt !important; 
+                font-weight: bold !important; 
+                margin: 2px 0 0 0 !important;
+                color: #333 !important;
+                line-height: 1.1 !important;
+            }
+            
+            /* ============================================ */
+            /* PIE DE PÁGINA */
+            /* ============================================ */
+            .print-footer-element { 
+                display: flex !important; 
+                justify-content: space-between !important;
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                font-size: 6.5pt !important;
+                color: #666 !important;
+                padding: 4px 10px !important;
+                background: white !important;
+                border-top: 1px solid #ddd !important;
+            }
+            
+            .print-footer-element::after {
+                content: "Pág. " counter(page);
+            }
+            
+            /* ============================================ */
+            /* CONTENEDOR PRINCIPAL */
+            /* ============================================ */
+            #dashboard-content { 
+                display: block !important;
+                width: 100% !important;
+                padding: 0 6px 35px 6px !important;
+                margin: 0 !important;
+            }
+            
+            #dashboard-content * {
+                box-shadow: none !important;
+                text-shadow: none !important;
+            }
+            
+            #dashboard-content .py-8,
+            #dashboard-content .py-6,
+            #dashboard-content .py-4,
+            #dashboard-content .my-8,
+            #dashboard-content .my-6,
+            #dashboard-content .my-4,
+            #dashboard-content .mb-8 {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            /* ============================================ */
+            /* SECCIÓN 1: KPIs (4 COLUMNAS) */
+            /* ============================================ */
+            #dashboard-content > div:nth-child(1) {
                 display: grid !important;
                 grid-template-columns: repeat(4, 1fr) !important;
                 gap: 4px !important;
                 margin-bottom: 6px !important;
-            `;
-        }
-        
-        // Cursos + Género (segundo hijo)
-        if (children[1]) {
-            children[1].style.cssText = `
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
+            }
+            
+            #dashboard-content > div:nth-child(1) > div {
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                padding: 4px 6px !important;
+                height: 34px !important;
+                border: 1px solid #ddd !important;
+                background: white !important;
+            }
+            
+            #dashboard-content > div:nth-child(1) .text-3xl {
+                font-size: 16px !important;
+            }
+            
+            #dashboard-content > div:nth-child(1) .text-2xl {
+                font-size: 0.8rem !important;
+                font-weight: bold !important;
+                line-height: 1 !important;
+            }
+            
+            #dashboard-content > div:nth-child(1) .text-\[10px\] {
+                font-size: 6pt !important;
+                line-height: 1.1 !important;
+            }
+            
+            /* ============================================ */
+            /* SECCIÓN 2: CURSOS + GÉNERO (2 COLUMNAS) */
+            /* ============================================ */
+            #dashboard-content > div:nth-child(2) {
                 display: grid !important;
                 grid-template-columns: 60% 38% !important;
                 gap: 5px !important;
                 height: 215px !important;
                 margin-bottom: 6px !important;
-            `;
-        }
-        
-        // Departamentos + Tipo (tercer hijo)
-        if (children[2]) {
-            children[2].style.cssText = `
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
+            }
+            
+            #dashboard-content > div:nth-child(2) > div:nth-child(1) {
+                height: 215px !important;
+                padding: 3px !important;
+                border: 1px solid #ddd !important;
+                background: white !important;
+            }
+            
+            #dashboard-content > div:nth-child(2) > div:nth-child(2) {
+                height: 215px !important;
+                padding: 3px !important;
+                border: 1px solid #ddd !important;
+                background: white !important;
+            }
+            
+            /* ============================================ */
+            /* SECCIÓN 3: DEPARTAMENTOS + TIPO (2 COLUMNAS) */
+            /* ============================================ */
+            #dashboard-content > div:nth-child(3) {
                 display: grid !important;
                 grid-template-columns: 67% 31% !important;
                 gap: 5px !important;
                 margin-bottom: 6px !important;
-            `;
-            
-            // Contenedor de departamentos con leyenda
-            const deptContainer = children[2].children[0];
-            if (deptContainer) {
-                deptContainer.style.cssText = `
-                    display: flex !important;
-                    flex-direction: column !important;
-                `;
-                
-                // Gráfica
-                if (deptContainer.children[0]) {
-                    deptContainer.children[0].style.height = '195px';
-                }
-                
-                // Leyenda
-                if (deptContainer.children[1]) {
-                    deptContainer.children[1].style.cssText = `
-                        height: 48px !important;
-                        max-height: 48px !important;
-                        overflow: hidden !important;
-                    `;
-                }
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
             }
             
-            // Tipo de curso
-            if (children[2].children[1]) {
-                children[2].children[1].style.height = '243px';
+            /* Departamentos con leyenda */
+            #dashboard-content > div:nth-child(3) > div:nth-child(1) {
+                display: flex !important;
+                flex-direction: column !important;
+                border: 1px solid #ddd !important;
+                background: white !important;
+                overflow: hidden !important;
             }
-        }
-        
-        // Histórica (cuarto hijo)
-        if (children[3]) {
-            children[3].style.cssText = `
+            
+            /* Gráfica de departamentos */
+            #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) {
+                height: 195px !important;
+                padding: 3px !important;
+                flex-shrink: 0 !important;
+            }
+            
+            /* Leyenda */
+            #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) {
+                height: 48px !important;
+                max-height: 48px !important;
+                padding: 3px 5px !important;
+                background: #f9fafb !important;
+                border-top: 1px solid #e5e7eb !important;
+                overflow: hidden !important;
+                flex-shrink: 0 !important;
+            }
+            
+            #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) p {
+                font-size: 6pt !important;
+                font-weight: bold !important;
+                margin: 0 0 2px 0 !important;
+            }
+            
+            #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) .grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr 1fr !important;
+                gap: 2px !important;
+            }
+            
+            #dashboard-content > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) .text-xs {
+                font-size: 5.5pt !important;
+                line-height: 1.15 !important;
+            }
+            
+            /* Tipo de curso */
+            #dashboard-content > div:nth-child(3) > div:nth-child(2) {
+                height: 243px !important;
+                padding: 3px !important;
+                border: 1px solid #ddd !important;
+                background: white !important;
+            }
+            
+            #dashboard-content > div:nth-child(3) > div:nth-child(2) > div {
+                height: 100% !important;
+            }
+            
+            /* ============================================ */
+            /* SECCIÓN 4: EVOLUCIÓN HISTÓRICA */
+            /* ============================================ */
+            #dashboard-content > div:nth-child(4) {
                 display: block !important;
                 width: 100% !important;
                 height: 195px !important;
+                padding: 3px !important;
                 margin-top: 6px !important;
-            `;
-        }
-    }
-    
-    console.log('✅ Layout de impresión aplicado');
-});
-
-// Restaurar después de imprimir
-window.addEventListener('afterprint', function() {
-    console.log('🔄 Restaurando vista web...');
-    
-    // Limpiar estilos inline
-    const dashboardContent = document.getElementById('dashboard-content');
-    if (dashboardContent) {
-        const children = Array.from(dashboardContent.children);
-        children.forEach(child => {
-            if (child && child.style) {
-                child.style.cssText = '';
+                border: 1px solid #ddd !important;
+                background: white !important;
+                page-break-before: auto !important;
+                page-break-inside: avoid !important;
             }
-        });
-    }
-    
-    console.log('✅ Vista web restaurada');
-});
-
-// También agregar listener al botón de imprimir si existe
-document.addEventListener('DOMContentLoaded', function() {
-    // Buscar botones de imprimir (por texto o icono)
-    const printButtons = document.querySelectorAll('button');
-    printButtons.forEach(button => {
-        const buttonText = button.textContent || '';
-        if (buttonText.includes('Imprimir') || buttonText.includes('🖨️')) {
-            button.addEventListener('click', function() {
-                setTimeout(() => window.print(), 100);
-            });
+            
+            #dashboard-content > div:nth-child(4) > div {
+                height: 100% !important;
+            }
+            
+            /* ============================================ */
+            /* GRÁFICAS: ESTRUCTURA INTERNA */
+            /* ============================================ */
+            #dashboard-content .bg-white {
+                display: flex !important;
+                flex-direction: column !important;
+                height: 100% !important;
+                width: 100% !important;
+                padding: 3px !important;
+                overflow: hidden !important;
+            }
+            
+            #dashboard-content .bg-white h3 {
+                font-size: 7.5pt !important;
+                font-weight: bold !important;
+                color: #1f2937 !important;
+                text-align: center !important;
+                margin: 0 0 2px 0 !important;
+                padding: 0 !important;
+                flex-shrink: 0 !important;
+            }
+            
+            #dashboard-content .bg-white > div:last-child {
+                flex: 1 !important;
+                min-height: 0 !important;
+                width: 100% !important;
+                position: relative !important;
+            }
+            
+            #dashboard-content canvas {
+                display: block !important;
+                width: 100% !important;
+                height: 100% !important;
+                max-width: 100% !important;
+                max-height: 100% !important;
+            }
+            
+            /* ============================================ */
+            /* PREVENIR SALTOS DE PÁGINA */
+            /* ============================================ */
+            #dashboard-content > div {
+                page-break-inside: avoid !important;
+            }
+            
+            #dashboard-content > div:nth-child(3) {
+                page-break-after: auto !important;
+            }
+            
+            #dashboard-content > div:nth-child(4) {
+                page-break-before: auto !important;
+            }
+            
+            /* ============================================ */
+            /* AJUSTES FINALES */
+            /* ============================================ */
+            .shadow-md,
+            .shadow-xl,
+            .shadow-lg,
+            .rounded-xl,
+            .rounded-lg {
+                box-shadow: none !important;
+                border-radius: 3px !important;
+            }
+            
+            .flex-1 {
+                flex: 1 !important;
+            }
+            
+            .gap-6,
+            .gap-4 {
+                gap: 5px !important;
+            }
+            
+            * {
+                color: #000 !important;
+            }
+            
+            h1, h2, h3, h4, h5, h6 {
+                color: #1f2937 !important;
+            }
+            
+            .text-gray-500,
+            .text-gray-600,
+            .text-gray-700 {
+                color: #4b5563 !important;
+            }
         }
-    });
-});
+    </style>
+</head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800">
 
+    <!-- ENCABEZADO PARA IMPRESIÓN -->
     <div class="print-header-element container mx-auto">
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM">
         <div class="text-center">
@@ -554,6 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD">
     </div>
 
+    <!-- HEADER WEB -->
     <header class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A] no-print">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
@@ -567,6 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </header>
     
+    <!-- ENLACE DE NAVEGACIÓN -->
     <div id="back-link" class="container mx-auto px-4 py-4 no-print">
         <a href="index.html" 
            onclick="event.preventDefault(); window.location.href = 'index.html';" 
@@ -575,6 +456,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </a>
     </div>
 
+    <!-- CONTENEDOR PRINCIPAL DE REACT -->
     <div id="root">
         <div class="flex justify-center items-center h-64">
             <div class="text-center">
@@ -584,6 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 
+    <!-- FOOTER WEB -->
     <footer class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449] no-print">
         <div class="container mx-auto px-4">
              <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
@@ -592,12 +475,105 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </footer>
     
+    <!-- PIE DE PÁGINA PARA IMPRESIÓN -->
     <div class="print-footer-element">
-        <span>© Coordinación de Actualización Docente | Reporte Generado: <script>document.write(new Date().toLocaleDateString());</script></span>
-        </div>
+        <span>© Coordinación de Actualización Docente | Reporte Generado: <span id="print-date"></span></span>
+    </div>
 
+    <!-- SCRIPT PARA MANEJO DE IMPRESIÓN -->
+    <script>
+        // Establecer fecha en el footer de impresión
+        document.addEventListener('DOMContentLoaded', function() {
+            var printDateEl = document.getElementById('print-date');
+            if (printDateEl) {
+                printDateEl.textContent = new Date().toLocaleDateString();
+            }
+        });
+
+        // Interceptar el evento de impresión
+        window.addEventListener('beforeprint', function() {
+            console.log('🖨️ Preparando impresión...');
+            
+            // 1. Forzar recálculo de gráficas
+            var charts = document.querySelectorAll('canvas');
+            charts.forEach(function(canvas) {
+                if (canvas && canvas.style) {
+                    canvas.style.width = '100%';
+                    canvas.style.height = '100%';
+                }
+            });
+            
+            // 2. Aplicar estilos directamente a contenedores
+            var dashboardContent = document.getElementById('dashboard-content');
+            if (dashboardContent) {
+                var children = Array.from(dashboardContent.children);
+                
+                // KPIs (primer hijo)
+                if (children[0]) {
+                    children[0].style.cssText = 'display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 4px !important; margin-bottom: 6px !important;';
+                }
+                
+                // Cursos + Género (segundo hijo)
+                if (children[1]) {
+                    children[1].style.cssText = 'display: grid !important; grid-template-columns: 60% 38% !important; gap: 5px !important; height: 215px !important; margin-bottom: 6px !important;';
+                }
+                
+                // Departamentos + Tipo (tercer hijo)
+                if (children[2]) {
+                    children[2].style.cssText = 'display: grid !important; grid-template-columns: 67% 31% !important; gap: 5px !important; margin-bottom: 6px !important;';
+                    
+                    // Contenedor de departamentos con leyenda
+                    var deptContainer = children[2].children[0];
+                    if (deptContainer) {
+                        deptContainer.style.cssText = 'display: flex !important; flex-direction: column !important;';
+                        
+                        // Gráfica
+                        if (deptContainer.children[0]) {
+                            deptContainer.children[0].style.height = '195px';
+                        }
+                        
+                        // Leyenda
+                        if (deptContainer.children[1]) {
+                            deptContainer.children[1].style.cssText = 'height: 48px !important; max-height: 48px !important; overflow: hidden !important;';
+                        }
+                    }
+                    
+                    // Tipo de curso
+                    if (children[2].children[1]) {
+                        children[2].children[1].style.height = '243px';
+                    }
+                }
+                
+                // Histórica (cuarto hijo)
+                if (children[3]) {
+                    children[3].style.cssText = 'display: block !important; width: 100% !important; height: 195px !important; margin-top: 6px !important;';
+                }
+            }
+            
+            console.log('✅ Layout de impresión aplicado');
+        });
+
+        // Restaurar después de imprimir
+        window.addEventListener('afterprint', function() {
+            console.log('🔄 Restaurando vista web...');
+            
+            var dashboardContent = document.getElementById('dashboard-content');
+            if (dashboardContent) {
+                var children = Array.from(dashboardContent.children);
+                children.forEach(function(child) {
+                    if (child && child.style) {
+                        child.style.cssText = '';
+                    }
+                });
+            }
+            
+            console.log('✅ Vista web restaurada');
+        });
+    </script>
+
+    <!-- APLICACIÓN REACT -->
     <script type="text/babel">
-        // FIX CRÍTICO: Acceso seguro a React y ReactDOM
+        // Acceso seguro a React y ReactDOM
         const React = window.React;
         const ReactDOM = window.ReactDOM;
 
@@ -609,8 +585,36 @@ document.addEventListener('DOMContentLoaded', function() {
         const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
         const VIBRANT_COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC926', '#1982C4', '#6A4C93', '#F15BB5', '#E9C46A', '#2A9D8F', '#E76F51'];
         
-        const DEPT_ACRONYMS = { "SISTEMAS Y COMPUTACION": "DSC", "CIENCIAS ECONOMICO-ADMINISTRATIVAS": "DCEA", "INGENIERÍA QUÍMICA-BIOQUÍMICA": "DIQB", "QUIMICA-BIOQUIMICA": "DIQB", "CIENCIAS DE LA TIERRA": "DCT", "CIENCIAS BASICAS": "DCB", "METAL-MECÁNICA": "DMM", "METAL MECANICA": "DMM", "INGENIERÍA INDUSTRIAL": "DII", "INDUSTRIAL": "DII", "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA": "DIEE", "ELECTRICA Y ELECTRONICA": "DIEE", "POSGRADO E INVESTIGACION": "DEPI", "ADMINISTRATIVO": "ADMON", "EXTERNO": "EXT", "DESARROLLO ACADÉMICO": "DDA", "GESTION TECNOLOGICA": "DGT" };
-        const getAcronym = (fullName) => { if(!fullName) return "ND"; const nameUpper = fullName.toUpperCase().replace('DEPARTAMENTO DE ', '').replace('DIVISION DE ESTUDIOS DE ', '').replace('CENTRO DE ', ''); for (const [key, val] of Object.entries(DEPT_ACRONYMS)) { if (nameUpper.includes(key)) return val; } const words = nameUpper.split(' '); if(words.length > 1) return words.map(w => w[0]).join('').substring(0,4); return nameUpper.substring(0, 4) + "."; };
+        const DEPT_ACRONYMS = { 
+            "SISTEMAS Y COMPUTACION": "DSC", 
+            "CIENCIAS ECONOMICO-ADMINISTRATIVAS": "DCEA", 
+            "INGENIERÍA QUÍMICA-BIOQUÍMICA": "DIQB", 
+            "QUIMICA-BIOQUIMICA": "DIQB", 
+            "CIENCIAS DE LA TIERRA": "DCT", 
+            "CIENCIAS BASICAS": "DCB", 
+            "METAL-MECÁNICA": "DMM", 
+            "METAL MECANICA": "DMM", 
+            "INGENIERÍA INDUSTRIAL": "DII", 
+            "INDUSTRIAL": "DII", 
+            "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA": "DIEE", 
+            "ELECTRICA Y ELECTRONICA": "DIEE", 
+            "POSGRADO E INVESTIGACION": "DEPI", 
+            "ADMINISTRATIVO": "ADMON", 
+            "EXTERNO": "EXT", 
+            "DESARROLLO ACADÉMICO": "DDA", 
+            "GESTION TECNOLOGICA": "DGT" 
+        };
+        
+        const getAcronym = (fullName) => { 
+            if(!fullName) return "ND"; 
+            const nameUpper = fullName.toUpperCase().replace('DEPARTAMENTO DE ', '').replace('DIVISION DE ESTUDIOS DE ', '').replace('CENTRO DE ', ''); 
+            for (const [key, val] of Object.entries(DEPT_ACRONYMS)) { 
+                if (nameUpper.includes(key)) return val; 
+            } 
+            const words = nameUpper.split(' '); 
+            if(words.length > 1) return words.map(w => w[0]).join('').substring(0,4); 
+            return nameUpper.substring(0, 4) + "."; 
+        };
         
         const splitLabel = (label, maxLength = 30) => { 
             if (!label || label.length <= maxLength) return label; 
@@ -629,6 +633,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return lines; 
         };
 
+        // ====================================================================
+        // COMPONENTE: Login
+        // ====================================================================
         const Login = ({ onLogin, loginError }) => {
             const googleButtonRef = React.useRef(null);
 
@@ -637,14 +644,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 const initGoogle = () => {
                     if (window.google && window.google.accounts && googleButtonRef.current) {
                         try {
-                            window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
-                            window.google.accounts.id.renderButton(googleButtonRef.current, { theme: "outline", size: "large", text: "signin_with" });
+                            window.google.accounts.id.initialize({ 
+                                client_id: CONFIG.GOOGLE_CLIENT_ID, 
+                                callback: onLogin 
+                            });
+                            window.google.accounts.id.renderButton(googleButtonRef.current, { 
+                                theme: "outline", 
+                                size: "large", 
+                                text: "signin_with" 
+                            });
                             return true;
-                        } catch (e) { console.error("Error initializing Google Sign-In", e); return false; }
+                        } catch (e) { 
+                            console.error("Error initializing Google Sign-In", e); 
+                            return false; 
+                        }
                     }
                     return false;
                 };
-                if (!initGoogle()) { intervalId = setInterval(() => { if (initGoogle()) clearInterval(intervalId); }, 500); }
+                if (!initGoogle()) { 
+                    intervalId = setInterval(() => { 
+                        if (initGoogle()) clearInterval(intervalId); 
+                    }, 500); 
+                }
                 return () => { if(intervalId) clearInterval(intervalId); };
             }, [onLogin]);
 
@@ -661,6 +682,9 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         };
 
+        // ====================================================================
+        // COMPONENTE: Dashboard
+        // ====================================================================
         const Dashboard = ({ user, onLogout }) => {
             const [stats, setStats] = React.useState(null);
             const [loading, setLoading] = React.useState(true);
@@ -674,7 +698,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 setError(null);
 
                 fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}`)
-                    .then(r => { if(!r.ok) throw new Error(`Error HTTP: ${r.status}`); return r.json(); })
+                    .then(r => { 
+                        if(!r.ok) throw new Error(`Error HTTP: ${r.status}`); 
+                        return r.json(); 
+                    })
                     .then(res => {
                         if (!isMounted) return;
                         if (res.success) {
@@ -690,7 +717,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const processedDepts = React.useMemo(() => {
                 if (!stats?.topDepartamentos) return { chartData: {}, legend: [] };
-                const chartData = {}; const legend = [];
+                const chartData = {}; 
+                const legend = [];
                 stats.topDepartamentos.forEach(([name, count]) => {
                     const acronym = getAcronym(name);
                     chartData[acronym] = count;
@@ -699,12 +727,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 return { chartData, legend };
             }, [stats]);
 
-            if (loading && !stats) return <div className="flex justify-center items-center h-96"><div className="animate-spin h-16 w-16 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div>;
-            if (error) return <div className="flex justify-center items-center py-20"><div className="text-red-600 font-bold text-xl">Error: {error} <br/><button onClick={()=>window.location.reload()} className="text-sm text-blue-600 underline mt-2">Recargar</button></div></div>;
+            if (loading && !stats) {
+                return (
+                    <div className="flex justify-center items-center h-96">
+                        <div className="animate-spin h-16 w-16 border-4 border-[#1B396A] rounded-full border-t-transparent"></div>
+                    </div>
+                );
+            }
+            
+            if (error) {
+                return (
+                    <div className="flex justify-center items-center py-20">
+                        <div className="text-red-600 font-bold text-xl">
+                            Error: {error} <br/>
+                            <button onClick={() => window.location.reload()} className="text-sm text-blue-600 underline mt-2">Recargar</button>
+                        </div>
+                    </div>
+                );
+            }
+            
             if (!stats) return null;
 
             return (
                 <div className="container mx-auto px-4 py-8 max-w-7xl animate-fadeIn" id="dashboard-content">
+                    {/* CONTROLES DEL DASHBOARD */}
                     <div id="dashboard-header-controls" className="bg-white rounded-xl shadow-sm p-4 mb-8 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#9D2449] gap-4 no-print">
                         <div className="flex-1">
                             <h2 className="text-xl font-bold text-[#1B396A]">Dashboard de Resultados</h2>
@@ -715,14 +761,18 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <option value="ACTUAL">🟢 Periodo Actual</option>
                                 {availableYears.filter(y => y !== 'ACTUAL').map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
                             </select>
-                            <button onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center gap-2"><span>🖨️</span> Imprimir Reporte</button>
-                            <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm font-bold text-gray-700 border border-gray-300 transition">Cerrar Sesión</button>
+                            <button onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center gap-2">
+                                <span>🖨️</span> Imprimir Reporte
+                            </button>
+                            <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm font-bold text-gray-700 border border-gray-300 transition">
+                                Cerrar Sesión
+                            </button>
                         </div>
                     </div>
                     
                     {loading && <div className="flex justify-center items-center h-20 text-blue-600 font-bold">Cargando datos...</div>}
 
-
+                    {/* SECCIÓN 1: KPIs */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                         {[
                             { icon: "📝", val: stats.totalInscripciones, label: "Docentes Inscritos", color: "border-[#1B396A]" },
@@ -732,36 +782,60 @@ document.addEventListener('DOMContentLoaded', function() {
                         ].map((kpi, idx) => (
                             <div key={idx} className={`bg-white p-5 rounded-xl shadow-md border-b-4 ${kpi.color} flex items-center gap-3`}>
                                 <div className="text-3xl">{kpi.icon}</div>
-                                <div><div className="text-2xl font-bold text-gray-800">{kpi.val}</div><div className="text-[10px] font-bold text-gray-500 uppercase">{kpi.label}</div></div>
+                                <div>
+                                    <div className="text-2xl font-bold text-gray-800">{kpi.val}</div>
+                                    <div className="text-[10px] font-bold text-gray-500 uppercase">{kpi.label}</div>
+                                </div>
                             </div>
                         ))}
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 my-8">
-                        <div class="lg:col-span-7 h-96 chart-container-wrapper"><StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" horizontal={true} /></div>
-                        <div class="lg:col-span-5 h-96 chart-container-wrapper"><StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="chartGen" /></div>
+                    {/* SECCIÓN 2: CURSOS + GÉNERO */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-8">
+                        <div className="lg:col-span-7 h-96 chart-container-wrapper">
+                            <StatsChart type="bar" data={Object.fromEntries(stats.topCursos||[])} title="Cursos Más Demandados" id="chartCourse" horizontal={true} />
+                        </div>
+                        <div className="lg:col-span-5 h-96 chart-container-wrapper">
+                            <StatsChart type="doughnut" data={stats.distribucionGenero} title="Distribución por Género" id="chartGen" />
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-                        <div class="lg:col-span-9 h-full flex flex-col bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
-                            <div class="p-6 flex-1 h-96 chart-container-wrapper"><StatsChart type="bar" data={processedDepts.chartData} title="Top 5 Departamentos" id="chartDept" horizontal={true} /></div>
-                            <div class="bg-gray-50 p-4 border-t border-gray-200 rounded-b-xl print-hide">
-                                <p class="text-xs font-bold text-gray-500 mb-2 uppercase">Leyenda:</p>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-gray-600 max-h-32 overflow-y-auto custom-scrollbar">
-                                    {processedDepts.legend.map((item, idx) => <div key={idx} class="flex items-start gap-2"><span class="font-bold text-[#1B396A] min-w-[35px]">{item.acronym}:</span><span class="truncate" title={item.name}>{item.name}</span></div>)}
+                    {/* SECCIÓN 3: DEPARTAMENTOS + TIPO */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+                        <div className="lg:col-span-9 h-full flex flex-col bg-white rounded-xl shadow-md border-t-4 border-[#1B396A]">
+                            <div className="p-6 flex-1 h-96 chart-container-wrapper">
+                                <StatsChart type="bar" data={processedDepts.chartData} title="Top 5 Departamentos" id="chartDept" horizontal={true} />
+                            </div>
+                            <div className="bg-gray-50 p-4 border-t border-gray-200 rounded-b-xl">
+                                <p className="text-xs font-bold text-gray-500 mb-2 uppercase">Leyenda:</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-gray-600 max-h-32 overflow-y-auto custom-scrollbar">
+                                    {processedDepts.legend.map((item, idx) => (
+                                        <div key={idx} className="flex items-start gap-2">
+                                            <span className="font-bold text-[#1B396A] min-w-[35px]">{item.acronym}:</span>
+                                            <span className="truncate" title={item.name}>{item.name}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
-                        <div class="lg:col-span-3 h-full"><div class="h-96 chart-container-wrapper"><StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={false} /></div></div>
+                        <div className="lg:col-span-3 h-full">
+                            <div className="h-96 chart-container-wrapper">
+                                <StatsChart type="bar" data={stats.distribucionTipo} title="Tipo de Curso" id="chartType" horizontal={false} />
+                            </div>
+                        </div>
                     </div>
 
-                     <div class="mb-8 h-96 chart-container-wrapper">
+                    {/* SECCIÓN 4: EVOLUCIÓN HISTÓRICA */}
+                    <div className="mb-8 h-96 chart-container-wrapper">
                         <StatsChart type="line" data={stats.historicalTrend || {}} title="Evolución Histórica" id="chartHistory" horizontal={false} />
                     </div>
                 </div>
             );
         };
         
+        // ====================================================================
+        // COMPONENTE: StatsChart
+        // ====================================================================
         const StatsChart = ({ type, data, title, id, horizontal = false }) => {
             const chartRef = React.useRef(null);
             const canvasRef = React.useRef(null);
@@ -782,7 +856,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const isHistory = id === 'chartHistory';
                 const isPie = type === 'pie' || type === 'doughnut';
                 
-                // Determinamos el tamaño de fuente para impresión/pantalla de manera segura
                 const isPrinting = window.matchMedia && window.matchMedia('print').matches;
                 const printFontSize = 8;
                 const screenFontSize = 10;
@@ -797,15 +870,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         maintainAspectRatio: false, 
                         indexAxis: horizontal ? 'y' : 'x',
                         
-                        // CONFIGURACIÓN DE ESCALAS PARA IMPRESIÓN (Texto más pequeño y claro)
                         scales: isPie ? {} : { 
                             y: { 
                                 beginAtZero: true, 
                                 ticks: { 
                                     stepSize: 1, 
-                                    color: '#000000', // Texto negro
+                                    color: '#000000',
                                     font: { 
-                                        size: isPrinting ? printFontSize : screenFontSize, /* Tamaño de impresión */
+                                        size: isPrinting ? printFontSize : screenFontSize,
                                         weight: 'bold' 
                                     },
                                 },
@@ -818,7 +890,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     stepSize: 1,
                                     color: '#000000',
                                     font: { 
-                                        size: isPrinting ? printFontSize : screenFontSize, /* Tamaño de impresión */
+                                        size: isPrinting ? printFontSize : screenFontSize,
                                         weight: 'bold' 
                                     },
                                 },
@@ -831,9 +903,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 display: isPie || isHistory, 
                                 position: 'bottom', 
                                 labels: { 
-                                    color: '#000000', // Texto de leyenda negro
+                                    color: '#000000',
                                     font: {
-                                        size: pieLabelFontSize, /* Ajustado para impresión */
+                                        size: pieLabelFontSize,
                                         weight: 'bold'
                                     }
                                 }
@@ -846,15 +918,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 };
                 
-                // Ajuste específico para barras horizontales (Cursos más demandados y Top 5 Deptos)
                 if (horizontal) {
-                    // Forzar a que las etiquetas de cursos/departamentos sean legibles
                     config.options.scales.y.ticks.autoSkip = false;
                     config.options.scales.y.ticks.maxRotation = 0;
                     config.options.scales.y.ticks.minRotation = 0;
                 }
                 
-                // Ajuste específico para Doughnut (para asegurar la leyenda)
                 if (isPie) {
                     config.options.plugins.datalabels = { 
                         display: true, 
@@ -871,9 +940,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     };
                 }
 
-
                 if (isHistory) {
-                    // Configuración específica para Evolución Histórica
                     const years = Object.keys(data).sort((a,b) => parseInt(a) - parseInt(b));
                     config.data = {
                         labels: years,
@@ -896,7 +963,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         ]
                     };
-                    // Activar DataLabels para esta gráfica específica con alta visibilidad
                     config.options.plugins.datalabels = { 
                         display: true, 
                         color: '#444',
@@ -912,7 +978,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     const labels = Object.keys(data);
                     config.data = {
                         labels: labels.map(l => horizontal ? splitLabel(l, 30) : l),
-                        datasets: [{ label: title, data: Object.values(data), backgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS }]
+                        datasets: [{ 
+                            label: title, 
+                            data: Object.values(data), 
+                            backgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS 
+                        }]
                     };
                 }
 
@@ -923,26 +993,43 @@ document.addEventListener('DOMContentLoaded', function() {
             return (
                 <div className="bg-white p-4 rounded-xl shadow-md h-full flex flex-col border border-gray-100">
                     <h3 className="text-gray-700 font-bold mb-2 text-center">{title}</h3>
-                    <div className="flex-1 relative min-h-[200px]"><canvas ref={canvasRef} id={id}></canvas></div>
+                    <div className="flex-1 relative min-h-[200px]">
+                        <canvas ref={canvasRef} id={id}></canvas>
+                    </div>
                 </div>
             );
         };
 
+        // ====================================================================
+        // COMPONENTE: App Principal
+        // ====================================================================
         const App = () => {
             const [user, setUser] = React.useState(null);
             const [loginError, setLoginError] = React.useState(null);
+            
             const handleLogin = (res) => {
                 try {
                     const p = JSON.parse(atob(res.credential.split('.')[1]));
                     setUser({ name: p.name, email: p.email });
-                } catch (e) { setLoginError("Error de acceso."); }
+                } catch (e) { 
+                    setLoginError("Error de acceso."); 
+                }
             };
-            // Se eliminó el ';' al final de la línea return para mayor compatibilidad con JSX/Babel
-            return user ? <Dashboard user={user} onLogout={() => setUser(null)} /> : <Login onLogin={handleLogin} loginError={loginError} />;
+            
+            return user 
+                ? <Dashboard user={user} onLogout={() => setUser(null)} /> 
+                : <Login onLogin={handleLogin} loginError={loginError} />;
         };
 
+        // ====================================================================
+        // INICIALIZACIÓN
+        // ====================================================================
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-        document.addEventListener('DOMContentLoaded', () => { const el = document.getElementById('copyright-year'); if(el) el.textContent = new Date().getFullYear(); });
+        
+        document.addEventListener('DOMContentLoaded', () => { 
+            const el = document.getElementById('copyright-year'); 
+            if(el) el.textContent = new Date().getFullYear(); 
+        });
     </script>
 </body>
 </html>
