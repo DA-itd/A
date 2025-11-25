@@ -7,27 +7,22 @@
     
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
     
-    <!-- React y Babel (Usando versiones de producción para mayor estabilidad) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Estilos y Utilidades -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
-    <!-- Librerías para Reportes (PDF, Excel) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
-    <!-- Google Identity -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -60,7 +55,7 @@
                 color: black !important; 
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important; 
-                padding-top: 60px; /* Header más pequeño */
+                padding-top: 20px !important; /* FIX: Reducido de 60px a 20px para subir el encabezado */
                 padding-bottom: 30px;
                 font-size: 9pt !important; /* Texto más compacto */
             }
@@ -272,7 +267,6 @@
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800">
 
-    <!-- Encabezado EXCLUSIVO para Impresión -->
     <div class="print-header-element container mx-auto">
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM">
         <div class="text-center">
@@ -282,7 +276,6 @@
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD">
     </div>
 
-    <!-- Header Web -->
     <header class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A] no-print">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
@@ -303,7 +296,6 @@
     </div>
 
     <div id="root">
-        <!-- Mensaje de carga inicial por si React tarda en arrancar -->
         <div class="flex justify-center items-center h-64">
             <div class="text-center">
                 <div class="animate-spin h-10 w-10 border-4 border-[#1B396A] rounded-full border-t-transparent mx-auto mb-4"></div>
@@ -312,7 +304,6 @@
         </div>
     </div>
 
-    <!-- Footer Web -->
     <footer class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449] no-print">
         <div class="container mx-auto px-4">
              <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
@@ -321,11 +312,9 @@
         </div>
     </footer>
     
-    <!-- Footer de Impresión -->
     <div class="print-footer-element">
         <span>© Coordinación de Actualización Docente | Reporte Generado: <script>document.write(new Date().toLocaleDateString());</script></span>
-        <!-- El número de página se inserta via CSS -->
-    </div>
+        </div>
 
     <script type="text/babel">
         // Fix: Explicitly access global React/ReactDOM to avoid ReferenceError
