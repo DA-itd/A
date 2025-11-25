@@ -44,7 +44,7 @@
         /* Elementos exclusivos de impresión */
         .print-header-element, .print-footer-element { display: none; }
 
-        /* NUEVA SECCIÓN DE IMPRESIÓN OPTIMIZADA (Para Ctrl+P) */
+        /* SECCIÓN DE IMPRESIÓN OPTIMIZADA (Para Ctrl+P) */
         @media print {
             @page { 
                 size: letter portrait; 
@@ -68,14 +68,14 @@
             }
             
             /* ============================================ */
-            /* ENCABEZADO COMPACTO (ELEMENTO FIJO) */
+            /* ENCABEZADO COMPACTO - AHORA NO ES FIJO (SOLO EN PÁGINA 1) */
             /* ============================================ */
             .print-header-element { 
                 display: flex !important; 
                 justify-content: space-between; 
                 align-items: center; 
-                position: fixed;
-                top: 0;
+                position: static !important; /* <--- YA NO ES FIJO */
+                top: auto;
                 left: 0;
                 right: 0;
                 height: 50px; 
@@ -108,12 +108,12 @@
             }
             
             /* ============================================ */
-            /* PIE DE PÁGINA COMPACTO */
+            /* PIE DE PÁGINA COMPACTO - AHORA FIJO */
             /* ============================================ */
             .print-footer-element { 
                 display: flex !important; 
                 justify-content: space-between;
-                position: fixed; 
+                position: fixed; /* <-- Este sí se mantiene fijo en todas las páginas */
                 bottom: 0; 
                 left: 0; 
                 width: 100%; 
@@ -128,7 +128,7 @@
             }
             
             /* ============================================ */
-            /* CONTENEDOR PRINCIPAL Y FIX SOLAPAMIENTO EN PÁGINA 2+ */
+            /* CONTENEDOR PRINCIPAL Y MARGENES - REVERTIDOS DEL HACK FIJO */
             /* ============================================ */
             #dashboard-content { 
                 width: 100% !important; 
@@ -138,17 +138,17 @@
                 padding-bottom: 0px !important; 
             }
 
-            /* FIX CRÍTICO: Empujar TODOS los bloques principales 60px hacia abajo. */
+            /* FIX CRÍTICO: Restaurar márgenes normales, eliminando el hack de margin-top de 60px */
             #dashboard-content > .grid,
             #dashboard-content > .mb-8.h-96 {
-                margin-top: 60px !important; 
+                margin-top: 8px !important; /* Margen normal después del encabezado (solo en pág 1) o después del corte (pág 2+) */
                 margin-bottom: 8px !important; 
                 page-break-inside: avoid !important;
             }
             
-            /* Revertir el margen superior del primer grid (KPIs) para que solo tenga el margen del bloque */
+            /* Restaurar el margen superior del primer grid (KPIs) */
             .md\:grid-cols-4 {
-                 margin-top: 60px !important; 
+                 margin-top: 12px !important; 
                  margin-bottom: 12px !important; 
             }
             
@@ -455,14 +455,14 @@
                 try {
                     // 1. Captura el contenido como un canvas (la "captura de pantalla")
                     const canvas = await html2canvas(dashboardContent, {
-                        scale: 2, // Aumenta la resolución
+                        scale: 3, // <--- CAMBIO CLAVE: Aumentado a 3 para más nitidez
                         logging: false,
                         useCORS: true,
-                        backgroundColor: '#f9fafb' // Asegura el fondo claro
+                        backgroundColor: '#f9fafb' 
                     });
 
-                    // 2. Convierte el canvas a imagen
-                    const imgData = canvas.toDataURL('image/jpeg', 0.9);
+                    // 2. Convierte el canvas a imagen (usando PNG, que es lossless)
+                    const imgData = canvas.toDataURL('image/png'); // <--- CAMBIO CLAVE: PNG para cero pérdida de calidad
                     
                     // 3. Crea el documento PDF
                     const pdf = new jsPDF('p', 'mm', 'letter');
@@ -474,8 +474,8 @@
                     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width; 
 
                     // 4. Agrega la imagen al PDF (la captura)
-                    pdf.addImage(imgData, 'JPEG', margin, margin, pdfWidth, pdfHeight);
-
+                    pdf.addImage(imgData, 'PNG', margin, margin, pdfWidth, pdfHeight); // <--- CAMBIO CLAVE: 'PNG'
+                    
                     // 5. Guarda el archivo
                     pdf.save('Reporte_Estadisticas_ITD_Captura.pdf');
 
