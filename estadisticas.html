@@ -373,7 +373,7 @@
             };
 
             // ================================================================
-            // FUNCIÓN: Generar PDF con Preview - VERSIÓN MEJORADA
+            // FUNCIÓN: Generar PDF con Preview - VERSIÓN CORREGIDA
             // ================================================================
             const generatePDF = async () => {
                 setPdfState({ generating: true, preview: null, blob: null });
@@ -389,21 +389,18 @@
                     
                     let yPos = margin;
                     
-                    // ========== ENCABEZADO (SIN LOGOS) ==========
-                    // Rectángulo de fondo para el encabezado
+                    // ========== ENCABEZADO ==========
                     pdf.setFillColor(27, 57, 106);
                     pdf.rect(0, 0, pageWidth, 18, 'F');
                     
-                    // Título principal
                     pdf.setFontSize(14);
                     pdf.setFont('helvetica', 'bold');
                     pdf.setTextColor(255, 255, 255);
-                    pdf.text('INSTITUTO TECNOLÓGICO DE DURANGO', pageWidth / 2, 8, { align: 'center' });
+                    pdf.text('INSTITUTO TECNOLOGICO DE DURANGO', pageWidth / 2, 8, { align: 'center' });
                     
-                    // Subtítulo
                     pdf.setFontSize(10);
                     pdf.setFont('helvetica', 'normal');
-                    pdf.text('Coordinación de Actualización Docente - Reporte Estadístico', pageWidth / 2, 14, { align: 'center' });
+                    pdf.text('Coordinacion de Actualizacion Docente - Reporte Estadistico', pageWidth / 2, 14, { align: 'center' });
                     
                     yPos = 22;
                     
@@ -411,10 +408,9 @@
                     pdf.setFontSize(9);
                     pdf.setFont('helvetica', 'bold');
                     pdf.setTextColor(157, 36, 73);
-                    const periodoTexto = period === 'ACTUAL' ? 'Periodo Actual' : `Histórico ${period}`;
-                    pdf.text(`📅 ${periodoTexto}`, margin, yPos);
+                    const periodoTexto = period === 'ACTUAL' ? 'Periodo Actual' : 'Historico ' + period;
+                    pdf.text('Periodo: ' + periodoTexto, margin, yPos);
                     
-                    // Fecha de generación
                     pdf.setFont('helvetica', 'normal');
                     pdf.setTextColor(100, 100, 100);
                     const today = new Date().toLocaleDateString('es-MX', {
@@ -422,16 +418,16 @@
                         month: 'long',
                         day: 'numeric'
                     });
-                    pdf.text(`Generado: ${today}`, pageWidth - margin, yPos, { align: 'right' });
+                    pdf.text('Generado: ' + today, pageWidth - margin, yPos, { align: 'right' });
                     
                     yPos += 6;
                     
                     // ========== KPIs ==========
                     const kpiData = [
                         { value: stats.totalInscripciones, label: 'Docentes Inscritos', color: [27,57,106] },
-                        { value: stats.coberturaDocente.actualizados, label: 'Docentes Únicos', color: [212,175,55] },
+                        { value: stats.coberturaDocente.actualizados, label: 'Docentes Unicos', color: [212,175,55] },
                         { value: stats.coberturaDocente.recurrentes, label: 'Recurrentes', color: [157,36,73] },
-                        { value: `${stats.coberturaDocente.porcentaje}%`, label: 'Cobertura', color: [84,110,122] }
+                        { value: stats.coberturaDocente.porcentaje + '%', label: 'Cobertura', color: [84,110,122] }
                     ];
                     
                     const kpiWidth = (contentWidth - 9) / 4;
@@ -440,106 +436,98 @@
                     kpiData.forEach((kpi, idx) => {
                         const x = margin + (idx * (kpiWidth + 3));
                         
-                        // Fondo
                         pdf.setFillColor(250, 250, 250);
                         pdf.setDrawColor(200, 200, 200);
                         pdf.roundedRect(x, yPos, kpiWidth, kpiHeight, 2, 2, 'FD');
                         
-                        // Borde de color izquierdo
                         pdf.setFillColor(...kpi.color);
                         pdf.rect(x, yPos, 2, kpiHeight, 'F');
                         
-                        // Valor
                         pdf.setFontSize(13);
                         pdf.setFont('helvetica', 'bold');
                         pdf.setTextColor(40, 40, 40);
                         pdf.text(String(kpi.value), x + kpiWidth/2 + 1, yPos + 6, { align: 'center' });
                         
-                        // Etiqueta
                         pdf.setFontSize(5.5);
                         pdf.setFont('helvetica', 'normal');
                         pdf.setTextColor(100, 100, 100);
                         pdf.text(kpi.label.toUpperCase(), x + kpiWidth/2 + 1, yPos + 11, { align: 'center' });
                     });
                     
-                    yPos += kpiHeight + 6;
+                    yPos += kpiHeight + 5;
                     
-                    // ========== CAPTURAR Y AGREGAR GRÁFICAS ==========
-                    
-                    // Fila 1: Cursos (más grande) + Género (más pequeña)
+                    // ========== FILA 1: Cursos + Género ==========
                     const coursesImg = await captureElement('chartBox-chartCourses');
                     const genderImg = await captureElement('chartBox-chartGender');
                     
-                    // Altura aumentada para "Cursos más demandados"
-                    const row1Height = 68;
+                    const row1Height = 62;
+                    const coursesWidth = contentWidth * 0.72;
+                    const genderSize = 38; // Cuadrado para mantener proporción circular
                     
                     if (coursesImg) {
-                        // Cursos ocupa 78% del ancho
-                        const coursesWidth = contentWidth * 0.78;
                         pdf.addImage(coursesImg, 'PNG', margin, yPos, coursesWidth, row1Height);
                     }
                     
                     if (genderImg) {
-                        // Género ocupa 20% del ancho
-                        const genderX = margin + contentWidth * 0.80;
-                        const genderWidth = contentWidth * 0.20;
-                        pdf.addImage(genderImg, 'PNG', genderX, yPos, genderWidth, row1Height);
+                        // Centrar verticalmente la gráfica circular
+                        const genderX = margin + coursesWidth + 5;
+                        const genderY = yPos + (row1Height - genderSize) / 2;
+                        pdf.addImage(genderImg, 'PNG', genderX, genderY, genderSize, genderSize);
                     }
                     
                     yPos += row1Height + 4;
                     
-                    // Fila 2: Departamentos + Tipo
+                    // ========== FILA 2: Departamentos + Tipo (MÁS GRANDE) ==========
                     const deptsImg = await captureElement('chartBox-chartDepts');
                     const typeImg = await captureElement('chartBox-chartType');
                     
-                    const row2Height = 52;
+                    const row2Height = 58; // Aumentado de 52 a 58
                     
                     if (deptsImg) {
-                        const deptsWidth = contentWidth * 0.68;
+                        const deptsWidth = contentWidth * 0.65;
                         pdf.addImage(deptsImg, 'PNG', margin, yPos, deptsWidth, row2Height);
                     }
                     
                     if (typeImg) {
-                        const typeX = margin + contentWidth * 0.70;
-                        const typeWidth = contentWidth * 0.30;
+                        const typeX = margin + contentWidth * 0.67;
+                        const typeWidth = contentWidth * 0.33;
                         pdf.addImage(typeImg, 'PNG', typeX, yPos, typeWidth, row2Height);
                     }
                     
                     yPos += row2Height + 3;
                     
-                    // Leyenda de departamentos (compacta)
-                    pdf.setFontSize(6.5);
+                    // ========== LEYENDA ==========
+                    pdf.setFontSize(6);
                     pdf.setFont('helvetica', 'bold');
                     pdf.setTextColor(60, 60, 60);
                     pdf.text('Siglas:', margin, yPos);
                     
                     pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(5.5);
+                    pdf.setFontSize(5);
                     
-                    // Leyenda en una sola línea si es posible
-                    let legendText = processedDepts.legend.map(item => `${item.acronym}: ${item.name}`).join('  |  ');
-                    if (legendText.length > 120) {
-                        // Si es muy larga, dividir en 2 líneas
-                        const half = Math.ceil(processedDepts.legend.length / 2);
-                        const line1 = processedDepts.legend.slice(0, half).map(item => `${item.acronym}: ${item.name}`).join('  |  ');
-                        const line2 = processedDepts.legend.slice(half).map(item => `${item.acronym}: ${item.name}`).join('  |  ');
+                    const legendItems = processedDepts.legend.map(item => item.acronym + ': ' + item.name);
+                    const legendText = legendItems.join('  |  ');
+                    
+                    if (legendText.length > 130) {
+                        const half = Math.ceil(legendItems.length / 2);
                         pdf.setTextColor(80, 80, 80);
-                        pdf.text(line1, margin + 12, yPos);
+                        pdf.text(legendItems.slice(0, half).join('  |  '), margin + 10, yPos);
                         yPos += 3;
-                        pdf.text(line2, margin, yPos);
-                        yPos += 4;
+                        pdf.text(legendItems.slice(half).join('  |  '), margin, yPos);
+                        yPos += 3;
                     } else {
                         pdf.setTextColor(80, 80, 80);
-                        pdf.text(legendText, margin + 12, yPos);
-                        yPos += 5;
+                        pdf.text(legendText, margin + 10, yPos);
+                        yPos += 4;
                     }
                     
-                    // Fila 3: Histórico
+                    // ========== FILA 3: Histórico (USA TODO EL ESPACIO RESTANTE) ==========
                     const historyImg = await captureElement('chartBox-chartHistory');
                     
                     if (historyImg) {
-                        const remainingHeight = pageHeight - yPos - 12;
-                        const historyHeight = Math.min(remainingHeight, 50);
+                        const footerHeight = 10;
+                        const remainingHeight = pageHeight - yPos - footerHeight - 2;
+                        const historyHeight = Math.max(remainingHeight, 45); // Mínimo 45mm
                         pdf.addImage(historyImg, 'PNG', margin, yPos, contentWidth, historyHeight);
                     }
                     
@@ -550,7 +538,7 @@
                     pdf.setFontSize(7);
                     pdf.setFont('helvetica', 'normal');
                     pdf.setTextColor(255, 255, 255);
-                    pdf.text('Coordinación de Actualización Docente - Instituto Tecnológico de Durango', pageWidth / 2, pageHeight - 3, { align: 'center' });
+                    pdf.text('Coordinacion de Actualizacion Docente - Instituto Tecnologico de Durango', pageWidth / 2, pageHeight - 3, { align: 'center' });
                     
                     // Crear blob para preview
                     const pdfBlob = pdf.output('blob');
@@ -560,7 +548,7 @@
                         generating: false, 
                         preview: pdfUrl, 
                         blob: pdfBlob,
-                        filename: `Reporte_Estadisticas_${period}_${new Date().toISOString().split('T')[0]}.pdf`
+                        filename: 'Reporte_Estadisticas_' + period + '_' + new Date().toISOString().split('T')[0] + '.pdf'
                     });
                     
                 } catch (err) {
