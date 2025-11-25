@@ -373,7 +373,7 @@
             };
 
             // ================================================================
-            // FUNCIÓN: Generar PDF con Preview
+            // FUNCIÓN: Generar PDF con Preview - VERSIÓN MEJORADA
             // ================================================================
             const generatePDF = async () => {
                 setPdfState({ generating: true, preview: null, blob: null });
@@ -384,176 +384,173 @@
                     
                     const pageWidth = pdf.internal.pageSize.getWidth();
                     const pageHeight = pdf.internal.pageSize.getHeight();
-                    const margin = 12;
+                    const margin = 10;
                     const contentWidth = pageWidth - (margin * 2);
                     
                     let yPos = margin;
                     
-                    // ========== ENCABEZADO ==========
-                    try {
-                        const logoTecNM = await loadImage('https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg');
-                        if (logoTecNM) pdf.addImage(logoTecNM, 'PNG', margin, yPos, 28, 14);
-                    } catch(e) {}
+                    // ========== ENCABEZADO (SIN LOGOS) ==========
+                    // Rectángulo de fondo para el encabezado
+                    pdf.setFillColor(27, 57, 106);
+                    pdf.rect(0, 0, pageWidth, 18, 'F');
                     
-                    try {
-                        const logoITD = await loadImage('https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png');
-                        if (logoITD) pdf.addImage(logoITD, 'PNG', pageWidth - margin - 22, yPos, 22, 14);
-                    } catch(e) {}
-                    
+                    // Título principal
                     pdf.setFontSize(14);
                     pdf.setFont('helvetica', 'bold');
-                    pdf.setTextColor(27, 57, 106);
-                    pdf.text('INSTITUTO TECNOLOGICO DE DURANGO', pageWidth / 2, yPos + 6, { align: 'center' });
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.text('INSTITUTO TECNOLÓGICO DE DURANGO', pageWidth / 2, 8, { align: 'center' });
                     
+                    // Subtítulo
                     pdf.setFontSize(10);
-                    pdf.setTextColor(157, 36, 73);
-                    pdf.text('Coordinacion de Actualizacion Docente - Reporte Estadistico', pageWidth / 2, yPos + 12, { align: 'center' });
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text('Coordinación de Actualización Docente - Reporte Estadístico', pageWidth / 2, 14, { align: 'center' });
                     
-                    yPos += 18;
-                    
-                    // Línea separadora
-                    pdf.setDrawColor(27, 57, 106);
-                    pdf.setLineWidth(0.8);
-                    pdf.line(margin, yPos, pageWidth - margin, yPos);
-                    
-                    yPos += 6;
+                    yPos = 22;
                     
                     // ========== PERIODO ==========
                     pdf.setFontSize(9);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(157, 36, 73);
+                    const periodoTexto = period === 'ACTUAL' ? 'Periodo Actual' : `Histórico ${period}`;
+                    pdf.text(`📅 ${periodoTexto}`, margin, yPos);
+                    
+                    // Fecha de generación
                     pdf.setFont('helvetica', 'normal');
                     pdf.setTextColor(100, 100, 100);
-                    const periodoTexto = period === 'ACTUAL' ? 'Periodo Actual' : `Historico ${period}`;
-                    pdf.text(`Periodo: ${periodoTexto}`, margin, yPos);
+                    const today = new Date().toLocaleDateString('es-MX', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    pdf.text(`Generado: ${today}`, pageWidth - margin, yPos, { align: 'right' });
                     
                     yPos += 6;
                     
                     // ========== KPIs ==========
                     const kpiData = [
                         { value: stats.totalInscripciones, label: 'Docentes Inscritos', color: [27,57,106] },
-                        { value: stats.coberturaDocente.actualizados, label: 'Docentes Unicos', color: [212,175,55] },
+                        { value: stats.coberturaDocente.actualizados, label: 'Docentes Únicos', color: [212,175,55] },
                         { value: stats.coberturaDocente.recurrentes, label: 'Recurrentes', color: [157,36,73] },
                         { value: `${stats.coberturaDocente.porcentaje}%`, label: 'Cobertura', color: [84,110,122] }
                     ];
                     
                     const kpiWidth = (contentWidth - 9) / 4;
-                    const kpiHeight = 16;
+                    const kpiHeight = 14;
                     
                     kpiData.forEach((kpi, idx) => {
                         const x = margin + (idx * (kpiWidth + 3));
                         
                         // Fondo
-                        pdf.setFillColor(248, 249, 250);
-                        pdf.setDrawColor(220, 220, 220);
+                        pdf.setFillColor(250, 250, 250);
+                        pdf.setDrawColor(200, 200, 200);
                         pdf.roundedRect(x, yPos, kpiWidth, kpiHeight, 2, 2, 'FD');
                         
-                        // Borde de color
+                        // Borde de color izquierdo
                         pdf.setFillColor(...kpi.color);
-                        pdf.rect(x, yPos, 2.5, kpiHeight, 'F');
+                        pdf.rect(x, yPos, 2, kpiHeight, 'F');
                         
                         // Valor
-                        pdf.setFontSize(14);
+                        pdf.setFontSize(13);
                         pdf.setFont('helvetica', 'bold');
                         pdf.setTextColor(40, 40, 40);
-                        pdf.text(String(kpi.value), x + kpiWidth/2 + 1, yPos + 7, { align: 'center' });
+                        pdf.text(String(kpi.value), x + kpiWidth/2 + 1, yPos + 6, { align: 'center' });
                         
                         // Etiqueta
-                        pdf.setFontSize(6);
+                        pdf.setFontSize(5.5);
                         pdf.setFont('helvetica', 'normal');
                         pdf.setTextColor(100, 100, 100);
-                        pdf.text(kpi.label.toUpperCase(), x + kpiWidth/2 + 1, yPos + 12, { align: 'center' });
+                        pdf.text(kpi.label.toUpperCase(), x + kpiWidth/2 + 1, yPos + 11, { align: 'center' });
                     });
                     
-                    yPos += kpiHeight + 8;
+                    yPos += kpiHeight + 6;
                     
                     // ========== CAPTURAR Y AGREGAR GRÁFICAS ==========
                     
-                    // Fila 1: Cursos + Género
+                    // Fila 1: Cursos (más grande) + Género (más pequeña)
                     const coursesImg = await captureElement('chartBox-chartCourses');
                     const genderImg = await captureElement('chartBox-chartGender');
                     
-                    const row1Height = 52;
+                    // Altura aumentada para "Cursos más demandados"
+                    const row1Height = 68;
                     
                     if (coursesImg) {
-                        const coursesWidth = contentWidth * 0.72;
+                        // Cursos ocupa 78% del ancho
+                        const coursesWidth = contentWidth * 0.78;
                         pdf.addImage(coursesImg, 'PNG', margin, yPos, coursesWidth, row1Height);
                     }
                     
                     if (genderImg) {
-                        const genderX = margin + contentWidth * 0.74;
-                        const genderWidth = contentWidth * 0.26;
+                        // Género ocupa 20% del ancho
+                        const genderX = margin + contentWidth * 0.80;
+                        const genderWidth = contentWidth * 0.20;
                         pdf.addImage(genderImg, 'PNG', genderX, yPos, genderWidth, row1Height);
                     }
                     
-                    yPos += row1Height + 5;
+                    yPos += row1Height + 4;
                     
                     // Fila 2: Departamentos + Tipo
                     const deptsImg = await captureElement('chartBox-chartDepts');
                     const typeImg = await captureElement('chartBox-chartType');
                     
-                    const row2Height = 48;
+                    const row2Height = 52;
                     
                     if (deptsImg) {
-                        const deptsWidth = contentWidth * 0.65;
+                        const deptsWidth = contentWidth * 0.68;
                         pdf.addImage(deptsImg, 'PNG', margin, yPos, deptsWidth, row2Height);
                     }
                     
                     if (typeImg) {
-                        const typeX = margin + contentWidth * 0.67;
-                        const typeWidth = contentWidth * 0.33;
+                        const typeX = margin + contentWidth * 0.70;
+                        const typeWidth = contentWidth * 0.30;
                         pdf.addImage(typeImg, 'PNG', typeX, yPos, typeWidth, row2Height);
                     }
                     
-                    yPos += row2Height + 5;
+                    yPos += row2Height + 3;
                     
-                    // Leyenda de departamentos
-                    pdf.setFontSize(7);
+                    // Leyenda de departamentos (compacta)
+                    pdf.setFontSize(6.5);
                     pdf.setFont('helvetica', 'bold');
                     pdf.setTextColor(60, 60, 60);
-                    pdf.text('Leyenda de Siglas:', margin, yPos);
+                    pdf.text('Siglas:', margin, yPos);
                     
-                    yPos += 4;
                     pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(6);
+                    pdf.setFontSize(5.5);
                     
-                    processedDepts.legend.forEach((item, idx) => {
-                        const col = idx % 3;
-                        const row = Math.floor(idx / 3);
-                        const lx = margin + (col * 65);
-                        const ly = yPos + (row * 4);
-                        
-                        pdf.setFont('helvetica', 'bold');
-                        pdf.setTextColor(27, 57, 106);
-                        pdf.text(`${item.acronym}:`, lx, ly);
-                        
-                        pdf.setFont('helvetica', 'normal');
+                    // Leyenda en una sola línea si es posible
+                    let legendText = processedDepts.legend.map(item => `${item.acronym}: ${item.name}`).join('  |  ');
+                    if (legendText.length > 120) {
+                        // Si es muy larga, dividir en 2 líneas
+                        const half = Math.ceil(processedDepts.legend.length / 2);
+                        const line1 = processedDepts.legend.slice(0, half).map(item => `${item.acronym}: ${item.name}`).join('  |  ');
+                        const line2 = processedDepts.legend.slice(half).map(item => `${item.acronym}: ${item.name}`).join('  |  ');
                         pdf.setTextColor(80, 80, 80);
-                        const shortName = item.name.length > 28 ? item.name.substring(0, 28) + '...' : item.name;
-                        pdf.text(shortName, lx + 12, ly);
-                    });
-                    
-                    yPos += Math.ceil(processedDepts.legend.length / 3) * 4 + 6;
+                        pdf.text(line1, margin + 12, yPos);
+                        yPos += 3;
+                        pdf.text(line2, margin, yPos);
+                        yPos += 4;
+                    } else {
+                        pdf.setTextColor(80, 80, 80);
+                        pdf.text(legendText, margin + 12, yPos);
+                        yPos += 5;
+                    }
                     
                     // Fila 3: Histórico
                     const historyImg = await captureElement('chartBox-chartHistory');
                     
                     if (historyImg) {
-                        const historyHeight = 45;
+                        const remainingHeight = pageHeight - yPos - 12;
+                        const historyHeight = Math.min(remainingHeight, 50);
                         pdf.addImage(historyImg, 'PNG', margin, yPos, contentWidth, historyHeight);
                     }
                     
                     // ========== PIE DE PÁGINA ==========
+                    pdf.setFillColor(27, 57, 106);
+                    pdf.rect(0, pageHeight - 8, pageWidth, 8, 'F');
+                    
                     pdf.setFontSize(7);
                     pdf.setFont('helvetica', 'normal');
-                    pdf.setTextColor(120, 120, 120);
-                    
-                    const today = new Date().toLocaleDateString('es-MX', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
-                    
-                    pdf.text('Coordinacion de Actualizacion Docente - ITD', margin, pageHeight - 8);
-                    pdf.text(`Generado: ${today}`, pageWidth - margin, pageHeight - 8, { align: 'right' });
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.text('Coordinación de Actualización Docente - Instituto Tecnológico de Durango', pageWidth / 2, pageHeight - 3, { align: 'center' });
                     
                     // Crear blob para preview
                     const pdfBlob = pdf.output('blob');
