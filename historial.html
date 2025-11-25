@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -304,7 +303,19 @@
 
         const Dashboard = ({ user, data, onLogout, isAdmin, onAdminSearch }) => {
             const { teacher, courses } = data;
-            const years = [...new Set(courses.map(c => c.year))].sort().reverse();
+            
+            // Fix: Ensure all years are properly extracted and sorted
+            const years = [...new Set(courses.map(c => {
+                // Handle cases where year might be missing or invalid
+                if (!c.year || c.year === "") return "Sin año";
+                return c.year.toString();
+            }))].sort((a, b) => {
+                // Handle special case for "Sin año"
+                if (a === "Sin año") return 1;
+                if (b === "Sin año") return -1;
+                // Sort years in descending order
+                return parseInt(b) - parseInt(a);
+            });
             
             return (
                 <div className="animate-fadeIn container mx-auto px-4 py-8 max-w-5xl">
@@ -340,11 +351,19 @@
                         {years.map(year => (
                             <div key={year}>
                                 <div className="flex items-center mb-4">
-                                    <span className="bg-orange-600 text-white font-bold px-4 py-1 rounded-full text-sm z-10 shadow-md">Ciclo {year}</span>
+                                    <span className="bg-orange-600 text-white font-bold px-4 py-1 rounded-full text-sm z-10 shadow-md">
+                                        {year === "Sin año" ? "Sin información de año" : `Ciclo ${year}`}
+                                    </span>
                                     <div className="h-0.5 bg-orange-200 flex-grow ml-4"></div>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {courses.filter(c => c.year === year).map((c, i) => (
+                                    {courses.filter(c => {
+                                        // Handle filtering for courses without year
+                                        if (!c.year || c.year === "") {
+                                            return year === "Sin año";
+                                        }
+                                        return c.year.toString() === year;
+                                    }).map((c, i) => (
                                         <div key={i} className="bg-white p-5 rounded-lg shadow-sm hover:shadow-md border border-gray-100 transition-all">
                                             <div className="flex justify-between mb-2">
                                                 <span className={`text-xs px-2 py-0.5 rounded font-bold ${c.type === 'Profesional' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-800'}`}>{c.type}</span>
