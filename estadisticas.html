@@ -360,8 +360,8 @@
         </div>
 
     <script type="text/babel">
-        // Fix: Explicitly access global React/ReactDOM to avoid ReferenceError
-        const { useState, useEffect, useRef, useMemo, useCallback } = window.React;
+        // FIX CRÍTICO: Acceso seguro a React y ReactDOM
+        const React = window.React;
         const ReactDOM = window.ReactDOM;
 
         const CONFIG = {
@@ -393,9 +393,9 @@
         };
 
         const Login = ({ onLogin, loginError }) => {
-            const googleButtonRef = useRef(null);
+            const googleButtonRef = React.useRef(null);
 
-            useEffect(() => {
+            React.useEffect(() => {
                 let intervalId;
                 const initGoogle = () => {
                     if (window.google && window.google.accounts && googleButtonRef.current) {
@@ -425,18 +425,13 @@
         };
 
         const Dashboard = ({ user, onLogout }) => {
-            const [stats, setStats] = useState(null);
-            const [loading, setLoading] = useState(true);
-            const [error, setError] = useState(null);
-            const [period, setPeriod] = useState('ACTUAL');
-            const [availableYears, setAvailableYears] = useState([]);
+            const [stats, setStats] = React.useState(null);
+            const [loading, setLoading] = React.useState(true);
+            const [error, setError] = React.useState(null);
+            const [period, setPeriod] = React.useState('ACTUAL');
+            const [availableYears, setAvailableYears] = React.useState([]);
 
-            // **********************************************
-            // ELIMINACIÓN DE LA FUNCIÓN generateReportPDF por baja calidad
-            // **********************************************
-            // const generateReportPDF = async () => {...}
-
-            useEffect(() => {
+            React.useEffect(() => {
                 let isMounted = true;
                 setLoading(true);
                 setError(null);
@@ -456,7 +451,7 @@
                 return () => { isMounted = false; };
             }, [period]);
 
-            const processedDepts = useMemo(() => {
+            const processedDepts = React.useMemo(() => {
                 if (!stats?.topDepartamentos) return { chartData: {}, legend: [] };
                 const chartData = {}; const legend = [];
                 stats.topDepartamentos.forEach(([name, count]) => {
@@ -483,7 +478,6 @@
                                 <option value="ACTUAL">🟢 Periodo Actual</option>
                                 {availableYears.filter(y => y !== 'ACTUAL').map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
                             </select>
-                            {/* BOTÓN DE CAPTURA ELIMINADO POR BAJA CALIDAD */}
                             <button onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-bold transition flex items-center gap-2"><span>🖨️</span> Imprimir Reporte</button>
                             <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm font-bold text-gray-700 border border-gray-300 transition">Cerrar Sesión</button>
                         </div>
@@ -532,10 +526,10 @@
         };
         
         const StatsChart = ({ type, data, title, id, horizontal = false }) => {
-            const chartRef = useRef(null);
-            const canvasRef = useRef(null);
+            const chartRef = React.useRef(null);
+            const canvasRef = React.useRef(null);
 
-            useEffect(() => {
+            React.useEffect(() => {
                 if (!canvasRef.current || !data) return;
                 if (typeof window.Chart === 'undefined') return;
                 
@@ -550,6 +544,13 @@
                 const ctx = canvasRef.current.getContext('2d');
                 const isHistory = id === 'chartHistory';
                 const isPie = type === 'pie' || type === 'doughnut';
+                
+                // Determinamos el tamaño de fuente para impresión/pantalla de manera segura
+                const isPrinting = window.matchMedia && window.matchMedia('print').matches;
+                const printFontSize = 8;
+                const screenFontSize = 10;
+                const pieLabelFontSize = isPrinting ? 8 : 12;
+                const historyLabelFontSize = isPrinting ? 7 : 11;
                 
                 let config = {
                     type: isHistory ? 'line' : type,
@@ -567,7 +568,7 @@
                                     stepSize: 1, 
                                     color: '#000000', // Texto negro
                                     font: { 
-                                        size: window.matchMedia('print').matches ? 8 : 10, /* 8pt para impresión */
+                                        size: isPrinting ? printFontSize : screenFontSize, /* Tamaño de impresión */
                                         weight: 'bold' 
                                     },
                                 },
@@ -580,7 +581,7 @@
                                     stepSize: 1,
                                     color: '#000000',
                                     font: { 
-                                        size: window.matchMedia('print').matches ? 8 : 10, /* 8pt para impresión */
+                                        size: isPrinting ? printFontSize : screenFontSize, /* Tamaño de impresión */
                                         weight: 'bold' 
                                     },
                                 },
@@ -595,7 +596,7 @@
                                 labels: { 
                                     color: '#000000', // Texto de leyenda negro
                                     font: {
-                                        size: window.matchMedia('print').matches ? 8 : 12, /* 8pt para impresión */
+                                        size: pieLabelFontSize, /* Ajustado para impresión */
                                         weight: 'bold'
                                     }
                                 }
@@ -628,7 +629,7 @@
                         },
                         font: {
                             weight: 'bold',
-                            size: window.matchMedia('print').matches ? 8 : 12
+                            size: pieLabelFontSize 
                         }
                     };
                 }
@@ -664,7 +665,7 @@
                         color: '#444',
                         font: {
                             weight: 'bold',
-                            size: window.matchMedia('print').matches ? 7 : 11
+                            size: historyLabelFontSize
                         },
                         backgroundColor: 'rgba(255, 255, 255, 0.7)',
                         borderRadius: 4,
@@ -691,15 +692,16 @@
         };
 
         const App = () => {
-            const [user, setUser] = useState(null);
-            const [loginError, setLoginError] = useState(null);
+            const [user, setUser] = React.useState(null);
+            const [loginError, setLoginError] = React.useState(null);
             const handleLogin = (res) => {
                 try {
                     const p = JSON.parse(atob(res.credential.split('.')[1]));
                     setUser({ name: p.name, email: p.email });
                 } catch (e) { setLoginError("Error de acceso."); }
             };
-            return user ? <Dashboard user={user} onLogout={() => setUser(null)} /> : <Login onLogin={handleLogin} loginError={loginError} />;\
+            // Se eliminó el ';' al final de la línea return para mayor compatibilidad con JSX/Babel
+            return user ? <Dashboard user={user} onLogout={() => setUser(null)} /> : <Login onLogin={handleLogin} loginError={loginError} />;
         };
 
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
