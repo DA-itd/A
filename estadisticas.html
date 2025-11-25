@@ -58,7 +58,7 @@
                 print-color-adjust: exact !important; 
                 padding-top: 0px !important; 
                 padding-bottom: 30px;
-                font-size: 9pt !important; 
+                font-size: 8.5pt !important; /* Ligeramente más pequeño para más compactación */
             }
             
             /* Ocultar elementos innecesarios */
@@ -68,13 +68,13 @@
             }
             
             /* ============================================ */
-            /* ENCABEZADO COMPACTO - AHORA NO ES FIJO (SOLO EN PÁGINA 1) */
+            /* ENCABEZADO COMPACTO - NO FIJO */
             /* ============================================ */
             .print-header-element { 
                 display: flex !important; 
                 justify-content: space-between; 
                 align-items: center; 
-                position: static !important; /* <--- YA NO ES FIJO */
+                position: static !important; 
                 top: auto;
                 left: 0;
                 right: 0;
@@ -93,14 +93,14 @@
                 padding: 0 15px; 
             }
             .print-header-element h1 { 
-                font-size: 11pt !important; 
+                font-size: 10pt !important; /* Reducido */
                 font-weight: 900 !important; 
                 margin: 0; 
                 color: #1B396A; 
                 line-height: 1.1; 
             }
             .print-header-element h2 { 
-                font-size: 9pt !important; 
+                font-size: 8.5pt !important; /* Reducido */
                 font-weight: bold !important; 
                 margin: 3px 0 0 0; 
                 color: #333 !important; 
@@ -108,12 +108,12 @@
             }
             
             /* ============================================ */
-            /* PIE DE PÁGINA COMPACTO - AHORA FIJO */
+            /* PIE DE PÁGINA COMPACTO - FIJO */
             /* ============================================ */
             .print-footer-element { 
                 display: flex !important; 
                 justify-content: space-between;
-                position: fixed; /* <-- Este sí se mantiene fijo en todas las páginas */
+                position: fixed; 
                 bottom: 0; 
                 left: 0; 
                 width: 100%; 
@@ -128,7 +128,7 @@
             }
             
             /* ============================================ */
-            /* CONTENEDOR PRINCIPAL Y MARGENES - REVERTIDOS DEL HACK FIJO */
+            /* CONTENEDOR PRINCIPAL Y MARGENES */
             /* ============================================ */
             #dashboard-content { 
                 width: 100% !important; 
@@ -138,20 +138,13 @@
                 padding-bottom: 0px !important; 
             }
 
-            /* FIX CRÍTICO: Restaurar márgenes normales, eliminando el hack de margin-top de 60px */
+            /* FIX CRÍTICO: Restaurar márgenes normales */
             #dashboard-content > .grid,
             #dashboard-content > .mb-8.h-96 {
-                margin-top: 8px !important; /* Margen normal después del encabezado (solo en pág 1) o después del corte (pág 2+) */
-                margin-bottom: 8px !important; 
+                margin-top: 5px !important; /* REDUCIDO de 8px */
+                margin-bottom: 5px !important; /* REDUCIDO de 8px */
                 page-break-inside: avoid !important;
             }
-            
-            /* Restaurar el margen superior del primer grid (KPIs) */
-            .md\:grid-cols-4 {
-                 margin-top: 12px !important; 
-                 margin-bottom: 12px !important; 
-            }
-            
             
             /* ============================================ */
             /* KPIs EN UNA SOLA FILA COMPACTA */
@@ -161,27 +154,29 @@
                 flex-wrap: nowrap !important;
                 gap: 5px !important;
                 justify-content: space-between;
+                margin-top: 10px !important; /* REDUCIDO de 12px */
+                margin-bottom: 10px !important; /* REDUCIDO de 12px */
             }
             .md\:grid-cols-4 > div { 
                 flex: 1 !important;
                 border: 1px solid #ddd !important; 
-                padding: 5px !important; 
+                padding: 4px !important; /* REDUCIDO de 5px */
                 margin: 0 !important;
-                min-height: 45px !important; 
+                min-height: 40px !important; /* REDUCIDO de 45px */
             }
             .md\:grid-cols-4 > div .text-3xl {
-                font-size: 1.2rem !important; 
+                font-size: 1.1rem !important; /* REDUCIDO */
             }
             .md\:grid-cols-4 > div .text-2xl {
-                font-size: 1.1rem !important; 
-                margin: 2px 0 !important;
+                font-size: 1.0rem !important; /* REDUCIDO */
+                margin: 1px 0 !important;
             }
             .md\:grid-cols-4 > div .text-\[10px\] {
                 font-size: 7pt !important; 
             }
             
             /* ============================================ */
-            /* GRÁFICAS MÁS COMPACTAS Y PERSONALIZADAS - FIX DE ALTURAS */
+            /* GRÁFICAS MÁS COMPACTAS Y PROFESIONALES - ALTURAS REDUCIDAS */
             /* ============================================ */
             .bg-white, .shadow-md, .shadow-xl, .grid > div { 
                 box-shadow: none !important; 
@@ -197,51 +192,49 @@
                 min-height: 0 !important;
             }
             
-            /* 1. GRÁFICAS LARGAS (Izquierda: Cursos Más Demandados y Top 5 Departamentos) - 400px */
-            /* Cursos Más Demandados (lg:col-span-7) */
+            /* 1. GRÁFICAS LARGAS (Izquierda: Cursos Más Demandados) */
             .grid > .lg\:col-span-7 {
-                height: 400px !important; /* Altura aumentada */
+                height: 300px !important; /* AJUSTE CLAVE: Reducido de 400px a 300px */
             }
 
-            /* Top 5 Departamentos (lg:col-span-9) - Estructura anidada: target el contenedor flex dentro */
+            /* Top 5 Departamentos */
             .grid > .lg\:col-span-9 {
-                 height: 450px !important; 
+                 height: 350px !important; /* Reducido de 450px a 350px (Incluye leyenda) */
             }
             .grid > .lg\:col-span-9 > div:first-child {
-                 height: 400px !important; 
+                 height: 300px !important; /* AJUSTE CLAVE: Reducido de 400px a 300px (Solo gráfica) */
             }
 
-            /* 2. GRÁFICAS CORTAS (Derecha: Distribución por Género y Tipo de Curso) - 180px */
-            /* Distribución por Género (lg:col-span-5) */
+            /* 2. GRÁFICAS CORTAS (Derecha: Distribución por Género y Tipo de Curso) */
             .grid > .lg\:col-span-5 {
-                height: 180px !important; /* Altura corta */
+                height: 150px !important; /* AJUSTE CLAVE: Reducido de 180px a 150px */
             }
 
-            /* Tipo de Curso (lg:col-span-3) - Estructura anidada */
+            /* Tipo de Curso */
             .grid > .lg\:col-span-3 {
-                height: 180px !important;
+                height: 150px !important; /* AJUSTE CLAVE: Reducido de 180px a 150px */
             }
             .grid > .lg\:col-span-3 > div:first-child {
-                height: 100% !important; /* Asegurar que el contenido interno use el 100% de la altura de la columna */
+                height: 100% !important;
             }
 
             /* 3. GRÁFICA HISTÓRICA (Ancho completo) */
             .mb-8.h-96 {
-                height: 300px !important; 
-                grid-column: span 2 !important; /* Ancho completo */
+                height: 250px !important; /* AJUSTE CLAVE: Reducido de 300px a 250px */
+                grid-column: span 2 !important; 
             }
             
             /* 4. Asegurar que los contenedores internos usen el 100% de la nueva altura de impresión */
             .chart-container-wrapper { 
                 height: 100% !important; 
-                padding: 5px !important;
+                padding: 4px !important; /* REDUCIDO de 5px */
                 box-shadow: none !important;
             }
             .chart-container-wrapper > .flex-1.relative {
-                height: calc(100% - 25px) !important; /* Restar espacio del título (h3) */
+                height: calc(100% - 20px) !important; /* Ajuste para un título más pequeño */
             }
             
-            /* ** FIX EXTREMO ** Forzar canvas a ocupar su contenedor */
+            /* Forzar canvas a ocupar su contenedor */
             canvas { 
                 width: 100% !important; 
                 height: 100% !important; 
@@ -251,8 +244,8 @@
 
             /* Títulos de gráficas más pequeños */
             .bg-white h3 {
-                font-size: 9pt !important;
-                margin-bottom: 3px !important;
+                font-size: 8.5pt !important; /* REDUCIDO de 9pt */
+                margin-bottom: 2px !important; /* REDUCIDO de 3px */
                 padding: 0 !important;
             }
             
@@ -272,7 +265,7 @@
             
             /* Leyenda de departamentos MÁS COMPACTA */
             .bg-gray-50.p-4 {
-                padding: 5px !important;
+                padding: 4px !important; /* REDUCIDO de 5px */
                 max-height: 50px !important; 
                 overflow: hidden !important;
             }
@@ -289,18 +282,18 @@
             /* AJUSTES FINALES PARA REDUCIR ESPACIO */
             /* ============================================ */
             * {
-                line-height: 1.2 !important; 
+                line-height: 1.1 !important; /* Reducido para mayor compactación */
             }
             
             /* Eliminar espaciado extra */
             .py-8, .py-6, .py-4 {
-                padding-top: 3px !important;
-                padding-bottom: 3px !important;
+                padding-top: 2px !important; /* Reducido de 3px */
+                padding-bottom: 2px !important; /* Reducido de 3px */
             }
             
             .my-8, .my-6, .my-4 {
-                margin-top: 5px !important;
-                margin-bottom: 5px !important;
+                margin-top: 4px !important; /* Reducido de 5px */
+                margin-bottom: 4px !important; /* Reducido de 5px */
             }
             
             /* Forzar todo en máximo 2 páginas */
@@ -455,14 +448,14 @@
                 try {
                     // 1. Captura el contenido como un canvas (la "captura de pantalla")
                     const canvas = await html2canvas(dashboardContent, {
-                        scale: 3, // <--- CAMBIO CLAVE: Aumentado a 3 para más nitidez
+                        scale: 3, // Aumentado para más nitidez
                         logging: false,
                         useCORS: true,
                         backgroundColor: '#f9fafb' 
                     });
 
                     // 2. Convierte el canvas a imagen (usando PNG, que es lossless)
-                    const imgData = canvas.toDataURL('image/png'); // <--- CAMBIO CLAVE: PNG para cero pérdida de calidad
+                    const imgData = canvas.toDataURL('image/png'); // PNG para cero pérdida de calidad
                     
                     // 3. Crea el documento PDF
                     const pdf = new jsPDF('p', 'mm', 'letter');
@@ -474,7 +467,7 @@
                     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width; 
 
                     // 4. Agrega la imagen al PDF (la captura)
-                    pdf.addImage(imgData, 'PNG', margin, margin, pdfWidth, pdfHeight); // <--- CAMBIO CLAVE: 'PNG'
+                    pdf.addImage(imgData, 'PNG', margin, margin, pdfWidth, pdfHeight); 
                     
                     // 5. Guarda el archivo
                     pdf.save('Reporte_Estadisticas_ITD_Captura.pdf');
@@ -613,7 +606,20 @@
                     data: { labels: [], datasets: [] },
                     options: {
                         responsive: true, maintainAspectRatio: false, indexAxis: horizontal ? 'y' : 'x',
-                        scales: isPie ? {} : { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                        scales: isPie ? {} : { 
+                            y: { 
+                                beginAtZero: true, 
+                                ticks: { stepSize: 1 },
+                                barPercentage: horizontal ? 0.9 : 1, /* Ayuda a que las barras se vean mejor */
+                                categoryPercentage: horizontal ? 0.9 : 1 /* Ayuda a que las barras se vean mejor */
+                            },
+                            x: isPie ? {} : {
+                                beginAtZero: true, 
+                                ticks: { stepSize: 1 },
+                                barPercentage: horizontal ? 0.9 : 1, /* Ayuda a que las barras se vean mejor */
+                                categoryPercentage: horizontal ? 0.9 : 1 /* Ayuda a que las barras se vean mejor */
+                            }
+                        },
                         plugins: { 
                             legend: { display: isPie || isHistory, position: 'bottom' }, 
                             datalabels: { display: false } // Default off
@@ -623,6 +629,21 @@
                         }
                     }
                 };
+                
+                // Ajuste específico para barras horizontales (Cursos más demandados y Top 5 Deptos)
+                if (horizontal) {
+                    config.options.scales.x.ticks = { stepSize: 1 };
+                    config.options.scales.y.barPercentage = 0.9;
+                    config.options.scales.y.categoryPercentage = 0.9;
+                }
+                
+                // Ajuste específico para barras verticales (Tipo de Curso)
+                if (type === 'bar' && !horizontal) {
+                    config.options.scales.y.ticks = { stepSize: 1 };
+                    config.options.scales.x.barPercentage = 0.8;
+                    config.options.scales.x.categoryPercentage = 0.9;
+                }
+
 
                 if (isHistory) {
                     // Configuración específica para Evolución Histórica
