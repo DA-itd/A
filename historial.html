@@ -66,7 +66,6 @@
             'desarrollo.academico@itdurango.edu.mx'
         ];
 
-        // URLs CDN para evitar problemas de CORS en PDF
         const ITD_LOGO_URL = 'https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png';
         const TECNM_LOGO_URL = 'https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg';
 
@@ -96,14 +95,10 @@
                     canvas.height = img.height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0);
-                    try {
-                        resolve(canvas.toDataURL('image/png'));
-                    } catch (e) {
-                        console.warn("Canvas tainted, skipping image", e);
-                        resolve(null);
-                    }
+                    try { resolve(canvas.toDataURL('image/png')); } 
+                    catch (e) { resolve(null); }
                 };
-                img.onerror = (err) => { console.warn("Error cargando imagen PDF", err); resolve(null); };
+                img.onerror = () => resolve(null);
                 img.src = url;
             });
         };
@@ -180,22 +175,17 @@
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
 
-            // Cargar imágenes antes de generar
             const [itdLogo, tecNmLogo] = await Promise.all([
                 getImageDataFromURL(ITD_LOGO_URL),
                 getImageDataFromURL(TECNM_LOGO_URL)
             ]);
 
-            // Dibujar Logos
             if (tecNmLogo) doc.addImage(tecNmLogo, 'JPEG', 15, 10, 35, 16);
-            if (itdLogo) {
-                const logoSize = 20; 
-                doc.addImage(itdLogo, 'PNG', pageWidth - 15 - logoSize, 8, logoSize, logoSize);
-            }
+            if (itdLogo) doc.addImage(itdLogo, 'PNG', pageWidth - 35, 8, 20, 20);
             
             doc.setFont("helvetica", "bold");
             doc.setFontSize(12);
-            doc.setTextColor(27, 57, 106); // Azul ITD
+            doc.setTextColor(27, 57, 106);
             doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth / 2, 18, { align: "center" });
             
             doc.setFontSize(10);
@@ -203,7 +193,7 @@
             doc.text("Coordinación de Actualización Docente", pageWidth / 2, 23, { align: "center" });
             
             doc.setFontSize(14);
-            doc.setTextColor(200, 100, 0); // Naranja
+            doc.setTextColor(200, 100, 0);
             doc.text("HISTORIAL ACADÉMICO", pageWidth / 2, 35, { align: "center" });
             
             doc.setTextColor(0);
@@ -212,7 +202,7 @@
             doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, 15, 50);
 
             const tableRows = courses.map(c => [
-                c.year,
+                c.year || 'S/A',
                 c.folio,
                 c.courseName,
                 c.datesText || c.date,
@@ -227,14 +217,9 @@
                 theme: 'grid',
                 headStyles: { fillColor: [234, 88, 12], textColor: 255, halign: 'center' }, 
                 styles: { fontSize: 8 },
-                columnStyles: { 
-                    0: { cellWidth: 15, halign: 'center' },
-                    2: { cellWidth: 'auto' },
-                    4: { cellWidth: 15, halign: 'center' }
-                }
+                columnStyles: { 0: { cellWidth: 15, halign: 'center' }, 2: { cellWidth: 'auto' }, 4: { cellWidth: 15, halign: 'center' } }
             });
 
-            // Pie de página
             const pageCount = doc.internal.getNumberOfPages();
             for(let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
@@ -248,7 +233,7 @@
 
         const exportToExcel = (teacherName, courses) => {
             const data = courses.map(c => ({
-                "Año": c.year,
+                "Año": c.year || 'S/A',
                 "Folio": c.folio,
                 "Nombre del Curso": c.courseName,
                 "Fechas": c.datesText || c.date,
@@ -265,29 +250,16 @@
             const ref = useRef(null);
             
             useEffect(() => {
-                // Función para intentar renderizar el botón
                 const renderBtn = () => {
                     if(window.google && window.google.accounts && ref.current) {
-                        window.google.accounts.id.initialize({ 
-                            client_id: CONFIG.GOOGLE_CLIENT_ID, 
-                            callback: onLogin 
-                        });
-                        window.google.accounts.id.renderButton(ref.current, { 
-                            theme: "filled_blue", 
-                            size: "large", 
-                            text: "continue_with" 
-                        });
+                        window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
+                        window.google.accounts.id.renderButton(ref.current, { theme: "filled_blue", size: "large", text: "continue_with" });
                         return true;
                     }
                     return false;
                 };
-
-                // Intentar renderizar inmediatamente
                 if(!renderBtn()) {
-                    // Si falla, intentar cada 500ms hasta que cargue la librería
-                    const interval = setInterval(() => {
-                        if(renderBtn()) clearInterval(interval);
-                    }, 500);
+                    const interval = setInterval(() => { if(renderBtn()) clearInterval(interval); }, 500);
                     return () => clearInterval(interval);
                 }
             }, [onLogin]);
@@ -301,21 +273,67 @@
             );
         };
 
-        const Dashboard = ({ user, data, onLogout, isAdmin, onAdminSearch }) => {
+        // --- COMPONENTE DE DEBUG ---
+        const DebugPanel = ({ rawData, courses }) => {
+            const [show, setShow] = useState(false);
+            
+            // Analizar años encontrados
+            const yearAnalysis = {};
+            courses.forEach(c => {
+                const y = c.year || 'SIN_AÑO';
+                if (!yearAnalysis[y]) yearAnalysis[y] = [];
+                yearAnalysis[y].push(c.folio);
+            });
+            
+            return (
+                <div className="mb-6">
+                    <button 
+                        onClick={() => setShow(!show)}
+                        className="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-4 py-2 rounded-lg font-bold text-sm border border-yellow-300"
+                    >
+                        🔍 {show ? 'Ocultar' : 'Mostrar'} Panel de Diagnóstico
+                    </button>
+                    
+                    {show && (
+                        <div className="mt-4 bg-gray-900 text-green-400 p-4 rounded-lg text-xs font-mono overflow-auto max-h-96">
+                            <p className="text-yellow-400 font-bold mb-2">═══ ANÁLISIS DE DATOS RECIBIDOS ═══</p>
+                            
+                            <p className="text-cyan-400 mt-3">📊 Total cursos recibidos: {courses.length}</p>
+                            
+                            <p className="text-cyan-400 mt-3">📅 Desglose por año:</p>
+                            {Object.entries(yearAnalysis).sort((a,b) => String(b[0]).localeCompare(String(a[0]))).map(([year, folios]) => (
+                                <div key={year} className="ml-4">
+                                    <span className="text-white">{year}:</span> {folios.length} cursos
+                                    <span className="text-gray-500"> [{folios.slice(0,3).join(', ')}{folios.length > 3 ? '...' : ''}]</span>
+                                </div>
+                            ))}
+                            
+                            <p className="text-cyan-400 mt-3">📋 Datos crudos del servidor:</p>
+                            <pre className="text-gray-300 ml-4 whitespace-pre-wrap">
+                                {JSON.stringify(rawData, null, 2)}
+                            </pre>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const Dashboard = ({ user, data, rawData, onLogout, isAdmin, onAdminSearch }) => {
             const { teacher, courses } = data;
             
-            // Fix: Ensure all years are properly extracted and sorted
-            const years = [...new Set(courses.map(c => {
-                // Handle cases where year might be missing or invalid
-                if (!c.year || c.year === "") return "Sin año";
-                return c.year.toString();
-            }))].sort((a, b) => {
-                // Handle special case for "Sin año"
-                if (a === "Sin año") return 1;
-                if (b === "Sin año") return -1;
-                // Sort years in descending order
-                return parseInt(b) - parseInt(a);
-            });
+            // Procesar años - convertir a número para ordenar correctamente
+            const processedCourses = courses.map(c => ({
+                ...c,
+                yearNum: parseInt(c.year) || 0,
+                yearDisplay: c.year || 'Sin Año'
+            }));
+            
+            // Obtener años únicos y ordenar numéricamente (mayor a menor)
+            const years = [...new Set(processedCourses.map(c => c.year).filter(y => y && y !== 'UNKNOWN'))]
+                .sort((a, b) => parseInt(b) - parseInt(a));
+            
+            // Cursos sin año válido
+            const coursesWithoutYear = processedCourses.filter(c => !c.year || c.year === 'UNKNOWN');
             
             return (
                 <div className="animate-fadeIn container mx-auto px-4 py-8 max-w-5xl">
@@ -328,10 +346,11 @@
                         <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded font-bold text-gray-700">Cerrar Sesión</button>
                     </div>
 
-                    {/* BUSCADOR PARA ADMINS */}
                     {isAdmin && <AdminTeacherSearch onSearch={onAdminSearch} />}
 
-                    {/* FICHA DEL DOCENTE VISUALIZADO */}
+                    {/* PANEL DE DEBUG - Solo para admins */}
+                    {isAdmin && <DebugPanel rawData={rawData} courses={courses} />}
+
                     <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-200 relative">
                         <div className="absolute top-4 right-4 flex gap-2">
                             <button onClick={() => exportToPdf(teacher.name, courses)} title="Descargar PDF" className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded transition">📄 PDF</button>
@@ -340,46 +359,71 @@
                         <h3 className="text-gray-500 text-sm font-bold uppercase tracking-wider">Historial de:</h3>
                         <h2 className="text-3xl font-bold text-orange-700 mt-1">{teacher.name || "Usuario"}</h2>
                         <p className="text-gray-600">{teacher.dept || "Departamento no registrado"}</p>
-                        <div className="mt-4 flex gap-4 text-sm">
+                        <div className="mt-4 flex gap-4 text-sm flex-wrap">
                             <div className="bg-orange-50 px-3 py-1 rounded border border-orange-200">Total Cursos: <strong>{courses.length}</strong></div>
                             <div className="bg-blue-50 px-3 py-1 rounded border border-blue-200">Total Horas: <strong>{courses.reduce((acc, c) => acc + (parseInt(c.hours)||0), 0)}</strong></div>
+                            <div className="bg-green-50 px-3 py-1 rounded border border-green-200">Años: <strong>{years.join(', ') || 'N/A'}</strong></div>
                         </div>
                     </div>
 
-                    {courses.length === 0 ? <p className="text-center text-gray-500 py-10 bg-white rounded-lg shadow">No se encontró historial de cursos para este usuario.</p> : 
-                    <div className="space-y-8">
-                        {years.map(year => (
-                            <div key={year}>
-                                <div className="flex items-center mb-4">
-                                    <span className="bg-orange-600 text-white font-bold px-4 py-1 rounded-full text-sm z-10 shadow-md">
-                                        {year === "Sin año" ? "Sin información de año" : `Ciclo ${year}`}
-                                    </span>
-                                    <div className="h-0.5 bg-orange-200 flex-grow ml-4"></div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {courses.filter(c => {
-                                        // Handle filtering for courses without year
-                                        if (!c.year || c.year === "") {
-                                            return year === "Sin año";
-                                        }
-                                        return c.year.toString() === year;
-                                    }).map((c, i) => (
-                                        <div key={i} className="bg-white p-5 rounded-lg shadow-sm hover:shadow-md border border-gray-100 transition-all">
-                                            <div className="flex justify-between mb-2">
-                                                <span className={`text-xs px-2 py-0.5 rounded font-bold ${c.type === 'Profesional' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-800'}`}>{c.type}</span>
-                                                <span className="text-xs text-gray-400 font-mono">{c.folio}</span>
+                    {courses.length === 0 ? (
+                        <p className="text-center text-gray-500 py-10 bg-white rounded-lg shadow">No se encontró historial de cursos para este usuario.</p>
+                    ) : (
+                        <div className="space-y-8">
+                            {years.map(year => (
+                                <div key={year}>
+                                    <div className="flex items-center mb-4">
+                                        <span className="bg-orange-600 text-white font-bold px-4 py-1 rounded-full text-sm z-10 shadow-md">
+                                            Ciclo {year} ({processedCourses.filter(c => c.year === year).length} cursos)
+                                        </span>
+                                        <div className="h-0.5 bg-orange-200 flex-grow ml-4"></div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {processedCourses.filter(c => c.year === year).map((c, i) => (
+                                            <div key={i} className="bg-white p-5 rounded-lg shadow-sm hover:shadow-md border border-gray-100 transition-all">
+                                                <div className="flex justify-between mb-2">
+                                                    <span className={`text-xs px-2 py-0.5 rounded font-bold ${c.type === 'Profesional' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-800'}`}>{c.type}</span>
+                                                    <span className="text-xs text-gray-400 font-mono">{c.folio}</span>
+                                                </div>
+                                                <h3 className="font-bold text-gray-800 mb-2 leading-snug">{c.courseName}</h3>
+                                                <div className="text-sm text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
+                                                    <span className="flex items-center gap-1">📅 {c.datesText || c.date}</span>
+                                                    <span className="flex items-center gap-1">⏱️ {c.hours} hrs</span>
+                                                </div>
                                             </div>
-                                            <h3 className="font-bold text-gray-800 mb-2 leading-snug">{c.courseName}</h3>
-                                            <div className="text-sm text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
-                                                <span className="flex items-center gap-1">📅 {c.datesText || c.date}</span>
-                                                <span className="flex items-center gap-1">⏱️ {c.hours} hrs</span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>}
+                            ))}
+                            
+                            {coursesWithoutYear.length > 0 && (
+                                <div>
+                                    <div className="flex items-center mb-4">
+                                        <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded-full text-sm z-10 shadow-md">
+                                            ⚠️ Sin año identificado ({coursesWithoutYear.length} cursos)
+                                        </span>
+                                        <div className="h-0.5 bg-gray-300 flex-grow ml-4"></div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {coursesWithoutYear.map((c, i) => (
+                                            <div key={i} className="bg-white p-5 rounded-lg shadow-sm border border-orange-300 transition-all">
+                                                <div className="flex justify-between mb-2">
+                                                    <span className={`text-xs px-2 py-0.5 rounded font-bold ${c.type === 'Profesional' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-800'}`}>{c.type}</span>
+                                                    <span className="text-xs text-gray-400 font-mono">{c.folio}</span>
+                                                </div>
+                                                <h3 className="font-bold text-gray-800 mb-2 leading-snug">{c.courseName}</h3>
+                                                <div className="text-sm text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
+                                                    <span className="flex items-center gap-1">📅 {c.datesText || c.date}</span>
+                                                    <span className="flex items-center gap-1">⏱️ {c.hours} hrs</span>
+                                                    <span className="text-orange-600 text-xs">Año raw: "{c.year}"</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             );
         };
@@ -387,6 +431,7 @@
         const App = () => {
             const [user, setUser] = useState(null);
             const [data, setData] = useState(null);
+            const [rawData, setRawData] = useState(null);
             const [loading, setLoading] = useState(false);
 
             const fetchData = async (token, targetEmail = null) => {
@@ -397,9 +442,18 @@
                 try {
                     const resp = await fetch(url);
                     const json = await resp.json();
-                    if (json.success) setData(json.data);
-                    else alert("Error: " + json.message);
-                } catch (e) { console.error(e); }
+                    console.log("📥 Respuesta completa del servidor:", json);
+                    setRawData(json);
+                    
+                    if (json.success) {
+                        setData(json.data);
+                    } else {
+                        alert("Error: " + json.message);
+                    }
+                } catch (e) { 
+                    console.error("Error en fetch:", e); 
+                    alert("Error de conexión: " + e.message);
+                }
                 finally { setLoading(false); }
             };
 
@@ -418,9 +472,14 @@
             const isAdmin = user && ADMIN_EMAILS.includes(user.email);
 
             if (!user) return <LoginScreen onLogin={handleLogin} />;
-            if (!data || loading) return <div className="flex justify-center items-center min-h-screen"><div className="animate-spin h-12 w-12 border-4 border-orange-500 rounded-full border-t-transparent"></div></div>;
+            if (!data || loading) return (
+                <div className="flex flex-col justify-center items-center min-h-screen gap-4">
+                    <div className="animate-spin h-12 w-12 border-4 border-orange-500 rounded-full border-t-transparent"></div>
+                    <p className="text-gray-600">Cargando historial...</p>
+                </div>
+            );
 
-            return <Dashboard user={user} data={data} onLogout={() => {setUser(null); window.location.reload();}} isAdmin={isAdmin} onAdminSearch={handleAdminSearch} />;
+            return <Dashboard user={user} data={data} rawData={rawData} onLogout={() => {setUser(null); window.location.reload();}} isAdmin={isAdmin} onAdminSearch={handleAdminSearch} />;
         };
 
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
