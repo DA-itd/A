@@ -189,7 +189,7 @@
             
             doc.setFontSize(14);
             doc.setTextColor(200, 100, 0);
-            doc.text("HISTORIAL ACADÉMICO", pageWidth / 2, 35, { align: "center" });
+            doc.text("HISTORIAL DE CURSOS DE ACTUALIZACION DOCENTE", pageWidth / 2, 35, { align: "center" });
             
             doc.setTextColor(0);
             doc.setFontSize(10);
@@ -351,7 +351,7 @@
                     <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-200 relative">
                         <div className="absolute top-4 right-4 flex gap-2">
                             <button onClick={() => exportToPdf(teacher.name, courses)} title="Descargar PDF" className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded transition">📄 PDF</button>
-                            <button onClick={() => exportToExcel(teacher.name, courses)} title="Descargar Excel" className="p-2 bg-green-100 hover:bg-green-200 text-green-700 rounded transition">📊 Excel</button>
+                            {isAdmin && <button onClick={() => exportToExcel(teacher.name, courses)} title="Descargar Excel" className="p-2 bg-green-100 hover:bg-green-200 text-green-700 rounded transition">📊 Excel</button>}
                         </div>
                         <h3 className="text-gray-500 text-sm font-bold uppercase tracking-wider">Historial de:</h3>
                         <h2 className="text-3xl font-bold text-orange-700 mt-1">{teacher.name || "Usuario"}</h2>
