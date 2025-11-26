@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Metaetiquetas para evitar Caché (Solución Safari/Móvil) -->
+    <!-- Metaetiquetas estrictas para evitar Caché -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -15,6 +15,26 @@
     
     <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
     
+    <!-- Script de Corrección para Safari (Debe ir en el HEAD) -->
+    <script>
+        // 1. Hack "Dummy": Al definir un manejador para 'unload', Safari desactiva 
+        // automáticamente la "Back-Forward Cache" (bfcache) que causa la hoja blanca/texto.
+        window.onunload = function() {};
+
+        // 2. Detección agresiva de navegación "Atrás/Adelante"
+        window.addEventListener('pageshow', function(event) {
+            // Si la página persiste en caché O el tipo de navegación es "back_forward"
+            var historyTraversal = event.persisted || 
+                                   (typeof window.performance != "undefined" && 
+                                    window.performance.navigation.type === 2);
+            
+            if (historyTraversal) {
+                // Forzar recarga inmediata
+                window.location.reload();
+            }
+        });
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Google tag (gtag.js) -->
@@ -578,15 +598,6 @@
     </footer>
 
     <script>
-        // SOLUCIÓN FIX SAFARI (BFCACHE)
-        // Este evento detecta si la página se carga desde la memoria caché (botón atrás)
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                console.log('Restaurando desde cache (Safari fix)...');
-                window.location.reload();
-            }
-        });
-
         const cursorDot = document.getElementById('cursor-dot');
         
         window.addEventListener('mousemove', e => {
