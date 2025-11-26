@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Metaetiquetas para evitar Caché (Solución Safari/Móvil) -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>Portal de Actualización Docente - ITD</title>
     <meta name="description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango. Accede a inscripciones, formatos, calendario y más.">
     <meta name="keywords" content="ITD, Tecnológico de Durango, actualización docente, cursos para maestros, desarrollo académico, portal docente">
@@ -572,9 +578,8 @@
     </footer>
 
     <script>
-        // FIX PARA SAFARI (BFCACHE)
-        // Esto soluciona el problema de que aparezca una "hoja con texto" o estado incompleto
-        // al presionar el botón de "Atrás". Fuerza la recarga si la página viene del caché.
+        // SOLUCIÓN FIX SAFARI (BFCACHE)
+        // Este evento detecta si la página se carga desde la memoria caché (botón atrás)
         window.addEventListener('pageshow', function(event) {
             if (event.persisted) {
                 console.log('Restaurando desde cache (Safari fix)...');
@@ -587,33 +592,29 @@
         window.addEventListener('mousemove', e => {
             const { clientX, clientY } = e;
             requestAnimationFrame(() => {
-                if (cursorDot) {
-                    cursorDot.style.left = `${clientX}px`;
-                    cursorDot.style.top = `${clientY}px`;
-                }
+                cursorDot.style.left = `${clientX}px`;
+                cursorDot.style.top = `${clientY}px`;
             });
             const target = e.target;
             if (target.closest('a, button, [role="button"], .card-portal:not(.cursor-not-allowed)')) {
-                cursorDot?.classList.add('active');
+                cursorDot.classList.add('active');
             } else {
-                cursorDot?.classList.remove('active');
+                cursorDot.classList.remove('active');
             }
         });
 
         const menuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         
-        if (menuButton && mobileMenu) {
-            menuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
+        menuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
 
-            mobileMenu.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', () => {
-                    mobileMenu.classList.add('hidden');
-                });
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
             });
-        }
+        });
 
         const inspirationalQuotes = [
             { quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.", author: "Nelson Mandela" },
@@ -668,10 +669,7 @@
         function startClock() {
             function updateClock() {
                 const now = new Date();
-                const clockEl = document.getElementById('clock');
-                if (clockEl) {
-                    clockEl.textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-                }
+                document.getElementById('clock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
             }
             updateClock(); setInterval(updateClock, 1000);
         }
@@ -680,10 +678,7 @@
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const ds = now.toLocaleDateString('es-MX', options);
-            const dateEl = document.getElementById('currentDate');
-            if (dateEl) {
-                dateEl.textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
-            }
+            document.getElementById('currentDate').textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
         }
 
         function updateCalendarYear() {
@@ -716,7 +711,7 @@
                     announcementBanner.classList.add('hidden-banner');
                     window.removeEventListener('scroll', hideBanner);
                     window.removeEventListener('click', hideBanner);
-                    // clearTimeout(bannerTimeout); // bannerTimeout no es accesible aquí, pero el scroll/click lo limpia en la lógica original
+                    clearTimeout(bannerTimeout);
                 }
             };
             const bannerTimeout = setTimeout(hideBanner, 10000);
