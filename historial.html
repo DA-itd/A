@@ -26,7 +26,7 @@
 
     <header class="bg-white shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-6 flex justify-between items-center gap-4">
-            <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" class="h-12 sm:h-16 object-contain">
+            <div class="w-16 sm:w-20"></div>
             <div class="text-center flex-1">
                 <h1 class="text-sm sm:text-2xl font-bold text-blue-900">HISTORIAL DE CURSOS</h1>
                 <p class="text-xs sm:text-sm text-blue-700 font-semibold">Kardex de Actualización Docente</p>
@@ -67,7 +67,6 @@
         ];
 
         const ITD_LOGO_URL = 'https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png';
-        const TECNM_LOGO_URL = 'https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg';
 
         // --- UTILIDADES CSV ---
         const parseCSVLine = (line) => {
@@ -175,12 +174,8 @@
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
 
-            const [itdLogo, tecNmLogo] = await Promise.all([
-                getImageDataFromURL(ITD_LOGO_URL),
-                getImageDataFromURL(TECNM_LOGO_URL)
-            ]);
+            const itdLogo = await getImageDataFromURL(ITD_LOGO_URL);
 
-            if (tecNmLogo) doc.addImage(tecNmLogo, 'JPEG', 15, 10, 35, 16);
             if (itdLogo) doc.addImage(itdLogo, 'PNG', pageWidth - 35, 8, 20, 20);
             
             doc.setFont("helvetica", "bold");
@@ -207,17 +202,23 @@
                 c.courseName,
                 c.datesText || c.date,
                 c.hours,
-                c.type
+                c.type,
+                c.courseDept || 'N/A'
             ]);
 
             doc.autoTable({
-                head: [['Año', 'Folio', 'Curso', 'Fechas', 'Hrs', 'Tipo']],
+                head: [['Año', 'Folio', 'Curso', 'Fechas', 'Hrs', 'Tipo', 'Depto. Origen']],
                 body: tableRows,
                 startY: 55,
                 theme: 'grid',
                 headStyles: { fillColor: [234, 88, 12], textColor: 255, halign: 'center' }, 
-                styles: { fontSize: 8 },
-                columnStyles: { 0: { cellWidth: 15, halign: 'center' }, 2: { cellWidth: 'auto' }, 4: { cellWidth: 15, halign: 'center' } }
+                styles: { fontSize: 7 },
+                columnStyles: { 
+                    0: { cellWidth: 12, halign: 'center' },
+                    2: { cellWidth: 'auto' },
+                    4: { cellWidth: 12, halign: 'center' },
+                    6: { cellWidth: 25, fontSize: 6 }
+                }
             });
 
             const pageCount = doc.internal.getNumberOfPages();
@@ -238,7 +239,8 @@
                 "Nombre del Curso": c.courseName,
                 "Fechas": c.datesText || c.date,
                 "Horas": c.hours,
-                "Tipo": c.type
+                "Tipo": c.type,
+                "Departamento Origen": c.courseDept || 'N/A'
             }));
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
@@ -277,7 +279,6 @@
         const DebugPanel = ({ rawData, courses }) => {
             const [show, setShow] = useState(false);
             
-            // Analizar años encontrados
             const yearAnalysis = {};
             courses.forEach(c => {
                 const y = c.year || 'SIN_AÑO';
@@ -296,7 +297,7 @@
                     
                     {show && (
                         <div className="mt-4 bg-gray-900 text-green-400 p-4 rounded-lg text-xs font-mono overflow-auto max-h-96">
-                            <p className="text-yellow-400 font-bold mb-2">═══ ANÁLISIS DE DATOS RECIBIDOS ═══</p>
+                            <p className="text-yellow-400 font-bold mb-2">╔══ ANÁLISIS DE DATOS RECIBIDOS ══╗</p>
                             
                             <p className="text-cyan-400 mt-3">📊 Total cursos recibidos: {courses.length}</p>
                             
@@ -321,18 +322,15 @@
         const Dashboard = ({ user, data, rawData, onLogout, isAdmin, onAdminSearch }) => {
             const { teacher, courses } = data;
             
-            // Procesar años - convertir a número para ordenar correctamente
             const processedCourses = courses.map(c => ({
                 ...c,
                 yearNum: parseInt(c.year) || 0,
                 yearDisplay: c.year || 'Sin Año'
             }));
             
-            // Obtener años únicos y ordenar numéricamente (mayor a menor)
             const years = [...new Set(processedCourses.map(c => c.year).filter(y => y && y !== 'UNKNOWN'))]
                 .sort((a, b) => parseInt(b) - parseInt(a));
             
-            // Cursos sin año válido
             const coursesWithoutYear = processedCourses.filter(c => !c.year || c.year === 'UNKNOWN');
             
             return (
@@ -348,7 +346,6 @@
 
                     {isAdmin && <AdminTeacherSearch onSearch={onAdminSearch} />}
 
-                    {/* PANEL DE DEBUG - Solo para admins */}
                     {isAdmin && <DebugPanel rawData={rawData} courses={courses} />}
 
                     <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-200 relative">
@@ -386,9 +383,10 @@
                                                     <span className="text-xs text-gray-400 font-mono">{c.folio}</span>
                                                 </div>
                                                 <h3 className="font-bold text-gray-800 mb-2 leading-snug">{c.courseName}</h3>
-                                                <div className="text-sm text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
-                                                    <span className="flex items-center gap-1">📅 {c.datesText || c.date}</span>
-                                                    <span className="flex items-center gap-1">⏱️ {c.hours} hrs</span>
+                                                <div className="text-sm text-gray-600 space-y-1">
+                                                    <div className="flex items-center gap-1">📅 {c.datesText || c.date}</div>
+                                                    <div className="flex items-center gap-1">⏱️ {c.hours} hrs</div>
+                                                    {c.courseDept && <div className="flex items-center gap-1 text-xs text-orange-600">🏢 {c.courseDept}</div>}
                                                 </div>
                                             </div>
                                         ))}
@@ -412,10 +410,11 @@
                                                     <span className="text-xs text-gray-400 font-mono">{c.folio}</span>
                                                 </div>
                                                 <h3 className="font-bold text-gray-800 mb-2 leading-snug">{c.courseName}</h3>
-                                                <div className="text-sm text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
-                                                    <span className="flex items-center gap-1">📅 {c.datesText || c.date}</span>
-                                                    <span className="flex items-center gap-1">⏱️ {c.hours} hrs</span>
-                                                    <span className="text-orange-600 text-xs">Año raw: "{c.year}"</span>
+                                                <div className="text-sm text-gray-600 space-y-1">
+                                                    <div className="flex items-center gap-1">📅 {c.datesText || c.date}</div>
+                                                    <div className="flex items-center gap-1">⏱️ {c.hours} hrs</div>
+                                                    {c.courseDept && <div className="flex items-center gap-1 text-xs text-orange-600">🏢 {c.courseDept}</div>}
+                                                    <div className="text-orange-600 text-xs">Año raw: "{c.year}"</div>
                                                 </div>
                                             </div>
                                         ))}
@@ -442,7 +441,7 @@
                 try {
                     const resp = await fetch(url);
                     const json = await resp.json();
-                    console.log("📥 Respuesta completa del servidor:", json);
+                    console.log("🔥 Respuesta completa del servidor:", json);
                     setRawData(json);
                     
                     if (json.success) {
