@@ -39,6 +39,7 @@
     <!-- SOLUCIÓN SAFARI, ESTILOS & MODO OSCURO -->
     <script>
         // 0. Aplicar tema oscuro inmediatamente antes de pintar
+        // Verifica localStorage o preferencia del sistema
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
@@ -211,6 +212,7 @@
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 min-h-screen transition-colors duration-500">
@@ -319,7 +321,7 @@
         <div id="servicios" class="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32">
             <div class="flex items-baseline justify-center gap-4 sm:gap-6 mb-4">
                 <div class="inline-block animate-pulse-slow">
-                    <div class="text-6xl sm:text-7xl md:text-8xl">🎓</div>
+                    <img src="https://raw.githubusercontent.com/DA-itd/A/main/pola.png" alt="Servicios" class="h-16 sm:h-20 md:h-24 object-contain">
                 </div>
                 <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 dark:text-white transition-colors">
                     Servicios Disponibles
@@ -574,6 +576,12 @@
             <p class="text-xs sm:text-sm opacity-75 mt-1">
                 Todos los derechos reservados <span id="copyright-year"></span>
             </p>
+            <!-- Enlace al Aviso de Privacidad -->
+            <div class="mt-4 pt-4 border-t border-white/10">
+                <a href="aviso.html" class="text-xs text-white/60 hover:text-white transition-colors underline">
+                    Aviso de Privacidad
+                </a>
+            </div>
         </div>
     </footer>
 
@@ -774,6 +782,7 @@
             }
         }
 
+        // Initial check
         updateThemeIcons();
 
         var themeToggleBtnD = document.getElementById('theme-toggle-desktop');
@@ -808,5 +817,6 @@
             rotateQuotes(); setInterval(rotateQuotes, 15000);
         });
     </script>
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviso de Privacidad - ITD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { bg: '#0f172a', card: '#1e293b', text: '#f8fafc' }
+                    }
+                }
+            }
+        }
+        // Aplicar modo oscuro si está guardado
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+    <style>
+        body { cursor: default; } /* Cursor normal para lectura */
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen transition-colors duration-300 font-sans">
+
+    <!-- Header Simple -->
+    <header class="bg-white dark:bg-slate-800 shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-10 w-auto">
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-blue-900 dark:text-blue-300">Coordinación de Actualización Docente</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Aviso de Privacidad</p>
+                </div>
+            </div>
+            <a href="index.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                Volver
+            </a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <!-- Banner Resumen -->
+        <div id="aviso-simplificado" class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-6 rounded-r-lg shadow-sm mb-8">
+            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-blue-900 dark:text-blue-300 mb-2">Aviso Simplificado</h2>
+                    <p class="text-sm text-slate-700 dark:text-slate-300">
+                        Recabamos datos necesarios para gestionar servicios académicos, contacto y estadísticas de uso. Consulte el aviso completo para conocer finalidades, derechos ARCO y transferencias.
+                    </p>
+                </div>
+                <a href="#aviso-completo" class="whitespace-nowrap px-4 py-2 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold text-sm rounded border border-blue-200 dark:border-slate-700 hover:shadow-md transition-all">
+                    Ver detalle
+                </a>
+            </div>
+        </div>
+
+        <!-- Contenido Completo -->
+        <div id="aviso-completo" class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 space-y-8 border dark:border-slate-700">
+            
+            <div class="border-b dark:border-slate-700 pb-4">
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Aviso de Privacidad Integral</h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Fecha de última actualización: <strong>Enero 2025</strong></p>
+            </div>
+
+            <section>
+                <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
+                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">1</span> Responsable
+                </h2>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    El responsable del tratamiento de sus datos personales es la <strong>Coordinación de Actualización Docente</strong> del Instituto Tecnológico de Durango. Para contacto: correo <a href="mailto:desarrollo.academico@itdurango.edu.mx" class="text-blue-600 underline">desarrollo.academico@itdurango.edu.mx</a>.
+                </p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
+                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">2</span> ¿Qué datos recabamos?
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100 dark:bg-slate-700 dark:text-slate-200">
+                            <tr>
+                                <th class="px-4 py-3 rounded-tl-lg">Tipo</th>
+                                <th class="px-4 py-3">Ejemplos</th>
+                                <th class="px-4 py-3 rounded-tr-lg">Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                            <tr>
+                                <td class="px-4 py-3 font-semibold">Datos de navegación</td>
+                                <td class="px-4 py-3">Dirección IP, tipo de navegador, fecha y hora.</td>
+                                <td class="px-4 py-3">Operación, seguridad y estadísticas.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold">Datos de contacto</td>
+                                <td class="px-4 py-3">Nombre, correo institucional, teléfono.</td>
+                                <td class="px-4 py-3">Trámites académicos y contacto.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold">Archivos subidos</td>
+                                <td class="px-4 py-3">Documentos PDF, evidencias.</td>
+                                <td class="px-4 py-3">Procesamiento de solicitudes.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="mt-3 text-xs text-slate-500 italic">No se solicitarán datos sensibles ni de menores sin consentimiento expreso.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
+                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">3</span> Finalidades
+                </h2>
+                <ul class="list-disc list-inside text-sm space-y-2 text-slate-600 dark:text-slate-300 ml-2">
+                    <li><strong>Necesarias:</strong> Funcionamiento del portal, gestión de constancias y seguridad.</li>
+                    <li><strong>Secundarias:</strong> Comunicaciones informativas, encuestas y estadísticas.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
+                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">4</span> Derechos ARCO
+                </h2>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    Usted tiene derecho a Acceder, Rectificar, Cancelar y Oponerse al tratamiento de sus datos. Puede enviar una solicitud a: <strong><a href="mailto:desarrollo.academico@itdurango.edu.mx" class="text-blue-600 underline">desarrollo.academico@itdurango.edu.mx</a></strong> incluyendo su nombre completo y descripción de la solicitud.
+                </p>
+                <div class="mt-4 flex gap-4">
+                     <a href="mailto:desarrollo.academico@itdurango.edu.mx?subject=Solicitud%20ARCO" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase rounded shadow transition-colors">
+                        Solicitar Derechos ARCO
+                    </a>
+                </div>
+            </section>
+
+            <div class="border-t dark:border-slate-700 pt-6 mt-8">
+                <p class="text-xs text-slate-400 text-center">
+                    Este aviso cumple con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12 py-6 text-center">
+        <p class="text-sm text-slate-600 dark:text-slate-400">© Coordinación de Actualización Docente ITD</p>
+    </footer>
+
+</body>
+</html>
