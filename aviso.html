@@ -23,9 +23,12 @@
     </script>
     <style>
         body { cursor: default; } /* Cursor normal para lectura */
+        /* Animación suave para el botón flotante */
+        .float-enter { animation: floatIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes floatIn { from { transform: scale(0) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen transition-colors duration-300 font-sans">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen transition-colors duration-300 font-sans pb-20">
 
     <!-- Header Simple -->
     <header class="bg-white dark:bg-slate-800 shadow-md sticky top-0 z-40">
@@ -44,7 +47,7 @@
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8 max-w-4xl">
+    <main class="container mx-auto px-4 py-8 max-w-4xl relative">
         
         <!-- Banner Resumen -->
         <div id="aviso-simplificado" class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-6 rounded-r-lg shadow-sm mb-8">
@@ -74,7 +77,7 @@
                     <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">1</span> Responsable
                 </h2>
                 <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                    El responsable del tratamiento de sus datos personales es la <strong>Coordinación de Actualización Docente</strong> del Instituto Tecnológico de Durango. Para contacto: correo <a href="mailto:desarrollo.academico@itdurango.edu.mx" class="text-blue-600 underline">desarrollo.academico@itdurango.edu.mx</a>.
+                    El responsable del tratamiento de sus datos personales es la <strong>Coordinación de Actualización Docente</strong> del Instituto Tecnológico de Durango. Para contacto: correo <a href="mailto:coord_actualizaciondocente@itdurango.edu.mx" class="text-blue-600 underline">coord_actualizaciondocente@itdurango.edu.mx</a>.
                 </p>
             </section>
 
@@ -128,10 +131,10 @@
                     <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">4</span> Derechos ARCO
                 </h2>
                 <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                    Usted tiene derecho a Acceder, Rectificar, Cancelar y Oponerse al tratamiento de sus datos. Puede enviar una solicitud a: <strong><a href="mailto:desarrollo.academico@itdurango.edu.mx" class="text-blue-600 underline">desarrollo.academico@itdurango.edu.mx</a></strong> incluyendo su nombre completo y descripción de la solicitud.
+                    Usted tiene derecho a Acceder, Rectificar, Cancelar y Oponerse al tratamiento de sus datos. Puede enviar una solicitud a: <strong><a href="mailto:coord_actualizaciondocente@itdurango.edu.mx" class="text-blue-600 underline">coord_actualizaciondocente@itdurango.edu.mx</a></strong> incluyendo su nombre completo y descripción de la solicitud.
                 </p>
                 <div class="mt-4 flex gap-4">
-                     <a href="mailto:desarrollo.academico@itdurango.edu.mx?subject=Solicitud%20ARCO" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase rounded shadow transition-colors">
+                     <a href="mailto:coord_actualizaciondocente@itdurango.edu.mx?subject=Solicitud%20ARCO" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase rounded shadow transition-colors">
                         Solicitar Derechos ARCO
                     </a>
                 </div>
@@ -142,12 +145,55 @@
                     Este aviso cumple con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.
                 </p>
             </div>
+
+            <!-- Botón Grande de Regreso Inferior -->
+            <div class="pt-4 flex justify-center">
+                <a href="index.html" class="w-full sm:w-auto px-8 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-blue-600 hover:text-white text-slate-800 dark:text-white font-bold rounded-xl transition-all text-center flex items-center justify-center gap-2 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" /></svg>
+                    Volver al Portal Principal
+                </a>
+            </div>
         </div>
     </main>
 
-    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12 py-6 text-center">
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 mt-8 py-6 text-center">
         <p class="text-sm text-slate-600 dark:text-slate-400">© Coordinación de Actualización Docente ITD</p>
     </footer>
+
+    <!-- Botón Flotante de Regreso -->
+    <a href="index.html" class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-2xl float-enter z-50 flex items-center justify-center transition-transform hover:scale-110" title="Volver al Portal">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+    </a>
+
+    <!-- Script de redirección automática por inactividad -->
+    <script>
+        let inactivityTime = function () {
+            let time;
+            // Reiniciar temporizador en cualquier interacción
+            window.onload = resetTimer;
+            document.onmousemove = resetTimer;
+            document.onkeypress = resetTimer;
+            document.ontouchstart = resetTimer; 
+            document.onclick = resetTimer;
+            document.onscroll = resetTimer;
+
+            function logout() {
+                // Redirigir al inicio después de inactividad
+                window.location.href = 'index.html';
+            }
+
+            function resetTimer() {
+                clearTimeout(time);
+                // 60000 milisegundos = 60 segundos
+                time = setTimeout(logout, 60000); 
+            }
+        };
+
+        inactivityTime();
+    </script>
 
 </body>
 </html>
