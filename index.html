@@ -3,38 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Metaetiquetas estrictas para evitar Caché -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-
     <title>Portal de Actualización Docente - ITD</title>
     <meta name="description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango. Accede a inscripciones, formatos, calendario y más.">
     <meta name="keywords" content="ITD, Tecnológico de Durango, actualización docente, cursos para maestros, desarrollo académico, portal docente">
     
     <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
     
-    <!-- Script de Corrección para Safari (Debe ir en el HEAD) -->
+    <!-- Script Corregido para Safari: Manejo limpio de la caché al retroceder -->
     <script>
-        // 1. Hack "Dummy": Al definir un manejador para 'unload', Safari desactiva 
-        // automáticamente la "Back-Forward Cache" (bfcache) que causa la hoja blanca/texto.
-        window.onunload = function() {};
-
-        // 2. Detección agresiva de navegación "Atrás/Adelante"
         window.addEventListener('pageshow', function(event) {
-            // Si la página persiste en caché O el tipo de navegación es "back_forward"
-            var historyTraversal = event.persisted || 
-                                   (typeof window.performance != "undefined" && 
-                                    window.performance.navigation.type === 2);
-            
-            if (historyTraversal) {
-                // Forzar recarga inmediata
+            // Si la página se carga desde la memoria caché (botón Atrás)
+            if (event.persisted) {
+                // Forzamos una recarga suave
                 window.location.reload();
             }
         });
     </script>
-
+    
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Google tag (gtag.js) -->
