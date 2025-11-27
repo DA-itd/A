@@ -308,11 +308,44 @@
 
         <div id="informacion" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
             <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600">
-                <div class="flex items-center gap-3 mb-4"><div class="text-3xl sm:text-4xl">ℹ️</div><h3 class="text-xl sm:text-2xl font-bold text-gray-800">Información Importante</h3></div>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="text-3xl sm:text-4xl">ℹ️</div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800">
+                        Información Importante
+                    </h3>
+                </div>
+                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="flex items-start gap-3 bg-green-50 p-4 rounded-lg"><div class="text-2xl flex-shrink-0">📚</div><div><p class="text-sm font-semibold text-gray-800">Límite de cursos</p><p class="text-xs text-gray-600 mt-1">Máximo 3 cursos sin empalme</p></div></div>
-                    <div class="flex items-start gap-3 bg-purple-50 p-4 rounded-lg"><div class="text-2xl flex-shrink-0">📝</div><div><p class="text-sm font-semibold text-gray-800">Formatos</p><p class="text-xs text-gray-600 mt-1">Entrega física firmada y sellada</p></div></div>
-                    <a href="#" class="flex items-start gap-3 bg-red-50 p-4 rounded-lg hover:bg-red-100 transition-colors"><div class="text-2xl flex-shrink-0">🗓️</div><div><p class="text-sm font-semibold text-gray-800">Calendario Oficial</p><p class="text-xs text-gray-600 mt-1">Ver fechas importantes</p></div></a>
+                    <div class="flex items-start gap-3 bg-green-50 p-4 rounded-lg">
+                        <div class="text-2xl flex-shrink-0">📚</div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Límite de cursos</p>
+                            <p class="text-xs text-gray-600 mt-1">Puedes tomar hasta 3 cursos por periodo sin empalme de horarios</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 bg-purple-50 p-4 rounded-lg">
+                        <div class="text-2xl flex-shrink-0">📝</div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Formatos</p>
+                            <p class="text-xs text-gray-600 mt-1">Los formatos que se envían (CVU y Ficha técnica) serán en PDF, los demás se entregarán debidamente firmados y sellados en la oficina de Coordinación y actualización docente</p>
+                        </div>
+                    </div>
+                    
+                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-red-50 p-4 rounded-lg hover:bg-red-100 transition-colors">
+                        <div class="text-2xl flex-shrink-0">🗓️</div>
+                        <div>
+                            <p id="calendar-year-text" class="text-sm font-semibold text-gray-800">Calendario Institucional</p>
+                            <p class="text-xs text-gray-600 mt-1">Consulte las fechas importantes del ciclo escolar.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="mt-4 flex items-start gap-3 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                    <div class="text-2xl flex-shrink-0">🧑‍💼</div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800">Nota Importante</p>
+                        <p class="text-xs text-gray-600 mt-1">Estos cursos están dirigidos al personal docente con plaza.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -341,6 +374,7 @@
         <div class="container mx-auto px-4">
             <p class="font-semibold text-sm mb-2">© Coordinación de Actualización Docente</p>
             <p class="text-xs opacity-90">M.C. Alejandro Calderón Rentería</p>
+            <p class="text-xs opacity-75 mt-1">Todos los derechos reservados <span id="copyright-year"></span></p>
         </div>
     </footer>
 
@@ -449,10 +483,20 @@
             setTimeout(() => banner.classList.add('hidden-banner'), 10000);
         }
 
+        // Año en calendario y footer
+        function updateYears() {
+             const cy = document.getElementById('calendar-year-text');
+             if(cy) cy.textContent = `Calendario Institucional ${new Date().getFullYear()}`;
+             
+             const cpy = document.getElementById('copyright-year');
+             if(cpy) cpy.textContent = new Date().getFullYear();
+        }
+
         // Inicializar
         startClock();
         updateWeather();
         rotateQuotes();
+        updateYears();
     </script>
 </body>
 </html>
