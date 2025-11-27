@@ -166,6 +166,7 @@
             const [stats, setStats] = useState(null);
             const [loading, setLoading] = useState(true);
             const chartRef = useRef(null);
+            const chartInstance = useRef(null);
 
             useEffect(() => {
                 fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getSurveyStats`).then(r => r.json()).then(res => { if(res.success) setStats(res.data); setLoading(false); }).catch(e => { console.error(e); setLoading(false); });
@@ -174,8 +175,12 @@
             useEffect(() => {
                 if (stats && chartRef.current && stats.participacion) {
                     const participacionData = Object.entries(stats.participacion).sort((a, b) => b[1] - a[1]).slice(0, 10);
-                    if(window.myChart) window.myChart.destroy();
-                    window.myChart = new Chart(chartRef.current.getContext('2d'), {
+                    
+                    if(chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+
+                    chartInstance.current = new Chart(chartRef.current.getContext('2d'), {
                         type: 'bar',
                         data: {
                             labels: participacionData.map(p => p[0]),
@@ -183,6 +188,9 @@
                         },
                         options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false }, title: { display: true, text: 'Participación por Jefe Inmediato (Top 10)' } } }
                     });
+                }
+                return () => {
+                    if(chartInstance.current) chartInstance.current.destroy();
                 }
             }, [stats]);
 
