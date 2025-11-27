@@ -20,6 +20,16 @@
                             card: '#1e293b',
                             text: '#f8fafc'
                         }
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'border-dance': 'border-dance 4s linear infinite',
+                    },
+                    keyframes: {
+                        'border-dance': {
+                            '0%, 100%': { 'background-position': '0% 50%' },
+                            '50%': { 'background-position': '100% 50%' },
+                        }
                     }
                 }
             }
@@ -28,7 +38,7 @@
 
     <!-- SOLUCIÓN SAFARI, ESTILOS & MODO OSCURO -->
     <script>
-        // 0. Aplicar tema oscuro inmediatamente antes de pintar para evitar flash
+        // 0. Aplicar tema oscuro inmediatamente antes de pintar
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
@@ -183,6 +193,12 @@
         #announcement-banner.hidden-banner {
             opacity: 0; height: 0 !important; padding: 0 !important; margin: 0 !important;
         }
+
+        /* Estilo para el Modal */
+        .modal-overlay {
+            background-color: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+        }
     </style>
 <script type="importmap">
 {
@@ -220,369 +236,577 @@
                 <div class="flex justify-between items-center">
                     <div class="hidden md:flex space-x-4 items-center">
                         <a href="#inicio" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Inicio</a>
-                        <a href="planificador.html" class="px-3 py-3 text-sm font-bold text-yellow-300 hover:text-white hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors flex items-center gap-1">✨ Planificador IA</a>
-                        <a href="tutor.html" class="px-3 py-3 text-sm font-bold text-cyan-300 hover:text-white hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors flex items-center gap-1">🤖 Tutor IA</a>
+                        <!-- Botón consolidado para IA -->
+                        <button onclick="openIAModal()" class="px-3 py-3 text-sm font-bold text-yellow-300 hover:text-white hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors flex items-center gap-1">
+                            ✨ Herramientas IA
+                        </button>
                         <a href="#servicios" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Servicios</a>
                         <a href="#informacion" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Información</a>
                         <a href="#enlaces" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Enlaces</a>
                         
                         <!-- Botón Tema Desktop -->
                         <button id="theme-toggle-desktop" class="ml-4 p-2 rounded-lg hover:bg-blue-700 dark:hover:bg-slate-700 transition-colors focus:outline-none" title="Cambiar tema">
-                            <!-- Sol -->
                             <svg id="theme-toggle-light-icon-d" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                            <!-- Luna -->
-                            <svg id="theme-toggle-dark-icon-d" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                            <svg id="theme-toggle-dark-icon-d" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586 1 1 0 01-5.293-5.293zM16.707 16.707a6 6 0 11-5.236-8.236 8.003 8.003 0 008.165 4.928.75.75 0 01.378 1.054 7.999 7.999 0 01-3.307 2.254z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                         </button>
                     </div>
                     
-                    <div class="md:hidden flex items-center w-full justify-between">
+                    <div class="md:hidden flex items-center w-full">
+                         <div class="flex-grow"></div>
                          <!-- Botón Tema Móvil -->
-                         <button id="theme-toggle-mobile" class="p-2 rounded-lg hover:bg-blue-700 dark:hover:bg-slate-700 transition-colors focus:outline-none">
-                            <svg id="theme-toggle-light-icon-m" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                            <svg id="theme-toggle-dark-icon-m" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                         <button id="theme-toggle-mobile" class="p-2 mr-2 rounded-lg hover:bg-blue-700 dark:hover:bg-slate-700 transition-colors focus:outline-none">
+                            <svg id="theme-toggle-light-icon-m" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                            <svg id="theme-toggle-dark-icon-m" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586 1 1 0 01-5.293-5.293zM16.707 16.707a6 6 0 11-5.236-8.236 8.003 8.003 0 008.165 4.928.75.75 0 01.378 1.054 7.999 7.999 0 01-3.307 2.254z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                          </button>
-                         
                          <button id="mobile-menu-button" class="text-white focus:outline-none p-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                          </button>
                     </div>
                 </div>
             </div>
-            <!-- Menú Móvil -->
+            
             <div id="mobile-menu" class="hidden md:hidden border-t border-blue-700 dark:border-slate-700">
                 <a href="#inicio" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Inicio</a>
-                <a href="planificador.html" class="block px-4 py-3 text-sm font-bold text-yellow-300 hover:bg-blue-700 dark:hover:bg-slate-700">✨ Planificador IA</a>
-                <a href="tutor.html" class="block px-4 py-3 text-sm font-bold text-cyan-300 hover:bg-blue-700 dark:hover:bg-slate-700">🤖 Tutor IA</a>
+                <button onclick="openIAModal()" class="w-full text-left block px-4 py-3 text-sm font-bold text-yellow-300 hover:bg-blue-700 dark:hover:bg-slate-700">✨ Herramientas IA</button>
                 <a href="#servicios" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Servicios</a>
                 <a href="#informacion" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Información</a>
+                <a href="#enlaces" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Enlaces</a>
             </div>
         </nav>
     </header>
 
-    <!-- Info Bar -->
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-slate-800 dark:to-indigo-900 text-white shadow-lg transition-colors duration-500">
+    <!-- Barra Clima -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-slate-800 dark:to-slate-700 text-white shadow-lg transition-colors duration-500">
         <div class="container mx-auto px-4 py-3">
             <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 text-sm">
-                <div class="flex items-center gap-2"><span class="text-xl">📅</span><span id="currentDate" class="font-semibold">Cargando...</span></div>
-                <div id="weatherInfo" class="flex items-center gap-2"><span class="text-2xl weather-icon">🌤️</span><span class="font-semibold">Durango, Dgo.</span></div>
-                <div class="flex items-center gap-2"><span class="text-xl">🕒</span><span id="clock" class="font-mono font-bold text-lg">--:--:--</span></div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📅</span>
+                    <span id="currentDate" class="font-semibold">Cargando...</span>
+                </div>
+                <div id="weatherInfo" class="flex items-center gap-2">
+                    <span class="text-2xl weather-icon">🌤️</span>
+                    <span class="font-semibold">Durango, Dgo.</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🕒</span>
+                    <span id="clock" class="font-mono font-bold text-lg">--:--:--</span>
+                </div>
             </div>
         </div>
     </div>
     
     <!-- Banner -->
-    <div id="announcement-banner" class="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 dark:from-amber-600 dark:via-orange-700 dark:to-red-700 text-white p-4 text-center font-bold shadow-lg relative cursor-pointer">
+    <div id="announcement-banner" class="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 text-white p-4 text-center font-bold shadow-lg relative cursor-pointer">
         <div class="container mx-auto flex items-center justify-center gap-4">
             <span class="text-2xl animate-pulse">📢</span>
-            <div><strong class="block sm:inline text-lg">BIENVENIDA(o)</strong><span class="block sm:inline ml-2">¡Próximos cursos de actualización docente enero 2026!</span></div>
+            <div>
+                <strong class="block sm:inline text-lg">BIENVENIDA(o)</strong>
+                <span class="block sm:inline ml-2">¡Próximos cursos de actualización docente enero 2026!</span>
+            </div>
         </div>
     </div>
 
-    <!-- Contenido -->
     <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
+        
+        <!-- Frase -->
         <section class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
-            <div id="quote-container" class="quote-container rounded-lg p-6 text-center transition-opacity duration-500 ease-in-out"></div>
+            <div id="quote-container" class="quote-container rounded-lg p-6 text-center transition-opacity duration-500 ease-in-out">
+                <!-- Quote injected -->
+            </div>
         </section>
         
+        <!-- Servicios -->
         <div id="servicios" class="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32">
             <div class="flex items-baseline justify-center gap-4 sm:gap-6 mb-4">
-                <div class="inline-block animate-pulse-slow"><div class="text-6xl sm:text-7xl md:text-8xl">🎓</div></div>
-                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 dark:text-gray-100 transition-colors">Servicios Disponibles</h2>
+                <div class="inline-block animate-pulse-slow">
+                    <div class="text-6xl sm:text-7xl md:text-8xl">🎓</div>
+                </div>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 dark:text-white transition-colors">
+                    Servicios Disponibles
+                </h2>
             </div>
-            <p class="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto px-4 transition-colors">Seleccione la opción que necesite para acceder a los diferentes servicios</p>
+            <p class="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto px-4 transition-colors">
+                Seleccione la opción que necesite para acceder a los diferentes servicios
+            </p>
         </div>
 
+        <!-- Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
-            <a href="planificador.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-500 dark:hover:border-indigo-400 animate-fadeInUp delay-100 relative group transition-colors">
-                <div class="badge-new">¡NUEVO!</div><div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">✨</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Planificador de Clases</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Diseña secuencias didácticas con IA</p>
-                <div class="inline-block bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">Herramienta IA</div>
+            
+            <!-- Herramientas IA (Modal) -->
+            <button onclick="openIAModal()" 
+               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-500 dark:hover:border-indigo-400 animate-fadeInUp delay-100 relative group w-full">
+                <div class="badge-new">¡NUEVO!</div>
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">✨</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+                    Suite de Herramientas IA
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Planificador y Tutor Pedagógico
+                </p>
+                <div class="inline-block bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-semibold px-3 py-1 rounded-full">
+                    Inteligencia Artificial
+                </div>
+            </button>
+
+            <!-- Opción 1: Inscripción a Cursos -->
+            <a href="inscripciones.html" 
+               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-rose-400 hover:bg-rose-50 dark:hover:bg-slate-700 animate-fadeInUp delay-300 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 bg-rose-500 text-white text-[10px] px-2 py-1 rounded-bl-lg font-bold">
+                    ¡ABIERTO!
+                </div>
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">📝</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+                    Inscripción a Cursos
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 font-bold text-rose-600 dark:text-rose-400">
+                    Registrate y no pierdas tu lugar
+                </p>
+                <div class="inline-block bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
             </a>
-            <a href="tutor.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 animate-fadeInUp delay-200 relative group transition-colors">
-                <div class="badge-new">¡NUEVO!</div><div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">🤖</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Tutor Pedagógico</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Resuelve dudas pedagógicas con IA</p>
-                <div class="inline-block bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">Asistente IA</div>
-            </a>
-            <a href="inscripciones.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 dark:hover:border-rose-400 animate-fadeInUp delay-300 transition-colors">
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📝</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Inscripción a Cursos</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Registrarse en cursos de actualización</p>
-                <div class="inline-block bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
-            </a>
-            <a href="historial.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-orange-400 dark:hover:border-orange-400 animate-fadeInUp delay-400 transition-colors">
+
+            <!-- Opción 2: Historial de Cursos -->
+            <a href="historial.html" 
+               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-orange-400 animate-fadeInUp delay-400">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Historial de Cursos</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Ver mi historial de actualización</p>
-                <div class="inline-block bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+                    Historial de Cursos
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Ver mi historial de actualización
+                </p>
+                <div class="inline-block bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
             </a>
-            <a href="formatos.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 dark:hover:border-green-400 animate-fadeInUp delay-500 transition-colors">
+
+            <!-- Opción 3: Formatos Oficiales -->
+            <a href="formatos.html" 
+               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-500">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📋</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Formatos Oficiales</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Descargar formatos y documentos</p>
-                <div class="inline-block bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+                    Formatos Oficiales
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Descargar formatos y documentos
+                </p>
+                <div class="inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
             </a>
-            <a href="verificador.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 dark:hover:border-cyan-400 animate-fadeInUp delay-600 transition-colors">
+
+            <!-- Opción 4: Validación de Constancias -->
+            <a href="verificador.html" 
+               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-600">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">✅</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Validación</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Verificar autenticidad</p>
-                <div class="inline-block bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+                    Validación de Constancias
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Verificar la autenticidad de documentos.
+                </p>
+                <div class="inline-block bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
             </a>
-            <a href="instructores.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 dark:hover:border-indigo-400 animate-fadeInUp delay-700 transition-colors">
+
+            <!-- Opción 5: Área para Instructores -->
+            <a href="instructores.html" 
+               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-700">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Instructores</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Área para Instructores</p>
-                <div class="inline-block bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+                    Área para Instructores
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Subir propuestas y evidencias
+                </p>
+                <div class="inline-block bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
             </a>
-            <a href="encuestas.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 dark:hover:border-yellow-400 animate-fadeInUp delay-800 transition-colors">
+
+            <!-- Opción 6: Encuestas -->
+            <a href="encuestas.html" 
+               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 animate-fadeInUp delay-800">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📊</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Encuestas</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Evaluación de servicios</p>
-                <div class="inline-block bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+                    Encuestas de Opinión
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Evaluación de cursos y servicios
+                </p>
+                <div class="inline-block bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
             </a>
-            <a href="estadisticas.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 dark:hover:border-purple-400 animate-fadeInUp delay-900 transition-colors">
+            
+             <!-- Opción 7: Estadísticas -->
+            <a href="estadisticas.html" 
+               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-900">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📈</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Estadísticas</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Análisis y resultados de inscripciones</p>
-                <div class="inline-block bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+                    Estadísticas
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Análisis y resultados
+                </p>
+                <div class="inline-block bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-semibold px-3 py-1 rounded-full">
+                    ✓ Disponible
+                </div>
             </a>
+
         </div>
 
+        <!-- Información -->
         <div id="informacion" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600 dark:border-blue-500 transition-colors">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="text-3xl sm:text-4xl">ℹ️</div>
-                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white transition-colors">
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
                         Información Importante
                     </h3>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="flex items-start gap-3 bg-green-50 dark:bg-green-900/30 p-4 rounded-lg transition-colors">
+                    <div class="flex items-start gap-3 bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
                         <div class="text-2xl flex-shrink-0">📚</div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 transition-colors">Límite de cursos</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 transition-colors">Puedes tomar hasta 3 cursos por periodo sin empalme de horarios</p>
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Límite de cursos</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Puedes tomar hasta 3 cursos por periodo sin empalme de horarios</p>
                         </div>
                     </div>
-                    
-                    <div class="flex items-start gap-3 bg-purple-50 dark:bg-purple-900/30 p-4 rounded-lg transition-colors">
+                    <div class="flex items-start gap-3 bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
                         <div class="text-2xl flex-shrink-0">📝</div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 transition-colors">Formatos</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 transition-colors">Los formatos que se envían (CVU y Ficha técnica) serán en PDF, los demás se entregarán debidamente firmados y sellados en la oficina de Coordinación y actualización docente</p>
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Formatos</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Los formatos (CVU y Ficha técnica) serán en PDF, los demás firmados en Coordinación.</p>
                         </div>
                     </div>
-                    
-                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-red-50 dark:bg-red-900/30 p-4 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors">
+                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-red-50 dark:bg-red-900/20 p-4 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors cursor-pointer">
                         <div class="text-2xl flex-shrink-0">🗓️</div>
                         <div>
-                            <p id="calendar-year-text" class="text-sm font-semibold text-gray-800 dark:text-gray-200 transition-colors">Calendario Institucional</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 transition-colors">Consulte las fechas importantes del ciclo escolar.</p>
+                            <p id="calendar-year-text" class="text-sm font-semibold text-gray-800 dark:text-gray-200">Calendario Institucional</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Consulte las fechas importantes del ciclo escolar.</p>
                         </div>
                     </a>
                 </div>
-                <div class="mt-4 flex items-start gap-3 bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg border-l-4 border-blue-400 dark:border-blue-500 transition-colors">
+                <div class="mt-4 flex items-start gap-3 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-l-4 border-blue-400">
                     <div class="text-2xl flex-shrink-0">🧑‍💼</div>
                     <div>
-                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 transition-colors">Nota Importante</p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 transition-colors">Estos cursos están dirigidos al personal docente con plaza.</p>
+                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Nota Importante</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Estos cursos están dirigidos al personal docente con plaza.</p>
                     </div>
                 </div>
             </div>
         </div>
-        
+
+        <!-- Enlaces -->
         <div id="enlaces" class="max-w-4xl mx-auto scroll-mt-32">
-             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-slate-800 dark:to-indigo-900 rounded-2xl shadow-xl p-6 text-white transition-colors">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-slate-800 dark:to-slate-700 rounded-2xl shadow-xl p-6 text-white transition-colors">
                 <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <a href="https://www.itdurango.edu.mx" target="_blank" class="bg-sky-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-3xl mb-2">🏛️</div><p class="font-semibold text-sm">ITD</p><p class="text-xs opacity-90">Portal Principal</p></a>
-                    <a href="https://www.tecnm.mx" target="_blank" class="bg-emerald-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-3xl mb-2">🎓</div><p class="font-semibold text-sm">TecNM</p><p class="text-xs opacity-90">Sitio Nacional</p></a>
-                    <a href="https://mooc.tecnm.mx/portal/" target="_blank" class="bg-purple-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-3xl mb-2">💻</div><p class="font-semibold text-sm">MOOC</p><p class="text-xs opacity-90">Cursos en Línea</p></a>
-                    <a href="https://www.itdurango.edu.mx/sgi/" target="_blank" class="bg-rose-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-3xl mb-2">📂</div><p class="font-semibold text-sm">SGI</p><p class="text-xs opacity-90">Gestión Integrado</p></a>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <a href="https://www.itdurango.edu.mx" target="_blank" rel="noopener noreferrer" class="bg-sky-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
+                        <div class="text-3xl mb-2">🏛️</div>
+                        <p class="font-semibold text-sm">ITD</p>
+                        <p class="text-xs opacity-90">Portal Principal</p>
+                    </a>
+                    <a href="https://www.tecnm.mx" target="_blank" rel="noopener noreferrer" class="bg-emerald-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
+                        <div class="text-3xl mb-2">🎓</div>
+                        <p class="font-semibold text-sm">TecNM</p>
+                        <p class="text-xs opacity-90">Sitio Nacional</p>
+                    </a>
+                    <a href="https://mooc.tecnm.mx/portal/" target="_blank" rel="noopener noreferrer" class="bg-purple-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
+                        <div class="text-3xl mb-2">💻</div>
+                        <p class="font-semibold text-sm">MOOC</p>
+                        <p class="text-xs opacity-90">Cursos en Línea</p>
+                    </a>
+                    <a href="https://www.itdurango.edu.mx/sgi/" target="_blank" rel="noopener noreferrer" class="bg-rose-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
+                        <div class="text-3xl mb-2">📂</div>
+                        <p class="font-semibold text-sm">SGI</p>
+                        <p class="text-xs opacity-90">Gestión Integrado</p>
+                    </a>
+                     <a href="https://www.labmexia.gob.mx" target="_blank" rel="noopener noreferrer" class="bg-fuchsia-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
+                        <div class="text-3xl mb-2">🧪</div>
+                        <p class="font-semibold text-sm">LabMexIA</p>
+                        <p class="text-xs opacity-90">Laboratorio IA</p>
+                    </a>
+                    <a href="https://saberes.gob.mx/cms/index.php" target="_blank" rel="noopener noreferrer" class="bg-teal-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
+                        <div class="text-3xl mb-2">🧠</div>
+                        <p class="font-semibold text-sm">Saberes</p>
+                        <p class="text-xs opacity-90">Plataforma</p>
+                    </a>
                 </div>
             </div>
         </div>
-        
+
+        <!-- Contacto -->
         <div id="contacto" class="max-w-4xl mx-auto mt-8 scroll-mt-32">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-slate-800 dark:to-indigo-900 rounded-2xl shadow-xl p-6 text-white text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6 transition-colors">
-                 <div><h3 class="text-lg font-bold">¿Necesitas Ayuda?</h3><p class="text-sm opacity-90">Contacta a la Coordinación.</p></div>
-                 <a href="mailto:desarrollo.academico@itdurango.edu.mx" class="bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md">📧 Enviar Email</a>
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-slate-800 dark:to-slate-700 rounded-2xl shadow-xl p-6 text-white transition-colors">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+                    <div class="flex items-center gap-4">
+                        <div class="text-4xl hidden sm:block">💬</div>
+                        <div>
+                            <h3 class="text-lg font-bold">¿Necesitas Ayuda?</h3>
+                            <p class="text-sm opacity-90">Contacta a la Coordinación de Actualización Docente.</p>
+                        </div>
+                    </div>
+                    <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
+                       class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md cursor-pointer">
+                        <span class="mr-2">📧</span> Enviar Email
+                    </a>
+                </div>
             </div>
         </div>
+
     </main>
 
-    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-slate-900 dark:to-indigo-950 text-white text-center py-6 mt-8 transition-colors">
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-slate-900 dark:to-slate-950 text-white text-center py-6 sm:py-8 mt-8 transition-colors">
         <div class="container mx-auto px-4">
-            <p class="font-semibold text-sm mb-2">© Coordinación de Actualización Docente</p>
-            <p class="text-xs opacity-90">M.C. Alejandro Calderón Rentería</p>
-            <p class="text-xs opacity-75 mt-1">Todos los derechos reservados <span id="copyright-year"></span></p>
+            <p class="font-semibold text-sm sm:text-base mb-2">
+                © Coordinación de Actualización Docente
+            </p>
+            <p class="text-xs sm:text-sm opacity-90">
+                M.C. Alejandro Calderón Rentería
+            </p>
+            <p class="text-xs sm:text-sm opacity-75 mt-1">
+                Todos los derechos reservados <span id="copyright-year"></span>
+            </p>
         </div>
     </footer>
 
-    <!-- LÓGICA DE LA PÁGINA -->
+    <!-- Modal IA -->
+    <div id="ia-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+        <div class="modal-overlay absolute inset-0" onclick="closeIAModal()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 w-11/12 max-w-md border-2 border-indigo-100 dark:border-slate-700">
+            <button onclick="closeIAModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <div class="text-center mb-6">
+                <div class="inline-block p-3 rounded-full bg-indigo-100 dark:bg-indigo-900/50 mb-4">
+                    <span class="text-4xl">✨</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Herramientas IA</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Selecciona la herramienta que deseas utilizar</p>
+            </div>
+            
+            <div class="space-y-4">
+                <a href="planificador.html" class="block p-4 rounded-xl border-2 border-indigo-100 hover:border-indigo-500 bg-indigo-50 hover:bg-white dark:bg-slate-700 dark:border-slate-600 dark:hover:bg-slate-600 dark:hover:border-indigo-400 transition-all group">
+                    <div class="flex items-center gap-4">
+                        <span class="text-3xl">📅</span>
+                        <div class="text-left">
+                            <h4 class="font-bold text-indigo-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300">Planificador de Clases</h4>
+                            <p class="text-xs text-indigo-700 dark:text-gray-300">Diseña secuencias didácticas</p>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="tutor.html" class="block p-4 rounded-xl border-2 border-cyan-100 hover:border-cyan-500 bg-cyan-50 hover:bg-white dark:bg-slate-700 dark:border-slate-600 dark:hover:bg-slate-600 dark:hover:border-cyan-400 transition-all group">
+                    <div class="flex items-center gap-4">
+                        <span class="text-3xl">🤖</span>
+                        <div class="text-left">
+                            <h4 class="font-bold text-cyan-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-300">Tutor Pedagógico</h4>
+                            <p class="text-xs text-cyan-700 dark:text-gray-300">Asistente virtual especializado</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Lógica de Modo Oscuro
-        const themeToggleBtnDesktop = document.getElementById('theme-toggle-desktop');
-        const themeToggleBtnMobile = document.getElementById('theme-toggle-mobile');
+        // Modal Logic
+        const iaModal = document.getElementById('ia-modal');
+        function openIAModal() {
+            iaModal.classList.remove('hidden');
+            setTimeout(() => {
+                iaModal.querySelector('div.absolute').classList.add('scale-100', 'opacity-100');
+                iaModal.querySelector('div.absolute').classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        }
+        function closeIAModal() {
+            iaModal.classList.add('hidden');
+        }
+
+        // Cursor
+        const cursorDot = document.getElementById('cursor-dot');
+        window.addEventListener('mousemove', e => {
+            const { clientX, clientY } = e;
+            requestAnimationFrame(() => {
+                cursorDot.style.left = `${clientX}px`;
+                cursorDot.style.top = `${clientY}px`;
+            });
+            const target = e.target;
+            if (target.closest('a, button, [role="button"], .card-portal, .cursor-pointer')) {
+                cursorDot.classList.add('active');
+            } else {
+                cursorDot.classList.remove('active');
+            }
+        });
+
+        // Mobile Menu
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Date & Clock
+        function updateDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const ds = now.toLocaleDateString('es-MX', options);
+            document.getElementById('currentDate').textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
+        }
+        function startClock() {
+            function updateClock() {
+                const now = new Date();
+                document.getElementById('clock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+            }
+            updateClock(); setInterval(updateClock, 1000);
+        }
         
-        const darkIconD = document.getElementById('theme-toggle-dark-icon-d');
-        const lightIconD = document.getElementById('theme-toggle-light-icon-d');
-        const darkIconM = document.getElementById('theme-toggle-dark-icon-m');
-        const lightIconM = document.getElementById('theme-toggle-light-icon-m');
+        // Year Updates
+        function updateYears() {
+             const year = new Date().getFullYear();
+             const calEl = document.getElementById('calendar-year-text');
+             if(calEl) calEl.textContent = `Calendario Institucional ${year}`;
+             
+             const copyEl = document.getElementById('copyright-year');
+             if(copyEl) copyEl.textContent = year;
+        }
+
+        // Weather
+        function updateWeather() {
+            const weatherElement = document.getElementById('weatherInfo');
+            if (!weatherElement) return;
+            const getWeatherIcon = (code) => {
+                if (code === 0) return '☀️';
+                if ([1, 2, 3].includes(code)) return '⛅';
+                if ([45, 48].includes(code)) return '🌫️';
+                if ([51, 53, 55].includes(code)) return '🌦️';
+                if ([61, 63, 65].includes(code)) return '🌧️';
+                if ([71, 73, 75, 77].includes(code)) return '🌨️';
+                if ([80, 81, 82].includes(code)) return '⛈️';
+                if ([95, 96, 99].includes(code)) return '🌩️';
+                return '🌤️';
+            };
+            const showWeather = (lat, lon) => {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+                fetch(url)
+                    .then(response => { if (!response.ok) throw new Error('Err'); return response.json(); })
+                    .then(data => {
+                        if (data && data.current_weather) {
+                            const temp = Math.round(data.current_weather.temperature);
+                            const icon = getWeatherIcon(data.current_weather.weathercode);
+                            weatherElement.innerHTML = `<span class="text-2xl weather-icon">${icon}</span><span class="font-semibold">Durango, Dgo. ${temp}°C</span>`;
+                        }
+                    })
+                    .catch(e => console.error(e));
+            };
+            const durangoLat = 24.0277;
+            const durangoLon = -104.653;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (p) => showWeather(p.coords.latitude, p.coords.longitude),
+                    (e) => showWeather(durangoLat, durangoLon)
+                );
+            } else { showWeather(durangoLat, durangoLon); }
+        }
+
+        // Quotes
+        const inspirationalQuotes = [
+            { quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.", author: "Nelson Mandela" },
+            { quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.", author: "Carl Sagan" },
+            { quote: "La educación no es preparación para la vida; la educación es la vida misma.", author: "John Dewey" },
+            { quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.", author: "Albert Einstein" },
+            { quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.", author: "Platón" }
+        ];
+        function rotateQuotes() {
+            const qc = document.getElementById('quote-container');
+            if (!qc) return;
+            const q = inspirationalQuotes[Math.floor(Math.random() * inspirationalQuotes.length)];
+            qc.style.opacity = 0;
+            setTimeout(() => {
+                qc.innerHTML = `<p class="text-base sm:text-lg italic text-gray-700 dark:text-gray-300 leading-relaxed">"${q.quote}"</p><p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 text-right mt-2">- ${q.author}</p>`;
+                qc.style.opacity = 1;
+            }, 500);
+        }
+
+        // Banner
+        const announcementBanner = document.getElementById('announcement-banner');
+        if (announcementBanner) {
+            let bannerHidden = false;
+            const hideBanner = () => {
+                if (!bannerHidden) {
+                    bannerHidden = true;
+                    announcementBanner.classList.add('hidden-banner');
+                    window.removeEventListener('scroll', hideBanner);
+                }
+            };
+            setTimeout(hideBanner, 10000);
+            window.addEventListener('scroll', hideBanner, { once: true });
+            announcementBanner.addEventListener('click', hideBanner);
+        }
+
+        // Dark Mode Toggle Logic
+        var themeToggleDarkIconD = document.getElementById('theme-toggle-dark-icon-d');
+        var themeToggleLightIconD = document.getElementById('theme-toggle-light-icon-d');
+        var themeToggleDarkIconM = document.getElementById('theme-toggle-dark-icon-m');
+        var themeToggleLightIconM = document.getElementById('theme-toggle-light-icon-m');
 
         function updateThemeIcons() {
-            const isDark = document.documentElement.classList.contains('dark');
-            if (isDark) {
-                // En modo oscuro, mostramos el sol (para cambiar a light)
-                darkIconD.classList.add('hidden');
-                lightIconD.classList.remove('hidden');
-                darkIconM.classList.add('hidden');
-                lightIconM.classList.remove('hidden');
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                themeToggleLightIconD.classList.remove('hidden');
+                themeToggleDarkIconD.classList.add('hidden');
+                themeToggleLightIconM.classList.remove('hidden');
+                themeToggleDarkIconM.classList.add('hidden');
+                document.documentElement.classList.add('dark');
             } else {
-                // En modo claro, mostramos la luna (para cambiar a dark)
-                lightIconD.classList.add('hidden');
-                darkIconD.classList.remove('hidden');
-                lightIconM.classList.add('hidden');
-                darkIconM.classList.remove('hidden');
+                themeToggleLightIconD.classList.add('hidden');
+                themeToggleDarkIconD.classList.remove('hidden');
+                themeToggleLightIconM.classList.add('hidden');
+                themeToggleDarkIconM.classList.remove('hidden');
+                document.documentElement.classList.remove('dark');
             }
         }
 
+        updateThemeIcons();
+
+        var themeToggleBtnD = document.getElementById('theme-toggle-desktop');
+        var themeToggleBtnM = document.getElementById('theme-toggle-mobile');
+
         function toggleTheme() {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('color-theme', 'light');
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
             } else {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('color-theme', 'dark');
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
             }
             updateThemeIcons();
         }
 
-        if(themeToggleBtnDesktop) themeToggleBtnDesktop.addEventListener('click', toggleTheme);
-        if(themeToggleBtnMobile) themeToggleBtnMobile.addEventListener('click', toggleTheme);
-        
-        // Inicializar iconos
-        updateThemeIcons();
+        themeToggleBtnD.addEventListener('click', toggleTheme);
+        themeToggleBtnM.addEventListener('click', toggleTheme);
 
-        // Cursor
-        const cursorDot = document.getElementById('cursor-dot');
-        if(cursorDot) {
-            window.addEventListener('mousemove', e => {
-                requestAnimationFrame(() => {
-                    cursorDot.style.left = `${e.clientX}px`;
-                    cursorDot.style.top = `${e.clientY}px`;
-                });
-                const target = e.target;
-                if (target.closest('a, button, .cursor-pointer, .card-portal')) {
-                    cursorDot.classList.add('active');
-                } else {
-                    cursorDot.classList.remove('active');
-                }
-            });
-        }
-
-        // Menú Móvil
-        const menuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        if(menuButton && mobileMenu) {
-            menuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
-            mobileMenu.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
-            });
-        }
-
-        // Reloj y Fecha
-        function startClock() {
-            const clockEl = document.getElementById('clock');
-            if(!clockEl) return;
-            function update() {
-                const now = new Date();
-                clockEl.textContent = now.toLocaleTimeString('es-MX', {hour12: false});
-            }
-            setInterval(update, 1000);
-            update();
-            
-            const dateEl = document.getElementById('currentDate');
-            if(dateEl) {
-                const now = new Date();
-                const opt = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                const ds = now.toLocaleDateString('es-MX', opt);
-                dateEl.textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
-            }
-        }
-
-        // Clima (OpenMeteo)
-        function updateWeather() {
-            const el = document.getElementById('weatherInfo');
-            if(!el) return;
-            const getWeatherIcon = (c) => {
-                if (c === 0) return '☀️'; if ([1,2,3].includes(c)) return '⛅';
-                if ([45,48].includes(c)) return '🌫️'; if ([51,53,55].includes(c)) return '🌦️';
-                if ([61,63,65].includes(c)) return '🌧️'; if ([71,73,75,77].includes(c)) return '🌨️';
-                if ([80,81,82].includes(c)) return '⛈️'; if ([95,96,99].includes(c)) return '🌩️';
-                return '🌤️';
-            };
-            const fetchW = (lat, lon) => {
-                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
-                .then(r => r.json())
-                .then(d => {
-                    if(d.current_weather) {
-                        el.innerHTML = `<span class="text-2xl weather-icon">${getWeatherIcon(d.current_weather.weathercode)}</span><span class="font-semibold">Durango, Dgo. ${Math.round(d.current_weather.temperature)}°C</span>`;
-                    }
-                }).catch(() => {});
-            };
-            if(navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(p => fetchW(p.coords.latitude, p.coords.longitude), () => fetchW(24.0277, -104.653));
-            } else { fetchW(24.0277, -104.653); }
-        }
-
-        // Frases
-        const quotes = [
-            { t: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.", a: "Nelson Mandela" },
-            { t: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.", a: "Carl Sagan" },
-            { t: "La educación no es preparación para la vida; la educación es la vida misma.", a: "John Dewey" },
-            { t: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.", a: "Albert Einstein" }
-        ];
-        function rotateQuotes() {
-            const qc = document.getElementById('quote-container');
-            if(!qc) return;
-            let i = 0;
-            const show = () => {
-                const q = quotes[i];
-                qc.innerHTML = `<p class="text-base sm:text-lg italic text-gray-700 dark:text-gray-200">"${q.t}"</p><p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 text-right mt-2">- ${q.a}</p>`;
-                qc.style.opacity = 1;
-                i = (i + 1) % quotes.length;
-            };
-            show();
-            setInterval(() => {
-                qc.style.opacity = 0;
-                setTimeout(show, 500);
-            }, 10000);
-        }
-
-        // Banner
-        const banner = document.getElementById('announcement-banner');
-        if(banner) {
-            banner.addEventListener('click', () => banner.classList.add('hidden-banner'));
-            setTimeout(() => banner.classList.add('hidden-banner'), 10000);
-        }
-
-        // Año en calendario y footer
-        function updateYears() {
-             const cy = document.getElementById('calendar-year-text');
-             if(cy) cy.textContent = `Calendario Institucional ${new Date().getFullYear()}`;
-             
-             const cpy = document.getElementById('copyright-year');
-             if(cpy) cpy.textContent = new Date().getFullYear();
-        }
-
-        // Inicializar
-        startClock();
-        updateWeather();
-        rotateQuotes();
-        updateYears();
+        window.addEventListener('load', function() {
+            startClock(); updateDate(); updateWeather(); updateYears();
+            rotateQuotes(); setInterval(rotateQuotes, 15000);
+        });
     </script>
 </body>
 </html>
