@@ -12,10 +12,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
-    <!-- Librerías para Exportación -->
+    <!-- Librerías para Exportación y Gráficas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } 
@@ -185,26 +186,103 @@
             );
         };
 
-        // --- NUEVO COMPONENTE DE ENCUESTAS (IFRAME) ---
-        const AdminSurveyEmbed = () => {
+        // --- COMPONENTE GRÁFICAS DE ENCUESTA ---
+        const AdminSurveyCharts = () => {
+            const [stats, setStats] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const chartRef = useRef(null);
+
+            useEffect(() => {
+                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getSurveyStats`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if(res.success) setStats(res.data);
+                        setLoading(false);
+                    })
+                    .catch(e => {
+                        console.error(e);
+                        setLoading(false);
+                    });
+            }, []);
+
+            useEffect(() => {
+                if (stats && chartRef.current && stats.participacion) {
+                    // Preparar datos para "Jefe Inmediato"
+                    const participacionData = Object.entries(stats.participacion)
+                        .sort((a, b) => b[1] - a[1]) // Ordenar de mayor a menor
+                        .slice(0, 10); // Top 10
+
+                    const labels = participacionData.map(p => p[0]);
+                    const values = participacionData.map(p => p[1]);
+
+                    const ctx = chartRef.current.getContext('2d');
+                    
+                    // Destruir gráfica anterior si existe
+                    if (window.myChart) window.myChart.destroy();
+
+                    window.myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Evaluaciones Recibidas',
+                                data: values,
+                                backgroundColor: 'rgba(79, 70, 229, 0.7)', // Indigo
+                                borderColor: 'rgba(79, 70, 229, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y', // Barra Horizontal
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false },
+                                title: {
+                                    display: true,
+                                    text: 'Participación por Jefe Inmediato / Departamento (Top 10)'
+                                }
+                            },
+                            scales: {
+                                x: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+            }, [stats]);
+
+            if (loading) return <div className="text-center p-8">Cargando gráficas...</div>;
+            if (!stats) return null;
+
             return (
                 <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200 animate-fadeIn">
-                    <h2 className="text-xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-                        📊 Avance de Encuestas
+                    <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        📊 Avance de Encuestas: Jefes de Departamento
                     </h2>
-                    <p className="text-gray-600 mb-6 text-sm">
-                        Los siguientes gráficos muestran el avance actualizado de la encuesta realizada por la Coordinación Docente.
-                    </p>
                     
-                    <div className="w-full bg-gray-50 rounded-lg border border-gray-200 overflow-hidden shadow-inner">
-                        <iframe 
-                            src="https://docs.google.com/spreadsheets/d/1ibpKCmMnhxlGmy0gPTejtBj-9kZbZquGhRtyMT2k2Cg/htmlembed?gid=684485348&widget=true&chrome=false"
-                            width="100%" 
-                            height="800" 
-                            frameBorder="0"
-                            className="w-full"
-                        >
-                        </iframe>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Resumen */}
+                        <div className="lg:col-span-1 space-y-4">
+                            <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                                <p className="text-sm text-blue-600 font-bold uppercase">Total Encuestas</p>
+                                <p className="text-3xl font-bold text-blue-900">{stats.total}</p>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Últimos Registros</h4>
+                                <ul className="text-xs space-y-2 max-h-60 overflow-y-auto">
+                                    {stats.recent && stats.recent.map((r, i) => (
+                                        <li key={i} className="bg-white p-2 rounded shadow-sm border border-gray-100">
+                                            <span className="font-bold block text-indigo-700 truncate">{r.curso}</span>
+                                            <span className="text-gray-500">{r.fecha} - Calif: {r.rating}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+
+                        {/* Gráfica Canvas */}
+                        <div className="lg:col-span-2 min-h-[400px]">
+                            <canvas ref={chartRef}></canvas>
+                        </div>
                     </div>
                 </div>
             );
@@ -498,8 +576,8 @@
                     {/* Búsqueda Admin */}
                     {isAdmin && <AdminTeacherSearch onSearch={onAdminSearch} />}
 
-                    {/* Módulo Admin: Gráficas de Encuestas (EMBEDDED) */}
-                    {isAdmin && showSurveyStats && <AdminSurveyEmbed />}
+                    {/* Módulo Admin: Gráficas de Encuestas (CUSTOM CHART) */}
+                    {isAdmin && showSurveyStats && <AdminSurveyCharts />}
 
                     {/* Módulo Admin: Reportes */}
                     {isAdmin && <AdminReports />}
@@ -545,49 +623,6 @@
                     </div>
                 </div>
             );
-        };
-
-        const App = () => {
-            const [user, setUser] = useState(null);
-            const [data, setData] = useState(null);
-            const [loading, setLoading] = useState(false);
-
-            const fetchData = async (token, targetEmail = null) => {
-                setLoading(true);
-                let url = `${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${token}`;
-                if (targetEmail) url += `&target_email=${encodeURIComponent(targetEmail)}`;
-                try {
-                    const resp = await fetch(url);
-                    const json = await resp.json();
-                    if (json.success) setData(json.data);
-                    else alert("Error: " + json.message);
-                } catch (e) { alert("Error de conexión"); }
-                finally { setLoading(false); }
-            };
-
-            const handleLogin = (res) => {
-                const token = res.credential;
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const userData = { ...payload, token };
-                setUser(userData);
-                fetchData(token);
-            };
-
-            const handleAdminSearch = (email) => {
-                if (user && user.token) fetchData(user.token, email);
-            };
-
-            const isAdmin = user && ADMIN_EMAILS.includes(user.email);
-
-            if (!user) return <LoginScreen onLogin={handleLogin} />;
-            if (!data || loading) return (
-                <div className="flex flex-col justify-center items-center min-h-screen gap-4">
-                    <div className="animate-spin h-12 w-12 border-4 border-orange-500 rounded-full border-t-transparent"></div>
-                    <p className="text-gray-600">Cargando historial...</p>
-                </div>
-            );
-
-            return <Dashboard user={user} data={data} onLogout={() => {setUser(null); window.location.reload();}} isAdmin={isAdmin} onAdminSearch={handleAdminSearch} />;
         };
 
         // Renderizado robusto
