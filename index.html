@@ -8,51 +8,66 @@
     
     <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
 
-    <!-- SOLUCIÓN SAFARI & ESTILOS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // 1. Hack para desactivar bfcache en Safari (evita restauración corrupta)
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            text: '#f8fafc'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- SOLUCIÓN SAFARI, ESTILOS & MODO OSCURO -->
+    <script>
+        // 0. Aplicar tema oscuro inmediatamente antes de pintar para evitar flash
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // 1. Hack para desactivar bfcache en Safari
         window.onunload = function() {};
 
         // 2. Función para mostrar la página solo cuando esté lista
         function safeReveal() {
             var body = document.body;
             var computed = window.getComputedStyle(body);
-            
-            // Verificamos si Tailwind ha cargado (el body debe tener un gradiente)
             var hasStyles = computed.backgroundImage && computed.backgroundImage.includes('gradient');
-            
-            // Detección específica de Safari
             var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
             if (isSafari && !hasStyles) {
-                console.log('Detectado Safari sin estilos. Recargando...');
+                console.log('Recargando por estilos faltantes...');
                 window.location.reload();
                 return;
             }
 
-            // Mostrar página
             document.documentElement.style.transition = 'opacity 0.3s ease-in';
             document.documentElement.style.visibility = 'visible';
             document.documentElement.style.opacity = '1';
         }
 
-        // 3. Eventos de carga y restauración
         window.addEventListener('pageshow', function(event) {
             if (event.persisted) {
                 window.location.reload();
             } else {
-                // Pequeño delay para dar tiempo a Tailwind CDN
                 setTimeout(safeReveal, 150);
             }
         });
         
-        // Fallback por si pageshow falla
         window.addEventListener('load', function() {
             setTimeout(safeReveal, 150);
         });
     </script>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
@@ -66,7 +81,7 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
-            cursor: none; /* Oculta cursor nativo */
+            cursor: none;
         }
         
         a, button, .cursor-pointer {
@@ -79,12 +94,17 @@
             overflow: hidden;
         }
         
+        /* Efecto hover ajustado para modo oscuro */
         .card-portal::before {
             content: '';
             position: absolute;
             top: 0; left: -100%; width: 100%; height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
             transition: left 0.5s;
+        }
+        
+        .dark .card-portal::before {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
         }
         
         .card-portal:hover::before { left: 100%; }
@@ -135,6 +155,11 @@
             border-left: 3px solid rgba(99, 102, 241, 0.5);
         }
         
+        .dark .quote-container {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.5) 100%);
+            border-left: 3px solid rgba(129, 140, 248, 0.5);
+        }
+        
         /* Cursor personalizado */
         #cursor-dot {
             position: fixed; width: 12px; height: 12px;
@@ -147,6 +172,9 @@
             width: 40px; height: 40px;
             background-color: rgba(99, 102, 241, 0.2);
         }
+        
+        .dark #cursor-dot { background-color: rgba(165, 180, 252, 0.5); }
+        .dark #cursor-dot.active { background-color: rgba(165, 180, 252, 0.2); }
         
         #announcement-banner {
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -169,55 +197,70 @@
 </script>
 </head>
 
-<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 min-h-screen transition-colors duration-500">
     
     <div id="cursor-dot"></div>
 
     <!-- Header -->
-    <header class="bg-white shadow-xl sticky top-0 z-40">
+    <header class="bg-white dark:bg-slate-900 shadow-xl sticky top-0 z-40 transition-colors duration-500">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain bg-white rounded-lg p-1">
                 <div class="text-center flex-1 px-2 sm:px-4">
-                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">ACTUALIZACIÓN DOCENTE</h1>
-                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">Desarrollo Académico</p>
-                    <p class="text-xs sm:text-sm text-blue-600">TecNM - Instituto Tecnológico de Durango</p>
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 dark:text-blue-300 leading-tight transition-colors">ACTUALIZACIÓN DOCENTE</h1>
+                    <p class="text-xs sm:text-sm md:text-base text-blue-700 dark:text-blue-400 mt-1 font-semibold transition-colors">Desarrollo Académico</p>
+                    <p class="text-xs sm:text-sm text-blue-600 dark:text-slate-400 transition-colors">TecNM - Instituto Tecnológico de Durango</p>
                 </div>
                 <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
             </div>
         </div>
         <!-- Menú -->
-        <nav class="bg-blue-800 text-white shadow-md">
+        <nav class="bg-blue-800 dark:bg-slate-800 text-white shadow-md transition-colors duration-500">
             <div class="container mx-auto px-4">
                 <div class="flex justify-between items-center">
-                    <div class="hidden md:flex space-x-4">
-                        <a href="#inicio" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Inicio</a>
-                        <a href="planificador.html" class="px-3 py-3 text-sm font-bold text-yellow-300 hover:text-white hover:bg-blue-700 rounded-md transition-colors flex items-center gap-1">✨ Planificador IA</a>
-                        <a href="tutor.html" class="px-3 py-3 text-sm font-bold text-cyan-300 hover:text-white hover:bg-blue-700 rounded-md transition-colors flex items-center gap-1">🤖 Tutor IA</a>
-                        <a href="#servicios" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Servicios</a>
-                        <a href="#informacion" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Información</a>
-                        <a href="#enlaces" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Enlaces y Contacto</a>
+                    <div class="hidden md:flex space-x-4 items-center">
+                        <a href="#inicio" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Inicio</a>
+                        <a href="planificador.html" class="px-3 py-3 text-sm font-bold text-yellow-300 hover:text-white hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors flex items-center gap-1">✨ Planificador IA</a>
+                        <a href="tutor.html" class="px-3 py-3 text-sm font-bold text-cyan-300 hover:text-white hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors flex items-center gap-1">🤖 Tutor IA</a>
+                        <a href="#servicios" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Servicios</a>
+                        <a href="#informacion" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Información</a>
+                        <a href="#enlaces" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Enlaces</a>
+                        
+                        <!-- Botón Tema Desktop -->
+                        <button id="theme-toggle-desktop" class="ml-4 p-2 rounded-lg hover:bg-blue-700 dark:hover:bg-slate-700 transition-colors focus:outline-none" title="Cambiar tema">
+                            <!-- Sol -->
+                            <svg id="theme-toggle-light-icon-d" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                            <!-- Luna -->
+                            <svg id="theme-toggle-dark-icon-d" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        </button>
                     </div>
-                    <div class="md:hidden flex items-center w-full">
-                         <button id="mobile-menu-button" class="text-white focus:outline-none p-3 ml-auto">
+                    
+                    <div class="md:hidden flex items-center w-full justify-between">
+                         <!-- Botón Tema Móvil -->
+                         <button id="theme-toggle-mobile" class="p-2 rounded-lg hover:bg-blue-700 dark:hover:bg-slate-700 transition-colors focus:outline-none">
+                            <svg id="theme-toggle-light-icon-m" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                            <svg id="theme-toggle-dark-icon-m" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                         </button>
+                         
+                         <button id="mobile-menu-button" class="text-white focus:outline-none p-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                          </button>
                     </div>
                 </div>
             </div>
             <!-- Menú Móvil -->
-            <div id="mobile-menu" class="hidden md:hidden border-t border-blue-700">
-                <a href="#inicio" class="block px-4 py-3 text-sm hover:bg-blue-700">Inicio</a>
-                <a href="planificador.html" class="block px-4 py-3 text-sm font-bold text-yellow-300 hover:bg-blue-700">✨ Planificador IA</a>
-                <a href="tutor.html" class="block px-4 py-3 text-sm font-bold text-cyan-300 hover:bg-blue-700">🤖 Tutor IA</a>
-                <a href="#servicios" class="block px-4 py-3 text-sm hover:bg-blue-700">Servicios</a>
-                <a href="#informacion" class="block px-4 py-3 text-sm hover:bg-blue-700">Información</a>
+            <div id="mobile-menu" class="hidden md:hidden border-t border-blue-700 dark:border-slate-700">
+                <a href="#inicio" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Inicio</a>
+                <a href="planificador.html" class="block px-4 py-3 text-sm font-bold text-yellow-300 hover:bg-blue-700 dark:hover:bg-slate-700">✨ Planificador IA</a>
+                <a href="tutor.html" class="block px-4 py-3 text-sm font-bold text-cyan-300 hover:bg-blue-700 dark:hover:bg-slate-700">🤖 Tutor IA</a>
+                <a href="#servicios" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Servicios</a>
+                <a href="#informacion" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Información</a>
             </div>
         </nav>
     </header>
 
     <!-- Info Bar -->
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-slate-800 dark:to-indigo-900 text-white shadow-lg transition-colors duration-500">
         <div class="container mx-auto px-4 py-3">
             <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 text-sm">
                 <div class="flex items-center gap-2"><span class="text-xl">📅</span><span id="currentDate" class="font-semibold">Cargando...</span></div>
@@ -228,7 +271,7 @@
     </div>
     
     <!-- Banner -->
-    <div id="announcement-banner" class="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 text-white p-4 text-center font-bold shadow-lg relative cursor-pointer">
+    <div id="announcement-banner" class="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 dark:from-amber-600 dark:via-orange-700 dark:to-red-700 text-white p-4 text-center font-bold shadow-lg relative cursor-pointer">
         <div class="container mx-auto flex items-center justify-center gap-4">
             <span class="text-2xl animate-pulse">📢</span>
             <div><strong class="block sm:inline text-lg">BIENVENIDA(o)</strong><span class="block sm:inline ml-2">¡Próximos cursos de actualización docente enero 2026!</span></div>
@@ -244,114 +287,114 @@
         <div id="servicios" class="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32">
             <div class="flex items-baseline justify-center gap-4 sm:gap-6 mb-4">
                 <div class="inline-block animate-pulse-slow"><div class="text-6xl sm:text-7xl md:text-8xl">🎓</div></div>
-                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800">Servicios Disponibles</h2>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 dark:text-gray-100 transition-colors">Servicios Disponibles</h2>
             </div>
-            <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">Seleccione la opción que necesite para acceder a los diferentes servicios</p>
+            <p class="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto px-4 transition-colors">Seleccione la opción que necesite para acceder a los diferentes servicios</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
-            <a href="planificador.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-500 animate-fadeInUp delay-100 relative group">
+            <a href="planificador.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-500 dark:hover:border-indigo-400 animate-fadeInUp delay-100 relative group transition-colors">
                 <div class="badge-new">¡NUEVO!</div><div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">✨</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">Planificador de Clases</h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">Diseña secuencias didácticas con IA</p>
-                <div class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">Herramienta IA</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Planificador de Clases</h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Diseña secuencias didácticas con IA</p>
+                <div class="inline-block bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">Herramienta IA</div>
             </a>
-            <a href="tutor.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-500 animate-fadeInUp delay-200 relative group">
+            <a href="tutor.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 animate-fadeInUp delay-200 relative group transition-colors">
                 <div class="badge-new">¡NUEVO!</div><div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">🤖</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">Tutor Pedagógico</h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">Resuelve dudas pedagógicas con IA</p>
-                <div class="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">Asistente IA</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Tutor Pedagógico</h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Resuelve dudas pedagógicas con IA</p>
+                <div class="inline-block bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">Asistente IA</div>
             </a>
-            <a href="inscripciones.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp delay-300">
+            <a href="inscripciones.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 dark:hover:border-rose-400 animate-fadeInUp delay-300 transition-colors">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📝</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">Inscripción a Cursos</h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">Registrarse en cursos de actualización</p>
-                <div class="inline-block bg-rose-100 text-rose-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Inscripción a Cursos</h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Registrarse en cursos de actualización</p>
+                <div class="inline-block bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
             </a>
-            <a href="historial.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-orange-400 animate-fadeInUp delay-400">
+            <a href="historial.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-orange-400 dark:hover:border-orange-400 animate-fadeInUp delay-400 transition-colors">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">Historial de Cursos</h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">Ver mi historial de actualización</p>
-                <div class="inline-block bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Historial de Cursos</h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Ver mi historial de actualización</p>
+                <div class="inline-block bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
             </a>
-            <a href="formatos.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-500">
+            <a href="formatos.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 dark:hover:border-green-400 animate-fadeInUp delay-500 transition-colors">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📋</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">Formatos Oficiales</h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">Descargar formatos y documentos</p>
-                <div class="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Formatos Oficiales</h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Descargar formatos y documentos</p>
+                <div class="inline-block bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
             </a>
-            <a href="verificador.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-600">
+            <a href="verificador.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 dark:hover:border-cyan-400 animate-fadeInUp delay-600 transition-colors">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">✅</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">Validación</h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">Verificar autenticidad</p>
-                <div class="inline-block bg-cyan-100 text-cyan-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Validación</h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Verificar autenticidad</p>
+                <div class="inline-block bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
             </a>
-            <a href="instructores.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-700">
+            <a href="instructores.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 dark:hover:border-indigo-400 animate-fadeInUp delay-700 transition-colors">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">Instructores</h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">Área para Instructores</p>
-                <div class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Instructores</h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Área para Instructores</p>
+                <div class="inline-block bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
             </a>
-            <a href="encuestas.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 animate-fadeInUp delay-800">
+            <a href="encuestas.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 dark:hover:border-yellow-400 animate-fadeInUp delay-800 transition-colors">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📊</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">Encuestas</h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">Evaluación de servicios</p>
-                <div class="inline-block bg-yellow-100 text-yellow-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Encuestas</h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Evaluación de servicios</p>
+                <div class="inline-block bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
             </a>
-            <a href="estadisticas.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-900">
+            <a href="estadisticas.html" class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 dark:hover:border-purple-400 animate-fadeInUp delay-900 transition-colors">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📈</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">Estadísticas</h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">Análisis y resultados de inscripciones</p>
-                <div class="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors">Estadísticas</h3>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 transition-colors">Análisis y resultados de inscripciones</p>
+                <div class="inline-block bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200 text-xs font-semibold px-3 py-1 rounded-full transition-colors">✓ Disponible</div>
             </a>
         </div>
 
         <div id="informacion" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
-            <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600 dark:border-blue-500 transition-colors">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="text-3xl sm:text-4xl">ℹ️</div>
-                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800">
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white transition-colors">
                         Información Importante
                     </h3>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="flex items-start gap-3 bg-green-50 p-4 rounded-lg">
+                    <div class="flex items-start gap-3 bg-green-50 dark:bg-green-900/30 p-4 rounded-lg transition-colors">
                         <div class="text-2xl flex-shrink-0">📚</div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800">Límite de cursos</p>
-                            <p class="text-xs text-gray-600 mt-1">Puedes tomar hasta 3 cursos por periodo sin empalme de horarios</p>
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 transition-colors">Límite de cursos</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 transition-colors">Puedes tomar hasta 3 cursos por periodo sin empalme de horarios</p>
                         </div>
                     </div>
                     
-                    <div class="flex items-start gap-3 bg-purple-50 p-4 rounded-lg">
+                    <div class="flex items-start gap-3 bg-purple-50 dark:bg-purple-900/30 p-4 rounded-lg transition-colors">
                         <div class="text-2xl flex-shrink-0">📝</div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800">Formatos</p>
-                            <p class="text-xs text-gray-600 mt-1">Los formatos que se envían (CVU y Ficha técnica) serán en PDF, los demás se entregarán debidamente firmados y sellados en la oficina de Coordinación y actualización docente</p>
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 transition-colors">Formatos</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 transition-colors">Los formatos que se envían (CVU y Ficha técnica) serán en PDF, los demás se entregarán debidamente firmados y sellados en la oficina de Coordinación y actualización docente</p>
                         </div>
                     </div>
                     
-                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-red-50 p-4 rounded-lg hover:bg-red-100 transition-colors">
+                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-red-50 dark:bg-red-900/30 p-4 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors">
                         <div class="text-2xl flex-shrink-0">🗓️</div>
                         <div>
-                            <p id="calendar-year-text" class="text-sm font-semibold text-gray-800">Calendario Institucional</p>
-                            <p class="text-xs text-gray-600 mt-1">Consulte las fechas importantes del ciclo escolar.</p>
+                            <p id="calendar-year-text" class="text-sm font-semibold text-gray-800 dark:text-gray-200 transition-colors">Calendario Institucional</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 transition-colors">Consulte las fechas importantes del ciclo escolar.</p>
                         </div>
                     </a>
                 </div>
-                <div class="mt-4 flex items-start gap-3 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                <div class="mt-4 flex items-start gap-3 bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg border-l-4 border-blue-400 dark:border-blue-500 transition-colors">
                     <div class="text-2xl flex-shrink-0">🧑‍💼</div>
                     <div>
-                        <p class="text-sm font-semibold text-gray-800">Nota Importante</p>
-                        <p class="text-xs text-gray-600 mt-1">Estos cursos están dirigidos al personal docente con plaza.</p>
+                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 transition-colors">Nota Importante</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 transition-colors">Estos cursos están dirigidos al personal docente con plaza.</p>
                     </div>
                 </div>
             </div>
         </div>
         
         <div id="enlaces" class="max-w-4xl mx-auto scroll-mt-32">
-             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
+             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-slate-800 dark:to-indigo-900 rounded-2xl shadow-xl p-6 text-white transition-colors">
                 <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <a href="https://www.itdurango.edu.mx" target="_blank" class="bg-sky-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-3xl mb-2">🏛️</div><p class="font-semibold text-sm">ITD</p><p class="text-xs opacity-90">Portal Principal</p></a>
@@ -363,14 +406,14 @@
         </div>
         
         <div id="contacto" class="max-w-4xl mx-auto mt-8 scroll-mt-32">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-slate-800 dark:to-indigo-900 rounded-2xl shadow-xl p-6 text-white text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6 transition-colors">
                  <div><h3 class="text-lg font-bold">¿Necesitas Ayuda?</h3><p class="text-sm opacity-90">Contacta a la Coordinación.</p></div>
                  <a href="mailto:desarrollo.academico@itdurango.edu.mx" class="bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md">📧 Enviar Email</a>
             </div>
         </div>
     </main>
 
-    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 mt-8">
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-slate-900 dark:to-indigo-950 text-white text-center py-6 mt-8 transition-colors">
         <div class="container mx-auto px-4">
             <p class="font-semibold text-sm mb-2">© Coordinación de Actualización Docente</p>
             <p class="text-xs opacity-90">M.C. Alejandro Calderón Rentería</p>
@@ -380,6 +423,49 @@
 
     <!-- LÓGICA DE LA PÁGINA -->
     <script>
+        // Lógica de Modo Oscuro
+        const themeToggleBtnDesktop = document.getElementById('theme-toggle-desktop');
+        const themeToggleBtnMobile = document.getElementById('theme-toggle-mobile');
+        
+        const darkIconD = document.getElementById('theme-toggle-dark-icon-d');
+        const lightIconD = document.getElementById('theme-toggle-light-icon-d');
+        const darkIconM = document.getElementById('theme-toggle-dark-icon-m');
+        const lightIconM = document.getElementById('theme-toggle-light-icon-m');
+
+        function updateThemeIcons() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                // En modo oscuro, mostramos el sol (para cambiar a light)
+                darkIconD.classList.add('hidden');
+                lightIconD.classList.remove('hidden');
+                darkIconM.classList.add('hidden');
+                lightIconM.classList.remove('hidden');
+            } else {
+                // En modo claro, mostramos la luna (para cambiar a dark)
+                lightIconD.classList.add('hidden');
+                darkIconD.classList.remove('hidden');
+                lightIconM.classList.add('hidden');
+                darkIconM.classList.remove('hidden');
+            }
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            }
+            updateThemeIcons();
+        }
+
+        if(themeToggleBtnDesktop) themeToggleBtnDesktop.addEventListener('click', toggleTheme);
+        if(themeToggleBtnMobile) themeToggleBtnMobile.addEventListener('click', toggleTheme);
+        
+        // Inicializar iconos
+        updateThemeIcons();
+
         // Cursor
         const cursorDot = document.getElementById('cursor-dot');
         if(cursorDot) {
@@ -465,7 +551,7 @@
             let i = 0;
             const show = () => {
                 const q = quotes[i];
-                qc.innerHTML = `<p class="text-base sm:text-lg italic text-gray-700">"${q.t}"</p><p class="text-sm sm:text-base text-gray-600 text-right mt-2">- ${q.a}</p>`;
+                qc.innerHTML = `<p class="text-base sm:text-lg italic text-gray-700 dark:text-gray-200">"${q.t}"</p><p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 text-right mt-2">- ${q.a}</p>`;
                 qc.style.opacity = 1;
                 i = (i + 1) % quotes.length;
             };
