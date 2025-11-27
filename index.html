@@ -1,22 +1,54 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth">
+<html lang="es" class="scroll-smooth" style="visibility: hidden; opacity: 0;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal de Actualización Docente - ITD</title>
-    <meta name="description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango. Accede a inscripciones, formatos, calendario y más.">
-    <meta name="keywords" content="ITD, Tecnológico de Durango, actualización docente, cursos para maestros, desarrollo académico, portal docente">
+    <meta name="description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango.">
     
     <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
-    
-    <!-- Script Corregido para Safari: Manejo limpio de la caché al retroceder -->
+
+    <!-- SOLUCIÓN SAFARI & ESTILOS -->
     <script>
-        window.addEventListener('pageshow', function(event) {
-            // Si la página se carga desde la memoria caché (botón Atrás)
-            if (event.persisted) {
-                // Forzamos una recarga suave
+        // 1. Hack para desactivar bfcache en Safari (evita restauración corrupta)
+        window.onunload = function() {};
+
+        // 2. Función para mostrar la página solo cuando esté lista
+        function safeReveal() {
+            var body = document.body;
+            var computed = window.getComputedStyle(body);
+            
+            // Verificamos si Tailwind ha cargado (el body debe tener un gradiente)
+            var hasStyles = computed.backgroundImage && computed.backgroundImage.includes('gradient');
+            
+            // Detección específica de Safari
+            var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+            if (isSafari && !hasStyles) {
+                console.log('Detectado Safari sin estilos. Recargando...');
                 window.location.reload();
+                return;
             }
+
+            // Mostrar página
+            document.documentElement.style.transition = 'opacity 0.3s ease-in';
+            document.documentElement.style.visibility = 'visible';
+            document.documentElement.style.opacity = '1';
+        }
+
+        // 3. Eventos de carga y restauración
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            } else {
+                // Pequeño delay para dar tiempo a Tailwind CDN
+                setTimeout(safeReveal, 150);
+            }
+        });
+        
+        // Fallback por si pageshow falla
+        window.addEventListener('load', function() {
+            setTimeout(safeReveal, 150);
         });
     </script>
     
@@ -33,13 +65,11 @@
     
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-            cursor: none; /* Oculta el cursor por defecto en el cuerpo */
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            cursor: none; /* Oculta cursor nativo */
         }
         
-        /* Oculta el cursor por defecto en elementos interactivos */
-        a, button {
+        a, button, .cursor-pointer {
             cursor: none;
         }
 
@@ -52,37 +82,24 @@
         .card-portal::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
+            top: 0; left: -100%; width: 100%; height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
             transition: left 0.5s;
         }
         
-        .card-portal:not(.cursor-not-allowed):hover::before {
-            left: 100%;
-        }
+        .card-portal:hover::before { left: 100%; }
         
-        .card-portal:not(.cursor-not-allowed):hover {
+        .card-portal:hover {
             transform: translateY(-8px) scale(1.02);
             box-shadow: 0 20px 40px rgba(0,0,0,0.12);
         }
         
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .animate-fadeInUp {
-            animation: fadeInUp 0.6s ease-out forwards;
-        }
+        .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
         
         .delay-100 { animation-delay: 0.1s; opacity: 0; }
         .delay-200 { animation-delay: 0.2s; opacity: 0; }
@@ -99,68 +116,36 @@
             50% { transform: scale(1.05); }
         }
         
-        .animate-pulse-slow {
-            animation: pulse-slow 3s ease-in-out infinite;
-        }
+        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
         
-        .badge-soon {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            color: white;
-            font-size: 10px;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-weight: bold;
-            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-        }
-
         .badge-new {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+            position: absolute; top: 10px; right: 10px;
             background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            color: white;
-            font-size: 10px;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-weight: bold;
+            color: white; font-size: 10px; padding: 4px 8px;
+            border-radius: 12px; font-weight: bold;
             box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
             animation: pulse-slow 2s infinite;
         }
 
-        .weather-icon {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
+        .weather-icon { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
 
         .quote-container {
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
             border-left: 3px solid rgba(99, 102, 241, 0.5);
         }
         
-        /* Estilos para el cursor personalizado */
+        /* Cursor personalizado */
         #cursor-dot {
-            position: fixed;
-            width: 12px;
-            height: 12px;
-            background-color: rgba(99, 102, 241, 0.5); /* Color índigo semitransparente */
-            border-radius: 50%;
-            pointer-events: none; /* Muy importante para que no interfiera con los clics */
-            transform: translate(-50%, -50%);
-            z-index: 9999;
-            transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease, transform 0.1s linear;
+            position: fixed; width: 12px; height: 12px;
+            background-color: rgba(99, 102, 241, 0.5);
+            border-radius: 50%; pointer-events: none;
+            transform: translate(-50%, -50%); z-index: 9999;
+            transition: width 0.2s, height 0.2s, background-color 0.2s, top 0.1s linear, left 0.1s linear;
         }
-
         #cursor-dot.active {
-            width: 40px;
-            height: 40px;
-            background-color: rgba(99, 102, 241, 0.2); /* Más grande y más transparente */
+            width: 40px; height: 40px;
+            background-color: rgba(99, 102, 241, 0.2);
         }
         
         #announcement-banner {
@@ -168,12 +153,7 @@
             overflow: hidden;
         }
         #announcement-banner.hidden-banner {
-            opacity: 0;
-            height: 0 !important;
-            padding-top: 0 !important;
-            padding-bottom: 0 !important;
-            margin-bottom: 0 !important;
-            transform: translateY(-100%);
+            opacity: 0; height: 0 !important; padding: 0 !important; margin: 0 !important;
         }
     </style>
 <script type="importmap">
@@ -191,536 +171,282 @@
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
     
-    <!-- Elemento del cursor personalizado -->
     <div id="cursor-dot"></div>
 
     <!-- Header -->
     <header class="bg-white shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" 
-                     alt="TecNM" 
-                     class="h-12 sm:h-16 md:h-20 object-contain">
-                
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
                 <div class="text-center flex-1 px-2 sm:px-4">
-                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">
-                        ACTUALIZACIÓN DOCENTE
-                    </h1>
-                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">
-                        Desarrollo Académico
-                    </p>
-                    <p class="text-xs sm:text-sm text-blue-600">
-                        TecNM - Instituto Tecnológico de Durango
-                    </p>
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">ACTUALIZACIÓN DOCENTE</h1>
+                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">Desarrollo Académico</p>
+                    <p class="text-xs sm:text-sm text-blue-600">TecNM - Instituto Tecnológico de Durango</p>
                 </div>
-                
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" 
-                     alt="ITD" 
-                     class="h-12 sm:h-16 md:h-20 object-contain">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
             </div>
         </div>
-         <!-- Menú de Navegación -->
+        <!-- Menú -->
         <nav class="bg-blue-800 text-white shadow-md">
             <div class="container mx-auto px-4">
                 <div class="flex justify-between items-center">
-                    <!-- Menú Desktop -->
                     <div class="hidden md:flex space-x-4">
                         <a href="#inicio" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Inicio</a>
-                        <!-- Accesos directos a Herramientas IA -->
-                        <a href="planificador.html" class="px-3 py-3 text-sm font-bold text-yellow-300 hover:text-white hover:bg-blue-700 rounded-md transition-colors flex items-center gap-1">
-                            ✨ Planificador IA
-                        </a>
-                        <a href="tutor.html" class="px-3 py-3 text-sm font-bold text-cyan-300 hover:text-white hover:bg-blue-700 rounded-md transition-colors flex items-center gap-1">
-                            🤖 Tutor IA
-                        </a>
+                        <a href="planificador.html" class="px-3 py-3 text-sm font-bold text-yellow-300 hover:text-white hover:bg-blue-700 rounded-md transition-colors flex items-center gap-1">✨ Planificador IA</a>
+                        <a href="tutor.html" class="px-3 py-3 text-sm font-bold text-cyan-300 hover:text-white hover:bg-blue-700 rounded-md transition-colors flex items-center gap-1">🤖 Tutor IA</a>
                         <a href="#servicios" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Servicios</a>
                         <a href="#informacion" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Información</a>
                         <a href="#enlaces" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Enlaces y Contacto</a>
                     </div>
-                    <!-- Botón Menú Móvil -->
                     <div class="md:hidden flex items-center w-full">
-                         <button id="mobile-menu-button" class="text-white focus:outline-none p-3">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                         <button id="mobile-menu-button" class="text-white focus:outline-none p-3 ml-auto">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                          </button>
                     </div>
                 </div>
             </div>
-             <!-- Menú Desplegable Móvil -->
-            <div id="mobile-menu" class="hidden md:hidden">
+            <!-- Menú Móvil -->
+            <div id="mobile-menu" class="hidden md:hidden border-t border-blue-700">
                 <a href="#inicio" class="block px-4 py-3 text-sm hover:bg-blue-700">Inicio</a>
                 <a href="planificador.html" class="block px-4 py-3 text-sm font-bold text-yellow-300 hover:bg-blue-700">✨ Planificador IA</a>
                 <a href="tutor.html" class="block px-4 py-3 text-sm font-bold text-cyan-300 hover:bg-blue-700">🤖 Tutor IA</a>
                 <a href="#servicios" class="block px-4 py-3 text-sm hover:bg-blue-700">Servicios</a>
                 <a href="#informacion" class="block px-4 py-3 text-sm hover:bg-blue-700">Información</a>
-                <a href="#enlaces" class="block px-4 py-3 text-sm hover:bg-blue-700">Enlaces y Contacto</a>
             </div>
         </nav>
     </header>
 
-    <!-- Barra de Información: Clima y Hora -->
+    <!-- Info Bar -->
     <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
         <div class="container mx-auto px-4 py-3">
             <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 text-sm">
-                <!-- Fecha -->
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">📅</span>
-                    <span id="currentDate" class="font-semibold">Cargando...</span>
-                </div>
-                
-                <!-- Clima -->
-                <div id="weatherInfo" class="flex items-center gap-2">
-                    <span class="text-2xl weather-icon">🌤️</span>
-                    <span class="font-semibold">Durango, Dgo.</span>
-                </div>
-                
-                <!-- Hora -->
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🕒</span>
-                    <span id="clock" class="font-mono font-bold text-lg">--:--:--</span>
-                </div>
+                <div class="flex items-center gap-2"><span class="text-xl">📅</span><span id="currentDate" class="font-semibold">Cargando...</span></div>
+                <div id="weatherInfo" class="flex items-center gap-2"><span class="text-2xl weather-icon">🌤️</span><span class="font-semibold">Durango, Dgo.</span></div>
+                <div class="flex items-center gap-2"><span class="text-xl">🕒</span><span id="clock" class="font-mono font-bold text-lg">--:--:--</span></div>
             </div>
         </div>
     </div>
     
-    <!-- Banner de Anuncios -->
+    <!-- Banner -->
     <div id="announcement-banner" class="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 text-white p-4 text-center font-bold shadow-lg relative cursor-pointer">
         <div class="container mx-auto flex items-center justify-center gap-4">
             <span class="text-2xl animate-pulse">📢</span>
-            <div>
-                <strong class="block sm:inline text-lg">BIENVENIDA(o)</strong>
-                <span class="block sm:inline ml-2">¡Proximos cursos de actualización docente enero 2026!</span>
-            </div>
+            <div><strong class="block sm:inline text-lg">BIENVENIDA(o)</strong><span class="block sm:inline ml-2">¡Próximos cursos de actualización docente enero 2026!</span></div>
         </div>
     </div>
 
-    <!-- Contenido Principal -->
+    <!-- Contenido -->
     <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
-        
-        <!-- Frase Inspiracional -->
         <section class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
-            <div id="quote-container" class="quote-container rounded-lg p-6 text-center transition-opacity duration-500 ease-in-out">
-                <!-- Quote will be injected here -->
-            </div>
+            <div id="quote-container" class="quote-container rounded-lg p-6 text-center transition-opacity duration-500 ease-in-out"></div>
         </section>
         
-        <!-- Banner de Servicios -->
         <div id="servicios" class="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32">
             <div class="flex items-baseline justify-center gap-4 sm:gap-6 mb-4">
-                <div class="inline-block animate-pulse-slow">
-                    <div class="text-6xl sm:text-7xl md:text-8xl">🎓</div>
-                </div>
-                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800">
-                    Servicios Disponibles
-                </h2>
+                <div class="inline-block animate-pulse-slow"><div class="text-6xl sm:text-7xl md:text-8xl">🎓</div></div>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800">Servicios Disponibles</h2>
             </div>
-            <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-                Seleccione la opción que necesite para acceder a los diferentes servicios
-            </p>
+            <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">Seleccione la opción que necesite para acceder a los diferentes servicios</p>
         </div>
 
-        <!-- Grid de Opciones -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
-            
-            <!-- Opción: Planificador de Clases (NUEVO) -->
-            <a href="planificador.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-500 animate-fadeInUp delay-100 relative group">
-                <div class="badge-new">¡NUEVO!</div>
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">✨</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">
-                    Planificador de Clases
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Diseña secuencias didácticas con IA
-                </p>
-                <div class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">
-                    Herramienta IA
-                </div>
+            <a href="planificador.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-500 animate-fadeInUp delay-100 relative group">
+                <div class="badge-new">¡NUEVO!</div><div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">✨</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Planificador de Clases</h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">Diseña secuencias didácticas con IA</p>
+                <div class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">Herramienta IA</div>
             </a>
-
-            <!-- Opción: Tutor Virtual (NUEVO) -->
-            <a href="tutor.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-500 animate-fadeInUp delay-200 relative group">
-                <div class="badge-new">¡NUEVO!</div>
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">🤖</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">
-                    Tutor Pedagógico
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Resuelve dudas pedagógicas con IA
-                </p>
-                <div class="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
-                    Asistente IA
-                </div>
+            <a href="tutor.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-blue-500 animate-fadeInUp delay-200 relative group">
+                <div class="badge-new">¡NUEVO!</div><div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">🤖</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Tutor Pedagógico</h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">Resuelve dudas pedagógicas con IA</p>
+                <div class="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">Asistente IA</div>
             </a>
-
-            <!-- Opción 1: Inscripción a Cursos -->
-            <a href="inscripciones.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp delay-300">
+            <a href="inscripciones.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp delay-300">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📝</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">
-                    Inscripción a Cursos
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Registrarse en cursos de actualización
-                </p>
-                <div class="inline-block bg-rose-100 text-rose-700 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Inscripción a Cursos</h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">Registrarse en cursos de actualización</p>
+                <div class="inline-block bg-rose-100 text-rose-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
             </a>
-
-            <!-- Opción 2: Historial de Cursos -->
-            <a href="historial.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-orange-400 animate-fadeInUp delay-400">
+            <a href="historial.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-orange-400 animate-fadeInUp delay-400">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">
-                    Historial de Cursos
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Ver mi historial de actualización docente
-                </p>
-                <div class="inline-block bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Historial de Cursos</h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">Ver mi historial de actualización</p>
+                <div class="inline-block bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
             </a>
-
-            <!-- Opción 3: Formatos Oficiales -->
-            <a href="formatos.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-500">
+            <a href="formatos.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-500">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📋</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">
-                    Formatos Oficiales
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Descargar formatos y documentos
-                </p>
-                <div class="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Formatos Oficiales</h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">Descargar formatos y documentos</p>
+                <div class="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
             </a>
-
-            <!-- Opción 4: Validación de Constancias -->
-            <a href="verificador.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-600">
+            <a href="verificador.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-600">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">✅</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">
-                    Validación de Constancias
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Verificar la autenticidad de documentos.
-                </p>
-                <div class="inline-block bg-cyan-100 text-cyan-700 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Validación</h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">Verificar autenticidad</p>
+                <div class="inline-block bg-cyan-100 text-cyan-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
             </a>
-
-            <!-- Opción 5: Área para Instructores -->
-            <a href="instructores.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-700">
+            <a href="instructores.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-700">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">
-                    Área para Instructores
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Subir propuestas y evidencias
-                </p>
-                <div class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Instructores</h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">Área para Instructores</p>
+                <div class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
             </a>
-
-            <!-- Opción 6: Encuestas de Opinión -->
-            <a href="encuestas.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 animate-fadeInUp delay-800">
+            <a href="encuestas.html" class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 animate-fadeInUp delay-800">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📊</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">
-                    Encuestas de Opinión
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Evaluación de cursos y servicios
-                </p>
-                <div class="inline-block bg-yellow-100 text-yellow-700 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Encuestas</h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">Evaluación de servicios</p>
+                <div class="inline-block bg-yellow-100 text-yellow-700 text-xs font-semibold px-3 py-1 rounded-full">✓ Disponible</div>
             </a>
-            
-            <!-- Opción 7: Estadísticas -->
-            <a href="estadisticas.html" 
-               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-900">
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📈</div>
-                <h3 class="text-lg font-bold text-gray-800 mb-2">
-                    Estadísticas
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 mb-4">
-                    Análisis y resultados de inscripciones
-                </p>
-                <div class="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
-            </a>
-
         </div>
 
-        <!-- Panel de Información -->
         <div id="informacion" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
             <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="text-3xl sm:text-4xl">ℹ️</div>
-                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800">
-                        Información Importante
-                    </h3>
-                </div>
-                
+                <div class="flex items-center gap-3 mb-4"><div class="text-3xl sm:text-4xl">ℹ️</div><h3 class="text-xl sm:text-2xl font-bold text-gray-800">Información Importante</h3></div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="flex items-start gap-3 bg-green-50 p-4 rounded-lg">
-                        <div class="text-2xl flex-shrink-0">📚</div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Límite de cursos</p>
-                            <p class="text-xs text-gray-600 mt-1">Puedes tomar hasta 3 cursos por periodo sin empalme de horarios</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start gap-3 bg-purple-50 p-4 rounded-lg">
-                        <div class="text-2xl flex-shrink-0">📝</div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Formatos</p>
-                            <p class="text-xs text-gray-600 mt-1">Los formatos que se envían (CVU y Ficha técnica) serán en PDF, los demás se entregarán debidamente firmados y sellados en la oficina de Coordinación y actualización docente</p>
-                        </div>
-                    </div>
-                    
-                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-red-50 p-4 rounded-lg hover:bg-red-100 transition-colors">
-                        <div class="text-2xl flex-shrink-0">🗓️</div>
-                        <div>
-                            <p id="calendar-year-text" class="text-sm font-semibold text-gray-800">Calendario Institucional</p>
-                            <p class="text-xs text-gray-600 mt-1">Consulte las fechas importantes del ciclo escolar.</p>
-                        </div>
-                    </a>
-                </div>
-                <div class="mt-4 flex items-start gap-3 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
-                    <div class="text-2xl flex-shrink-0">🧑‍💼</div>
-                    <div>
-                        <p class="text-sm font-semibold text-gray-800">Nota Importante</p>
-                        <p class="text-xs text-gray-600 mt-1">Estos cursos están dirigidos al personal docente con plaza.</p>
-                    </div>
+                    <div class="flex items-start gap-3 bg-green-50 p-4 rounded-lg"><div class="text-2xl flex-shrink-0">📚</div><div><p class="text-sm font-semibold text-gray-800">Límite de cursos</p><p class="text-xs text-gray-600 mt-1">Máximo 3 cursos sin empalme</p></div></div>
+                    <div class="flex items-start gap-3 bg-purple-50 p-4 rounded-lg"><div class="text-2xl flex-shrink-0">📝</div><div><p class="text-sm font-semibold text-gray-800">Formatos</p><p class="text-xs text-gray-600 mt-1">Entrega física firmada y sellada</p></div></div>
+                    <a href="#" class="flex items-start gap-3 bg-red-50 p-4 rounded-lg hover:bg-red-100 transition-colors"><div class="text-2xl flex-shrink-0">🗓️</div><div><p class="text-sm font-semibold text-gray-800">Calendario Oficial</p><p class="text-xs text-gray-600 mt-1">Ver fechas importantes</p></div></a>
                 </div>
             </div>
         </div>
-
-        <!-- Enlaces Institucionales -->
+        
         <div id="enlaces" class="max-w-4xl mx-auto scroll-mt-32">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
+             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
                 <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <a href="https://www.itdurango.edu.mx" 
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="bg-sky-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">🏛️</div>
-                        <p class="font-semibold text-sm">ITD</p>
-                        <p class="text-xs opacity-90">Portal Principal</p>
-                    </a>
-                    <a href="https://www.tecnm.mx" 
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="bg-emerald-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">🎓</div>
-                        <p class="font-semibold text-sm">TecNM</p>
-                        <p class="text-xs opacity-90">Sitio Nacional</p>
-                    </a>
-                    <a href="https://mooc.tecnm.mx/portal/" 
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="bg-purple-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">💻</div>
-                        <p class="font-semibold text-sm">MOOC</p>
-                        <p class="text-xs opacity-90">Cursos en Línea</p>
-                    </a>
-                    <a href="https://www.itdurango.edu.mx/sgi/" 
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="bg-rose-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">📂</div>
-                        <p class="font-semibold text-sm">SGI</p>
-                        <p class="text-xs opacity-90">Gestión Integrado</p>
-                    </a>
+                    <a href="https://www.itdurango.edu.mx" target="_blank" class="bg-sky-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-3xl mb-2">🏛️</div><p class="font-semibold text-sm">ITD</p><p class="text-xs opacity-90">Portal Principal</p></a>
+                    <a href="https://www.tecnm.mx" target="_blank" class="bg-emerald-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-3xl mb-2">🎓</div><p class="font-semibold text-sm">TecNM</p><p class="text-xs opacity-90">Sitio Nacional</p></a>
+                    <a href="https://mooc.tecnm.mx/portal/" target="_blank" class="bg-purple-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-3xl mb-2">💻</div><p class="font-semibold text-sm">MOOC</p><p class="text-xs opacity-90">Cursos en Línea</p></a>
+                    <a href="https://www.itdurango.edu.mx/sgi/" target="_blank" class="bg-rose-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-3xl mb-2">📂</div><p class="font-semibold text-sm">SGI</p><p class="text-xs opacity-90">Gestión Integrado</p></a>
                 </div>
             </div>
         </div>
-
-        <!-- Ayuda y Soporte -->
+        
         <div id="contacto" class="max-w-4xl mx-auto mt-8 scroll-mt-32">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
-                    <div class="flex items-center gap-4">
-                        <div class="text-4xl hidden sm:block">💬</div>
-                        <div>
-                            <h3 class="text-lg font-bold">¿Necesitas Ayuda?</h3>
-                            <p class="text-sm opacity-90">Contacta a la Coordinación de Actualización Docente.</p>
-                        </div>
-                    </div>
-                    <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
-                       class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md">
-                        <span class="mr-2">📧</span> Enviar Email
-                    </a>
-                </div>
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6">
+                 <div><h3 class="text-lg font-bold">¿Necesitas Ayuda?</h3><p class="text-sm opacity-90">Contacta a la Coordinación.</p></div>
+                 <a href="mailto:desarrollo.academico@itdurango.edu.mx" class="bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md">📧 Enviar Email</a>
             </div>
         </div>
-
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-8">
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 mt-8">
         <div class="container mx-auto px-4">
-            <p class="font-semibold text-sm sm:text-base mb-2">
-                © Coordinación de Actualización Docente
-            </p>
-            <p class="text-xs sm:text-sm opacity-90">
-                M.C. Alejandro Calderón Rentería
-            </p>
-            <p class="text-xs sm:text-sm opacity-75 mt-1">
-                Todos los derechos reservados <span id="copyright-year"></span>
-            </p>
+            <p class="font-semibold text-sm mb-2">© Coordinación de Actualización Docente</p>
+            <p class="text-xs opacity-90">M.C. Alejandro Calderón Rentería</p>
         </div>
     </footer>
 
+    <!-- LÓGICA DE LA PÁGINA -->
     <script>
+        // Cursor
         const cursorDot = document.getElementById('cursor-dot');
-        
-        window.addEventListener('mousemove', e => {
-            const { clientX, clientY } = e;
-            requestAnimationFrame(() => {
-                cursorDot.style.left = `${clientX}px`;
-                cursorDot.style.top = `${clientY}px`;
+        if(cursorDot) {
+            window.addEventListener('mousemove', e => {
+                requestAnimationFrame(() => {
+                    cursorDot.style.left = `${e.clientX}px`;
+                    cursorDot.style.top = `${e.clientY}px`;
+                });
+                const target = e.target;
+                if (target.closest('a, button, .cursor-pointer, .card-portal')) {
+                    cursorDot.classList.add('active');
+                } else {
+                    cursorDot.classList.remove('active');
+                }
             });
-            const target = e.target;
-            if (target.closest('a, button, [role="button"], .card-portal:not(.cursor-not-allowed)')) {
-                cursorDot.classList.add('active');
-            } else {
-                cursorDot.classList.remove('active');
-            }
-        });
+        }
 
+        // Menú Móvil
         const menuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
-        
-        menuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
+        if(menuButton && mobileMenu) {
+            menuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
             });
-        });
+        }
 
-        const inspirationalQuotes = [
-            { quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.", author: "Nelson Mandela" },
-            { quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.", author: "Carl Sagan" },
-            { quote: "La educación no es preparación para la vida; la educación es la vida misma.", author: "John Dewey" },
-            { quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.", author: "Albert Einstein" },
-            { quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.", author: "Platón" },
-            { quote: "La ciencia no conoce fronteras, porque el conocimiento pertenece a la humanidad.", author: "Louis Pasteur" },
-            { quote: "Educación es lo que queda después de olvidar lo que se ha aprendido en la escuela.", author: "Albert Einstein" },
-            { quote: "La investigación es ver lo que todos han visto y pensar lo que nadie ha pensado.", author: "Albert Szent-Györgyi" },
-            { quote: "Un maestro afecta la eternidad; nunca se sabe dónde termina su influencia.", author: "Henry Adams" },
-            { quote: "La mejor forma de predecir el futuro es inventándolo.", author: "Alan Kay" }
-        ];
+        // Reloj y Fecha
+        function startClock() {
+            const clockEl = document.getElementById('clock');
+            if(!clockEl) return;
+            function update() {
+                const now = new Date();
+                clockEl.textContent = now.toLocaleTimeString('es-MX', {hour12: false});
+            }
+            setInterval(update, 1000);
+            update();
+            
+            const dateEl = document.getElementById('currentDate');
+            if(dateEl) {
+                const now = new Date();
+                const opt = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const ds = now.toLocaleDateString('es-MX', opt);
+                dateEl.textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
+            }
+        }
 
+        // Clima (OpenMeteo)
         function updateWeather() {
-            const weatherElement = document.getElementById('weatherInfo');
-            if (!weatherElement) return;
-            const getWeatherIcon = (code) => {
-                if (code === 0) return '☀️';
-                if ([1, 2, 3].includes(code)) return '⛅';
-                if ([45, 48].includes(code)) return '🌫️';
-                if ([51, 53, 55].includes(code)) return '🌦️';
-                if ([61, 63, 65].includes(code)) return '🌧️';
-                if ([71, 73, 75, 77].includes(code)) return '🌨️';
-                if ([80, 81, 82].includes(code)) return '⛈️';
-                if ([95, 96, 99].includes(code)) return '🌩️';
+            const el = document.getElementById('weatherInfo');
+            if(!el) return;
+            const getWeatherIcon = (c) => {
+                if (c === 0) return '☀️'; if ([1,2,3].includes(c)) return '⛅';
+                if ([45,48].includes(c)) return '🌫️'; if ([51,53,55].includes(c)) return '🌦️';
+                if ([61,63,65].includes(c)) return '🌧️'; if ([71,73,75,77].includes(c)) return '🌨️';
+                if ([80,81,82].includes(c)) return '⛈️'; if ([95,96,99].includes(c)) return '🌩️';
                 return '🌤️';
             };
-            const showWeather = (lat, lon) => {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
-                fetch(url)
-                    .then(response => { if (!response.ok) throw new Error('Err'); return response.json(); })
-                    .then(data => {
-                        if (data && data.current_weather) {
-                            const temp = Math.round(data.current_weather.temperature);
-                            const icon = getWeatherIcon(data.current_weather.weathercode);
-                            weatherElement.innerHTML = `<span class="text-2xl weather-icon">${icon}</span><span class="font-semibold">Durango, Dgo. ${temp}°C</span>`;
-                        }
-                    })
-                    .catch(e => console.error(e));
+            const fetchW = (lat, lon) => {
+                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+                .then(r => r.json())
+                .then(d => {
+                    if(d.current_weather) {
+                        el.innerHTML = `<span class="text-2xl weather-icon">${getWeatherIcon(d.current_weather.weathercode)}</span><span class="font-semibold">Durango, Dgo. ${Math.round(d.current_weather.temperature)}°C</span>`;
+                    }
+                }).catch(() => {});
             };
-            const durangoLat = 24.0277;
-            const durangoLon = -104.653;
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (p) => showWeather(p.coords.latitude, p.coords.longitude),
-                    (e) => showWeather(durangoLat, durangoLon)
-                );
-            } else { showWeather(durangoLat, durangoLon); }
+            if(navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(p => fetchW(p.coords.latitude, p.coords.longitude), () => fetchW(24.0277, -104.653));
+            } else { fetchW(24.0277, -104.653); }
         }
 
-        function startClock() {
-            function updateClock() {
-                const now = new Date();
-                document.getElementById('clock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-            }
-            updateClock(); setInterval(updateClock, 1000);
-        }
-
-        function updateDate() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const ds = now.toLocaleDateString('es-MX', options);
-            document.getElementById('currentDate').textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
-        }
-
-        function updateCalendarYear() {
-            const el = document.getElementById('calendar-year-text');
-            if (el) el.textContent = `Calendario Institucional ${new Date().getFullYear()}`;
-        }
-
-        function updateCopyrightYear() {
-            const el = document.getElementById('copyright-year');
-            if (el) el.textContent = new Date().getFullYear();
-        }
-
+        // Frases
+        const quotes = [
+            { t: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.", a: "Nelson Mandela" },
+            { t: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.", a: "Carl Sagan" },
+            { t: "La educación no es preparación para la vida; la educación es la vida misma.", a: "John Dewey" },
+            { t: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.", a: "Albert Einstein" }
+        ];
         function rotateQuotes() {
             const qc = document.getElementById('quote-container');
-            if (!qc) return;
-            const q = inspirationalQuotes[Math.floor(Math.random() * inspirationalQuotes.length)];
-            qc.style.opacity = 0;
-            setTimeout(() => {
-                qc.innerHTML = `<p class="text-base sm:text-lg italic text-gray-700 leading-relaxed">"${q.quote}"</p><p class="text-sm sm:text-base text-gray-600 text-right mt-2">- ${q.author}</p>`;
+            if(!qc) return;
+            let i = 0;
+            const show = () => {
+                const q = quotes[i];
+                qc.innerHTML = `<p class="text-base sm:text-lg italic text-gray-700">"${q.t}"</p><p class="text-sm sm:text-base text-gray-600 text-right mt-2">- ${q.a}</p>`;
                 qc.style.opacity = 1;
-            }, 500);
-        }
-        
-        const announcementBanner = document.getElementById('announcement-banner');
-        if (announcementBanner) {
-            let bannerHidden = false;
-            const hideBanner = () => {
-                if (!bannerHidden) {
-                    bannerHidden = true;
-                    announcementBanner.classList.add('hidden-banner');
-                    window.removeEventListener('scroll', hideBanner);
-                    window.removeEventListener('click', hideBanner);
-                    clearTimeout(bannerTimeout);
-                }
+                i = (i + 1) % quotes.length;
             };
-            const bannerTimeout = setTimeout(hideBanner, 10000);
-            window.addEventListener('scroll', hideBanner, { once: true });
-            window.addEventListener('click', hideBanner, { once: true });
+            show();
+            setInterval(() => {
+                qc.style.opacity = 0;
+                setTimeout(show, 500);
+            }, 10000);
         }
 
-        window.addEventListener('load', function() {
-            startClock(); updateDate(); updateWeather();
-            rotateQuotes(); setInterval(rotateQuotes, 30000);
-            updateCalendarYear(); updateCopyrightYear();
-            console.log('%c Portal ITD - Listo ', 'background: #1e3a8a; color: white; font-size: 16px; padding: 8px; border-radius: 4px;');
-        });
+        // Banner
+        const banner = document.getElementById('announcement-banner');
+        if(banner) {
+            banner.addEventListener('click', () => banner.classList.add('hidden-banner'));
+            setTimeout(() => banner.classList.add('hidden-banner'), 10000);
+        }
+
+        // Inicializar
+        startClock();
+        updateWeather();
+        rotateQuotes();
     </script>
 </body>
 </html>
