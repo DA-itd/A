@@ -16,6 +16,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Chart.js para gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } 
@@ -117,6 +119,161 @@
                 img.onerror = () => resolve(null);
                 img.src = url;
             });
+        };
+
+        // --- COMPONENTE GRAFICAS ADMIN ---
+        const AdminSurveyStats = () => {
+            const [stats, setStats] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const chartSatisfaccionRef = useRef(null);
+            const chartParticipacionRef = useRef(null);
+            const chartInstances = useRef([]);
+
+            useEffect(() => {
+                const fetchStats = async () => {
+                    setLoading(true);
+                    try {
+                        const url = `${CONFIG.APPS_SCRIPT_URL}?action=getSurveyStats`;
+                        const resp = await fetch(url);
+                        const json = await resp.json();
+                        if (json.success) {
+                            setStats(json.data);
+                        } else {
+                            console.error(json.message);
+                        }
+                    } catch (e) {
+                        console.error("Error fetching stats", e);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                fetchStats();
+            }, []);
+
+            useEffect(() => {
+                // Limpiar gráficas anteriores
+                chartInstances.current.forEach(c => c.destroy());
+                chartInstances.current = [];
+
+                if (stats) {
+                    // 1. Gráfica de Satisfacción
+                    if(chartSatisfaccionRef.current) {
+                        const ctx1 = chartSatisfaccionRef.current.getContext('2d');
+                        const labels1 = Object.keys(stats.satisfaccion);
+                        const dataValues1 = Object.values(stats.satisfaccion);
+
+                        const chart1 = new Chart(ctx1, {
+                            type: 'doughnut',
+                            data: {
+                                labels: labels1,
+                                datasets: [{
+                                    label: 'Nivel de Satisfacción',
+                                    data: dataValues1,
+                                    backgroundColor: [
+                                        'rgba(54, 162, 235, 0.6)',
+                                        'rgba(75, 192, 192, 0.6)',
+                                        'rgba(255, 206, 86, 0.6)',
+                                        'rgba(255, 159, 64, 0.6)',
+                                        'rgba(255, 99, 132, 0.6)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: { responsive: true, maintainAspectRatio: false }
+                        });
+                        chartInstances.current.push(chart1);
+                    }
+
+                    // 2. Gráfica de Participación por Jefe
+                    if(chartParticipacionRef.current && stats.participacion) {
+                        const ctx2 = chartParticipacionRef.current.getContext('2d');
+                        // Ordenar de mayor a menor
+                        const sorted = Object.entries(stats.participacion).sort((a,b) => b[1] - a[1]);
+                        const labels2 = sorted.map(i => i[0]);
+                        const dataValues2 = sorted.map(i => i[1]);
+
+                        const chart2 = new Chart(ctx2, {
+                            type: 'bar',
+                            data: {
+                                labels: labels2,
+                                datasets: [{
+                                    label: 'Evaluaciones por Jefe/Depto',
+                                    data: dataValues2,
+                                    backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                                    borderColor: 'rgba(99, 102, 241, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y', // Barra horizontal para nombres largos
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                            }
+                        });
+                        chartInstances.current.push(chart2);
+                    }
+                }
+            }, [stats]);
+
+            if (loading) return <div className="p-4 text-center text-gray-500">Cargando gráficas...</div>;
+            if (!stats) return null;
+
+            return (
+                <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200 animate-fadeIn">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        📊 Tablero de Encuestas
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        {/* Grafica 1 */}
+                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <h4 className="font-bold text-gray-700 mb-2 text-center">Satisfacción General</h4>
+                            <div className="h-64 relative">
+                                <canvas ref={chartSatisfaccionRef}></canvas>
+                            </div>
+                            <div className="mt-2 text-center text-sm font-semibold text-blue-600">
+                                Total Respuestas: {stats.total}
+                            </div>
+                        </div>
+
+                        {/* Grafica 2 */}
+                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <h4 className="font-bold text-gray-700 mb-2 text-center">Participación por Jefatura</h4>
+                            <div className="h-64 relative">
+                                <canvas ref={chartParticipacionRef}></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Historial Reciente */}
+                    <div>
+                        <h4 className="font-bold text-gray-700 mb-3 border-b pb-2">Últimos Comentarios Recibidos</h4>
+                        <div className="overflow-y-auto max-h-48 border border-gray-200 rounded-lg">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-gray-100 text-gray-600 sticky top-0">
+                                    <tr>
+                                        <th className="px-3 py-2">Fecha</th>
+                                        <th className="px-3 py-2">Curso</th>
+                                        <th className="px-3 py-2">Calif.</th>
+                                        <th className="px-3 py-2">Comentario</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {stats.recent.map((r, i) => (
+                                        <tr key={i} className="hover:bg-gray-50">
+                                            <td className="px-3 py-2 text-xs text-gray-500">{r.fecha}</td>
+                                            <td className="px-3 py-2 font-medium">{r.curso}</td>
+                                            <td className="px-3 py-2 font-bold text-indigo-600">{r.rating}</td>
+                                            <td className="px-3 py-2 text-xs text-gray-500 italic max-w-xs truncate">{r.comentario}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
         };
 
         // --- COMPONENTE REPORTES ADMIN ---
@@ -322,6 +479,7 @@
 
         const Dashboard = ({ user, data, onLogout, isAdmin }) => {
             const { teacher, courses } = data;
+            const [showSurveyStats, setShowSurveyStats] = useState(false);
             
             const exportToPdf = async () => {
                 const { jsPDF } = window.jspdf;
@@ -393,8 +551,18 @@
                             <h2 className="text-2xl font-bold text-gray-800">Bienvenido, {user.name}</h2>
                             {isAdmin && <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded uppercase">Administrador</span>}
                         </div>
-                        <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded font-bold text-gray-700">Cerrar Sesión</button>
+                        <div className="flex gap-2">
+                             {isAdmin && (
+                                <button onClick={() => setShowSurveyStats(!showSurveyStats)} className="bg-blue-100 hover:bg-blue-200 px-4 py-2 rounded font-bold text-blue-700 flex items-center gap-1 transition-colors">
+                                    {showSurveyStats ? 'Ocultar Encuestas' : '📊 Ver Encuestas'}
+                                </button>
+                             )}
+                            <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded font-bold text-gray-700">Cerrar Sesión</button>
+                        </div>
                     </div>
+
+                    {/* Módulo Admin: Gráficas de Encuestas */}
+                    {isAdmin && showSurveyStats && <AdminSurveyStats />}
 
                     {/* Módulo Admin: Reportes */}
                     {isAdmin && <AdminReports />}
