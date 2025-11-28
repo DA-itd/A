@@ -117,7 +117,7 @@
             };
 
             const search = (target) => {
-                if(!target.trim()) return; // Prevent empty search
+                if(!target.trim()) return; 
                 setLoading(true);
                 setSuggestions([]);
                 setResult(null);
@@ -184,6 +184,24 @@
                 doc.save(`Kardex_${teacher.name}.pdf`);
             };
 
+            const exportKardexExcel = () => {
+                if(!result) return;
+                const { teacher, courses } = result;
+                const rows = courses.map(c => ({
+                    "Año": c.year,
+                    "Folio": c.folio,
+                    "Curso": c.courseName,
+                    "Fechas": c.datesText,
+                    "Horas": c.hours,
+                    "Tipo": c.type,
+                    "Depto. Origen": c.deptOrigin || teacher.dept
+                }));
+                const ws = XLSX.utils.json_to_sheet(rows);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Historial");
+                XLSX.writeFile(wb, `Historial_${teacher.name}.xlsx`);
+            };
+
             return (
                 <div className="animate-fadeIn p-6">
                     <div className="max-w-3xl mx-auto">
@@ -225,14 +243,19 @@
 
                         {result && (
                             <div className="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
-                                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                <div className="p-6 border-b border-slate-100 flex flex-wrap gap-4 justify-between items-center bg-slate-50">
                                     <div>
                                         <h3 className="text-xl font-bold text-slate-800">{result.teacher.name}</h3>
                                         <p className="text-slate-500 text-sm">{result.teacher.dept}</p>
                                     </div>
-                                    <button onClick={exportKardexPdf} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
-                                        Descargar PDF
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button onClick={exportKardexPdf} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
+                                            Descargar PDF
+                                        </button>
+                                        <button onClick={exportKardexExcel} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
+                                            Descargar Excel
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="p-0 overflow-x-auto">
                                     <table className="w-full text-sm text-left">
@@ -335,7 +358,7 @@
                 const dateStr = new Date().toLocaleDateString('es-MX', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
                 doc.setFontSize(10); doc.setTextColor(50); doc.text(`Avance hasta la fecha: ${dateStr}`, 15, 155);
                 doc.setDrawColor(128, 0, 0); doc.setLineWidth(2); doc.line(15, pageHeight - 20, pageWidth - 15, pageHeight - 20);
-                doc.save('Encuesta_Jefes.pdf');
+                doc.save('Encuesta_Eficacia.pdf');
             };
 
             return (
@@ -343,7 +366,7 @@
                     <div className="max-w-4xl mx-auto">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                                <span className="bg-yellow-100 p-2 rounded-lg text-yellow-600">📊</span> Avance de Encuestas
+                                <span className="bg-yellow-100 p-2 rounded-lg text-yellow-600">📊</span> Encuesta de Eficacia
                             </h2>
                             <button onClick={exportPdf} className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition">
                                 Descargar PDF
@@ -430,7 +453,7 @@
 
             return (
                 <div className="animate-fadeIn p-6">
-                    <div className="max-w-3xl mx-auto">
+                    <div className="max-w-5xl mx-auto">
                         <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
                             <span className="bg-green-100 p-2 rounded-lg text-green-600">📋</span> Generador de Reportes
                         </h2>
@@ -439,11 +462,37 @@
                                 <div><label className="block text-sm font-bold mb-1">Año</label><select value={year} onChange={e=>setYear(e.target.value)} className="w-full p-2 border rounded"><option value="ACTUAL">ACTUAL</option><option value="2025">2025</option><option value="2024">2024</option></select></div>
                                 <div><label className="block text-sm font-bold mb-1">Departamento</label><select value={dept} onChange={e=>setDept(e.target.value)} className="w-full p-2 border rounded" disabled={loading}><option value="">-- Seleccione --</option>{departments.map(d=><option key={d} value={d}>{d}</option>)}</select></div>
                             </div>
-                            <div className="flex gap-4">
+                            <div className="flex gap-4 mb-6">
                                 <button onClick={exportPdf} disabled={!filtered.length} className="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 disabled:opacity-50">Descargar PDF</button>
                                 <button onClick={exportExcel} disabled={!filtered.length} className="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 disabled:opacity-50">Descargar Excel</button>
                             </div>
-                            {filtered.length > 0 && <p className="mt-4 text-sm text-gray-500">{filtered.length} registros encontrados.</p>}
+                            {filtered.length > 0 && (
+                                <div>
+                                    <p className="text-sm text-gray-500 mb-2 font-bold">{filtered.length} registros encontrados.</p>
+                                    <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
+                                        <table className="w-full text-xs text-left">
+                                            <thead className="bg-slate-100 font-bold sticky top-0">
+                                                <tr>
+                                                    <th className="p-2 border-b">Nombre</th>
+                                                    <th className="p-2 border-b">Curso</th>
+                                                    <th className="p-2 border-b">Folio</th>
+                                                    <th className="p-2 border-b">Fecha</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {filtered.map((r, i) => (
+                                                    <tr key={i} className="hover:bg-slate-50">
+                                                        <td className="p-2 border-b">{r.nombre}</td>
+                                                        <td className="p-2 border-b">{r.curso}</td>
+                                                        <td className="p-2 border-b text-gray-500 font-mono">{r.folio}</td>
+                                                        <td className="p-2 border-b">{r.fechas}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
