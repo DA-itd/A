@@ -112,6 +112,19 @@
                 img.onerror = () => resolve(null); img.src = url;
             });
         };
+        
+        // Helper para dibujar logo sin deformar
+        const drawLogo = (doc, logoData, x, y, targetWidth) => {
+            if (!logoData) return;
+            try {
+                const props = doc.getImageProperties(logoData);
+                const targetHeight = (props.height * targetWidth) / props.width;
+                doc.addImage(logoData, 'PNG', x, y, targetWidth, targetHeight);
+            } catch (e) {
+                // Fallback si falla el cálculo
+                doc.addImage(logoData, 'PNG', x, y, targetWidth, targetWidth); 
+            }
+        };
 
         const getTeachers = async () => {
             try {
@@ -181,11 +194,33 @@
                         chartInstance.current.destroy();
                     }
 
+                    // Paleta de colores variada
+                    const colors = [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(201, 203, 207, 0.7)',
+                        'rgba(255, 99, 71, 0.7)',
+                        'rgba(60, 179, 113, 0.7)',
+                        'rgba(30, 144, 255, 0.7)'
+                    ];
+                    
+                    const borderColors = colors.map(c => c.replace('0.7', '1'));
+
                     chartInstance.current = new Chart(chartRef.current.getContext('2d'), {
                         type: 'bar',
                         data: {
                             labels: participacionData.map(p => p[0]),
-                            datasets: [{ label: 'Evaluaciones', data: participacionData.map(p => p[1]), backgroundColor: 'rgba(79, 70, 229, 0.7)', borderColor: 'rgba(79, 70, 229, 1)', borderWidth: 1 }]
+                            datasets: [{ 
+                                label: 'Evaluaciones', 
+                                data: participacionData.map(p => p[1]), 
+                                backgroundColor: colors, 
+                                borderColor: borderColors, 
+                                borderWidth: 1 
+                            }]
                         },
                         options: { 
                             indexAxis: 'y', 
@@ -211,36 +246,35 @@
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const pageHeight = doc.internal.pageSize.getHeight();
                 
-                // 1. Logo
+                // 1. Logo (con corrección de aspecto)
                 const logo = await getImageDataFromURL(ITD_LOGO_URL);
                 if (logo) {
-                    doc.addImage(logo, 'PNG', 15, 10, 18, 18);
+                    drawLogo(doc, logo, 15, 10, 18);
                 }
                 
                 // 2. Encabezado Oficial
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(14);
-                doc.setTextColor(27, 57, 106); // Azul ITD #1B396A
+                doc.setTextColor(27, 57, 106); // Azul ITD
                 doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth / 2, 18, { align: "center" });
                 
                 doc.setFontSize(10);
-                doc.setTextColor(100); // Gris oscuro
+                doc.setTextColor(100); 
                 doc.text("Coordinación de Actualización Docente", pageWidth / 2, 24, { align: "center" });
                 
-                // 3. Título de la Gráfica (Negritas, 8pts, abajo de la coordinación)
+                // 3. Título de la Gráfica
                 doc.setFontSize(8);
-                doc.setTextColor(0); // Negro
+                doc.setTextColor(0); 
                 doc.text("AVANCE DE LA ENCUESTA DE EFICACIA DE JEFES DE DEPARTAMENTO", pageWidth / 2, 32, { align: "center" });
                 
                 // 4. Línea Azul Institucional
-                doc.setDrawColor(27, 57, 106); // Azul ITD
+                doc.setDrawColor(27, 57, 106); 
                 doc.setLineWidth(1);
                 doc.line(15, 36, pageWidth - 15, 36);
                 
                 // 5. Insertar Gráfica
                 try {
                     const canvas = chartRef.current;
-                    // Crear un canvas temporal con fondo blanco para asegurar que no sea transparente
                     const tempCanvas = document.createElement('canvas');
                     tempCanvas.width = canvas.width;
                     tempCanvas.height = canvas.height;
@@ -250,7 +284,6 @@
                     ctx.drawImage(canvas, 0, 0);
                     
                     const imgData = tempCanvas.toDataURL("image/png", 1.0);
-                    // Ajustar tamaño para que quepa bien
                     doc.addImage(imgData, 'PNG', 15, 45, 180, 100);
                 } catch(e) {
                     console.error("Error al exportar gráfica", e);
@@ -264,7 +297,7 @@
                 doc.text(`Avance hasta la fecha: ${dateStr}`, 15, 155);
                 
                 // 7. Línea Guinda Inferior
-                doc.setDrawColor(128, 0, 0); // Guinda aproximado #800000
+                doc.setDrawColor(128, 0, 0); 
                 doc.setLineWidth(2);
                 doc.line(15, pageHeight - 20, pageWidth - 15, pageHeight - 20);
                 
@@ -337,16 +370,31 @@
             const exportAdminPdf = async () => {
                 if (filteredData.length === 0) return;
                 const { jsPDF } = window.jspdf; const doc = new jsPDF();
-                const itdLogo = await getImageDataFromURL(ITD_LOGO_URL); if (itdLogo) doc.addImage(itdLogo, 'PNG', 10, 8, 20, 20);
-                doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(27, 57, 106); doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", doc.internal.pageSize.getWidth() / 2, 15, { align: "center" });
-                doc.setFontSize(10); doc.setTextColor(100); doc.text("Coordinación de Actualización Docente", doc.internal.pageSize.getWidth() / 2, 20, { align: "center" });
-                doc.setFontSize(14); doc.setTextColor(0); doc.text(`REPORTE DE ACTUALIZACIÓN POR DEPARTAMENTO (${selectedYear})`, doc.internal.pageSize.getWidth() / 2, 30, { align: "center" });
-                doc.setFontSize(10); doc.text(`Departamento: ${selectedDept}`, 14, 40); doc.text(`Total: ${filteredData.length}`, doc.internal.pageSize.getWidth() - 14, 40, { align: "right" });
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const pageWidth = doc.internal.pageSize.getWidth();
+
+                const itdLogo = await getImageDataFromURL(ITD_LOGO_URL); 
+                if (itdLogo) drawLogo(doc, itdLogo, 10, 8, 20);
+
+                doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(27, 57, 106); doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth / 2, 15, { align: "center" });
+                doc.setFontSize(10); doc.setTextColor(100); doc.text("Coordinación de Actualización Docente", pageWidth / 2, 20, { align: "center" });
+                doc.setFontSize(14); doc.setTextColor(128, 0, 0); // Guinda para el título
+                doc.text(`REPORTE DE ACTUALIZACIÓN POR DEPARTAMENTO (${selectedYear})`, pageWidth / 2, 30, { align: "center" });
+                
+                doc.setFontSize(10); doc.setTextColor(0);
+                doc.text(`Departamento: ${selectedDept}`, 14, 40); doc.text(`Total: ${filteredData.length}`, pageWidth - 14, 40, { align: "right" });
+                
                 doc.autoTable({
                     head: [['Nombre Completo', 'Curso', 'Folio', 'Fecha']],
                     body: filteredData.map(r => [r.nombre, r.curso, r.folio, r.fechas instanceof Date ? r.fechas.toLocaleDateString() : r.fechas]),
                     startY: 45, theme: 'grid', headStyles: { fillColor: [27, 57, 106], textColor: 255, halign: 'center' }, styles: { fontSize: 8 }
                 });
+
+                // Línea guinda inferior
+                doc.setDrawColor(128, 0, 0); 
+                doc.setLineWidth(2);
+                doc.line(14, pageHeight - 20, pageWidth - 14, pageHeight - 20);
+
                 doc.save(`Reporte_${selectedDept}_${selectedYear}.pdf`);
             };
 
@@ -385,11 +433,28 @@
             const [showSurveyStats, setShowSurveyStats] = useState(false);
             const exportToPdf = async () => {
                 const { jsPDF } = window.jspdf; const doc = new jsPDF();
-                const itdLogo = await getImageDataFromURL(ITD_LOGO_URL); if (itdLogo) doc.addImage(itdLogo, 'PNG', doc.internal.pageSize.getWidth()-35, 8, 20, 20);
-                doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(27, 57, 106); doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", doc.internal.pageSize.getWidth()/2, 18, { align: "center" });
-                doc.setFontSize(14); doc.setTextColor(200, 100, 0); doc.text("HISTORIAL DE CURSOS", doc.internal.pageSize.getWidth()/2, 35, { align: "center" });
+                const pageWidth = doc.internal.pageSize.getWidth();
+
+                const itdLogo = await getImageDataFromURL(ITD_LOGO_URL); 
+                if (itdLogo) drawLogo(doc, itdLogo, pageWidth-35, 8, 20);
+
+                doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(27, 57, 106); // Azul ITD
+                doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth/2, 18, { align: "center" });
+                
+                doc.setFontSize(14); doc.setTextColor(128, 0, 0); // Guinda
+                doc.text("HISTORIAL DE CURSOS", pageWidth/2, 35, { align: "center" });
+                
                 doc.setTextColor(0); doc.setFontSize(10); doc.text(`Docente: ${teacher.name}`, 15, 45);
-                doc.autoTable({ head: [['Año', 'Folio', 'Curso', 'Fechas', 'Hrs', 'Tipo']], body: courses.map(c => [c.year, c.folio, c.courseName, c.datesText, c.hours, c.type]), startY: 55, theme: 'grid', headStyles: { fillColor: [234, 88, 12], textColor: 255 } });
+                
+                // Tabla azul institucional
+                doc.autoTable({ 
+                    head: [['Año', 'Folio', 'Curso', 'Fechas', 'Hrs', 'Tipo']], 
+                    body: courses.map(c => [c.year, c.folio, c.courseName, c.datesText, c.hours, c.type]), 
+                    startY: 55, 
+                    theme: 'grid', 
+                    headStyles: { fillColor: [27, 57, 106], textColor: 255 } // Azul ITD
+                });
+                
                 doc.save(`Kardex_${teacher.name}.pdf`);
             };
             const years = [...new Set(courses.map(c => c.year))].sort().reverse();
