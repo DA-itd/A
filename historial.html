@@ -81,7 +81,7 @@
 
         const ADMIN_EMAILS = [
             'alejandro.calderon@itdurango.edu.mx',
-            'depdesarrolloacademico@itdurango.edu.mx'
+            'desarrollo.academico@itdurango.edu.mx'
         ];
 
         const ITD_LOGO_URL = 'https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png';
@@ -481,7 +481,8 @@
                 
                 doc.setFontSize(14); 
                 doc.setTextColor(128, 0, 0); // Guinda (#800000)
-                doc.text("HISTORIAL DE CURSOS DE ACTUALIZACIÓN DOCENTE", pageWidth/2, 38, { align: "center" });
+                // Se cambio el texto a HISTORIAL DE CURSOS
+                doc.text("HISTORIAL DE CURSOS", pageWidth/2, 38, { align: "center" });
                 
                 // 3. Información del Docente y Fecha
                 doc.setTextColor(0); 
@@ -520,7 +521,7 @@
                         halign: 'center'
                     },
                     styles: {
-                        fontSize: 8,
+                        fontSize: 7, // Reducido a 7pts
                         cellPadding: 2,
                         overflow: 'linebreak'
                     },
