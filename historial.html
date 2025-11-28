@@ -149,17 +149,11 @@
                     headStyles: { fillColor: [27, 57, 106], textColor: 255, fontSize: 9, halign: 'center' },
                     styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' },
                     columnStyles: {
-                        0: { cellWidth: 10, halign: 'center' },
-                        1: { cellWidth: 28 },
-                        2: { cellWidth: 'auto' },
-                        3: { cellWidth: 22, halign: 'center' },
-                        4: { cellWidth: 8, halign: 'center' },
-                        5: { cellWidth: 18, halign: 'center' },
-                        6: { 
-                            cellWidth: 38, 
-                            halign: 'left', // Alineado a la izquierda
-                            textColor: [80, 80, 80] // Color Gris Obscuro
-                        }
+                        0: { cellWidth: 12, halign: 'center' },
+                        3: { cellWidth: 25, halign: 'center' },
+                        4: { cellWidth: 10, halign: 'center' },
+                        5: { cellWidth: 20, halign: 'center' },
+                        6: { cellWidth: 35, halign: 'center' }
                     }
                 });
                 
@@ -213,7 +207,7 @@
                                             <span>📅 {c.datesText}</span>
                                             <div className="flex justify-between items-center">
                                                 <span>⏱️ {c.hours} hrs</span>
-                                                <span className="text-xs text-gray-500 truncate max-w-[150px]" title={c.deptOrigin}>{c.deptOrigin}</span>
+                                                <span className="text-xs text-gray-400 truncate max-w-[150px]" title={c.deptOrigin}>{c.deptOrigin}</span>
                                             </div>
                                         </div>
                                     </div>
