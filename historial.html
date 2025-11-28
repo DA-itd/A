@@ -361,7 +361,7 @@
         };
 
         // --- COMPONENTE REPORTES ADMIN ---
-        const AdminReports = () => {
+        const AdminReports = ({ user }) => {
             const [selectedYear, setSelectedYear] = useState('ACTUAL');
             const [selectedDept, setSelectedDept] = useState('');
             const [departments, setDepartments] = useState([]);
@@ -372,8 +372,9 @@
             useEffect(() => {
                 const fetchReportData = async () => {
                     setLoadingReport(true);
+                    if (!user || !user.token) return;
                     try {
-                        const resp = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getReportData&period=${selectedYear}`);
+                        const resp = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getReportData&period=${selectedYear}&id_token=${user.token}`);
                         const json = await resp.json();
                         if (json.success) {
                             setReportData(json.data);
@@ -383,7 +384,7 @@
                     } catch (e) { console.error(e); } finally { setLoadingReport(false); }
                 };
                 fetchReportData();
-            }, [selectedYear]);
+            }, [selectedYear, user]);
 
             useEffect(() => {
                 if (!selectedDept) { setFilteredData([]); return; }
@@ -561,7 +562,7 @@
                     </div>
                     {isAdmin && <AdminTeacherSearch onSearch={onAdminSearch} />}
                     {isAdmin && showSurveyStats && <AdminSurveyCharts />}
-                    {isAdmin && <AdminReports />}
+                    {isAdmin && <AdminReports user={user} />}
                     
                     <div className="bg-white rounded-xl shadow p-6 mb-6 relative border border-gray-100">
                         <button onClick={exportToPdf} className="absolute top-4 right-4 p-2 bg-red-100 text-red-700 rounded hover:bg-red-200 font-bold flex items-center gap-1">
