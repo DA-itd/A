@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -186,7 +187,15 @@
                             labels: participacionData.map(p => p[0]),
                             datasets: [{ label: 'Evaluaciones', data: participacionData.map(p => p[1]), backgroundColor: 'rgba(79, 70, 229, 0.7)', borderColor: 'rgba(79, 70, 229, 1)', borderWidth: 1 }]
                         },
-                        options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false }, title: { display: true, text: 'Participación por Jefe Inmediato (Top 10)' } } }
+                        options: { 
+                            indexAxis: 'y', 
+                            responsive: true, 
+                            maintainAspectRatio: false,
+                            plugins: { 
+                                legend: { display: false }, 
+                                title: { display: false } 
+                            } 
+                        }
                     });
                 }
                 return () => {
@@ -194,17 +203,102 @@
                 }
             }, [stats]);
 
+            const exportChartToPdf = async () => {
+                if (!chartRef.current) return;
+                
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                
+                // 1. Logo
+                const logo = await getImageDataFromURL(ITD_LOGO_URL);
+                if (logo) {
+                    doc.addImage(logo, 'PNG', 15, 10, 18, 18);
+                }
+                
+                // 2. Encabezado Oficial
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(14);
+                doc.setTextColor(27, 57, 106); // Azul ITD #1B396A
+                doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth / 2, 18, { align: "center" });
+                
+                doc.setFontSize(10);
+                doc.setTextColor(100); // Gris oscuro
+                doc.text("Coordinación de Actualización Docente", pageWidth / 2, 24, { align: "center" });
+                
+                // 3. Título de la Gráfica (Negritas, 8pts, abajo de la coordinación)
+                doc.setFontSize(8);
+                doc.setTextColor(0); // Negro
+                doc.text("AVANCE DE LA ENCUESTA DE EFICACIA DE JEFES DE DEPARTAMENTO", pageWidth / 2, 32, { align: "center" });
+                
+                // 4. Línea Azul Institucional
+                doc.setDrawColor(27, 57, 106); // Azul ITD
+                doc.setLineWidth(1);
+                doc.line(15, 36, pageWidth - 15, 36);
+                
+                // 5. Insertar Gráfica
+                try {
+                    const canvas = chartRef.current;
+                    // Crear un canvas temporal con fondo blanco para asegurar que no sea transparente
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = canvas.width;
+                    tempCanvas.height = canvas.height;
+                    const ctx = tempCanvas.getContext('2d');
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                    ctx.drawImage(canvas, 0, 0);
+                    
+                    const imgData = tempCanvas.toDataURL("image/png", 1.0);
+                    // Ajustar tamaño para que quepa bien
+                    doc.addImage(imgData, 'PNG', 15, 45, 180, 100);
+                } catch(e) {
+                    console.error("Error al exportar gráfica", e);
+                }
+                
+                // 6. Texto de Avance
+                const dateStr = new Date().toLocaleDateString('es-MX', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+                doc.setFontSize(10);
+                doc.setTextColor(50);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Avance hasta la fecha: ${dateStr}`, 15, 155);
+                
+                // 7. Línea Guinda Inferior
+                doc.setDrawColor(128, 0, 0); // Guinda aproximado #800000
+                doc.setLineWidth(2);
+                doc.line(15, pageHeight - 20, pageWidth - 15, pageHeight - 20);
+                
+                doc.save(`Avance_Encuesta_Jefes_${new Date().toISOString().slice(0,10)}.pdf`);
+            };
+
             if (loading) return <div className="text-center p-8">Cargando gráficas...</div>;
             if (!stats) return null;
 
             return (
                 <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200 animate-fadeIn">
-                    <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">📊 Avance de Encuestas</h2>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">📊 Avance de Encuestas</h2>
+                        <button 
+                            onClick={exportChartToPdf}
+                            className="bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-4 rounded shadow flex items-center gap-2 transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                            Descargar Reporte PDF
+                        </button>
+                    </div>
+                    
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-1 space-y-4">
-                            <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500"><p className="text-sm text-blue-600 font-bold uppercase">Total Encuestas</p><p className="text-3xl font-bold text-blue-900">{stats.total}</p></div>
+                            <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                                <p className="text-sm text-blue-600 font-bold uppercase">Total Encuestas</p>
+                                <p className="text-3xl font-bold text-blue-900">{stats.total}</p>
+                            </div>
                         </div>
-                        <div className="lg:col-span-2 min-h-[400px]"><canvas ref={chartRef}></canvas></div>
+                        <div className="lg:col-span-2 h-[400px]">
+                            <canvas ref={chartRef}></canvas>
+                        </div>
                     </div>
                 </div>
             );
