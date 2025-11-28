@@ -465,14 +465,14 @@
                 const doc = new jsPDF('p', 'mm', 'letter');
                 const pageWidth = doc.internal.pageSize.getWidth();
 
-                // 1. Logo a la derecha
+                // 1. Logo a la derecha (Calculado con drawLogo)
                 const itdLogo = await getImageDataFromURL(ITD_LOGO_URL); 
                 if (itdLogo) drawLogo(doc, itdLogo, pageWidth - 35, 10, 25);
 
                 // 2. Encabezados de Texto
                 doc.setFont("helvetica", "bold"); 
                 doc.setFontSize(14); 
-                doc.setTextColor(27, 57, 106); // Azul ITD
+                doc.setTextColor(27, 57, 106); // Azul ITD (#1B396A)
                 doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth/2, 20, { align: "center" });
                 
                 doc.setFontSize(11); 
@@ -480,7 +480,7 @@
                 doc.text("Coordinación de Actualización Docente", pageWidth/2, 26, { align: "center" });
                 
                 doc.setFontSize(14); 
-                doc.setTextColor(128, 0, 0); // Guinda
+                doc.setTextColor(128, 0, 0); // Guinda (#800000)
                 doc.text("HISTORIAL DE CURSOS DE ACTUALIZACIÓN DOCENTE", pageWidth/2, 38, { align: "center" });
                 
                 // 3. Información del Docente y Fecha
