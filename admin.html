@@ -126,7 +126,7 @@
                         if(res.success && res.data.courses.length > 0) {
                             setResult(res.data);
                         } else {
-                            alert("No se encontraron registros.");
+                            alert(res.data?.teacher?.name || "No se encontraron registros.");
                         }
                     })
                     .finally(() => setLoading(false));
@@ -175,7 +175,7 @@
                         3: { cellWidth: 25, halign: 'center' },
                         4: { cellWidth: 10, halign: 'center' },
                         5: { cellWidth: 20, halign: 'center' },
-                        6: { cellWidth: 35, halign: 'center' }
+                        6: { cellWidth: 35, halign: 'left', textColor: [80, 80, 80] }
                     }
                 });
 
@@ -196,7 +196,7 @@
                                         type="text" 
                                         value={query} 
                                         onChange={handleSuggestion} 
-                                        onKeyDown={(e) => e.key === 'Enter' && search(query)}
+                                        onKeyDown={(e) => e.key === 'Enter' && query.trim() && search(query)}
                                         placeholder="Nombre del docente o correo..." 
                                         className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
                                     />
@@ -211,7 +211,11 @@
                                         </ul>
                                     )}
                                 </div>
-                                <button onClick={() => search(query)} disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-lg shadow transition-colors disabled:opacity-50">
+                                <button 
+                                    onClick={() => search(query)} 
+                                    disabled={loading || !query.trim()} 
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-lg shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
                                     {loading ? 'Buscando...' : 'Buscar'}
                                 </button>
                             </div>
