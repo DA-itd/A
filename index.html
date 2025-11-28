@@ -212,6 +212,7 @@
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 min-h-screen transition-colors duration-500">
@@ -576,9 +577,12 @@
                 Todos los derechos reservados <span id="copyright-year"></span>
             </p>
             <!-- Enlace al Aviso de Privacidad -->
-            <div class="mt-4 pt-4 border-t border-white/10">
+            <div class="mt-4 pt-4 border-t border-white/10 flex flex-col sm:flex-row justify-center items-center gap-4">
                 <a href="aviso.html" class="text-xs text-white/60 hover:text-white transition-colors underline">
                     Aviso de Privacidad
+                </a>
+                <a href="admin.html" class="text-xs text-white/40 hover:text-white/80 transition-colors flex items-center gap-1">
+                    <span>🔒</span> Acceso Administrativo
                 </a>
             </div>
         </div>
@@ -816,5 +820,6 @@
             rotateQuotes(); setInterval(rotateQuotes, 15000);
         });
     </script>
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>

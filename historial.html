@@ -11,12 +11,8 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
-    <!-- Librerías para Exportación y Gráficas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } 
@@ -25,7 +21,6 @@
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen">
 
-    <!-- Loading Fallback para evitar pantalla blanca -->
     <div id="loading-fallback" class="fixed inset-0 flex items-center justify-center bg-white z-50 transition-opacity duration-500">
         <div class="text-center">
             <div class="animate-spin h-12 w-12 border-4 border-orange-500 rounded-full border-t-transparent mx-auto mb-4"></div>
@@ -44,7 +39,6 @@
         </div>
     </header>
 
-    <!-- Botón Volver -->
     <div class="container mx-auto px-4 py-4">
         <a href="index.html" class="text-indigo-800 hover:text-indigo-600 font-bold text-sm flex items-center gap-1">
             ← Volver al Portal Principal
@@ -64,7 +58,6 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // Ocultar loader inicial cuando React monta
         setTimeout(() => {
             const loader = document.getElementById('loading-fallback');
             if(loader) {
@@ -75,31 +68,11 @@
 
         const CONFIG = {
             GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
-            TEACHERS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv'
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
         };
-
-        const ADMIN_EMAILS = [
-            'alejandro.calderon@itdurango.edu.mx',
-            'desarrollo.academico@itdurango.edu.mx'
-        ];
 
         const ITD_LOGO_URL = 'https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png';
 
-        // --- UTILIDADES ---
-        const parseCSVLine = (line) => {
-            const result = []; let current = ''; let inQuotes = false;
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                if (char === '"') { if (inQuotes && line[i + 1] === '"') { current += '"'; i++; } else { inQuotes = !inQuotes; } }
-                else if (char === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
-                else { current += char; }
-            }
-            result.push(current.trim());
-            return result;
-        };
-        const cleanCSVValue = (val) => { let c = val.trim(); if (c.startsWith('"') && c.endsWith('"')) c = c.substring(1, c.length - 1).replace(/""/g, '"'); return c; };
-        const removeAccents = (text) => text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
         const getImageDataFromURL = (url) => {
             return new Promise((resolve, reject) => {
                 const img = new Image(); img.crossOrigin = 'Anonymous';
@@ -112,7 +85,6 @@
             });
         };
         
-        // Helper para dibujar logo sin deformar
         const drawLogo = (doc, logoData, x, y, targetWidth) => {
             if (!logoData) return;
             try {
@@ -120,328 +92,8 @@
                 const targetHeight = (props.height * targetWidth) / props.width;
                 doc.addImage(logoData, 'PNG', x, y, targetWidth, targetHeight);
             } catch (e) {
-                // Fallback si falla el cálculo
                 doc.addImage(logoData, 'PNG', x, y, targetWidth, targetWidth); 
             }
-        };
-
-        const getTeachers = async () => {
-            try {
-                const response = await fetch(`${CONFIG.TEACHERS_CSV_URL}&_=${Date.now()}`);
-                const csvText = await response.text();
-                return csvText.trim().split(/\r?\n/).slice(1).map(line => {
-                    const v = parseCSVLine(line);
-                    return v.length >= 3 ? { nombreCompleto: cleanCSVValue(v[0]), email: cleanCSVValue(v[2]) } : null;
-                }).filter(Boolean);
-            } catch (e) { console.error("Error cargando docentes", e); return []; }
-        };
-
-        // --- COMPONENTE BUSCADOR ADMIN ---
-        const AdminTeacherSearch = ({ onSearch }) => {
-            const [teachers, setTeachers] = useState([]);
-            const [suggestions, setSuggestions] = useState([]);
-            const [query, setQuery] = useState('');
-            const [loading, setLoading] = useState(true);
-
-            useEffect(() => { getTeachers().then(data => { setTeachers(data); setLoading(false); }); }, []);
-
-            const handleChange = (e) => {
-                const val = e.target.value; setQuery(val);
-                if (val.length > 0) {
-                    const norm = removeAccents(val.toLowerCase());
-                    setSuggestions(teachers.filter(t => removeAccents(t.nombreCompleto.toLowerCase()).includes(norm)).slice(0, 5));
-                } else setSuggestions([]);
-            };
-
-            const handleManualSearch = () => {
-                if(query.trim()) {
-                    setSuggestions([]);
-                    onSearch(query.trim()); // Enviar el texto tal cual (email o nombre)
-                }
-            };
-
-            return (
-                <div className="bg-indigo-50 border-l-4 border-indigo-600 p-6 mb-8 rounded-lg shadow-inner">
-                    <h3 className="text-indigo-800 font-bold mb-2 flex items-center gap-2">
-                        <span className="text-xl">👮</span> Panel Administrativo: Consultar Docente
-                    </h3>
-                    <div className="relative flex gap-2">
-                        <div className="flex-grow relative">
-                            <input 
-                                type="text" 
-                                value={query} 
-                                onChange={handleChange} 
-                                onKeyDown={(e) => e.key === 'Enter' && handleManualSearch()}
-                                placeholder={loading ? "Cargando lista..." : "Escriba el nombre o correo..."} 
-                                className="w-full p-3 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" 
-                                disabled={loading} 
-                            />
-                            {suggestions.length > 0 && (
-                                <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-xl max-h-60 overflow-auto">
-                                    {suggestions.map((t, i) => (
-                                        <li key={i} onClick={() => { setQuery(t.nombreCompleto); setSuggestions([]); onSearch(t.email); }} className="px-4 py-3 hover:bg-indigo-100 cursor-pointer border-b border-gray-100 last:border-0">
-                                            <div className="font-bold text-gray-800">{t.nombreCompleto}</div><div className="text-xs text-gray-500">{t.email}</div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-                        <button 
-                            onClick={handleManualSearch} 
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-lg shadow transition-colors"
-                        >
-                            Buscar
-                        </button>
-                    </div>
-                    <p className="text-xs text-indigo-400 mt-2 ml-1">Puede seleccionar de la lista o escribir el nombre completo y presionar Buscar.</p>
-                </div>
-            );
-        };
-
-        // --- COMPONENTE GRÁFICAS (Chart.js) ---
-        const AdminSurveyCharts = () => {
-            const [stats, setStats] = useState(null);
-            const [loading, setLoading] = useState(true);
-            const chartRef = useRef(null);
-            const chartInstance = useRef(null);
-
-            useEffect(() => {
-                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getSurveyStats`).then(r => r.json()).then(res => { if(res.success) setStats(res.data); setLoading(false); }).catch(e => { console.error(e); setLoading(false); });
-            }, []);
-
-            useEffect(() => {
-                if (stats && chartRef.current && stats.participacion) {
-                    const participacionData = Object.entries(stats.participacion).sort((a, b) => b[1] - a[1]).slice(0, 10);
-                    
-                    if(chartInstance.current) {
-                        chartInstance.current.destroy();
-                    }
-
-                    // Paleta de colores variada
-                    const colors = [
-                        'rgba(255, 99, 132, 0.7)',
-                        'rgba(54, 162, 235, 0.7)',
-                        'rgba(255, 206, 86, 0.7)',
-                        'rgba(75, 192, 192, 0.7)',
-                        'rgba(153, 102, 255, 0.7)',
-                        'rgba(255, 159, 64, 0.7)',
-                        'rgba(201, 203, 207, 0.7)',
-                        'rgba(255, 99, 71, 0.7)',
-                        'rgba(60, 179, 113, 0.7)',
-                        'rgba(30, 144, 255, 0.7)'
-                    ];
-                    
-                    const borderColors = colors.map(c => c.replace('0.7', '1'));
-
-                    chartInstance.current = new Chart(chartRef.current.getContext('2d'), {
-                        type: 'bar',
-                        data: {
-                            labels: participacionData.map(p => p[0]),
-                            datasets: [{ 
-                                label: 'Evaluaciones', 
-                                data: participacionData.map(p => p[1]), 
-                                backgroundColor: colors, 
-                                borderColor: borderColors, 
-                                borderWidth: 1 
-                            }]
-                        },
-                        options: { 
-                            indexAxis: 'y', 
-                            responsive: true, 
-                            maintainAspectRatio: false,
-                            plugins: { 
-                                legend: { display: false }, 
-                                title: { display: false } 
-                            } 
-                        }
-                    });
-                }
-                return () => {
-                    if(chartInstance.current) chartInstance.current.destroy();
-                }
-            }, [stats]);
-
-            const exportChartToPdf = async () => {
-                if (!chartRef.current) return;
-                
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'a4');
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const pageHeight = doc.internal.pageSize.getHeight();
-                
-                // 1. Logo (con corrección de aspecto)
-                const logo = await getImageDataFromURL(ITD_LOGO_URL);
-                if (logo) {
-                    drawLogo(doc, logo, 15, 10, 18);
-                }
-                
-                // 2. Encabezado Oficial
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(14);
-                doc.setTextColor(27, 57, 106); // Azul ITD
-                doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth / 2, 18, { align: "center" });
-                
-                doc.setFontSize(10);
-                doc.setTextColor(100); 
-                doc.text("Coordinación de Actualización Docente", pageWidth / 2, 24, { align: "center" });
-                
-                // 3. Título de la Gráfica
-                doc.setFontSize(8);
-                doc.setTextColor(0); 
-                doc.text("AVANCE DE LA ENCUESTA DE EFICACIA DE JEFES DE DEPARTAMENTO", pageWidth / 2, 32, { align: "center" });
-                
-                // 4. Línea Azul Institucional
-                doc.setDrawColor(27, 57, 106); 
-                doc.setLineWidth(1);
-                doc.line(15, 36, pageWidth - 15, 36);
-                
-                // 5. Insertar Gráfica
-                try {
-                    const canvas = chartRef.current;
-                    const tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = canvas.width;
-                    tempCanvas.height = canvas.height;
-                    const ctx = tempCanvas.getContext('2d');
-                    ctx.fillStyle = "#FFFFFF";
-                    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-                    ctx.drawImage(canvas, 0, 0);
-                    
-                    const imgData = tempCanvas.toDataURL("image/png", 1.0);
-                    doc.addImage(imgData, 'PNG', 15, 45, 180, 100);
-                } catch(e) {
-                    console.error("Error al exportar gráfica", e);
-                }
-                
-                // 6. Texto de Avance
-                const dateStr = new Date().toLocaleDateString('es-MX', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
-                doc.setFontSize(10);
-                doc.setTextColor(50);
-                doc.setFont("helvetica", "normal");
-                doc.text(`Avance hasta la fecha: ${dateStr}`, 15, 155);
-                
-                // 7. Línea Guinda Inferior
-                doc.setDrawColor(128, 0, 0); 
-                doc.setLineWidth(2);
-                doc.line(15, pageHeight - 20, pageWidth - 15, pageHeight - 20);
-                
-                doc.save(`Avance_Encuesta_Jefes_${new Date().toISOString().slice(0,10)}.pdf`);
-            };
-
-            if (loading) return <div className="text-center p-8">Cargando gráficas...</div>;
-            if (!stats) return null;
-
-            return (
-                <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200 animate-fadeIn">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">📊 Avance de Encuestas</h2>
-                        <button 
-                            onClick={exportChartToPdf}
-                            className="bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-4 rounded shadow flex items-center gap-2 transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                            Descargar Reporte PDF
-                        </button>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-1 space-y-4">
-                            <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-                                <p className="text-sm text-blue-600 font-bold uppercase">Total Encuestas</p>
-                                <p className="text-3xl font-bold text-blue-900">{stats.total}</p>
-                            </div>
-                        </div>
-                        <div className="lg:col-span-2 h-[400px]">
-                            <canvas ref={chartRef}></canvas>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- COMPONENTE REPORTES ADMIN ---
-        const AdminReports = ({ user }) => {
-            const [selectedYear, setSelectedYear] = useState('ACTUAL');
-            const [selectedDept, setSelectedDept] = useState('');
-            const [departments, setDepartments] = useState([]);
-            const [reportData, setReportData] = useState([]);
-            const [loadingReport, setLoadingReport] = useState(false);
-            const [filteredData, setFilteredData] = useState([]);
-
-            useEffect(() => {
-                const fetchReportData = async () => {
-                    setLoadingReport(true);
-                    if (!user || !user.token) return;
-                    try {
-                        const resp = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getReportData&period=${selectedYear}&id_token=${user.token}`);
-                        const json = await resp.json();
-                        if (json.success) {
-                            setReportData(json.data);
-                            setDepartments([...new Set(json.data.map(item => item.departamento).filter(Boolean).map(d => d.trim().toUpperCase()))].sort());
-                            setSelectedDept(''); setFilteredData([]);
-                        }
-                    } catch (e) { console.error(e); } finally { setLoadingReport(false); }
-                };
-                fetchReportData();
-            }, [selectedYear, user]);
-
-            useEffect(() => {
-                if (!selectedDept) { setFilteredData([]); return; }
-                setFilteredData(reportData.filter(item => item.departamento && item.departamento.trim().toUpperCase() === selectedDept));
-            }, [selectedDept, reportData]);
-
-            const exportAdminPdf = async () => {
-                if (filteredData.length === 0) return;
-                const { jsPDF } = window.jspdf; const doc = new jsPDF();
-                const pageHeight = doc.internal.pageSize.getHeight();
-                const pageWidth = doc.internal.pageSize.getWidth();
-
-                const itdLogo = await getImageDataFromURL(ITD_LOGO_URL); 
-                if (itdLogo) drawLogo(doc, itdLogo, 10, 8, 20);
-
-                doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(27, 57, 106); doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth / 2, 15, { align: "center" });
-                doc.setFontSize(10); doc.setTextColor(100); doc.text("Coordinación de Actualización Docente", pageWidth / 2, 20, { align: "center" });
-                
-                // TÍTULO ACTUALIZADO
-                doc.setFontSize(14); doc.setTextColor(128, 0, 0); // Guinda
-                doc.text(`REPORTE (${selectedYear})`, pageWidth / 2, 30, { align: "center" });
-                
-                // SUBTÍTULO DEPARTAMENTO ACTUALIZADO (Sin etiqueta 'Departamento:')
-                doc.setFontSize(10); doc.setTextColor(0);
-                doc.text(selectedDept, 14, 40); doc.text(`Total: ${filteredData.length}`, pageWidth - 14, 40, { align: "right" });
-                
-                doc.autoTable({
-                    head: [['Nombre Completo', 'Curso', 'Folio', 'Fecha']],
-                    body: filteredData.map(r => [r.nombre, r.curso, r.folio, r.fechas instanceof Date ? r.fechas.toLocaleDateString() : r.fechas]),
-                    startY: 45, theme: 'grid', headStyles: { fillColor: [27, 57, 106], textColor: 255, halign: 'center' }, styles: { fontSize: 8 }
-                });
-
-                // Línea guinda inferior
-                doc.setDrawColor(128, 0, 0); 
-                doc.setLineWidth(2);
-                doc.line(14, pageHeight - 20, pageWidth - 14, pageHeight - 20);
-
-                doc.save(`Reporte_${selectedDept}_${selectedYear}.pdf`);
-            };
-
-            const exportAdminExcel = () => {
-                if (filteredData.length === 0) return;
-                const ws = XLSX.utils.json_to_sheet(filteredData.map(r => ({"Nombre": r.nombre, "Curso": r.curso, "Folio": r.folio, "Fecha": r.fechas})));
-                const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Reporte");
-                XLSX.writeFile(wb, `Reporte_${selectedDept}_${selectedYear}.xlsx`);
-            };
-
-            return (
-                <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200">
-                    <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">📋 Generador de Reportes por Departamento</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div><label className="block text-sm font-bold text-gray-700 mb-1">Año</label><select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="w-full p-2 border border-gray-300 rounded"><option value="ACTUAL">ACTUAL</option><option value="2025">2025</option><option value="2024">2024</option></select></div>
-                        <div><label className="block text-sm font-bold text-gray-700 mb-1">Departamento</label><select value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)} className="w-full p-2 border border-gray-300 rounded" disabled={loadingReport || departments.length === 0}><option value="">-- Seleccione --</option>{departments.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
-                    </div>
-                    {filteredData.length > 0 && <div className="flex gap-4"><button onClick={exportAdminPdf} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 font-bold">PDF</button><button onClick={exportAdminExcel} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-bold">Excel</button></div>}
-                </div>
-            );
         };
 
         const LoginScreen = ({ onLogin }) => {
@@ -455,92 +107,58 @@
             return (<div className="text-center py-20 animate-fadeIn"><h2 className="text-2xl font-bold mb-4 text-gray-800">Acceso a Historial</h2><div className="flex justify-center" ref={ref}></div></div>);
         };
 
-        const Dashboard = ({ user, data, onLogout, isAdmin, onAdminSearch }) => {
+        const Dashboard = ({ user, data, onLogout }) => {
             const { teacher, courses } = data;
-            const [showSurveyStats, setShowSurveyStats] = useState(false);
             
-            // FUNCIÓN DE EXPORTACIÓN KARDEX (REDISEÑADA SEGÚN PDF/SCREENSHOT)
             const exportToPdf = async () => {
                 const { jsPDF } = window.jspdf; 
-                // Orientación vertical
                 const doc = new jsPDF('p', 'mm', 'letter');
                 const pageWidth = doc.internal.pageSize.getWidth();
 
-                // 1. Logo a la derecha (Calculado con drawLogo)
                 const itdLogo = await getImageDataFromURL(ITD_LOGO_URL); 
                 if (itdLogo) drawLogo(doc, itdLogo, pageWidth - 35, 10, 25);
 
-                // 2. Encabezados de Texto
-                doc.setFont("helvetica", "bold"); 
-                doc.setFontSize(14); 
-                doc.setTextColor(27, 57, 106); // Azul ITD (#1B396A)
+                doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(27, 57, 106);
                 doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth/2, 20, { align: "center" });
                 
-                doc.setFontSize(11); 
-                doc.setTextColor(100); 
+                doc.setFontSize(11); doc.setTextColor(100); 
                 doc.text("Coordinación de Actualización Docente", pageWidth/2, 26, { align: "center" });
                 
-                doc.setFontSize(14); 
-                doc.setTextColor(128, 0, 0); // Guinda (#800000)
-                // Se cambio el texto a HISTORIAL DE CURSOS
+                doc.setFontSize(14); doc.setTextColor(128, 0, 0);
                 doc.text("HISTORIAL DE CURSOS", pageWidth/2, 38, { align: "center" });
                 
-                // 3. Información del Docente y Fecha
-                doc.setTextColor(0); 
-                doc.setFontSize(10); 
-                doc.setFont("helvetica", "bold");
+                doc.setTextColor(0); doc.setFontSize(10); doc.setFont("helvetica", "bold");
                 doc.text("Docente:", 14, 50);
                 doc.setFont("helvetica", "normal");
                 doc.text(teacher.name, 35, 50);
 
-                const today = new Date().toLocaleDateString('en-US'); // Formato MM/DD/YYYY de la imagen
+                const today = new Date().toLocaleDateString('en-US');
                 doc.setFont("helvetica", "bold");
                 doc.text("Fecha de emisión:", 14, 55);
                 doc.setFont("helvetica", "normal");
                 doc.text(today, 50, 55);
                 
-                // 4. Tabla
                 const tableBody = courses.map(c => [
-                    c.year, 
-                    c.folio, 
-                    c.courseName, 
-                    c.datesText, 
-                    c.hours, 
-                    c.type,
-                    c.deptOrigin || teacher.dept // Si el curso no tiene origen, usar el del maestro
+                    c.year, c.folio, c.courseName, c.datesText, c.hours, c.type, c.deptOrigin || teacher.dept
                 ]);
 
                 doc.autoTable({ 
                     head: [['Año', 'Folio', 'Curso', 'Fechas', 'Hrs', 'Tipo', 'Depto. Origen']], 
                     body: tableBody, 
-                    startY: 60, 
-                    theme: 'grid', 
-                    headStyles: { 
-                        fillColor: [27, 57, 106], // Azul Institucional
-                        textColor: 255,
-                        fontSize: 9,
-                        halign: 'center'
-                    },
-                    styles: {
-                        fontSize: 7, // Reducido a 7pts
-                        cellPadding: 2,
-                        overflow: 'linebreak'
-                    },
+                    startY: 60, theme: 'grid', 
+                    headStyles: { fillColor: [27, 57, 106], textColor: 255, fontSize: 9, halign: 'center' },
+                    styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' },
                     columnStyles: {
-                        0: { cellWidth: 12, halign: 'center' }, // Año
-                        1: { cellWidth: 30 }, // Folio
-                        2: { cellWidth: 'auto' }, // Curso (autoajuste)
-                        3: { cellWidth: 25, halign: 'center' }, // Fechas
-                        4: { cellWidth: 10, halign: 'center' }, // Hrs
-                        5: { cellWidth: 20, halign: 'center' }, // Tipo
-                        6: { cellWidth: 35, halign: 'center' }  // Depto
+                        0: { cellWidth: 12, halign: 'center' },
+                        3: { cellWidth: 25, halign: 'center' },
+                        4: { cellWidth: 10, halign: 'center' },
+                        5: { cellWidth: 20, halign: 'center' },
+                        6: { cellWidth: 35, halign: 'center' }
                     }
                 });
                 
-                // Pie de página
                 const pageCount = doc.internal.getNumberOfPages();
-                doc.setFontSize(8);
-                doc.setTextColor(150);
+                doc.setFontSize(8); doc.setTextColor(150);
                 doc.text("Página 1 de " + pageCount, pageWidth/2, doc.internal.pageSize.getHeight() - 10, { align: "center" });
 
                 doc.save(`Kardex_${teacher.name}.pdf`);
@@ -553,16 +171,9 @@
                     <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-orange-500 flex justify-between items-center">
                         <div>
                             <h2 className="text-2xl font-bold text-gray-800">Hola, {user.name}</h2>
-                            {isAdmin && <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded">ADMIN</span>}
                         </div>
-                        <div className="flex gap-2">
-                            {isAdmin && <button onClick={() => setShowSurveyStats(!showSurveyStats)} className="bg-blue-100 text-blue-700 px-4 py-2 rounded font-bold">{showSurveyStats ? 'Ocultar Encuestas' : '📊 Encuestas'}</button>}
-                            <button onClick={onLogout} className="bg-gray-100 text-gray-700 px-4 py-2 rounded font-bold">Salir</button>
-                        </div>
+                        <button onClick={onLogout} className="bg-gray-100 text-gray-700 px-4 py-2 rounded font-bold hover:bg-gray-200">Salir</button>
                     </div>
-                    {isAdmin && <AdminTeacherSearch onSearch={onAdminSearch} />}
-                    {isAdmin && showSurveyStats && <AdminSurveyCharts />}
-                    {isAdmin && <AdminReports user={user} />}
                     
                     <div className="bg-white rounded-xl shadow p-6 mb-6 relative border border-gray-100">
                         <button onClick={exportToPdf} className="absolute top-4 right-4 p-2 bg-red-100 text-red-700 rounded hover:bg-red-200 font-bold flex items-center gap-1">
@@ -608,63 +219,37 @@
             );
         };
 
-        // --- COMPONENTE PRINCIPAL APP ---
         const App = () => {
             const [user, setUser] = useState(null);
             const [data, setData] = useState(null);
             const [loading, setLoading] = useState(false);
-            const [isAdmin, setIsAdmin] = useState(false);
 
             const handleLogin = (response) => {
                 setLoading(true);
                 try {
                     const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                    const email = payload.email;
-                    if (ADMIN_EMAILS.includes(email)) setIsAdmin(true);
-                    
                     fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${response.credential}`)
                         .then(r => r.json())
                         .then(res => {
                             if(res.success) {
-                                setUser({ name: payload.name, email, picture: payload.picture, token: response.credential });
+                                setUser({ name: payload.name, email: payload.email, picture: payload.picture, token: response.credential });
                                 setData(res.data);
                             } else { alert("Error: " + res.message); }
                         })
-                        .catch(e => alert("Error de conexión"))
                         .finally(() => setLoading(false));
                 } catch(e) { setLoading(false); }
             };
 
-            const handleAdminSearch = (targetQuery) => {
-                if(!user || !isAdmin) return;
-                setLoading(true);
-                // Enviamos el query (email o nombre)
-                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${user.token}&target_email=${encodeURIComponent(targetQuery)}`)
-                    .then(r => r.json())
-                    .then(res => {
-                        if(res.success && res.data.courses.length > 0) {
-                            setData(res.data);
-                        } else {
-                            alert("No se encontraron registros para: " + targetQuery);
-                            // No limpiamos data anterior para no perder contexto, o podríamos limpiar si se prefiere.
-                        }
-                    })
-                    .finally(() => setLoading(false));
-            };
-
-            const handleLogout = () => { setUser(null); setData(null); setIsAdmin(false); };
+            const handleLogout = () => { setUser(null); setData(null); };
 
             if(loading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin h-12 w-12 border-4 border-orange-500 rounded-full border-t-transparent"></div></div>;
             if(!user || !data) return <div className="container mx-auto px-4"><LoginScreen onLogin={handleLogin} /></div>;
-            return <Dashboard user={user} data={data} onLogout={handleLogout} isAdmin={isAdmin} onAdminSearch={handleAdminSearch} />;
+            return <Dashboard user={user} data={data} onLogout={handleLogout} />;
         };
 
-        // Renderizado robusto
         window.onload = () => {
              const rootEl = document.getElementById('root');
-             if(rootEl && window.ReactDOM) {
-                 window.ReactDOM.createRoot(rootEl).render(<App />);
-             }
+             if(rootEl && window.ReactDOM) window.ReactDOM.createRoot(rootEl).render(<App />);
         };
     </script>
 </body>

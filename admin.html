@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - ITD</title>
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- Librerías para Exportación y Gráficas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } 
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans text-slate-900">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const CONFIG = {
+            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
+            TEACHERS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv'
+        };
+
+        const ADMIN_EMAILS = [
+            'alejandro.calderon@itdurango.edu.mx',
+            'desarrollo.academico@itdurango.edu.mx'
+        ];
+
+        const ITD_LOGO_URL = 'https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png';
+
+        // --- UTILIDADES ---
+        const removeAccents = (text) => text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+        const getImageDataFromURL = (url) => {
+            return new Promise((resolve) => {
+                const img = new Image(); img.crossOrigin = 'Anonymous';
+                img.onload = () => {
+                    const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height;
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
+                    try { resolve(canvas.toDataURL('image/png')); } catch (e) { resolve(null); }
+                };
+                img.onerror = () => resolve(null); img.src = url;
+            });
+        };
+        const drawLogo = (doc, logoData, x, y, targetWidth) => {
+            if (!logoData) return;
+            try {
+                const props = doc.getImageProperties(logoData);
+                const targetHeight = (props.height * targetWidth) / props.width;
+                doc.addImage(logoData, 'PNG', x, y, targetWidth, targetHeight);
+            } catch (e) { doc.addImage(logoData, 'PNG', x, y, targetWidth, targetWidth); }
+        };
+        const parseCSVLine = (line) => {
+            const result = []; let current = ''; let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') { if (inQuotes && line[i + 1] === '"') { current += '"'; i++; } else { inQuotes = !inQuotes; } }
+                else if (char === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
+                else { current += char; }
+            }
+            result.push(current.trim());
+            return result;
+        };
+        const cleanCSVValue = (val) => { let c = val.trim(); if (c.startsWith('"') && c.endsWith('"')) c = c.substring(1, c.length - 1).replace(/""/g, '"'); return c; };
+
+        // ==========================================
+        // MÓDULO 1: BUSCADOR DE DOCENTES (KARDEX)
+        // ==========================================
+        const SearchPanel = ({ user }) => {
+            const [query, setQuery] = useState('');
+            const [result, setResult] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [teachers, setTeachers] = useState([]);
+            const [suggestions, setSuggestions] = useState([]);
+
+            // Cargar lista de profesores para autocompletado
+            useEffect(() => {
+                const getTeachers = async () => {
+                    try {
+                        const response = await fetch(`${CONFIG.TEACHERS_CSV_URL}&_=${Date.now()}`);
+                        const csvText = await response.text();
+                        const list = csvText.trim().split(/\r?\n/).slice(1).map(line => {
+                            const v = parseCSVLine(line);
+                            return v.length >= 3 ? { nombreCompleto: cleanCSVValue(v[0]), email: cleanCSVValue(v[2]) } : null;
+                        }).filter(Boolean);
+                        setTeachers(list);
+                    } catch (e) { console.error("Error docentes", e); }
+                };
+                getTeachers();
+            }, []);
+
+            const handleSuggestion = (e) => {
+                const val = e.target.value; setQuery(val);
+                if (val.length > 0) {
+                    const norm = removeAccents(val.toLowerCase());
+                    setSuggestions(teachers.filter(t => removeAccents(t.nombreCompleto.toLowerCase()).includes(norm)).slice(0, 5));
+                } else setSuggestions([]);
+            };
+
+            const search = (target) => {
+                setLoading(true);
+                setSuggestions([]);
+                setResult(null);
+                setQuery(target);
+                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${user.token}&target_email=${encodeURIComponent(target)}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if(res.success && res.data.courses.length > 0) {
+                            setResult(res.data);
+                        } else {
+                            alert("No se encontraron registros.");
+                        }
+                    })
+                    .finally(() => setLoading(false));
+            };
+
+            const exportKardexPdf = async () => {
+                if(!result) return;
+                const { teacher, courses } = result;
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'letter');
+                const pageWidth = doc.internal.pageSize.getWidth();
+
+                const itdLogo = await getImageDataFromURL(ITD_LOGO_URL);
+                if (itdLogo) drawLogo(doc, itdLogo, pageWidth - 35, 10, 25);
+
+                doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(27, 57, 106);
+                doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth/2, 20, { align: "center" });
+                doc.setFontSize(11); doc.setTextColor(100);
+                doc.text("Coordinación de Actualización Docente", pageWidth/2, 26, { align: "center" });
+                doc.setFontSize(14); doc.setTextColor(128, 0, 0);
+                doc.text("HISTORIAL DE CURSOS", pageWidth/2, 38, { align: "center" });
+
+                doc.setTextColor(0); doc.setFontSize(10); doc.setFont("helvetica", "bold");
+                doc.text("Docente:", 14, 50);
+                doc.setFont("helvetica", "normal");
+                doc.text(teacher.name, 35, 50);
+
+                const today = new Date().toLocaleDateString('en-US');
+                doc.setFont("helvetica", "bold");
+                doc.text("Fecha de emisión:", 14, 55);
+                doc.setFont("helvetica", "normal");
+                doc.text(today, 50, 55);
+
+                const tableBody = courses.map(c => [
+                    c.year, c.folio, c.courseName, c.datesText, c.hours, c.type, c.deptOrigin || teacher.dept
+                ]);
+
+                doc.autoTable({
+                    head: [['Año', 'Folio', 'Curso', 'Fechas', 'Hrs', 'Tipo', 'Depto. Origen']],
+                    body: tableBody,
+                    startY: 60, theme: 'grid',
+                    headStyles: { fillColor: [27, 57, 106], textColor: 255, fontSize: 9, halign: 'center' },
+                    styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' },
+                    columnStyles: {
+                        0: { cellWidth: 12, halign: 'center' },
+                        3: { cellWidth: 25, halign: 'center' },
+                        4: { cellWidth: 10, halign: 'center' },
+                        5: { cellWidth: 20, halign: 'center' },
+                        6: { cellWidth: 35, halign: 'center' }
+                    }
+                });
+
+                doc.save(`Kardex_${teacher.name}.pdf`);
+            };
+
+            return (
+                <div className="animate-fadeIn p-6">
+                    <div className="max-w-3xl mx-auto">
+                        <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                            <span className="bg-indigo-100 p-2 rounded-lg text-indigo-600">🔍</span> Consultar Docente
+                        </h2>
+                        
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-8">
+                            <div className="relative flex gap-2">
+                                <div className="flex-grow relative">
+                                    <input 
+                                        type="text" 
+                                        value={query} 
+                                        onChange={handleSuggestion} 
+                                        onKeyDown={(e) => e.key === 'Enter' && search(query)}
+                                        placeholder="Nombre del docente o correo..." 
+                                        className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    />
+                                    {suggestions.length > 0 && (
+                                        <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-xl max-h-60 overflow-auto">
+                                            {suggestions.map((t, i) => (
+                                                <li key={i} onClick={() => search(t.nombreCompleto)} className="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-100">
+                                                    <div className="font-bold text-slate-800">{t.nombreCompleto}</div>
+                                                    <div className="text-xs text-slate-500">{t.email}</div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                                <button onClick={() => search(query)} disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-lg shadow transition-colors disabled:opacity-50">
+                                    {loading ? 'Buscando...' : 'Buscar'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {result && (
+                            <div className="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
+                                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-slate-800">{result.teacher.name}</h3>
+                                        <p className="text-slate-500 text-sm">{result.teacher.dept}</p>
+                                    </div>
+                                    <button onClick={exportKardexPdf} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
+                                        Descargar PDF
+                                    </button>
+                                </div>
+                                <div className="p-0 overflow-x-auto">
+                                    <table className="w-full text-sm text-left">
+                                        <thead className="bg-slate-100 text-slate-700 uppercase font-bold text-xs">
+                                            <tr>
+                                                <th className="px-4 py-3">Año</th>
+                                                <th className="px-4 py-3">Curso</th>
+                                                <th className="px-4 py-3">Folio</th>
+                                                <th className="px-4 py-3">Hrs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {result.courses.map((c, i) => (
+                                                <tr key={i} className="hover:bg-slate-50">
+                                                    <td className="px-4 py-3 font-bold text-indigo-700">{c.year}</td>
+                                                    <td className="px-4 py-3 font-medium text-slate-800">{c.courseName}</td>
+                                                    <td className="px-4 py-3 text-slate-500 font-mono text-xs">{c.folio}</td>
+                                                    <td className="px-4 py-3">{c.hours}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // MÓDULO 2: ENCUESTAS (GRÁFICAS)
+        // ==========================================
+        const SurveyPanel = () => {
+            const [stats, setStats] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+
+            useEffect(() => {
+                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getSurveyStats`)
+                    .then(r => r.json())
+                    .then(res => { if(res.success) setStats(res.data); setLoading(false); })
+                    .catch(() => setLoading(false));
+            }, []);
+
+            useEffect(() => {
+                if (stats && chartRef.current && stats.participacion) {
+                    const participacionData = Object.entries(stats.participacion).sort((a, b) => b[1] - a[1]).slice(0, 10);
+                    if(chartInstance.current) chartInstance.current.destroy();
+
+                    const colors = [
+                        'rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)', 'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)'
+                    ];
+
+                    chartInstance.current = new Chart(chartRef.current.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: participacionData.map(p => p[0]),
+                            datasets: [{ 
+                                label: 'Evaluaciones', 
+                                data: participacionData.map(p => p[1]), 
+                                backgroundColor: colors, 
+                                borderRadius: 4
+                            }]
+                        },
+                        options: { 
+                            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false } } 
+                        }
+                    });
+                }
+            }, [stats]);
+
+            const exportPdf = async () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                
+                const logo = await getImageDataFromURL(ITD_LOGO_URL);
+                if (logo) drawLogo(doc, logo, 15, 10, 18);
+                
+                doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(27, 57, 106);
+                doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth / 2, 18, { align: "center" });
+                doc.setFontSize(10); doc.setTextColor(100); 
+                doc.text("Coordinación de Actualización Docente", pageWidth / 2, 24, { align: "center" });
+                doc.setFontSize(8); doc.setTextColor(0); 
+                doc.text("AVANCE DE LA ENCUESTA DE EFICACIA DE JEFES DE DEPARTAMENTO", pageWidth / 2, 32, { align: "center" });
+                doc.setDrawColor(27, 57, 106); doc.setLineWidth(1); doc.line(15, 36, pageWidth - 15, 36);
+                
+                if(chartRef.current) {
+                    const canvas = chartRef.current;
+                    const tempCanvas = document.createElement('canvas'); tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
+                    const ctx = tempCanvas.getContext('2d'); ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height); ctx.drawImage(canvas, 0, 0);
+                    doc.addImage(tempCanvas.toDataURL("image/png"), 'PNG', 15, 45, 180, 100);
+                }
+                
+                const dateStr = new Date().toLocaleDateString('es-MX', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+                doc.setFontSize(10); doc.setTextColor(50); doc.text(`Avance hasta la fecha: ${dateStr}`, 15, 155);
+                doc.setDrawColor(128, 0, 0); doc.setLineWidth(2); doc.line(15, pageHeight - 20, pageWidth - 15, pageHeight - 20);
+                doc.save('Encuesta_Jefes.pdf');
+            };
+
+            return (
+                <div className="animate-fadeIn p-6">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                                <span className="bg-yellow-100 p-2 rounded-lg text-yellow-600">📊</span> Avance de Encuestas
+                            </h2>
+                            <button onClick={exportPdf} className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition">
+                                Descargar PDF
+                            </button>
+                        </div>
+                        {loading ? <p>Cargando...</p> : (
+                            <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
+                                <div className="mb-4 flex gap-4">
+                                    <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                                        <p className="text-xs font-bold text-blue-600 uppercase">Total Respuestas</p>
+                                        <p className="text-3xl font-bold text-blue-900">{stats?.total || 0}</p>
+                                    </div>
+                                </div>
+                                <div className="h-[400px]">
+                                    <canvas ref={chartRef}></canvas>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // MÓDULO 3: REPORTES (PDF/EXCEL)
+        // ==========================================
+        const ReportsPanel = ({ user }) => {
+            const [year, setYear] = useState('ACTUAL');
+            const [dept, setDept] = useState('');
+            const [departments, setDepartments] = useState([]);
+            const [data, setData] = useState([]);
+            const [filtered, setFiltered] = useState([]);
+            const [loading, setLoading] = useState(false);
+
+            useEffect(() => {
+                setLoading(true);
+                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getReportData&period=${year}&id_token=${user.token}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if(res.success) {
+                            setData(res.data);
+                            setDepartments([...new Set(res.data.map(i => i.departamento).filter(Boolean).map(d => d.trim().toUpperCase()))].sort());
+                        }
+                    })
+                    .finally(() => setLoading(false));
+            }, [year]);
+
+            useEffect(() => {
+                if(!dept) setFiltered([]);
+                else setFiltered(data.filter(i => i.departamento && i.departamento.trim().toUpperCase() === dept));
+            }, [dept, data]);
+
+            const exportPdf = async () => {
+                if(filtered.length === 0) return;
+                const { jsPDF } = window.jspdf; const doc = new jsPDF();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const logo = await getImageDataFromURL(ITD_LOGO_URL);
+                if(logo) drawLogo(doc, logo, 10, 8, 20);
+
+                doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(27, 57, 106);
+                doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth/2, 15, { align: "center" });
+                doc.setFontSize(10); doc.setTextColor(100);
+                doc.text("Coordinación de Actualización Docente", pageWidth/2, 20, { align: "center" });
+                doc.setFontSize(14); doc.setTextColor(128, 0, 0);
+                doc.text(`REPORTE (${year})`, pageWidth/2, 30, { align: "center" });
+                doc.setFontSize(10); doc.setTextColor(0);
+                doc.text(dept, 14, 40); doc.text(`Total: ${filtered.length}`, pageWidth-14, 40, { align: "right" });
+
+                doc.autoTable({
+                    head: [['Nombre', 'Curso', 'Folio', 'Fecha']],
+                    body: filtered.map(r => [r.nombre, r.curso, r.folio, r.fechas instanceof Date ? r.fechas.toLocaleDateString() : r.fechas]),
+                    startY: 45, theme: 'grid', headStyles: { fillColor: [27, 57, 106], textColor: 255, halign: 'center' }, styles: { fontSize: 8 }
+                });
+                doc.setDrawColor(128, 0, 0); doc.setLineWidth(2); doc.line(14, pageHeight-20, pageWidth-14, pageHeight-20);
+                doc.save(`Reporte_${dept}_${year}.pdf`);
+            };
+
+            const exportExcel = () => {
+                const ws = XLSX.utils.json_to_sheet(filtered.map(r => ({"Nombre": r.nombre, "Curso": r.curso, "Folio": r.folio, "Fecha": r.fechas})));
+                const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Reporte");
+                XLSX.writeFile(wb, `Reporte_${dept}_${year}.xlsx`);
+            };
+
+            return (
+                <div className="animate-fadeIn p-6">
+                    <div className="max-w-3xl mx-auto">
+                        <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                            <span className="bg-green-100 p-2 rounded-lg text-green-600">📋</span> Generador de Reportes
+                        </h2>
+                        <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div><label className="block text-sm font-bold mb-1">Año</label><select value={year} onChange={e=>setYear(e.target.value)} className="w-full p-2 border rounded"><option value="ACTUAL">ACTUAL</option><option value="2025">2025</option><option value="2024">2024</option></select></div>
+                                <div><label className="block text-sm font-bold mb-1">Departamento</label><select value={dept} onChange={e=>setDept(e.target.value)} className="w-full p-2 border rounded" disabled={loading}><option value="">-- Seleccione --</option>{departments.map(d=><option key={d} value={d}>{d}</option>)}</select></div>
+                            </div>
+                            <div className="flex gap-4">
+                                <button onClick={exportPdf} disabled={!filtered.length} className="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 disabled:opacity-50">Descargar PDF</button>
+                                <button onClick={exportExcel} disabled={!filtered.length} className="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 disabled:opacity-50">Descargar Excel</button>
+                            </div>
+                            {filtered.length > 0 && <p className="mt-4 text-sm text-gray-500">{filtered.length} registros encontrados.</p>}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // COMPONENTE PRINCIPAL (ADMIN APP)
+        // ==========================================
+        const AdminApp = () => {
+            const [user, setUser] = useState(null);
+            const [activeTab, setActiveTab] = useState('search');
+            const [error, setError] = useState('');
+
+            const handleLogin = (response) => {
+                try {
+                    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                    if (ADMIN_EMAILS.includes(payload.email)) {
+                        setUser({ name: payload.name, email: payload.email, token: response.credential, picture: payload.picture });
+                    } else {
+                        setError('Acceso denegado. No tienes permisos de administrador.');
+                    }
+                } catch(e) { setError('Error de autenticación.'); }
+            };
+
+            const LoginScreen = () => {
+                const ref = useRef(null);
+                useEffect(() => {
+                    if(window.google && ref.current) {
+                        window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: handleLogin });
+                        window.google.accounts.id.renderButton(ref.current, { theme: "filled_blue", size: "large", text: "signin_with" });
+                    }
+                }, []);
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-slate-100">
+                        <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full border-t-4 border-indigo-600">
+                            <img src={ITD_LOGO_URL} className="h-20 mx-auto mb-4"/>
+                            <h1 className="text-2xl font-bold text-slate-800 mb-2">Panel Administrativo</h1>
+                            <p className="text-slate-500 mb-6">Actualización Docente</p>
+                            {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm font-bold">{error}</div>}
+                            <div className="flex justify-center" ref={ref}></div>
+                            <div className="mt-6 text-xs text-slate-400">
+                                Acceso exclusivo para Coordinación
+                            </div>
+                            <a href="index.html" className="block mt-4 text-indigo-600 text-sm hover:underline">← Volver al Portal</a>
+                        </div>
+                    </div>
+                );
+            };
+
+            if (!user) return <LoginScreen />;
+
+            return (
+                <div className="flex min-h-screen">
+                    {/* SIDEBAR */}
+                    <aside className="w-64 bg-slate-900 text-white flex flex-col fixed h-full z-10">
+                        <div className="p-6 border-b border-slate-700 flex items-center gap-3">
+                            <img src={user.picture} className="w-10 h-10 rounded-full border-2 border-indigo-500"/>
+                            <div>
+                                <p className="font-bold text-sm truncate w-32">{user.name}</p>
+                                <p className="text-xs text-slate-400">Administrador</p>
+                            </div>
+                        </div>
+                        <nav className="flex-1 p-4 space-y-2">
+                            <button onClick={() => setActiveTab('search')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'search' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}>
+                                <span>🔍</span> Consultar Docente
+                            </button>
+                            <button onClick={() => setActiveTab('surveys')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'surveys' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}>
+                                <span>📊</span> Encuestas
+                            </button>
+                            <button onClick={() => setActiveTab('reports')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'reports' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}>
+                                <span>📋</span> Reportes
+                            </button>
+                        </nav>
+                        <div className="p-4 border-t border-slate-700">
+                            <a href="index.html" className="block w-full text-center py-2 text-sm text-slate-400 hover:text-white">Ir al Portal</a>
+                            <button onClick={() => setUser(null)} className="block w-full text-center py-2 text-sm text-red-400 hover:text-red-300">Cerrar Sesión</button>
+                        </div>
+                    </aside>
+
+                    {/* CONTENT */}
+                    <main className="flex-1 ml-64 bg-slate-50 min-h-screen">
+                        <header className="bg-white shadow-sm p-6 mb-6">
+                            <h1 className="text-2xl font-bold text-slate-800">
+                                {activeTab === 'search' && 'Buscador de Historial Académico'}
+                                {activeTab === 'surveys' && 'Estadísticas de Encuestas'}
+                                {activeTab === 'reports' && 'Generador de Reportes Masivos'}
+                            </h1>
+                        </header>
+                        <div className="px-6 pb-12">
+                            {activeTab === 'search' && <SearchPanel user={user} />}
+                            {activeTab === 'surveys' && <SurveyPanel />}
+                            {activeTab === 'reports' && <ReportsPanel user={user} />}
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AdminApp />);
+    </script>
+</body>
+</html>
