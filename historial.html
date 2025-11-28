@@ -378,11 +378,14 @@
 
                 doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(27, 57, 106); doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth / 2, 15, { align: "center" });
                 doc.setFontSize(10); doc.setTextColor(100); doc.text("Coordinación de Actualización Docente", pageWidth / 2, 20, { align: "center" });
-                doc.setFontSize(14); doc.setTextColor(128, 0, 0); // Guinda para el título
-                doc.text(`REPORTE DE ACTUALIZACIÓN POR DEPARTAMENTO (${selectedYear})`, pageWidth / 2, 30, { align: "center" });
                 
+                // TÍTULO ACTUALIZADO
+                doc.setFontSize(14); doc.setTextColor(128, 0, 0); // Guinda
+                doc.text(`REPORTE (${selectedYear})`, pageWidth / 2, 30, { align: "center" });
+                
+                // SUBTÍTULO DEPARTAMENTO ACTUALIZADO (Sin etiqueta 'Departamento:')
                 doc.setFontSize(10); doc.setTextColor(0);
-                doc.text(`Departamento: ${selectedDept}`, 14, 40); doc.text(`Total: ${filteredData.length}`, pageWidth - 14, 40, { align: "right" });
+                doc.text(selectedDept, 14, 40); doc.text(`Total: ${filteredData.length}`, pageWidth - 14, 40, { align: "right" });
                 
                 doc.autoTable({
                     head: [['Nombre Completo', 'Curso', 'Folio', 'Fecha']],
