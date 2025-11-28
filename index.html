@@ -212,7 +212,6 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 min-h-screen transition-colors duration-500">
@@ -238,10 +237,6 @@
                 <div class="flex justify-between items-center">
                     <div class="hidden md:flex space-x-4 items-center">
                         <a href="#inicio" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Inicio</a>
-                        <!-- Botón consolidado para IA -->
-                        <button onclick="openIAModal()" class="px-3 py-3 text-sm font-bold text-yellow-300 hover:text-white hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors flex items-center gap-1">
-                            ✨ Herramientas IA
-                        </button>
                         <a href="#servicios" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Servicios</a>
                         <a href="#informacion" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Información</a>
                         <a href="#enlaces" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Enlaces</a>
@@ -269,7 +264,6 @@
             
             <div id="mobile-menu" class="hidden md:hidden border-t border-blue-700 dark:border-slate-700">
                 <a href="#inicio" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Inicio</a>
-                <button onclick="openIAModal()" class="w-full text-left block px-4 py-3 text-sm font-bold text-yellow-300 hover:bg-blue-700 dark:hover:bg-slate-700">✨ Herramientas IA</button>
                 <a href="#servicios" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Servicios</a>
                 <a href="#informacion" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Información</a>
                 <a href="#enlaces" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Enlaces</a>
@@ -335,22 +329,6 @@
         <!-- Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
             
-            <!-- Herramientas IA (Modal) -->
-            <button onclick="openIAModal()" 
-               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-500 dark:hover:border-indigo-400 animate-fadeInUp delay-100 relative group w-full">
-                <div class="badge-new">¡NUEVO!</div>
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">✨</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
-                    Suite de Herramientas IA
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Planificador y Tutor Pedagógico
-                </p>
-                <div class="inline-block bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-semibold px-3 py-1 rounded-full">
-                    Inteligencia Artificial
-                </div>
-            </button>
-
             <!-- Opción 1: Inscripción a Cursos -->
             <a href="inscripciones.html" 
                class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-rose-400 hover:bg-rose-50 dark:hover:bg-slate-700 animate-fadeInUp delay-300 relative overflow-hidden group">
@@ -588,60 +566,7 @@
         </div>
     </footer>
 
-    <!-- Modal IA -->
-    <div id="ia-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
-        <div class="modal-overlay absolute inset-0" onclick="closeIAModal()"></div>
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 w-11/12 max-w-md border-2 border-indigo-100 dark:border-slate-700">
-            <button onclick="closeIAModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            
-            <div class="text-center mb-6">
-                <div class="inline-block p-3 rounded-full bg-indigo-100 dark:bg-indigo-900/50 mb-4">
-                    <span class="text-4xl">✨</span>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Herramientas IA</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-300">Selecciona la herramienta que deseas utilizar</p>
-            </div>
-            
-            <div class="space-y-4">
-                <a href="planificador.html" class="block p-4 rounded-xl border-2 border-indigo-100 hover:border-indigo-500 bg-indigo-50 hover:bg-white dark:bg-slate-700 dark:border-slate-600 dark:hover:bg-slate-600 dark:hover:border-indigo-400 transition-all group">
-                    <div class="flex items-center gap-4">
-                        <span class="text-3xl">📅</span>
-                        <div class="text-left">
-                            <h4 class="font-bold text-indigo-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300">Planificador de Clases</h4>
-                            <p class="text-xs text-indigo-700 dark:text-gray-300">Diseña secuencias didácticas</p>
-                        </div>
-                    </div>
-                </a>
-                
-                <a href="tutor.html" class="block p-4 rounded-xl border-2 border-cyan-100 hover:border-cyan-500 bg-cyan-50 hover:bg-white dark:bg-slate-700 dark:border-slate-600 dark:hover:bg-slate-600 dark:hover:border-cyan-400 transition-all group">
-                    <div class="flex items-center gap-4">
-                        <span class="text-3xl">🤖</span>
-                        <div class="text-left">
-                            <h4 class="font-bold text-cyan-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-300">Tutor Pedagógico</h4>
-                            <p class="text-xs text-cyan-700 dark:text-gray-300">Asistente virtual especializado</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Modal Logic
-        const iaModal = document.getElementById('ia-modal');
-        function openIAModal() {
-            iaModal.classList.remove('hidden');
-            setTimeout(() => {
-                iaModal.querySelector('div.absolute').classList.add('scale-100', 'opacity-100');
-                iaModal.querySelector('div.absolute').classList.remove('scale-95', 'opacity-0');
-            }, 10);
-        }
-        function closeIAModal() {
-            iaModal.classList.add('hidden');
-        }
-
         // Cursor
         const cursorDot = document.getElementById('cursor-dot');
         window.addEventListener('mousemove', e => {
@@ -820,6 +745,5 @@
             rotateQuotes(); setInterval(rotateQuotes, 15000);
         });
     </script>
-<script type="module" src="/index.tsx"></script>
 </body>
 </html>
