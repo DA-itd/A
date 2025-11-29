@@ -1,84 +1,15 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth" style="visibility: hidden; opacity: 0;">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal de Actualización Docente - ITD</title>
-    <meta name="description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango.">
+    <meta name="description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango. Accede a inscripciones, formatos, calendario y más.">
+    <meta name="keywords" content="ITD, Tecnológico de Durango, actualización docente, cursos para maestros, desarrollo académico, portal docente">
     
     <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
-
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        dark: {
-                            bg: '#0f172a',
-                            card: '#1e293b',
-                            text: '#f8fafc'
-                        }
-                    },
-                    animation: {
-                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'border-dance': 'border-dance 4s linear infinite',
-                    },
-                    keyframes: {
-                        'border-dance': {
-                            '0%, 100%': { 'background-position': '0% 50%' },
-                            '50%': { 'background-position': '100% 50%' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- SOLUCIÓN SAFARI, ESTILOS & MODO OSCURO -->
-    <script>
-        // 0. Aplicar tema oscuro inmediatamente antes de pintar
-        // Verifica localStorage o preferencia del sistema
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-
-        // 1. Hack para desactivar bfcache en Safari
-        window.onunload = function() {};
-
-        // 2. Función para mostrar la página solo cuando esté lista
-        function safeReveal() {
-            var body = document.body;
-            var computed = window.getComputedStyle(body);
-            var hasStyles = computed.backgroundImage && computed.backgroundImage.includes('gradient');
-            var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
-            if (isSafari && !hasStyles) {
-                console.log('Recargando por estilos faltantes...');
-                window.location.reload();
-                return;
-            }
-
-            document.documentElement.style.transition = 'opacity 0.3s ease-in';
-            document.documentElement.style.visibility = 'visible';
-            document.documentElement.style.opacity = '1';
-        }
-
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                window.location.reload();
-            } else {
-                setTimeout(safeReveal, 150);
-            }
-        });
-        
-        window.addEventListener('load', function() {
-            setTimeout(safeReveal, 150);
-        });
-    </script>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
@@ -91,11 +22,13 @@
     
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
-            cursor: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            cursor: none; /* Oculta el cursor por defecto en el cuerpo */
         }
         
-        a, button, .cursor-pointer {
+        /* Oculta el cursor por defecto en elementos interactivos */
+        a, button {
             cursor: none;
         }
 
@@ -105,32 +38,40 @@
             overflow: hidden;
         }
         
-        /* Efecto hover ajustado para modo oscuro */
         .card-portal::before {
             content: '';
             position: absolute;
-            top: 0; left: -100%; width: 100%; height: 100%;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
             transition: left 0.5s;
         }
         
-        .dark .card-portal::before {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+        .card-portal:not(.cursor-not-allowed):hover::before {
+            left: 100%;
         }
         
-        .card-portal:hover::before { left: 100%; }
-        
-        .card-portal:hover {
+        .card-portal:not(.cursor-not-allowed):hover {
             transform: translateY(-8px) scale(1.02);
             box-shadow: 0 20px 40px rgba(0,0,0,0.12);
         }
         
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
-        .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
         
         .delay-100 { animation-delay: 0.1s; opacity: 0; }
         .delay-200 { animation-delay: 0.2s; opacity: 0; }
@@ -139,150 +80,163 @@
         .delay-500 { animation-delay: 0.5s; opacity: 0; }
         .delay-600 { animation-delay: 0.6s; opacity: 0; }
         .delay-700 { animation-delay: 0.7s; opacity: 0; }
-        .delay-800 { animation-delay: 0.8s; opacity: 0; }
-        .delay-900 { animation-delay: 0.9s; opacity: 0; }
         
         @keyframes pulse-slow {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
         
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
         
-        .badge-new {
-            position: absolute; top: 10px; right: 10px;
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            color: white; font-size: 10px; padding: 4px 8px;
-            border-radius: 12px; font-weight: bold;
-            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
-            animation: pulse-slow 2s infinite;
+        .badge-soon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
         }
 
-        .weather-icon { animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        .weather-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
 
         .quote-container {
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
             border-left: 3px solid rgba(99, 102, 241, 0.5);
         }
         
-        .dark .quote-container {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.5) 100%);
-            border-left: 3px solid rgba(129, 140, 248, 0.5);
-        }
-        
-        /* Cursor personalizado */
+        /* Estilos para el cursor personalizado */
         #cursor-dot {
-            position: fixed; width: 12px; height: 12px;
-            background-color: rgba(99, 102, 241, 0.5);
-            border-radius: 50%; pointer-events: none;
-            transform: translate(-50%, -50%); z-index: 9999;
-            transition: width 0.2s, height 0.2s, background-color 0.2s, top 0.1s linear, left 0.1s linear;
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background-color: rgba(99, 102, 241, 0.5); /* Color índigo semitransparente */
+            border-radius: 50%;
+            pointer-events: none; /* Muy importante para que no interfiera con los clics */
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease, transform 0.1s linear;
         }
+
         #cursor-dot.active {
-            width: 40px; height: 40px;
-            background-color: rgba(99, 102, 241, 0.2);
+            width: 40px;
+            height: 40px;
+            background-color: rgba(99, 102, 241, 0.2); /* Más grande y más transparente */
         }
-        
-        .dark #cursor-dot { background-color: rgba(165, 180, 252, 0.5); }
-        .dark #cursor-dot.active { background-color: rgba(165, 180, 252, 0.2); }
         
         #announcement-banner {
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
         }
         #announcement-banner.hidden-banner {
-            opacity: 0; height: 0 !important; padding: 0 !important; margin: 0 !important;
-        }
-
-        /* Estilo para el Modal */
-        .modal-overlay {
-            background-color: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(4px);
+            opacity: 0;
+            height: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            margin-bottom: 0 !important;
+            transform: translateY(-100%);
         }
     </style>
 <script type="importmap">
 {
   "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0"
+    "vite": "https://aistudiocdn.com/vite@^7.1.12",
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "process": "https://aistudiocdn.com/process@^0.11.10"
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
 
-<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 min-h-screen transition-colors duration-500">
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
     
+    <!-- Elemento del cursor personalizado -->
     <div id="cursor-dot"></div>
 
     <!-- Header -->
-    <header class="bg-white dark:bg-slate-900 shadow-xl sticky top-0 z-40 transition-colors duration-500">
+    <header class="bg-white shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain bg-white rounded-lg p-1">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" 
+                     alt="TecNM" 
+                     class="h-12 sm:h-16 md:h-20 object-contain">
+                
                 <div class="text-center flex-1 px-2 sm:px-4">
-                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 dark:text-blue-300 leading-tight transition-colors">ACTUALIZACIÓN DOCENTE</h1>
-                    <p class="text-xs sm:text-sm md:text-base text-blue-700 dark:text-blue-400 mt-1 font-semibold transition-colors">Desarrollo Académico</p>
-                    <p class="text-xs sm:text-sm text-blue-600 dark:text-slate-400 transition-colors">TecNM - Instituto Tecnológico de Durango</p>
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">
+                        ACTUALIZACIÓN DOCENTE
+                    </h1>
+                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">
+                        Desarrollo Académico
+                    </p>
+                    <p class="text-xs sm:text-sm text-blue-600">
+                        TecNM - Instituto Tecnológico de Durango
+                    </p>
                 </div>
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
+                
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" 
+                     alt="ITD" 
+                     class="h-12 sm:h-16 md:h-20 object-contain">
             </div>
         </div>
-        <!-- Menú -->
-        <nav class="bg-blue-800 dark:bg-slate-800 text-white shadow-md transition-colors duration-500">
+         <!-- Menú de Navegación -->
+        <nav class="bg-blue-800 text-white shadow-md">
             <div class="container mx-auto px-4">
                 <div class="flex justify-between items-center">
-                    <div class="hidden md:flex space-x-4 items-center">
-                        <a href="#inicio" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Inicio</a>
-                        <a href="#servicios" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Servicios</a>
-                        <a href="#informacion" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Información</a>
-                        <a href="#enlaces" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 dark:hover:bg-slate-700 rounded-md transition-colors">Enlaces</a>
-                        
-                        <!-- Botón Tema Desktop -->
-                        <button id="theme-toggle-desktop" class="ml-4 p-2 rounded-lg hover:bg-blue-700 dark:hover:bg-slate-700 transition-colors focus:outline-none" title="Cambiar tema">
-                            <svg id="theme-toggle-light-icon-d" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                            <svg id="theme-toggle-dark-icon-d" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586 1 1 0 01-5.293-5.293zM16.707 16.707a6 6 0 11-5.236-8.236 8.003 8.003 0 008.165 4.928.75.75 0 01.378 1.054 7.999 7.999 0 01-3.307 2.254z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                        </button>
+                    <!-- Menú Desktop -->
+                    <div class="hidden md:flex space-x-4">
+                        <a href="#inicio" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Inicio</a>
+                        <a href="#servicios" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Servicios</a>
+                        <a href="#informacion" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Información</a>
+                        <a href="#enlaces" class="px-3 py-3 text-sm font-medium hover:bg-blue-700 rounded-md transition-colors">Enlaces y Contacto</a>
                     </div>
-                    
+                    <!-- Botón Menú Móvil -->
                     <div class="md:hidden flex items-center w-full">
-                         <div class="flex-grow"></div>
-                         <!-- Botón Tema Móvil -->
-                         <button id="theme-toggle-mobile" class="p-2 mr-2 rounded-lg hover:bg-blue-700 dark:hover:bg-slate-700 transition-colors focus:outline-none">
-                            <svg id="theme-toggle-light-icon-m" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                            <svg id="theme-toggle-dark-icon-m" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586 1 1 0 01-5.293-5.293zM16.707 16.707a6 6 0 11-5.236-8.236 8.003 8.003 0 008.165 4.928.75.75 0 01.378 1.054 7.999 7.999 0 01-3.307 2.254z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                         </button>
                          <button id="mobile-menu-button" class="text-white focus:outline-none p-3">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                          </button>
                     </div>
                 </div>
             </div>
-            
-            <div id="mobile-menu" class="hidden md:hidden border-t border-blue-700 dark:border-slate-700">
-                <a href="#inicio" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Inicio</a>
-                <a href="#servicios" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Servicios</a>
-                <a href="#informacion" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Información</a>
-                <a href="#enlaces" class="block px-4 py-3 text-sm hover:bg-blue-700 dark:hover:bg-slate-700">Enlaces</a>
+             <!-- Menú Desplegable Móvil -->
+            <div id="mobile-menu" class="hidden md:hidden">
+                <a href="#inicio" class="block px-4 py-3 text-sm hover:bg-blue-700">Inicio</a>
+                <a href="#servicios" class="block px-4 py-3 text-sm hover:bg-blue-700">Servicios</a>
+                <a href="#informacion" class="block px-4 py-3 text-sm hover:bg-blue-700">Información</a>
+                <a href="#enlaces" class="block px-4 py-3 text-sm hover:bg-blue-700">Enlaces y Contacto</a>
             </div>
         </nav>
     </header>
 
-    <!-- Barra Clima -->
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-slate-800 dark:to-slate-700 text-white shadow-lg transition-colors duration-500">
+    <!-- Barra de Información: Clima y Hora -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
         <div class="container mx-auto px-4 py-3">
             <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 text-sm">
+                <!-- Fecha -->
                 <div class="flex items-center gap-2">
                     <span class="text-xl">📅</span>
                     <span id="currentDate" class="font-semibold">Cargando...</span>
                 </div>
+                
+                <!-- Clima -->
                 <div id="weatherInfo" class="flex items-center gap-2">
                     <span class="text-2xl weather-icon">🌤️</span>
                     <span class="font-semibold">Durango, Dgo.</span>
                 </div>
+                
+                <!-- Hora -->
                 <div class="flex items-center gap-2">
                     <span class="text-xl">🕒</span>
                     <span id="clock" class="font-mono font-bold text-lg">--:--:--</span>
@@ -291,239 +245,246 @@
         </div>
     </div>
     
-    <!-- Banner -->
+    <!-- Banner de Anuncios -->
+    <!-- ✏️ COMIENZA A EDITAR TU ANUNCIO AQUÍ (Línea ~198) ✏️ -->
     <div id="announcement-banner" class="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 text-white p-4 text-center font-bold shadow-lg relative cursor-pointer">
         <div class="container mx-auto flex items-center justify-center gap-4">
             <span class="text-2xl animate-pulse">📢</span>
             <div>
-                <strong class="block sm:inline text-lg">BIENVENIDA(o)</strong>
-                <span class="block sm:inline ml-2">¡Próximos cursos de actualización docente enero 2026!</span>
+                <strong class="block sm:inline text-lg">Aviso Importante:</strong>
+                <span class="block sm:inline ml-2">¡Este es un espacio para anuncios! Puede editar este texto en el archivo index.html.</span>
             </div>
         </div>
     </div>
+    <!-- ✏️ FIN DEL ÁREA DE EDICIÓN DEL ANUNCIO ✏️ -->
 
+
+    <!-- Contenido Principal -->
     <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
         
-        <!-- Frase -->
+        <!-- Frase Inspiracional -->
         <section class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
             <div id="quote-container" class="quote-container rounded-lg p-6 text-center transition-opacity duration-500 ease-in-out">
-                <!-- Quote injected -->
+                <!-- Quote will be injected here -->
             </div>
         </section>
         
-        <!-- Servicios -->
+        <!-- Banner de Servicios -->
         <div id="servicios" class="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32">
             <div class="flex items-baseline justify-center gap-4 sm:gap-6 mb-4">
                 <div class="inline-block animate-pulse-slow">
-                    <img src="https://raw.githubusercontent.com/DA-itd/A/main/pola.png" alt="Servicios" class="h-16 sm:h-20 md:h-24 object-contain">
+                    <div class="text-6xl sm:text-7xl md:text-8xl">🎓</div>
                 </div>
-                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 dark:text-white transition-colors">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800">
                     Servicios Disponibles
                 </h2>
             </div>
-            <p class="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto px-4 transition-colors">
+            <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
                 Seleccione la opción que necesite para acceder a los diferentes servicios
             </p>
         </div>
 
-        <!-- Grid -->
+        <!-- Grid de Opciones -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
             
             <!-- Opción 1: Inscripción a Cursos -->
             <a href="inscripciones.html" 
-               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-rose-400 hover:bg-rose-50 dark:hover:bg-slate-700 animate-fadeInUp delay-300 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 bg-rose-500 text-white text-[10px] px-2 py-1 rounded-bl-lg font-bold">
-                    ¡ABIERTO!
-                </div>
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">📝</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-rose-400 animate-fadeInUp delay-100">
+                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📝</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Inscripción a Cursos
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 font-bold text-rose-600 dark:text-rose-400">
-                    Registrate y no pierdas tu lugar
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Registrarse en cursos de actualización
                 </p>
-                <div class="inline-block bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 text-xs font-semibold px-3 py-1 rounded-full">
+                <div class="inline-block bg-rose-100 text-rose-700 text-xs font-semibold px-3 py-1 rounded-full">
                     ✓ Disponible
                 </div>
             </a>
 
             <!-- Opción 2: Historial de Cursos -->
-            <a href="historial.html" 
-               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-orange-400 animate-fadeInUp delay-400">
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+            <a href="#" onclick="event.preventDefault();"
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent animate-fadeInUp delay-200 opacity-60 cursor-not-allowed">
+                <span class="badge-soon">Próximamente</span>
+                <div class="text-4xl sm:text-5xl mb-4">📚</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Historial de Cursos
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Ver mi historial de actualización
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Ver mi historial de actualización docente
                 </p>
-                <div class="inline-block bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
+                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
+                    En desarrollo
                 </div>
             </a>
 
             <!-- Opción 3: Formatos Oficiales -->
             <a href="formatos.html" 
-               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-500">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-green-400 animate-fadeInUp delay-300">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📋</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Formatos Oficiales
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Descargar formatos y documentos
                 </p>
-                <div class="inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold px-3 py-1 rounded-full">
+                <div class="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
                     ✓ Disponible
                 </div>
             </a>
 
             <!-- Opción 4: Validación de Constancias -->
             <a href="verificador.html" 
-               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-600">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-cyan-400 animate-fadeInUp delay-400">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">✅</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Validación de Constancias
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Verificar la autenticidad de documentos.
                 </p>
-                <div class="inline-block bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 text-xs font-semibold px-3 py-1 rounded-full">
+                <div class="inline-block bg-cyan-100 text-cyan-700 text-xs font-semibold px-3 py-1 rounded-full">
                     ✓ Disponible
                 </div>
             </a>
 
             <!-- Opción 5: Área para Instructores -->
             <a href="instructores.html" 
-               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-700">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-indigo-400 animate-fadeInUp delay-500">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Área para Instructores
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Subir propuestas y evidencias
                 </p>
-                <div class="inline-block bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-semibold px-3 py-1 rounded-full">
+                <div class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full">
                     ✓ Disponible
                 </div>
             </a>
 
-            <!-- Opción 6: Encuestas -->
+            <!-- Opción 6: Encuestas de Opinión -->
             <a href="encuestas.html" 
-               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 animate-fadeInUp delay-800">
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-yellow-400 animate-fadeInUp delay-600">
                 <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📊</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Encuestas de Opinión
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
                     Evaluación de cursos y servicios
                 </p>
-                <div class="inline-block bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs font-semibold px-3 py-1 rounded-full">
+                <div class="inline-block bg-yellow-100 text-yellow-700 text-xs font-semibold px-3 py-1 rounded-full">
                     ✓ Disponible
                 </div>
             </a>
             
-             <!-- Opción 7: Estadísticas -->
-            <a href="estadisticas.html" 
-               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-transparent hover:border-purple-400 animate-fadeInUp delay-900">
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📈</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+            <!-- Opción 7: Estadísticas -->
+            <a href="#" onclick="event.preventDefault();"
+               class="card-portal bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-transparent animate-fadeInUp delay-700 opacity-60 cursor-not-allowed">
+                <span class="badge-soon">Próximamente</span>
+                <div class="text-4xl sm:text-5xl mb-4">📈</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
                     Estadísticas
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Análisis y resultados
+                <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                    Análisis y resultados de encuestas
                 </p>
-                <div class="inline-block bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
+                <div class="inline-block bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
+                    En desarrollo
                 </div>
             </a>
 
         </div>
 
-        <!-- Información -->
+        <!-- Panel de Información -->
         <div id="informacion" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600 dark:border-blue-500 transition-colors">
+            <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="text-3xl sm:text-4xl">ℹ️</div>
-                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-800">
                         Información Importante
                     </h3>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="flex items-start gap-3 bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                    <div class="flex items-start gap-3 bg-green-50 p-4 rounded-lg">
                         <div class="text-2xl flex-shrink-0">📚</div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Límite de cursos</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Puedes tomar hasta 3 cursos por periodo sin empalme de horarios</p>
+                            <p class="text-sm font-semibold text-gray-800">Límite de cursos</p>
+                            <p class="text-xs text-gray-600 mt-1">Puedes tomar hasta 3 cursos por periodo sin empalme de horarios</p>
                         </div>
                     </div>
-                    <div class="flex items-start gap-3 bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                    
+                    <div class="flex items-start gap-3 bg-purple-50 p-4 rounded-lg">
                         <div class="text-2xl flex-shrink-0">📝</div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Formatos</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Los formatos (CVU y Ficha técnica) serán en PDF, los demás firmados en Coordinación.</p>
+                            <p class="text-sm font-semibold text-gray-800">Formatos</p>
+                            <p class="text-xs text-gray-600 mt-1">Los formatos que se envían (CVU y Ficha técnica) serán en PDF, los demás se entregarán debidamente firmados y sellados en la oficina de Coordinación y actualización docente</p>
                         </div>
                     </div>
-                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-red-50 dark:bg-red-900/20 p-4 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors cursor-pointer">
+                    
+                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-red-50 p-4 rounded-lg hover:bg-red-100 transition-colors">
                         <div class="text-2xl flex-shrink-0">🗓️</div>
                         <div>
-                            <p id="calendar-year-text" class="text-sm font-semibold text-gray-800 dark:text-gray-200">Calendario Institucional</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Consulte las fechas importantes del ciclo escolar.</p>
+                            <p id="calendar-year-text" class="text-sm font-semibold text-gray-800">Calendario Institucional</p>
+                            <p class="text-xs text-gray-600 mt-1">Consulte las fechas importantes del ciclo escolar.</p>
                         </div>
                     </a>
                 </div>
-                <div class="mt-4 flex items-start gap-3 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-l-4 border-blue-400">
+                <div class="mt-4 flex items-start gap-3 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
                     <div class="text-2xl flex-shrink-0">🧑‍💼</div>
                     <div>
-                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Nota Importante</p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Estos cursos están dirigidos al personal docente con plaza.</p>
+                        <p class="text-sm font-semibold text-gray-800">Nota Importante</p>
+                        <p class="text-xs text-gray-600 mt-1">Estos cursos están dirigidos al personal docente con plaza.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Enlaces -->
+        <!-- Enlaces Institucionales -->
         <div id="enlaces" class="max-w-4xl mx-auto scroll-mt-32">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-slate-800 dark:to-slate-700 rounded-2xl shadow-xl p-6 text-white transition-colors">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
                 <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                    <a href="https://www.itdurango.edu.mx" target="_blank" rel="noopener noreferrer" class="bg-sky-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <a href="https://www.itdurango.edu.mx" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-sky-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
                         <div class="text-3xl mb-2">🏛️</div>
                         <p class="font-semibold text-sm">ITD</p>
                         <p class="text-xs opacity-90">Portal Principal</p>
                     </a>
-                    <a href="https://www.tecnm.mx" target="_blank" rel="noopener noreferrer" class="bg-emerald-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
+                    <a href="https://www.tecnm.mx" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-emerald-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
                         <div class="text-3xl mb-2">🎓</div>
                         <p class="font-semibold text-sm">TecNM</p>
                         <p class="text-xs opacity-90">Sitio Nacional</p>
                     </a>
-                    <a href="https://mooc.tecnm.mx/portal/" target="_blank" rel="noopener noreferrer" class="bg-purple-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
+                    <a href="https://mooc.tecnm.mx/portal/" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-purple-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
                         <div class="text-3xl mb-2">💻</div>
                         <p class="font-semibold text-sm">MOOC</p>
                         <p class="text-xs opacity-90">Cursos en Línea</p>
                     </a>
-                    <a href="https://www.itdurango.edu.mx/sgi/" target="_blank" rel="noopener noreferrer" class="bg-rose-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
+                    <a href="https://www.itdurango.edu.mx/sgi/" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="bg-rose-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
                         <div class="text-3xl mb-2">📂</div>
                         <p class="font-semibold text-sm">SGI</p>
                         <p class="text-xs opacity-90">Gestión Integrado</p>
-                    </a>
-                     <a href="https://www.labmexia.gob.mx" target="_blank" rel="noopener noreferrer" class="bg-fuchsia-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">🧪</div>
-                        <p class="font-semibold text-sm">LabMexIA</p>
-                        <p class="text-xs opacity-90">Laboratorio IA</p>
-                    </a>
-                    <a href="https://saberes.gob.mx/cms/index.php" target="_blank" rel="noopener noreferrer" class="bg-teal-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">🧠</div>
-                        <p class="font-semibold text-sm">Saberes</p>
-                        <p class="text-xs opacity-90">Plataforma</p>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Contacto -->
+        <!-- Ayuda y Soporte -->
         <div id="contacto" class="max-w-4xl mx-auto mt-8 scroll-mt-32">
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-slate-800 dark:to-slate-700 rounded-2xl shadow-xl p-6 text-white transition-colors">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
                     <div class="flex items-center gap-4">
                         <div class="text-4xl hidden sm:block">💬</div>
@@ -532,8 +493,8 @@
                             <p class="text-sm opacity-90">Contacta a la Coordinación de Actualización Docente.</p>
                         </div>
                     </div>
-                    <a href="mailto:coord_actualizaciondocente@itdurango.edu.mx" 
-                       class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md cursor-pointer">
+                    <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
+                       class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md">
                         <span class="mr-2">📧</span> Enviar Email
                     </a>
                 </div>
@@ -543,7 +504,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 dark:from-slate-900 dark:to-slate-950 text-white text-center py-6 sm:py-8 mt-8 transition-colors">
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-8">
         <div class="container mx-auto px-4">
             <p class="font-semibold text-sm sm:text-base mb-2">
                 © Coordinación de Actualización Docente
@@ -554,71 +515,103 @@
             <p class="text-xs sm:text-sm opacity-75 mt-1">
                 Todos los derechos reservados <span id="copyright-year"></span>
             </p>
-            <!-- Enlace al Aviso de Privacidad -->
-            <div class="mt-4 pt-4 border-t border-white/10 flex flex-col sm:flex-row justify-center items-center gap-4">
-                <a href="aviso.html" class="text-xs text-white/60 hover:text-white transition-colors underline">
-                    Aviso de Privacidad
-                </a>
-                <a href="admin.html" class="text-xs text-white/40 hover:text-white/80 transition-colors flex items-center gap-1">
-                    <span>🔒</span> Acceso Administrativo
-                </a>
-            </div>
         </div>
     </footer>
 
     <script>
-        // Cursor
+        // =============================================================================
+        // LÓGICA DEL CURSOR PERSONALIZADO
+        // =============================================================================
         const cursorDot = document.getElementById('cursor-dot');
+        
         window.addEventListener('mousemove', e => {
             const { clientX, clientY } = e;
+            
+            // Usamos requestAnimationFrame para un rendimiento más suave
             requestAnimationFrame(() => {
                 cursorDot.style.left = `${clientX}px`;
                 cursorDot.style.top = `${clientY}px`;
             });
+            
             const target = e.target;
-            if (target.closest('a, button, [role="button"], .card-portal, .cursor-pointer')) {
+            // Verifica si el elemento es un enlace, botón o tiene un rol de botón o es una tarjeta del portal
+            if (target.closest('a, button, [role="button"], .card-portal:not(.cursor-not-allowed)')) {
                 cursorDot.classList.add('active');
             } else {
                 cursorDot.classList.remove('active');
             }
         });
 
-        // Mobile Menu
+        // =============================================================================
+        // LÓGICA DEL MENÚ MÓVIL
+        // =============================================================================
         const menuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
+        
         menuButton.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Date & Clock
-        function updateDate() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const ds = now.toLocaleDateString('es-MX', options);
-            document.getElementById('currentDate').textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
-        }
-        function startClock() {
-            function updateClock() {
-                const now = new Date();
-                document.getElementById('clock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-            }
-            updateClock(); setInterval(updateClock, 1000);
-        }
-        
-        // Year Updates
-        function updateYears() {
-             const year = new Date().getFullYear();
-             const calEl = document.getElementById('calendar-year-text');
-             if(calEl) calEl.textContent = `Calendario Institucional ${year}`;
-             
-             const copyEl = document.getElementById('copyright-year');
-             if(copyEl) copyEl.textContent = year;
-        }
+        // Cerrar menú al hacer clic en un enlace
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
 
-        // Weather
+        // =============================================================================
+        // FRASES INSPIRACIONALES SOBRE EDUCACIÓN Y CIENCIA
+        // =============================================================================
+        const inspirationalQuotes = [
+            {
+                quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.",
+                author: "Nelson Mandela"
+            },
+            {
+                quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.",
+                author: "Carl Sagan"
+            },
+            {
+                quote: "La educación no es preparación para la vida; la educación es la vida misma.",
+                author: "John Dewey"
+            },
+            {
+                quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.",
+                author: "Albert Einstein"
+            },
+            {
+                quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.",
+                author: "Platón"
+            },
+            {
+                quote: "La ciencia no conoce fronteras, porque el conocimiento pertenece a la humanidad.",
+                author: "Louis Pasteur"
+            },
+            {
+                quote: "Educación es lo que queda después de olvidar lo que se ha aprendido en la escuela.",
+                author: "Albert Einstein"
+            },
+            {
+                quote: "La investigación es ver lo que todos han visto y pensar lo que nadie ha pensado.",
+                author: "Albert Szent-Györgyi"
+            },
+            {
+                quote: "Un maestro afecta la eternidad; nunca se sabe dónde termina su influencia.",
+                author: "Henry Adams"
+            },
+            {
+                quote: "La mejor forma de predecir el futuro es inventándolo.",
+                author: "Alan Kay"
+            }
+        ];
+
+        // =============================================================================
+        // CLIMA LOCAL
+        // =============================================================================
         function updateWeather() {
             const weatherElement = document.getElementById('weatherInfo');
             if (!weatherElement) return;
+
             const getWeatherIcon = (code) => {
                 if (code === 0) return '☀️';
                 if ([1, 2, 3].includes(code)) return '⛅';
@@ -630,122 +623,163 @@
                 if ([95, 96, 99].includes(code)) return '🌩️';
                 return '🌤️';
             };
+
             const showWeather = (lat, lon) => {
                 const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
                 fetch(url)
-                    .then(response => { if (!response.ok) throw new Error('Err'); return response.json(); })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Weather response not ok');
+                        return response.json();
+                    })
                     .then(data => {
                         if (data && data.current_weather) {
                             const temp = Math.round(data.current_weather.temperature);
                             const icon = getWeatherIcon(data.current_weather.weathercode);
-                            weatherElement.innerHTML = `<span class="text-2xl weather-icon">${icon}</span><span class="font-semibold">Durango, Dgo. ${temp}°C</span>`;
+                            weatherElement.innerHTML = `
+                                <span class="text-2xl weather-icon">${icon}</span>
+                                <span class="font-semibold">Durango, Dgo. ${temp}°C</span>`;
                         }
                     })
-                    .catch(e => console.error(e));
+                    .catch(error => {
+                        console.error("Error fetching weather:", error);
+                    });
             };
+
             const durangoLat = 24.0277;
             const durangoLon = -104.653;
+
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (p) => showWeather(p.coords.latitude, p.coords.longitude),
-                    (e) => showWeather(durangoLat, durangoLon)
+                    (position) => {
+                        showWeather(position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                        console.warn(`Geolocation error (${error.code}): ${error.message}`);
+                        showWeather(durangoLat, durangoLon); 
+                    }
                 );
-            } else { showWeather(durangoLat, durangoLon); }
+            } else {
+                showWeather(durangoLat, durangoLon); 
+            }
         }
 
-        // Quotes
-        const inspirationalQuotes = [
-            { quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.", author: "Nelson Mandela" },
-            { quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.", author: "Carl Sagan" },
-            { quote: "La educación no es preparación para la vida; la educación es la vida misma.", author: "John Dewey" },
-            { quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.", author: "Albert Einstein" },
-            { quote: "Las persona exitosas crean empresas. Las personas más exitosas crean países. Las personas más exitosas crean religiones", author: "Qi-Lu" },
-            { quote: "Los fundadores más exitosos no se proponen crear empresas, se proponen crea una religión y luego se dan cuenta que crear una empresa es la manera más fácil de hacerlo.", author: "Qi-Lu" },
-            { quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.", author: "Platón" }
-        ];
+        // =============================================================================
+        // RELOJ EN TIEMPO REAL
+        // =============================================================================
+        function startClock() {
+            function updateClock() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+
+        // =============================================================================
+        // FECHA ACTUAL
+        // =============================================================================
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateString = now.toLocaleDateString('es-MX', options);
+            document.getElementById('currentDate').textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+        }
+
+        // =============================================================================
+        // AÑO DEL CALENDARIO
+        // =============================================================================
+        function updateCalendarYear() {
+            const calendarElement = document.getElementById('calendar-year-text');
+            if (calendarElement) {
+                const currentYear = new Date().getFullYear();
+                calendarElement.textContent = `Calendario Institucional ${currentYear}`;
+            }
+        }
+
+        // =============================================================================
+        // AÑO DEL COPYRIGHT
+        // =============================================================================
+        function updateCopyrightYear() {
+            const yearSpan = document.getElementById('copyright-year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+        }
+
+        // =============================================================================
+        // FRASES INSPIRACIONALES (ROTATIVAS)
+        // =============================================================================
         function rotateQuotes() {
-            const qc = document.getElementById('quote-container');
-            if (!qc) return;
-            const q = inspirationalQuotes[Math.floor(Math.random() * inspirationalQuotes.length)];
-            qc.style.opacity = 0;
+            const quoteContainer = document.getElementById('quote-container');
+            if (!quoteContainer) return;
+
+            const randomIndex = Math.floor(Math.random() * inspirationalQuotes.length);
+            const quote = inspirationalQuotes[randomIndex];
+
+            // Fade out
+            quoteContainer.style.opacity = 0;
+
             setTimeout(() => {
-                qc.innerHTML = `<p class="text-base sm:text-lg italic text-gray-700 dark:text-gray-300 leading-relaxed">"${q.quote}"</p><p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 text-right mt-2">- ${q.author}</p>`;
-                qc.style.opacity = 1;
+                quoteContainer.innerHTML = `
+                    <p class="text-base sm:text-lg italic text-gray-700 leading-relaxed">"${quote.quote}"</p>
+                    <p class="text-sm sm:text-base text-gray-600 text-right mt-2">- ${quote.author}</p>`;
+                // Fade in
+                quoteContainer.style.opacity = 1;
             }, 500);
         }
-
-        // Banner
+        
+        // =============================================================================
+        // LÓGICA DEL BANNER DE ANUNCIOS
+        // =============================================================================
         const announcementBanner = document.getElementById('announcement-banner');
         if (announcementBanner) {
             let bannerHidden = false;
+
             const hideBanner = () => {
                 if (!bannerHidden) {
                     bannerHidden = true;
                     announcementBanner.classList.add('hidden-banner');
+                    // Limpiar listeners para evitar fugas de memoria
                     window.removeEventListener('scroll', hideBanner);
+                    window.removeEventListener('click', hideBanner);
+                    clearTimeout(bannerTimeout);
                 }
             };
-            setTimeout(hideBanner, 10000);
+            
+            // 👇 CAMBIA EL TIEMPO (en milisegundos). 10000ms = 10 segundos. (Línea ~669)
+            const bannerTimeout = setTimeout(hideBanner, 10000);
+            
+            // Ocultar al hacer scroll o clic en cualquier lugar
             window.addEventListener('scroll', hideBanner, { once: true });
-            announcementBanner.addEventListener('click', hideBanner);
+            window.addEventListener('click', hideBanner, { once: true });
         }
 
-        // Dark Mode Toggle Logic
-        var themeToggleDarkIconD = document.getElementById('theme-toggle-dark-icon-d');
-        var themeToggleLightIconD = document.getElementById('theme-toggle-light-icon-d');
-        var themeToggleDarkIconM = document.getElementById('theme-toggle-dark-icon-m');
-        var themeToggleLightIconM = document.getElementById('theme-toggle-light-icon-m');
-
-        function updateThemeIcons() {
-            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                themeToggleLightIconD.classList.remove('hidden');
-                themeToggleDarkIconD.classList.add('hidden');
-                themeToggleLightIconM.classList.remove('hidden');
-                themeToggleDarkIconM.classList.add('hidden');
-                document.documentElement.classList.add('dark');
-            } else {
-                themeToggleLightIconD.classList.add('hidden');
-                themeToggleDarkIconD.classList.remove('hidden');
-                themeToggleLightIconM.classList.add('hidden');
-                themeToggleDarkIconM.classList.remove('hidden');
-                document.documentElement.classList.remove('dark');
-            }
-        }
-
-        // Initial check
-        updateThemeIcons();
-
-        var themeToggleBtnD = document.getElementById('theme-toggle-desktop');
-        var themeToggleBtnM = document.getElementById('theme-toggle-mobile');
-
-        function toggleTheme() {
-            if (localStorage.getItem('color-theme')) {
-                if (localStorage.getItem('color-theme') === 'light') {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                }
-            } else {
-                if (document.documentElement.classList.contains('dark')) {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                } else {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                }
-            }
-            updateThemeIcons();
-        }
-
-        themeToggleBtnD.addEventListener('click', toggleTheme);
-        themeToggleBtnM.addEventListener('click', toggleTheme);
-
+        // =============================================================================
+        // INICIALIZACIÓN
+        // =============================================================================
         window.addEventListener('load', function() {
-            startClock(); updateDate(); updateWeather(); updateYears();
-            rotateQuotes(); setInterval(rotateQuotes, 15000);
+            startClock();
+            updateDate();
+            updateWeather();
+            rotateQuotes(); // Initial quote
+            setInterval(rotateQuotes, 30000); // Change quote every 30 seconds
+            updateCalendarYear();
+            updateCopyrightYear();
+
+            console.log('%c Portal ITD - Listo ', 
+                'background: #1e3a8a; color: white; font-size: 16px; padding: 8px; border-radius: 4px;'
+            );
         });
     </script>
+
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>
