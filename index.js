@@ -1,7 +1,7 @@
 
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
-// Versión: 4.0.0 - Full Stable (Búsqueda Dual Nombre/CURP)
+// Versión: 4.1.0 - Corrección de Detección de Duplicados
 // =============================================================================
 
 const COURSES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv';
@@ -160,10 +160,7 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
 
     // Función unificada para verificar registros
     const triggerCheck = async (curp, name) => {
-        // Validación mínima antes de consultar
         if (curp.length < 10 && name.length < 5) return;
-        
-        // Evitar consultas repetidas con los mismos datos
         if (curp === lastChecked.current.curp && name === lastChecked.current.name) return;
 
         setIsChecking(true);
@@ -189,23 +186,32 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
         }
     }, [formData.curp]);
 
-    // Check al salir del campo Nombre (onBlur)
+    // Check inteligente al escribir/seleccionar Nombre
+    const handleNameChange = (e) => {
+        const val = e.target.value.toUpperCase();
+        
+        // 1. Buscar si coincide con un maestro de la lista
+        const teacher = teachers.find(t => t.nombreCompleto === val);
+        
+        if (teacher) {
+            // Si seleccionó un maestro de la lista:
+            setFormData({
+                ...formData,
+                fullName: teacher.nombreCompleto,
+                curp: teacher.curp || formData.curp,
+                email: teacher.email || formData.email
+            });
+            // IMPORTANTE: Disparar el chequeo inmediatamente con los datos del maestro
+            triggerCheck(teacher.curp || '', teacher.nombreCompleto);
+        } else {
+            // Si solo está escribiendo
+            setFormData({...formData, fullName: val});
+        }
+    };
+
     const handleNameBlur = () => {
         if(formData.fullName.length > 5) {
             triggerCheck(formData.curp, formData.fullName);
-        }
-        handleTeacherSelect(); // Intentar autocompletar si coincide exacto
-    };
-
-    const handleTeacherSelect = () => {
-        const val = formData.fullName;
-        const teacher = teachers.find(t => t.nombreCompleto === val);
-        if(teacher) {
-            setFormData(prev => ({
-                ...prev,
-                curp: teacher.curp || prev.curp,
-                email: teacher.email || prev.email
-            }));
         }
     };
 
@@ -259,7 +265,7 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                         React.createElement('input', { 
                             className: 'w-full border p-2 rounded', 
                             value: formData.fullName, 
-                            onChange: e => setFormData({...formData, fullName: e.target.value.toUpperCase()}),
+                            onChange: handleNameChange,
                             onBlur: handleNameBlur,
                             list: 'teachers-list',
                             placeholder: 'Apellido Paterno, Materno y Nombres'
