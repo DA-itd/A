@@ -1,7 +1,7 @@
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
-// Versión: 2.0.1 - Robustez en campo "type"
-// Última actualización: Noviembre 2025
+// Versión: 2.0.2 - Fix response parsing
+// Última actualización: Enero 2025
 // =============================================================================
 
 // =============================================================================
@@ -178,7 +178,9 @@ const submitRegistration = async (submission) => {
 
         const result = await response.json();
         if (result?.success) {
-            return result.data;
+            // CORRECCIÓN: Devolver el objeto result completo.
+            // El backend devuelve { success: true, results: [...], emailSent: ... }
+            return result; 
         } else {
             throw new Error(result.message || 'Error en el servidor');
         }
@@ -306,6 +308,7 @@ const App = () => {
             };
 
             const result = await submitRegistration(submissionData);
+            // Ahora result contiene { success, results, emailSent }
             const registrationResultsArray = result.results || [];
 
             const augmentedResult = registrationResultsArray.map((reg) => {
