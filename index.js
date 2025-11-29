@@ -1,83 +1,20 @@
 
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
-// Versión: 4.1.0 - Corrección de Detección de Duplicados
+// Versión: 4.2.0 - Validación Forzada en Next
 // =============================================================================
 
 const COURSES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv';
 const TEACHERS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv';
 const MOCK_DEPARTMENTS = ["DEPARTAMENTO DE SISTEMAS Y COMPUTACION", "DEPARTAMENTO DE INGENIERÍA ELÉCTRICA Y ELECTRÓNICA", "DEPARTAMENTO DE CIENCIAS ECONOMICO-ADMINISTRATIVAS", "DEPARTAMENTO DE INGENIERÍA QUÍMICA-BIOQUÍMICA", "DEPARTAMENTO DE CIENCIAS DE LA TIERRA", "DEPARTAMENTO DE CIENCIAS BASICAS", "DEPARTAMENTO DE METAL-MECÁNICA", "DEPARTAMENTO DE INGENIERÍA INDUSTRIAL", "DIVISION DE ESTUDIOS DE POSGRADO E INVESTIGACION", "ADMINISTRATIVO", "EXTERNO"];
 
-// =============================================================================
-// UTILIDADES CSV
-// =============================================================================
-const parseCSVLine = (line) => { 
-    const result = []; 
-    let current = ''; 
-    let inQuotes = false; 
-    for (let i = 0; i < line.length; i++) { 
-        const char = line[i]; 
-        if (char === '"') { 
-            if (inQuotes && line[i + 1] === '"') { current += '"'; i++; } 
-            else { inQuotes = !inQuotes; } 
-        } else if (char === ',' && !inQuotes) { 
-            result.push(current.trim()); 
-            current = ''; 
-        } else { 
-            current += char; 
-        } 
-    } 
-    result.push(current.trim()); 
-    return result; 
-};
+const parseCSVLine = (line) => { const result = []; let current = ''; let inQuotes = false; for (let i = 0; i < line.length; i++) { const char = line[i]; if (char === '"') { if (inQuotes && line[i + 1] === '"') { current += '"'; i++; } else { inQuotes = !inQuotes; } } else if (char === ',' && !inQuotes) { result.push(current.trim()); current = ''; } else { current += char; } } result.push(current.trim()); return result; };
+const cleanCSVValue = (val) => { let cleaned = val.trim(); if (cleaned.startsWith('"') && cleaned.endsWith('"')) cleaned = cleaned.substring(1, cleaned.length - 1).replace(/""/g, '"'); return cleaned; };
 
-const cleanCSVValue = (val) => { 
-    let cleaned = val.trim(); 
-    if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
-        cleaned = cleaned.substring(1, cleaned.length - 1).replace(/""/g, '"'); 
-    }
-    return cleaned; 
-};
-
-// =============================================================================
-// SERVICIOS API
-// =============================================================================
-const getTeachers = async () => { 
-    try { 
-        const response = await fetch(`${TEACHERS_CSV_URL}&_=${Date.now()}`); 
-        if (!response.ok) throw new Error('Error'); 
-        const csvText = await response.text(); 
-        return csvText.trim().split(/\r?\n/).slice(1).map(line => { 
-            const v = parseCSVLine(line); 
-            return v.length < 3 ? null : { nombreCompleto: cleanCSVValue(v[0]), curp: cleanCSVValue(v[1]), email: cleanCSVValue(v[2]) }; 
-        }).filter(Boolean); 
-    } catch (e) { return []; } 
-};
-
-const getCourses = async () => { 
-    try { 
-        const response = await fetch(`${COURSES_CSV_URL}&_=${Date.now()}`); 
-        if (!response.ok) throw new Error('Error'); 
-        const csvText = await response.text(); 
-        return csvText.trim().split(/\r?\n/).slice(1).map(line => { 
-            const v = parseCSVLine(line); 
-            return v.length < 8 ? null : { 
-                id: cleanCSVValue(v[0]), 
-                name: cleanCSVValue(v[1]), 
-                dates: cleanCSVValue(v[2]), 
-                period: cleanCSVValue(v[3]), 
-                hours: parseInt(cleanCSVValue(v[4])) || 30, 
-                location: cleanCSVValue(v[5]), 
-                schedule: cleanCSVValue(v[6]), 
-                type: cleanCSVValue(v[7]) || 'No especificado' 
-            }; 
-        }).filter(Boolean); 
-    } catch (e) { return []; } 
-};
-
+const getTeachers = async () => { try { const response = await fetch(`${TEACHERS_CSV_URL}&_=${Date.now()}`); if (!response.ok) throw new Error('Error'); const csvText = await response.text(); return csvText.trim().split(/\r?\n/).slice(1).map(line => { const v = parseCSVLine(line); return v.length < 3 ? null : { nombreCompleto: cleanCSVValue(v[0]), curp: cleanCSVValue(v[1]), email: cleanCSVValue(v[2]) }; }).filter(Boolean); } catch (e) { return []; } };
+const getCourses = async () => { try { const response = await fetch(`${COURSES_CSV_URL}&_=${Date.now()}`); if (!response.ok) throw new Error('Error'); const csvText = await response.text(); return csvText.trim().split(/\r?\n/).slice(1).map(line => { const v = parseCSVLine(line); return v.length < 8 ? null : { id: cleanCSVValue(v[0]), name: cleanCSVValue(v[1]), dates: cleanCSVValue(v[2]), period: cleanCSVValue(v[3]), hours: parseInt(cleanCSVValue(v[4])) || 30, location: cleanCSVValue(v[5]), schedule: cleanCSVValue(v[6]), type: cleanCSVValue(v[7]) || 'No especificado' }; }).filter(Boolean); } catch (e) { return []; } };
 const getDepartments = () => Promise.resolve(MOCK_DEPARTMENTS);
 
-// Búsqueda Inteligente (CURP + Nombre)
 const checkRegistration = async (curp, fullName) => {
     try {
         const url = new URL(window.CONFIG.APPS_SCRIPT_URL);
@@ -85,7 +22,6 @@ const checkRegistration = async (curp, fullName) => {
         url.searchParams.append('curp', curp.toUpperCase());
         url.searchParams.append('fullName', fullName.toUpperCase());
         url.searchParams.append('_', Date.now());
-        
         const res = await fetch(url, { mode: 'cors' });
         const json = await res.json();
         return json?.success ? json.data.registeredCourses : [];
@@ -158,11 +94,9 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
     const [deletingId, setDeletingId] = useState(null);
     const lastChecked = useRef({ curp: '', name: '' });
 
-    // Función unificada para verificar registros
     const triggerCheck = async (curp, name) => {
-        if (curp.length < 10 && name.length < 5) return;
-        if (curp === lastChecked.current.curp && name === lastChecked.current.name) return;
-
+        if (curp.length < 10 && name.length < 5) return false;
+        
         setIsChecking(true);
         lastChecked.current = { curp, name };
         
@@ -174,55 +108,57 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                     setExistingCourses(found);
                     setOriginalSelectedCourses(found); 
                     setIsModalOpen(true);
+                    return true; // Encontró duplicados
                 }
             }
+            return false; // No encontró duplicados
         } finally { setIsChecking(false); }
     };
 
-    // Check automático al completar CURP
+    // Al completar CURP (check pasivo)
     useEffect(() => {
-        if(formData.curp.length === 18) {
+        if(formData.curp.length === 18 && formData.curp !== lastChecked.current.curp) {
             triggerCheck(formData.curp, formData.fullName);
         }
     }, [formData.curp]);
 
-    // Check inteligente al escribir/seleccionar Nombre
     const handleNameChange = (e) => {
         const val = e.target.value.toUpperCase();
-        
-        // 1. Buscar si coincide con un maestro de la lista
         const teacher = teachers.find(t => t.nombreCompleto === val);
-        
         if (teacher) {
-            // Si seleccionó un maestro de la lista:
-            setFormData({
-                ...formData,
-                fullName: teacher.nombreCompleto,
-                curp: teacher.curp || formData.curp,
-                email: teacher.email || formData.email
-            });
-            // IMPORTANTE: Disparar el chequeo inmediatamente con los datos del maestro
+            setFormData({ ...formData, fullName: teacher.nombreCompleto, curp: teacher.curp || formData.curp, email: teacher.email || formData.email });
+            // Check inmediato si seleccionó docente
             triggerCheck(teacher.curp || '', teacher.nombreCompleto);
         } else {
-            // Si solo está escribiendo
             setFormData({...formData, fullName: val});
         }
     };
 
     const handleNameBlur = () => {
-        if(formData.fullName.length > 5) {
+        if(formData.fullName.length > 5 && formData.fullName !== lastChecked.current.name) {
             triggerCheck(formData.curp, formData.fullName);
         }
+    };
+
+    // Función de Siguiente con validación forzada
+    const handleNext = async () => {
+        if (!validate()) return;
+        
+        setIsChecking(true);
+        // Hacemos un check final antes de pasar
+        const hasDuplicates = await triggerCheck(formData.curp, formData.fullName);
+        
+        if (!hasDuplicates) {
+            onNext();
+        }
+        // Si hay duplicados, triggerCheck ya abrió el modal
     };
 
     const handleDelete = async (cid) => {
         setDeletingId(cid);
         try {
             const course = existingCourses.find(c => c.id === cid);
-            await cancelSingleCourse({ 
-                curp: formData.curp, fullName: formData.fullName, email: formData.email, 
-                courseToCancel: { id: course.id, name: course.name } 
-            });
+            await cancelSingleCourse({ curp: formData.curp, fullName: formData.fullName, email: formData.email, courseToCancel: { id: course.id, name: course.name } });
             const updated = existingCourses.filter(c => c.id !== cid);
             setExistingCourses(updated);
             setOriginalSelectedCourses(updated);
@@ -270,39 +206,24 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                             list: 'teachers-list',
                             placeholder: 'Apellido Paterno, Materno y Nombres'
                         }),
-                        isChecking && React.createElement('span', { className: 'absolute right-2 top-2 text-xs text-blue-500 animate-pulse' }, 'Buscando...')
+                        isChecking && React.createElement('span', { className: 'absolute right-2 top-2 text-xs text-blue-500 animate-pulse' }, 'Verificando...')
                     ),
-                    React.createElement('datalist', { id: 'teachers-list' }, 
-                        teachers.map(t => React.createElement('option', { value: t.nombreCompleto }))
-                    ),
+                    React.createElement('datalist', { id: 'teachers-list' }, teachers.map(t => React.createElement('option', { value: t.nombreCompleto }))),
                     errors.fullName && React.createElement('p', { className: 'text-red-500 text-xs' }, errors.fullName)
                 ),
                 React.createElement('div', null,
                     React.createElement('label', { className: 'block text-sm font-medium' }, 'CURP *'),
-                    React.createElement('input', { 
-                        className: 'w-full border p-2 rounded', 
-                        value: formData.curp, 
-                        maxLength: 18,
-                        onChange: e => setFormData({...formData, curp: e.target.value.toUpperCase()}) 
-                    }),
+                    React.createElement('input', { className: 'w-full border p-2 rounded', value: formData.curp, maxLength: 18, onChange: e => setFormData({...formData, curp: e.target.value.toUpperCase()}) }),
                     errors.curp && React.createElement('p', { className: 'text-red-500 text-xs' }, errors.curp)
                 ),
                 React.createElement('div', null,
                     React.createElement('label', { className: 'block text-sm font-medium' }, 'Email Institucional *'),
-                    React.createElement('input', { 
-                        className: 'w-full border p-2 rounded', type: 'email',
-                        value: formData.email, 
-                        onChange: e => setFormData({...formData, email: e.target.value.toLowerCase()}) 
-                    }),
+                    React.createElement('input', { className: 'w-full border p-2 rounded', type: 'email', value: formData.email, onChange: e => setFormData({...formData, email: e.target.value.toLowerCase()}) }),
                     errors.email && React.createElement('p', { className: 'text-red-500 text-xs' }, errors.email)
                 ),
                 React.createElement('div', null,
                     React.createElement('label', { className: 'block text-sm font-medium' }, 'Departamento *'),
-                    React.createElement('select', { 
-                        className: 'w-full border p-2 rounded', 
-                        value: formData.department, 
-                        onChange: e => setFormData({...formData, department: e.target.value}) 
-                    },
+                    React.createElement('select', { className: 'w-full border p-2 rounded', value: formData.department, onChange: e => setFormData({...formData, department: e.target.value}) },
                         React.createElement('option', { value: '' }, 'Seleccione...'),
                         departments.map(d => React.createElement('option', { key: d, value: d }, d))
                     ),
@@ -310,9 +231,10 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                 )
             ),
             React.createElement('button', {
-                className: 'mt-6 bg-blue-700 text-white px-6 py-2 rounded font-bold w-full md:w-auto',
-                onClick: () => { if(validate()) onNext(); }
-            }, 'Siguiente')
+                className: `mt-6 text-white px-6 py-2 rounded font-bold w-full md:w-auto ${isChecking ? 'bg-gray-400' : 'bg-blue-700 hover:bg-blue-800'}`,
+                onClick: handleNext,
+                disabled: isChecking
+            }, isChecking ? 'Verificando...' : 'Siguiente')
         )
     );
 };
