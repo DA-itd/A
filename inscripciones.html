@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -200,7 +199,6 @@
                 let inferredGender = 'Mujer';
                 const curp = teacher.curp || '';
                 
-                // Prioridad: Dato del CSV > Inferencia por CURP > Default Mujer
                 if (teacher.gender) {
                     inferredGender = teacher.gender;
                 } else if (curp.length >= 11) {
@@ -272,7 +270,7 @@
                             </div>
                         </div>
                         <div className="mt-8 flex justify-end">
-                            <button type="submit" className="bg-blue-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-900 transition-colors">Siguiente ➝</button>
+                            <button type="submit" className="bg-blue-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-900 transition-colors">Siguiente ➜</button>
                         </div>
                     </form>
                 </div>
@@ -282,16 +280,16 @@
         const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, onNext, onBack }) => {
             const [searchTerm, setSearchTerm] = useState('');
 
-            // VALIDACIÓN DE TRASLAPE
+            // ✅ VALIDACIÓN MEJORADA DE TRASLAPE
             const checkOverlap = (newCourse) => {
-                const newDates = newCourse.dates.trim().toUpperCase();
-                const newSchedule = newCourse.schedule.trim().toUpperCase();
+                const newDates = (newCourse.dates || '').trim().toUpperCase();
+                const newSchedule = (newCourse.schedule || '').trim().toUpperCase();
 
                 for (const existing of selectedCourses) {
                     if (existing.id === newCourse.id) continue;
                     
-                    const exDates = existing.dates.trim().toUpperCase();
-                    const exSchedule = existing.schedule.trim().toUpperCase();
+                    const exDates = (existing.dates || '').trim().toUpperCase();
+                    const exSchedule = (existing.schedule || '').trim().toUpperCase();
 
                     // Criterio estricto: Mismas fechas Y mismo horario
                     if (exDates === newDates && exSchedule === newSchedule) {
@@ -307,13 +305,13 @@
                     setSelectedCourses(prev => prev.filter(c => c.id !== course.id));
                 } else {
                     if (selectedCourses.length >= 3) {
-                        alert("Máximo 3 cursos permitidos.");
+                        alert("⚠️ Máximo 3 cursos permitidos.");
                         return;
                     }
                     
                     const { overlap, conflict } = checkOverlap(course);
                     if (overlap) {
-                        alert(`⚠️ EMPALME DE HORARIO DETECTADO:\n\nNo puedes inscribirte a "${course.name}" porque tiene el mismo horario que "${conflict}".`);
+                        alert(`⚠️ EMPALME DE HORARIO DETECTADO:\n\nNo puedes inscribirte a "${course.name}" porque tiene el mismo horario que "${conflict}".\n\n📅 Fechas: ${course.dates}\n⏰ Horario: ${course.schedule}`);
                         return;
                     }
 
@@ -332,13 +330,12 @@
             return (
                 <div className="animate-fadeIn max-w-6xl mx-auto">
                     <h2 className="text-xl font-bold text-slate-800 mb-2">Selección de Cursos</h2>
-                    <p className="text-sm text-gray-600 mb-4">Seleccionados: {selectedCourses.length} de 3.</p>
+                    <p className="text-sm text-gray-600 mb-4">Seleccionados: {selectedCourses.length} de 3. ⚠️ No se permiten cursos con mismo horario y fecha.</p>
                     <input type="text" placeholder="Buscar curso..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full px-4 py-2 mb-6 border rounded-md" />
                     
                     {Object.keys(groupedCourses).length === 0 && <p className="text-center">No hay cursos.</p>}
 
                     {Object.entries(groupedCourses).map(([period, data]) => {
-                        // Colores por periodo
                         const isPeriod1 = period.toUpperCase().includes('PERIODO 1') || period.toUpperCase().includes('ENERO') || period.toUpperCase().includes('JUNIO');
                         const headerClass = isPeriod1 ? 'text-teal-800 border-teal-300' : 'text-indigo-800 border-indigo-300';
                         const headerIcon = isPeriod1 ? '☀️' : '🍂';
@@ -423,101 +420,211 @@
             );
         };
 
-        const FinalStep = ({ result, emailSent }) => (
+        const FinalStep = ({ result, emailSent, error }) => (
             <div className="animate-fadeIn max-w-2xl mx-auto bg-white p-10 rounded-xl shadow-xl text-center border-t-4 border-green-500">
-                <div className="text-6xl mb-4">🎉</div>
-                <h2 className="text-3xl font-bold text-slate-800 mb-2">¡Inscripción Exitosa!</h2>
-                <p className="text-slate-600 mb-8">Tus cursos han sido registrados correctamente.</p>
-                <div className="bg-slate-50 p-6 rounded text-left mb-6">
-                    <h3 className="font-bold border-b pb-2 mb-2">Folios Generados:</h3>
-                    {result.map((r, i) => (
-                        <div key={i} className="flex justify-between py-1 border-b border-gray-100 last:border-0">
-                            <span className="text-sm">Curso ID: {r.registrationId}</span>
-                            <span className="font-mono font-bold text-blue-700">{r.folio}</span>
+                {!error ? (
+                    <>
+                        <div className="text-6xl mb-4">🎉</div>
+                        <h2 className="text-3xl font-bold text-slate-800 mb-2">¡Inscripción Exitosa!</h2>
+                        <p className="text-slate-600 mb-8">Tus cursos han sido registrados correctamente.</p>
+                        <div className="bg-slate-50 p-6 rounded text-left mb-6">
+                            <h3 className="font-bold border-b pb-2 mb-2">Folios Generados:</h3>
+                            {result.map((r, i) => (
+                                <div key={i} className="flex justify-between py-1 border-b border-gray-100 last:border-0">
+                                    <span className="text-sm">Curso ID: {r.registrationId}</span>
+                                    <span className="font-mono font-bold text-blue-700">{r.folio}</span>
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
-                {!emailSent && <div className="bg-red-100 text-red-700 p-4 rounded mb-6 text-sm">⚠️ No se pudo enviar el correo. Toma captura de esta pantalla.</div>}
-                <a href="index.html" className="bg-blue-800 text-white font-bold py-3 px-8 rounded hover:bg-blue-900">Volver al Inicio</a>
-            </div>
-        );
+                        {!emailSent && <div className="bg-red-100 text-red-700 p-4 rounded mb-6 text-sm">⚠️ No se pudo enviar el correo. Toma captura de esta pantalla.</div>}// ======================================================
+// FUNCIÓN DE INSCRIPCIÓN CON VALIDACIÓN DE EMPALMES
+// ======================================================
 
-        const App = () => {
-            const [step, setStep] = useState(1);
-            const [formData, setFormData] = useState({ fullName: '', curp: '', email: '', gender: 'Mujer', department: '' });
-            const [selectedCourses, setSelectedCourses] = useState([]);
-            const [allCourses, setAllCourses] = useState([]);
-            const [teachers, setTeachers] = useState([]);
-            const [result, setResult] = useState([]);
-            const [emailSent, setEmailSent] = useState(true);
-            const [error, setError] = useState(null);
+function processEnrollment_v12(data) {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) {
+    return { success: false, message: "El servidor está ocupado. Intente de nuevo en unos segundos." };
+  }
 
-            useEffect(() => {
-                Promise.all([
-                    fetch(CONFIG.COURSES_CSV_URL).then(r => r.text()),
-                    fetch(CONFIG.TEACHERS_CSV_URL).then(r => r.text())
-                ]).then(([cText, tText]) => {
-                    const cRows = parseCSV(cText);
-                    setAllCourses(cRows.map(r => ({ 
-                        id: cleanStr(r[0]), 
-                        name: cleanStr(r[1]), 
-                        dates: cleanStr(r[2]), 
-                        period: cleanStr(r[3]), 
-                        location: cleanStr(r[5]), 
-                        schedule: cleanStr(r[6]), 
-                        type: cleanStr(r[7]) 
-                    })));
-                    
-                    const tRows = parseCSV(tText);
-                    setTeachers(tRows.map(r => ({ 
-                        name: cleanStr(r[0]), 
-                        curp: cleanStr(r[1]), 
-                        email: cleanStr(r[2]), 
-                        dept: cleanStr(r[3]), 
-                        gender: cleanStr(r[5]) 
-                    })));
-                }).catch(() => setError("Error cargando datos."));
-            }, []);
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let sheet = getSheetFlexible(ss, 'Inscripciones');
+    
+    if (!sheet) {
+      sheet = ss.insertSheet('Inscripciones');
+      sheet.appendRow([
+        'Folio personal', 'Timestamp', 'NombreCompleto', 'Curp', 'Email', 'Genero', 
+        'Departamento', 'Id_Curso', 'Curso', 'FechaCurso', 'Lugar', 'Horario', 
+        'Horas', 'tipo', 'Estado', 'Encuesta', 'Asistencia Aprobada'
+      ]);
+    }
 
-            const handleSubmit = async () => {
-                setError(null);
-                try {
-                    const payload = {
-                        action: 'enrollStudent',
-                        ...formData,
-                        DepartamentoSeleccionado: formData.department,
-                        selectedCourses: selectedCourses.map(c => ({ 
-                            id: c.id, name: c.name, dates: c.dates, schedule: c.schedule, location: c.location, type: c.type 
-                        }))
-                    };
-                    const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
-                        method: 'POST', body: JSON.stringify(payload)
-                    });
-                    const json = await res.json();
-                    if (json.success) {
-                        setResult(json.results);
-                        setEmailSent(json.emailSent);
-                        setStep(4);
-                    } else { throw new Error(json.message); }
-                } catch (e) { setError(e.message); setStep(3); }
-            };
+    const sheetData = sheet.getDataRange().getValues();
+    const curpToUpdate = String(data.curp).toUpperCase().trim();
+    const currentYear = new Date().getFullYear(); 
+    
+    const cancelledCoursesDetails = [];
 
-            return (
-                <div className="container mx-auto px-4 py-8">
-                    <a href="index.html" className="text-blue-600 hover:underline mb-6 inline-block">← Volver al Portal</a>
-                    <StepIndicator currentStep={step} />
-                    {error && <div className="bg-red-100 text-red-700 p-4 mb-4 rounded font-bold">Error: {error}</div>}
-                    
-                    {step === 1 && <InfoForm formData={formData} setFormData={setFormData} departments={DEPARTMENTS} teachers={teachers} onNext={() => setStep(2)} />}
-                    {step === 2 && <Step2CourseSelection courses={allCourses} selectedCourses={selectedCourses} setSelectedCourses={setSelectedCourses} onNext={() => setStep(3)} onBack={() => setStep(1)} />}
-                    {step === 3 && <Confirmation formData={formData} courses={selectedCourses} onBack={() => setStep(2)} onSubmit={handleSubmit} />}
-                    {step === 4 && <FinalStep result={result} emailSent={emailSent} />}
-                </div>
-            );
+    // ✅ PASO 1: Obtener cursos actuales ACTIVOS del usuario
+    const currentActiveCourses = [];
+    for (let i = 1; i < sheetData.length; i++) {
+      const rowCurp = String(sheetData[i][3]).toUpperCase().trim();
+      const rowStatus = String(sheetData[i][14]).toUpperCase().trim();
+      
+      if (rowCurp === curpToUpdate && rowStatus === 'ACTIVO') {
+        currentActiveCourses.push({
+          courseId: String(sheetData[i][7]).trim(),
+          courseName: String(sheetData[i][8]).trim(),
+          dates: String(sheetData[i][9]).trim().toUpperCase(),
+          schedule: String(sheetData[i][11]).trim().toUpperCase(),
+          folio: String(sheetData[i][0]),
+          rowIndex: i
+        });
+      }
+    }
+
+    // ✅ PASO 2: Validar empalmes ANTES de hacer cambios
+    for (const newCourse of data.selectedCourses) {
+      const newDates = String(newCourse.dates || '').trim().toUpperCase();
+      const newSchedule = String(newCourse.schedule || '').trim().toUpperCase();
+      
+      for (const existing of currentActiveCourses) {
+        // Omitir si es el mismo curso (caso de re-inscripción)
+        if (existing.courseId === String(newCourse.id).trim()) continue;
+        
+        // ⚠️ VALIDACIÓN ESTRICTA: Mismas fechas Y mismo horario
+        if (existing.dates === newDates && existing.schedule === newSchedule) {
+          return {
+            success: false,
+            message: `⚠️ EMPALME DE HORARIO DETECTADO:\n\nNo puedes inscribirte a "${newCourse.name}" porque tiene el mismo horario que "${existing.courseName}".\n\n📅 Fechas: ${newDates}\n⏰ Horario: ${newSchedule}`,
+            conflictDetails: {
+              newCourse: newCourse.name,
+              existingCourse: existing.courseName,
+              dates: newDates,
+              schedule: newSchedule
+            }
+          };
+        }
+      }
+    }
+
+    // ✅ PASO 3: Cancelación de cursos no seleccionados
+    if (data.previousRegistrationIds && data.previousRegistrationIds.length > 0) {
+      for (const existing of currentActiveCourses) {
+        const isKept = data.selectedCourses.some(c => String(c.id).trim() === existing.courseId);
+        
+        if (!isKept) {
+          sheet.getRange(existing.rowIndex + 1, 15).setValue('Inactivo');
+          cancelledCoursesDetails.push({ 
+            name: existing.courseName, 
+            folio: existing.folio 
+          });
+        }
+      }
+    }
+
+    if (cancelledCoursesDetails.length > 0) {
+      try {
+        sendCancellationEmailHTML(data.email, data.fullName, cancelledCoursesDetails);
+      } catch(e) { console.error("Error enviando correo cancelación", e); }
+    }
+
+    if (data.selectedCourses.length === 0) return { success: true, results: [] };
+
+    // ✅ PASO 4: Verificar cursos ya inscritos ACTIVOS
+    const alreadyEnrolledCourses = currentActiveCourses.map(c => c.courseId);
+
+    // ✅ PASO 5: Mapeo de slots ocupados
+    const occupiedSlotsByCourse = {}; 
+    for (let i = 1; i < sheetData.length; i++) {
+      const status = String(sheetData[i][14]).toUpperCase().trim();
+      if (status === 'ACTIVO') {
+        const cId = String(sheetData[i][7]).trim();
+        const folio = String(sheetData[i][0]);
+        if (!occupiedSlotsByCourse[cId]) occupiedSlotsByCourse[cId] = new Set();
+        const parts = folio.split('-');
+        if (parts.length > 0) {
+          const seqStr = parts[parts.length - 1];
+          const seq = parseInt(seqStr, 10);
+          if (!isNaN(seq)) occupiedSlotsByCourse[cId].add(seq);
+        }
+      }
+    }
+
+    const results = [];
+    const rowsToAdd = [];
+    const enrolledCoursesDetails = [];
+
+    // ✅ PASO 6: Inscripción de nuevos cursos
+    for (const course of data.selectedCourses) {
+      const courseId = String(course.id).trim(); 
+      
+      // Saltar si ya está inscrito
+      if (alreadyEnrolledCourses.includes(courseId)) {
+        console.warn(`Curso ya inscrito: ${courseId} para CURP ${curpToUpdate}`);
+        continue;
+      }
+      
+      const usedSet = occupiedSlotsByCourse[courseId] || new Set();
+      
+      let nextNum = 1;
+      while (usedSet.has(nextNum)) nextNum++;
+
+      if (nextNum > 30) {
+        return {
+          success: false,
+          message: `El curso "${course.name}" ha alcanzado el cupo máximo (30 participantes).`
         };
+      }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+      if (!occupiedSlotsByCourse[courseId]) occupiedSlotsByCourse[courseId] = new Set();
+      occupiedSlotsByCourse[courseId].add(nextNum);
+
+      const sequenceStr = nextNum.toString().padStart(2, '0');
+      let folio = "";
+      if (courseId.startsWith("TNM-")) {
+        folio = `${courseId}-${sequenceStr}`;
+      } else {
+        folio = `TNM-054-${courseId}-${currentYear}-${sequenceStr}`;
+      }
+      
+      rowsToAdd.push([
+        folio, new Date(), data.fullName.toUpperCase(), curpToUpdate, data.email.toLowerCase(),
+        data.gender, data.DepartamentoSeleccionado, courseId, course.name, course.dates,
+        course.location || '', course.schedule || '', course.hours || 30, course.type || 'Docente',
+        'ACTIVO', '', ''
+      ]);
+
+      results.push({ registrationId: courseId, folio: folio, status: 'Inscrito' });
+      enrolledCoursesDetails.push({ ...course, folio: folio });
+    }
+
+    if (rowsToAdd.length > 0) {
+      sheet.getRange(sheet.getLastRow() + 1, 1, rowsToAdd.length, rowsToAdd[0].length).setValues(rowsToAdd);
+    }
+
+    let emailSent = false;
+    let emailError = null;
+    try {
+      if (enrolledCoursesDetails.length > 0) {
+        sendConfirmationEmailHTML(data.email, data.fullName, enrolledCoursesDetails);
+        emailSent = true;
+      }
+    } catch (e) {
+      console.error("Error enviando correo inscripción", e);
+      emailError = e.toString();
+    }
+
+    return { 
+      success: true, 
+      results: results, 
+      emailSent: emailSent, 
+      emailError: emailError 
+    };
+
+  } catch (e) { 
+    return { success: false, message: e.toString() }; 
+  } finally { 
+    lock.releaseLock(); 
+  }
+}
