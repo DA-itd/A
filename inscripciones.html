@@ -1,489 +1,630 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscripción a Cursos - ITD</title>
-    <meta name="description" content="Inscríbete a los cursos de actualización docente del Instituto Tecnológico de Durango. Consulta la oferta académica, selecciona tus cursos y regístrate en línea.">
-    <meta name="keywords" content="inscripciones ITD, cursos ITD, registro cursos, actualización docente, TecNM Durango">
-   
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
-   
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscripción a Cursos - ITD</title>
+    <meta name="description" content="Inscríbete a los cursos de actualización docente del Instituto Tecnológico de Durango.">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-        <style>
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none; /* Inicia oculto, JS lo muestra */
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 90%;
-            max-height: 90%;
-            overflow-y: auto;
-        }
-        /* Clase para cursos marcados para cancelar */
-        .existing-course-card.to-cancel {
-            opacity: 0.6;
-            border: 2px dashed #dc2626;
-        }
-        .course-status-badge { /* Estilo básico */
-            display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;
-        }
-        .badge-active { background-color: #d1fae5; color: #065f46; }
-        .existing-course-card {
-            padding: 16px; margin-bottom: 12px; border: 1px solid #e5e7eb; border-radius: 6px;
-        }
-        .course-title { font-weight: bold; font-size: 16px; margin-bottom: 8px; }
-        .course-info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 14px; color: #4b5563; margin-bottom: 12px; }
-        .course-folio { font-size: 14px; margin-bottom: 12px; }
-        .course-actions button { padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-right: 8px; }
-        .btn-cancel-course { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
-        .btn-keep-course { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #93c5fd; }
-        .no-courses-message { text-align: center; padding: 20px; border: 1px dashed #d1d5db; border-radius: 6px; }
-        #actionSummary { background-color: #fef9e7; padding: 10px; border-radius: 6px; margin-top: 15px; }
-        #changesList { list-style: none; padding: 0; margin-top: 5px; }
-        #changesList .cancel { color: #dc2626; font-weight: bold; }
-    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JH1X2720VL');
+    </script>
 
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-JH1X2720VL');
-    </script>
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+        .step-active { background-color: #1e40af; color: white; border-color: #1e40af; }
+        .step-completed { background-color: #1e40af; color: white; border-color: #1e40af; }
+        .step-inactive { background-color: white; color: #9ca3af; border-color: #e5e7eb; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-slate-50 min-h-screen flex flex-col font-sans">
 
-        <header class="bg-white shadow-md">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between gap-4 py-4 min-h-[100px]">
-                <div class="flex-shrink-0">
-                    <img class="h-16 md:h-20 lg:h-24" src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="Logo TecNM">
-                </div>
-                <div class="text-center flex-1 px-2">
-                    <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-blue-900">
-                        SISTEMA DE INSCRIPCIÓN A CURSOS DE ACTUALIZACIÓN DOCENTE
-                    </h1>
-                    <h2 class="text-sm sm:text-base md:text-lg text-blue-900 mt-1">
-                        INSTITUTO TECNOLÓGICO DE DURANGO
-                    </h2>
-                </div>
-                <div class="flex-shrink-0">
-                    <img class="h-16 md:h-20 lg:h-24" src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="Logo Instituto Tecnológico de Durango">
-                </div>
-            </div>
-        </div>
-    </header>
+    <!-- Header -->
+    <header class="bg-white shadow-xl sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
+            <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 object-contain">
+            <div class="text-center flex-1">
+                <h1 class="text-sm sm:text-xl font-bold text-blue-900 leading-tight">INSCRIPCIÓN A CURSOS</h1>
+                <p class="text-xs sm:text-sm text-blue-700 font-semibold mt-1">Actualización Docente ITD</p>
+            </div>
+            <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 object-contain">
+        </div>
+    </header>
 
-        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
-                <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg mx-auto mb-8" id="curpSearchSection">
-            <h3 class="text-xl font-semibold mb-4 text-gray-800">1. Ingresa tu CURP</h3>
-            <div class="flex flex-col sm:flex-row gap-4">
-                <input type="text" id="curpInput" placeholder="CURP (18 caracteres)" maxlength="18"
-                    class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 uppercase">
-                <button onclick="lookupUser()"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-150">
-                    Buscar
-                </button>
-            </div>
-        </div>
+    <div id="root" class="flex-grow"></div>
 
-                <div id="root">
-                        <div id="catalogSection" style="display: none;">
-                <h3 class="text-xl font-semibold mb-4 text-gray-800">2. Catálogo de Cursos (Actualmente Oculto)</h3>
-                            </div>
-        </div>
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 mt-auto">
+        <div class="container mx-auto px-4">
+            <p class="font-bold text-sm mb-1">© Coordinación de Actualización Docente</p>
+            <p class="text-xs opacity-75">Instituto Tecnológico de Durango</p>
+        </div>
+    </footer>
 
-                <div id="loadingMessage" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden" style="z-index: 1001;">
-            <div class="bg-white p-6 rounded-lg shadow-xl">
-                <p id="loadingText" class="font-semibold text-blue-600">Cargando...</p>
-            </div>
-        </div>
-    </main>
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
 
-        <div id="existingCoursesModal" class="modal">
-        <div class="modal-content w-full max-w-4xl">
-            <h3 class="text-2xl font-bold mb-4 text-blue-800">Cursos de <span id="userName">Usuario</span> ya Inscritos</h3>
-            <p class="mb-4 text-gray-700">Parece que ya tienes cursos inscritos. Puedes **mantenerlos** o **cancelar** los que desees para inscribirte a otros.</p>
-           
-            <div id="existingCoursesList" class="my-6">
-                            </div>
+        // --- CONFIGURACIÓN ---
+        const CONFIG = {
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
+            COURSES_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv',
+            TEACHERS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv'
+        };
 
-            <div id="actionSummary" class="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800" style="display: none;">
-                <p class="font-bold">Resumen de Acciones:</p>
-                <ul id="changesList" class="list-disc ml-5 mt-2">
-                                    </ul>
-            </div>
+        const DEPARTMENTS = [
+            "CIENCIAS DE LA TIERRA", "CIENCIAS BASICAS", "INGENIERÍA INDUSTRIAL", 
+            "CIENCIAS ECONOMICO-ADMINISTRATIVAS", "SISTEMAS Y COMPUTACION", 
+            "INGENIERÍA QUÍMICA-BIOQUÍMICA", "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA", 
+            "METAL-MECÁNICA", "POSGRADO E INVESTIGACION", "DESARROLLO ACADÉMICO", 
+            "CENTRO DE INFORMACIÓN", "GESTION TECNOLOGICA", "ADMINISTRATIVO", "EXTERNO"
+        ];
 
-            <div class="flex justify-end mt-6 space-x-4">
-                <button onclick="closeExistingModal()" class="py-2 px-4 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">
-                    Volver a Buscar
-                </button>
-                <button onclick="continueToNewCourses()" class="py-2 px-4 bg-green-600 text-white rounded hover:bg-green-700 font-bold">
-                    Continuar al Catálogo (y Aplicar Cambios)
-                </button>
-            </div>
-        </div>
-    </div>
+        const removeAccents = (text) => text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
 
-        <div id="confirmCancelModal" class="modal">
-        <div class="modal-content w-full max-w-sm text-center">
-            <div class="text-4xl text-red-500 mb-4">⚠️</div>
-            <h4 class="text-xl font-semibold mb-2 text-gray-800">¿Estás seguro de cancelar?</h4>
-            <p class="text-sm text-gray-600 mb-4">La cancelación de este curso es irreversible una vez que presiones "Continuar al Catálogo".</p>
-           
-            <div id="courseToCancel" class="bg-gray-100 p-3 rounded mb-6">
-                            </div>
+        const parseCSV = (text) => {
+            const lines = text.trim().split(/\r?\n/).slice(1);
+            return lines.map(line => {
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+                for (let char of line) {
+                    if (char === '"') { inQuotes = !inQuotes; }
+                    else if (char === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
+                    else { current += char; }
+                }
+                values.push(current.trim());
+                return values;
+            }).filter(row => row.length > 1);
+        };
 
-            <div class="flex justify-center space-x-4">
-                <button onclick="closeConfirmModal()" class="py-2 px-4 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">
-                    No, Mantener Curso
-                </button>
-                <button id="btnConfirmCancel" class="py-2 px-4 bg-red-600 text-white rounded hover:bg-red-700 font-bold">
-                    Sí, Cancelar
-                </button>
-            </div>
-        </div>
-    </div>
+        const cleanStr = (s) => s ? s.replace(/^"|"$/g, '').trim() : '';
 
-        <footer class="bg-blue-800 text-white text-center p-4 mt-auto">
-        <p class="font-semibold text-sm sm:text-base">© Coordinación de actualización docente - M.C. Alejandro Calderón Rentería.</p>
-        <p class="text-xs sm:text-sm">Todos los derechos reservados <span id="copyright-year"></span>.</p>
-    </footer>
+        // --- COMPONENTES ---
+        const StepIndicator = ({ currentStep }) => {
+            const steps = ["Información", "Cursos", "Confirmar", "Finalizado"];
+            return (
+                <div className="flex justify-center items-center mb-8 px-4">
+                    {steps.map((label, idx) => {
+                        const stepNum = idx + 1;
+                        let statusClass = "step-inactive";
+                        if (stepNum < currentStep) statusClass = "step-completed";
+                        if (stepNum === currentStep) statusClass = "step-active";
+                        
+                        return (
+                            <div key={idx} className="flex flex-col items-center mx-2 sm:mx-6 relative z-10">
+                                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border-2 transition-all duration-300 ${statusClass}`}>
+                                    {stepNum}
+                                </div>
+                                <span className={`text-[10px] sm:text-xs mt-1 font-semibold ${stepNum === currentStep ? 'text-blue-800' : 'text-gray-400'}`}>
+                                    {label}
+                                </span>
+                                {idx < steps.length - 1 && (
+                                    <div className={`hidden sm:block absolute top-4 sm:top-5 left-1/2 w-full h-[2px] -z-10 ${stepNum < currentStep ? 'bg-blue-800' : 'bg-gray-200'}`} style={{ width: 'calc(100% + 3rem)', left: '50%' }}></div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        };
 
-                <script>
-        window.CONFIG = {
-            // 👇 REEMPLACE ESTA URL CON LA URL DE SU GOOGLE APPS SCRIPT
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
-        };
+        const AutocompleteInput = ({ teachers, onSelect, value, onChange, name, placeholder, required = false }) => {
+            const [suggestions, setSuggestions] = useState([]);
+            const [showSuggestions, setShowSuggestions] = useState(false);
+            const containerRef = useRef(null);
 
-        // La variable global WEBAPP_URL usa la URL definida en CONFIG
-        const WEBAPP_URL = window.CONFIG.APPS_SCRIPT_URL; // Asegura que la variable esté disponible para el script
+            useEffect(() => {
+                const handleClickOutside = (event) => {
+                    if (containerRef.current && !containerRef.current.contains(event.target)) {
+                        setShowSuggestions(false);
+                    }
+                };
+                document.addEventListener('mousedown', handleClickOutside);
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+            }, []);
 
-        // ============================================
-        // VARIABLES GLOBALES
-        // ============================================
-        let currentUserData = null;
-        let existingCourses = [];
-        let coursesToCancel = [];
-        let coursesToKeep = [];
+            const handleInputChange = (e) => {
+                const currentValue = e.target.value;
+                onChange(e);
+                if (currentValue && currentValue.length > 0) {
+                    const normalizedInput = removeAccents(currentValue.toLowerCase());
+                    const filtered = teachers.filter(teacher =>
+                        removeAccents(teacher.name.toLowerCase()).includes(normalizedInput)
+                    ).slice(0, 5);
+                    setSuggestions(filtered);
+                    setShowSuggestions(filtered.length > 0);
+                } else {
+                    setSuggestions([]);
+                    setShowSuggestions(false);
+                }
+            };
 
-        // ============================================
-        // FUNCIÓN PRINCIPAL: Buscar por CURP
-        // ============================================
-        async function lookupUser() {
-          const curpInput = document.getElementById('curpInput');
-          const curp = curpInput.value.trim().toUpperCase();
-         
-          if (curp.length !== 18) {
-            showAlert('Por favor ingresa un CURP válido de 18 caracteres', 'error');
-            return;
-          }
-         
-          showLoading('Buscando información...');
-         
-          try {
-            const response = await fetch(`${WEBAPP_URL}?action=lookupByCurp&curp=${encodeURIComponent(curp)}`);
-            const result = await response.json();
-           
-            hideLoading();
-           
-            if (result.success && result.data) {
-              currentUserData = result.data.userData;
-              existingCourses = result.data.courseDetails || [];
-             
-              if (result.data.hasActiveEnrollments && existingCourses.length > 0) {
-                // Tiene cursos inscritos → Mostrar modal
-                showExistingCoursesModal();
-              } else {
-                // No tiene cursos → Ir directo al catálogo
-                showCourseCatalog();
-              }
-            } else {
-              showAlert('No se encontró información. Verifica tu CURP.', 'warning');
-            }
-           
-          } catch (error) {
-            hideLoading();
-            showAlert('Error de conexión: ' + error.message, 'error');
-          }
-        }
+            const handleSelect = (teacher) => {
+                onSelect(teacher);
+                setShowSuggestions(false);
+            };
 
-        // ============================================
-        // MOSTRAR MODAL DE CURSOS EXISTENTES
-        // ============================================
-        function showExistingCoursesModal() {
-          const modal = document.getElementById('existingCoursesModal');
-          const listContainer = document.getElementById('existingCoursesList');
-          const userNameSpan = document.getElementById('userName');
-         
-          // Resetear listas
-          coursesToCancel = [];
-          coursesToKeep = [...existingCourses.map(c => c.courseId)];
-         
-          // Mostrar nombre del usuario
-          if (currentUserData && currentUserData.fullName) {
-            userNameSpan.textContent = currentUserData.fullName.split(' ')[0]; // Solo primer nombre
-          } else {
-            userNameSpan.textContent = 'Usuario';
-          }
-         
-          // Generar tarjetas de cursos
-          let html = '';
-         
-          if (existingCourses.length === 0) {
-            html = `
-              <div class="no-courses-message">
-                <div class="icon">📚</div>
-                <p>No tienes cursos inscritos actualmente.</p>
-              </div>
-            `;
-          } else {
-            existingCourses.forEach((course, index) => {
-              html += `
-                <div class="existing-course-card" id="courseCard_${index}" data-course-id="${course.courseId}">
-                  <span class="course-status-badge badge-active">✓ INSCRITO</span>
-                 
-                  <div class="course-title">${course.courseName}</div>
-                 
-                  <div class="course-info-grid">
-                    <div class="course-info-item">📅 ${course.dates}</div>
-                    <div class="course-info-item">⏰ ${course.schedule}</div>
-                    <div class="course-info-item">📍 ${course.location || 'Por definir'}</div>
-                    <div class="course-info-item">⏱️ ${course.hours} horas</div>
-                  </div>
-                 
-                  <div class="course-folio">
-                    <strong>Folio:</strong> ${course.folio}
-                  </div>
-                 
-                  <div class="course-actions">
-                    <button class="btn-cancel-course" onclick="markForCancel(${index})">
-                      ✕ Cancelar inscripción
-                    </button>
-                    <button class="btn-keep-course" onclick="markToKeep(${index})" style="display: none;">
-                      ✓ Mantener curso
-                    </button>
-                  </div>
-                </div>
-              `;
-            });
-          }
-         
-          listContainer.innerHTML = html;
-          updateActionSummary();
-          modal.style.display = 'flex';
-        }
+            return (
+                <div className="relative" ref={containerRef}>
+                    <input
+                        type="text"
+                        name={name}
+                        value={value}
+                        onChange={handleInputChange}
+                        onFocus={(e) => {
+                            const val = e.target.value;
+                            if (val) {
+                                const normalizedInput = removeAccents(val.toLowerCase());
+                                const filtered = teachers.filter(t =>
+                                    removeAccents(t.name.toLowerCase()).includes(normalizedInput)
+                                ).slice(0, 5);
+                                setSuggestions(filtered);
+                                setShowSuggestions(filtered.length > 0);
+                            }
+                        }}
+                        placeholder={placeholder || "Escriba su nombre"}
+                        className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base uppercase"
+                        required={required}
+                        autoComplete="off"
+                    />
+                    {showSuggestions && suggestions.length > 0 && (
+                        <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
+                            {suggestions.map((teacher) => (
+                                <li key={teacher.curp || teacher.name} onMouseDown={(e) => { e.preventDefault(); handleSelect(teacher); }} className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm sm:text-base">
+                                    {teacher.name}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            );
+        };
 
-        // ============================================
-        // MARCAR CURSO PARA CANCELAR
-        // ============================================
-        function markForCancel(index) {
-          const course = existingCourses[index];
-          const card = document.getElementById(`courseCard_${index}`);
-         
-          // Mostrar modal de confirmación
-          const confirmModal = document.getElementById('confirmCancelModal');
-          const courseInfo = document.getElementById('courseToCancel');
-         
-          courseInfo.innerHTML = `
-            <div class="name">${course.courseName}</div>
-            <div style="font-size: 13px; color: #6b7280; margin-top: 8px;">
-              📅 ${course.dates} | ⏰ ${course.schedule}<br>
-              🎫 Folio: ${course.folio}
-            </div>
-          `;
-         
-          document.getElementById('btnConfirmCancel').onclick = () => {
-            // Confirmar cancelación
-            card.classList.add('to-cancel');
-           
-            // Cambiar botones
-            card.querySelector('.btn-cancel-course').style.display = 'none';
-            card.querySelector('.btn-keep-course').style.display = 'block';
-           
-            // Actualizar listas
-            if (!coursesToCancel.includes(course.courseId)) {
-              coursesToCancel.push(course.courseId);
-            }
-            coursesToKeep = coursesToKeep.filter(id => id !== course.courseId);
-           
-            updateActionSummary();
-            closeConfirmModal();
-          };
-         
-          confirmModal.style.display = 'flex';
-        }
+        const InfoForm = ({ formData, setFormData, departments, teachers, onNext }) => {
+            const [errors, setErrors] = useState({});
+            
+            const handleTeacherSelect = (teacher) => {
+                let inferredGender = 'Mujer';
+                const curp = teacher.curp || '';
+                
+                if (teacher.gender) {
+                    inferredGender = teacher.gender;
+                } else if (curp.length >= 11) {
+                    const genderChar = curp.charAt(10).toUpperCase();
+                    if (genderChar === 'H') inferredGender = 'Hombre';
+                    else if (genderChar === 'M') inferredGender = 'Mujer';
+                }
 
-        // ============================================
-        // MARCAR CURSO PARA MANTENER (deshacer cancelación)
-        // ============================================
-        function markToKeep(index) {
-          const course = existingCourses[index];
-          const card = document.getElementById(`courseCard_${index}`);
-         
-          card.classList.remove('to-cancel');
-         
-          // Cambiar botones
-          card.querySelector('.btn-cancel-course').style.display = 'block';
-          card.querySelector('.btn-keep-course').style.display = 'none';
-         
-          // Actualizar listas
-          coursesToCancel = coursesToCancel.filter(id => id !== course.courseId);
-          if (!coursesToKeep.includes(course.courseId)) {
-            coursesToKeep.push(course.courseId);
-          }
-         
-          updateActionSummary();
-        }
+                setFormData({
+                    ...formData,
+                    fullName: (teacher.name || '').toUpperCase(),
+                    curp: (teacher.curp || '').toUpperCase(),
+                    email: (teacher.email || '').toLowerCase(),
+                    gender: inferredGender,
+                    department: teacher.dept || formData.department
+                });
+            };
 
-        // ============================================
-        // ACTUALIZAR RESUMEN DE ACCIONES
-        // ============================================
-        function updateActionSummary() {
-          const summary = document.getElementById('actionSummary');
-          const list = document.getElementById('changesList');
-         
-          if (coursesToCancel.length === 0) {
-            summary.style.display = 'none';
-            return;
-          }
-         
-          summary.style.display = 'block';
-         
-          let html = '';
-          coursesToCancel.forEach(courseId => {
-            const course = existingCourses.find(c => c.courseId === courseId);
-            if (course) {
-              html += `<li class="cancel">❌ Se cancelará: ${course.courseName}</li>`;
-            }
-          });
-         
-          list.innerHTML = html;
-        }
+            const validate = () => {
+                const newErrors = {};
+                if (!formData.fullName) newErrors.fullName = "Campo obligatorio";
+                if (!formData.curp || formData.curp.length < 18) newErrors.curp = "CURP inválido (18 caracteres)";
+                if (!formData.email) newErrors.email = "Campo obligatorio";
+                if (!formData.department) newErrors.department = "Seleccione departamento";
+                setErrors(newErrors);
+                return Object.keys(newErrors).length === 0;
+            };
 
-        // ============================================
-        // CERRAR MODALES
-        // ============================================
-        function closeExistingModal() {
-          document.getElementById('existingCoursesModal').style.display = 'none';
-        }
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (validate()) onNext();
+            };
 
-        function closeConfirmModal() {
-          document.getElementById('confirmCancelModal').style.display = 'none';
-        }
+            return (
+                <div className="animate-fadeIn max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-slate-200">
+                    <h2 className="text-xl font-bold text-slate-800 mb-6 border-b pb-2">Datos Personales</h2>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-1">Nombre Completo *</label>
+                            <AutocompleteInput teachers={teachers} onSelect={handleTeacherSelect} value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value.toUpperCase()})} name="fullName" required />
+                            {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">CURP *</label>
+                                <input type="text" value={formData.curp} onChange={e => setFormData({...formData, curp: e.target.value.toUpperCase()})} className="w-full p-2 border rounded uppercase" maxLength={18} />
+                                {errors.curp && <p className="text-red-500 text-xs mt-1">{errors.curp}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">Email *</label>
+                                <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value.toLowerCase()})} className="w-full p-2 border rounded" />
+                                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">Departamento *</label>
+                                <select value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} className="w-full p-2 border rounded">
+                                    <option value="">-- Seleccione --</option>
+                                    {departments.map(d => <option key={d} value={d}>{d}</option>)}
+                                </select>
+                                {errors.department && <p className="text-red-500 text-xs mt-1">{errors.department}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">Género</label>
+                                <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})} className="w-full p-2 border rounded">
+                                    <option value="Mujer">Mujer</option><option value="Hombre">Hombre</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="mt-8 flex justify-end">
+                            <button type="submit" className="bg-blue-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-900 transition-colors">Siguiente ➜</button>
+                        </div>
+                    </form>
+                </div>
+            );
+        };
 
-        // ============================================
-        // CONTINUAR A SELECCIÓN DE CURSOS NUEVOS
-        // ============================================
-        async function continueToNewCourses() {
-          // Si hay cursos para cancelar, procesarlos primero
-          if (coursesToCancel.length > 0) {
-            showLoading('Procesando cancelaciones...');
-           
-            try {
-              const response = await fetch(WEBAPP_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  action: 'cancelSelectedCourses',
-                  curp: document.getElementById('curpInput').value.trim().toUpperCase(),
-                  courseIds: coursesToCancel,
-                  email: currentUserData?.email,
-                  fullName: currentUserData?.fullName
-                })
-              });
-             
-              const result = await response.json();
-              hideLoading();
-             
-              if (result.success) {
-                showAlert(`Se cancelaron ${result.cancelledCount} curso(s). Recibirás confirmación por correo.`, 'success');
-               
-                // Actualizar lista de cursos existentes (remover los cancelados)
-                existingCourses = existingCourses.filter(c => !coursesToCancel.includes(c.courseId));
-                coursesToCancel = [];
-              } else {
-                showAlert('Error al cancelar: ' + result.message, 'error');
-                return;
-              }
-             
-            } catch (error) {
-              hideLoading();
-              showAlert('Error de conexión: ' + error.message, 'error');
-              return;
-            }
-          }
-         
-          closeExistingModal();
-         
-          // Mostrar catálogo de cursos
-          // Pasar los cursos que mantiene para validar empalmes
-          showCourseCatalog(coursesToKeep);
-        }
+        const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, onNext, onBack }) => {
+            const [searchTerm, setSearchTerm] = useState('');
 
-        // ============================================
-        // MOSTRAR CATÁLOGO DE CURSOS
-        // ============================================
-        function showCourseCatalog(keptCourseIds = []) {
-          // Aquí va tu código actual para mostrar el catálogo
-          // Los cursos en keptCourseIds ya están inscritos
-         
-          console.log('Cursos que mantiene:', keptCourseIds);
-          console.log('Cursos existentes para validar empalmes:', 
-            existingCourses.filter(c => keptCourseIds.includes(c.courseId))
-          );
-         
-          // Muestra tu formulario/catálogo aquí
-          document.getElementById('catalogSection').style.display = 'block';
-          document.getElementById('curpSearchSection').style.display = 'none'; // Ocultar búsqueda
-        }
+            // ✅ VALIDACIÓN MEJORADA DE TRASLAPE
+            const checkOverlap = (newCourse) => {
+                const newDates = (newCourse.dates || '').trim().toUpperCase();
+                const newSchedule = (newCourse.schedule || '').trim().toUpperCase();
 
-        // ============================================
-        // FUNCIONES AUXILIARES
-        // (Implementaciones mínimas para evitar errores)
-        // ============================================
-        function showLoading(message = 'Cargando...') {
-          const loadingDiv = document.getElementById('loadingMessage');
-          document.getElementById('loadingText').textContent = message;
-          loadingDiv.classList.remove('hidden');
-        }
+                for (const existing of selectedCourses) {
+                    if (existing.id === newCourse.id) continue;
+                    
+                    const exDates = (existing.dates || '').trim().toUpperCase();
+                    const exSchedule = (existing.schedule || '').trim().toUpperCase();
 
-        function hideLoading() {
-          document.getElementById('loadingMessage').classList.add('hidden');
-        }
+                    // Criterio estricto: Mismas fechas Y mismo horario
+                    if (exDates === newDates && exSchedule === newSchedule) {
+                        return { overlap: true, conflict: existing.name };
+                    }
+                }
+                return { overlap: false };
+            };
 
-        function showAlert(message, type = 'info') {
-          let icon = 'ℹ️';
-          if (type === 'error') icon = '❌';
-          if (type === 'warning') icon = '⚠️';
-          if (type === 'success') icon = '✅';
-          alert(`${icon} ${message}`); // Usando la función nativa alert por simplicidad
-        }
-    </script>
+            const toggleCourse = (course) => {
+                const isSelected = selectedCourses.some(c => c.id === course.id);
+                if (isSelected) {
+                    setSelectedCourses(prev => prev.filter(c => c.id !== course.id));
+                } else {
+                    if (selectedCourses.length >= 3) {
+                        alert("⚠️ Máximo 3 cursos permitidos.");
+                        return;
+                    }
+                    
+                    const { overlap, conflict } = checkOverlap(course);
+                    if (overlap) {
+                        alert(`⚠️ EMPALME DE HORARIO DETECTADO:\n\nNo puedes inscribirte a "${course.name}" porque tiene el mismo horario que "${conflict}".\n\n📅 Fechas: ${course.dates}\n⏰ Horario: ${course.schedule}`);
+                        return;
+                    }
 
-            <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const yearSpan = document.getElementById('copyright-year');
-            if (yearSpan) {
-                yearSpan.textContent = new Date().getFullYear();
-            }
-        });
-    </script>
-</body>
-</html>
+                    setSelectedCourses(prev => [...prev, course]);
+                }
+            };
+
+            const filteredCourses = useMemo(() => courses.filter(c => removeAccents(c.name.toLowerCase()).includes(removeAccents(searchTerm.toLowerCase()))), [searchTerm, courses]);
+            const groupedCourses = useMemo(() => filteredCourses.reduce((acc, c) => {
+                const p = c.period || 'Sin Periodo';
+                if (!acc[p]) acc[p] = { courses: [], dates: c.dates || '' };
+                acc[p].courses.push(c);
+                return acc;
+            }, {}), [filteredCourses]);
+
+            return (
+                <div className="animate-fadeIn max-w-6xl mx-auto">
+                    <h2 className="text-xl font-bold text-slate-800 mb-2">Selección de Cursos</h2>
+                    <p className="text-sm text-gray-600 mb-4">Seleccionados: {selectedCourses.length} de 3. ⚠️ No se permiten cursos con mismo horario y fecha.</p>
+                    <input type="text" placeholder="Buscar curso..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full px-4 py-2 mb-6 border rounded-md" />
+                    
+                    {Object.keys(groupedCourses).length === 0 && <p className="text-center">No hay cursos.</p>}
+
+                    {Object.entries(groupedCourses).map(([period, data]) => {
+                        const isPeriod1 = period.toUpperCase().includes('PERIODO 1') || period.toUpperCase().includes('ENERO') || period.toUpperCase().includes('JUNIO');
+                        const headerClass = isPeriod1 ? 'text-teal-800 border-teal-300' : 'text-indigo-800 border-indigo-300';
+                        const headerIcon = isPeriod1 ? '☀️' : '🍂';
+
+                        return (
+                            <div key={period} className="mb-8 bg-white rounded-xl shadow-sm border overflow-hidden">
+                                <div className={`px-6 py-3 font-bold border-b bg-slate-50 ${headerClass} flex items-center gap-2`}>
+                                    <span className="text-xl">{headerIcon}</span>
+                                    <span>{period} {data.dates && `| ${data.dates}`}</span>
+                                </div>
+                                <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {data.courses.map(course => {
+                                        const isSelected = selectedCourses.some(c => c.id === course.id);
+                                        
+                                        let cardClass = "bg-white border-transparent hover:shadow-md";
+                                        if (isSelected) {
+                                            cardClass = isPeriod1 
+                                                ? 'bg-teal-50 border-teal-500 ring-1 ring-teal-500' 
+                                                : 'bg-indigo-50 border-indigo-500 ring-1 ring-indigo-500';
+                                        } else {
+                                            cardClass = isPeriod1 
+                                                ? 'bg-slate-50 hover:bg-teal-50/50 hover:border-teal-200' 
+                                                : 'bg-slate-50 hover:bg-indigo-50/50 hover:border-indigo-200';
+                                        }
+
+                                        return (
+                                            <div key={course.id} onClick={() => toggleCourse(course)} className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${cardClass}`}>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className={`text-[10px] px-2 rounded font-bold uppercase ${course.type.includes('PROFESIONAL') ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>{course.type}</span>
+                                                    {isSelected && <span className="text-lg">✅</span>}
+                                                </div>
+                                                <h3 className="font-bold text-sm text-slate-800 mb-2 leading-tight">{course.name}</h3>
+                                                <div className="text-xs text-gray-500 space-y-1">
+                                                    <p>📅 {course.dates}</p>
+                                                    <p>⏰ {course.schedule}</p>
+                                                    <p>📍 {course.location}</p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                    <div className="flex justify-between mt-8">
+                        <button onClick={onBack} className="bg-gray-200 px-6 py-2 rounded font-bold hover:bg-gray-300">Atrás</button>
+                        <button onClick={onNext} disabled={selectedCourses.length===0} className="bg-blue-800 text-white px-6 py-2 rounded font-bold hover:bg-blue-900 disabled:opacity-50">Siguiente</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const Confirmation = ({ formData, courses, onBack, onSubmit }) => {
+            const [sending, setSending] = useState(false);
+            const handleSubmit = () => { setSending(true); onSubmit(); };
+            return (
+                <div className="animate-fadeIn max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg border">
+                    <h2 className="text-2xl font-bold mb-6">Confirmar Inscripción</h2>
+                    <div className="mb-6 border-b pb-4">
+                        <h3 className="font-bold text-gray-500 text-sm uppercase">Datos</h3>
+                        <p className="font-bold">{formData.fullName}</p>
+                        <p className="text-sm">{formData.email} | {formData.curp}</p>
+                        <p className="text-sm text-gray-600">{formData.department}</p>
+                    </div>
+                    <div className="mb-6">
+                        <h3 className="font-bold text-gray-500 text-sm uppercase mb-2">Cursos</h3>
+                        <ul className="space-y-2">
+                            {courses.map(c => (
+                                <li key={c.id} className="bg-blue-50 p-3 rounded border border-blue-100 font-bold text-sm text-blue-900">
+                                    {c.name} <br/><span className="font-normal text-xs text-gray-600">{c.dates} - {c.schedule}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="flex justify-between">
+                        <button onClick={onBack} disabled={sending} className="bg-gray-200 px-6 py-2 rounded font-bold">Regresar</button>
+                        <button onClick={handleSubmit} disabled={sending} className="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 disabled:opacity-50 flex items-center gap-2">
+                            {sending ? 'Enviando...' : 'Confirmar Inscripción'}
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const FinalStep = ({ result, emailSent, error }) => (
+            <div className="animate-fadeIn max-w-2xl mx-auto bg-white p-10 rounded-xl shadow-xl text-center border-t-4 border-green-500">
+                {!error ? (
+                    <>
+                        <div className="text-6xl mb-4">🎉</div>
+                        <h2 className="text-3xl font-bold text-slate-800 mb-2">¡Inscripción Exitosa!</h2>
+                        <p className="text-slate-600 mb-8">Tus cursos han sido registrados correctamente.</p>
+                        <div className="bg-slate-50 p-6 rounded text-left mb-6">
+                            <h3 className="font-bold border-b pb-2 mb-2">Folios Generados:</h3>
+                            {result.map((r, i) => (
+                                <div key={i} className="flex justify-between py-1 border-b border-gray-100 last:border-0">
+                                    <span className="text-sm">Curso ID: {r.registrationId}</span>
+                                    <span className="font-mono font-bold text-blue-700">{r.folio}</span>
+                                </div>
+                            ))}
+                        </div>
+                        {!emailSent && <div className="bg-red-100 text-red-700 p-4 rounded mb-6 text-sm">⚠️ No se pudo enviar el correo. Toma captura de esta pantalla.</div>}// ======================================================
+// FUNCIÓN DE INSCRIPCIÓN CON VALIDACIÓN DE EMPALMES
+// ======================================================
+
+function processEnrollment_v12(data) {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) {
+    return { success: false, message: "El servidor está ocupado. Intente de nuevo en unos segundos." };
+  }
+
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let sheet = getSheetFlexible(ss, 'Inscripciones');
+    
+    if (!sheet) {
+      sheet = ss.insertSheet('Inscripciones');
+      sheet.appendRow([
+        'Folio personal', 'Timestamp', 'NombreCompleto', 'Curp', 'Email', 'Genero', 
+        'Departamento', 'Id_Curso', 'Curso', 'FechaCurso', 'Lugar', 'Horario', 
+        'Horas', 'tipo', 'Estado', 'Encuesta', 'Asistencia Aprobada'
+      ]);
+    }
+
+    const sheetData = sheet.getDataRange().getValues();
+    const curpToUpdate = String(data.curp).toUpperCase().trim();
+    const currentYear = new Date().getFullYear(); 
+    
+    const cancelledCoursesDetails = [];
+
+    // ✅ PASO 1: Obtener cursos actuales ACTIVOS del usuario
+    const currentActiveCourses = [];
+    for (let i = 1; i < sheetData.length; i++) {
+      const rowCurp = String(sheetData[i][3]).toUpperCase().trim();
+      const rowStatus = String(sheetData[i][14]).toUpperCase().trim();
+      
+      if (rowCurp === curpToUpdate && rowStatus === 'ACTIVO') {
+        currentActiveCourses.push({
+          courseId: String(sheetData[i][7]).trim(),
+          courseName: String(sheetData[i][8]).trim(),
+          dates: String(sheetData[i][9]).trim().toUpperCase(),
+          schedule: String(sheetData[i][11]).trim().toUpperCase(),
+          folio: String(sheetData[i][0]),
+          rowIndex: i
+        });
+      }
+    }
+
+    // ✅ PASO 2: Validar empalmes ANTES de hacer cambios
+    for (const newCourse of data.selectedCourses) {
+      const newDates = String(newCourse.dates || '').trim().toUpperCase();
+      const newSchedule = String(newCourse.schedule || '').trim().toUpperCase();
+      
+      for (const existing of currentActiveCourses) {
+        // Omitir si es el mismo curso (caso de re-inscripción)
+        if (existing.courseId === String(newCourse.id).trim()) continue;
+        
+        // ⚠️ VALIDACIÓN ESTRICTA: Mismas fechas Y mismo horario
+        if (existing.dates === newDates && existing.schedule === newSchedule) {
+          return {
+            success: false,
+            message: `⚠️ EMPALME DE HORARIO DETECTADO:\n\nNo puedes inscribirte a "${newCourse.name}" porque tiene el mismo horario que "${existing.courseName}".\n\n📅 Fechas: ${newDates}\n⏰ Horario: ${newSchedule}`,
+            conflictDetails: {
+              newCourse: newCourse.name,
+              existingCourse: existing.courseName,
+              dates: newDates,
+              schedule: newSchedule
+            }
+          };
+        }
+      }
+    }
+
+    // ✅ PASO 3: Cancelación de cursos no seleccionados
+    if (data.previousRegistrationIds && data.previousRegistrationIds.length > 0) {
+      for (const existing of currentActiveCourses) {
+        const isKept = data.selectedCourses.some(c => String(c.id).trim() === existing.courseId);
+        
+        if (!isKept) {
+          sheet.getRange(existing.rowIndex + 1, 15).setValue('Inactivo');
+          cancelledCoursesDetails.push({ 
+            name: existing.courseName, 
+            folio: existing.folio 
+          });
+        }
+      }
+    }
+
+    if (cancelledCoursesDetails.length > 0) {
+      try {
+        sendCancellationEmailHTML(data.email, data.fullName, cancelledCoursesDetails);
+      } catch(e) { console.error("Error enviando correo cancelación", e); }
+    }
+
+    if (data.selectedCourses.length === 0) return { success: true, results: [] };
+
+    // ✅ PASO 4: Verificar cursos ya inscritos ACTIVOS
+    const alreadyEnrolledCourses = currentActiveCourses.map(c => c.courseId);
+
+    // ✅ PASO 5: Mapeo de slots ocupados
+    const occupiedSlotsByCourse = {}; 
+    for (let i = 1; i < sheetData.length; i++) {
+      const status = String(sheetData[i][14]).toUpperCase().trim();
+      if (status === 'ACTIVO') {
+        const cId = String(sheetData[i][7]).trim();
+        const folio = String(sheetData[i][0]);
+        if (!occupiedSlotsByCourse[cId]) occupiedSlotsByCourse[cId] = new Set();
+        const parts = folio.split('-');
+        if (parts.length > 0) {
+          const seqStr = parts[parts.length - 1];
+          const seq = parseInt(seqStr, 10);
+          if (!isNaN(seq)) occupiedSlotsByCourse[cId].add(seq);
+        }
+      }
+    }
+
+    const results = [];
+    const rowsToAdd = [];
+    const enrolledCoursesDetails = [];
+
+    // ✅ PASO 6: Inscripción de nuevos cursos
+    for (const course of data.selectedCourses) {
+      const courseId = String(course.id).trim(); 
+      
+      // Saltar si ya está inscrito
+      if (alreadyEnrolledCourses.includes(courseId)) {
+        console.warn(`Curso ya inscrito: ${courseId} para CURP ${curpToUpdate}`);
+        continue;
+      }
+      
+      const usedSet = occupiedSlotsByCourse[courseId] || new Set();
+      
+      let nextNum = 1;
+      while (usedSet.has(nextNum)) nextNum++;
+
+      if (nextNum > 30) {
+        return {
+          success: false,
+          message: `El curso "${course.name}" ha alcanzado el cupo máximo (30 participantes).`
+        };
+      }
+
+      if (!occupiedSlotsByCourse[courseId]) occupiedSlotsByCourse[courseId] = new Set();
+      occupiedSlotsByCourse[courseId].add(nextNum);
+
+      const sequenceStr = nextNum.toString().padStart(2, '0');
+      let folio = "";
+      if (courseId.startsWith("TNM-")) {
+        folio = `${courseId}-${sequenceStr}`;
+      } else {
+        folio = `TNM-054-${courseId}-${currentYear}-${sequenceStr}`;
+      }
+      
+      rowsToAdd.push([
+        folio, new Date(), data.fullName.toUpperCase(), curpToUpdate, data.email.toLowerCase(),
+        data.gender, data.DepartamentoSeleccionado, courseId, course.name, course.dates,
+        course.location || '', course.schedule || '', course.hours || 30, course.type || 'Docente',
+        'ACTIVO', '', ''
+      ]);
+
+      results.push({ registrationId: courseId, folio: folio, status: 'Inscrito' });
+      enrolledCoursesDetails.push({ ...course, folio: folio });
+    }
+
+    if (rowsToAdd.length > 0) {
+      sheet.getRange(sheet.getLastRow() + 1, 1, rowsToAdd.length, rowsToAdd[0].length).setValues(rowsToAdd);
+    }
+
+    let emailSent = false;
+    let emailError = null;
+    try {
+      if (enrolledCoursesDetails.length > 0) {
+        sendConfirmationEmailHTML(data.email, data.fullName, enrolledCoursesDetails);
+        emailSent = true;
+      }
+    } catch (e) {
+      console.error("Error enviando correo inscripción", e);
+      emailError = e.toString();
+    }
+
+    return { 
+      success: true, 
+      results: results, 
+      emailSent: emailSent, 
+      emailError: emailError 
+    };
+
+  } catch (e) { 
+    return { success: false, message: e.toString() }; 
+  } finally { 
+    lock.releaseLock(); 
+  }
+}
