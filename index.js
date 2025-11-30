@@ -1,7 +1,7 @@
 
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
-// Versión: 7.1.0 - Corrección UI Nombre, Género Auto y Baja Masiva Real
+// Versión: 6.0.0 - Diseño Limpio, Correos Oficiales, Autocomplete 3 chars
 // =============================================================================
 
 const COURSES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv';
@@ -14,15 +14,6 @@ const cleanCSVValue = (val) => { let cleaned = val.trim(); if (cleaned.startsWit
 const getTeachers = async () => { try { const response = await fetch(`${TEACHERS_CSV_URL}&_=${Date.now()}`); if (!response.ok) throw new Error('Error'); const csvText = await response.text(); return csvText.trim().split(/\r?\n/).slice(1).map(line => { const v = parseCSVLine(line); return v.length < 3 ? null : { nombreCompleto: cleanCSVValue(v[0]), curp: cleanCSVValue(v[1]), email: cleanCSVValue(v[2]) }; }).filter(Boolean); } catch (e) { return []; } };
 const getCourses = async () => { try { const response = await fetch(`${COURSES_CSV_URL}&_=${Date.now()}`); if (!response.ok) throw new Error('Error'); const csvText = await response.text(); return csvText.trim().split(/\r?\n/).slice(1).map(line => { const v = parseCSVLine(line); return v.length < 8 ? null : { id: cleanCSVValue(v[0]), name: cleanCSVValue(v[1]), dates: cleanCSVValue(v[2]), period: cleanCSVValue(v[3]), hours: parseInt(cleanCSVValue(v[4])) || 30, location: cleanCSVValue(v[5]), schedule: cleanCSVValue(v[6]), type: cleanCSVValue(v[7]) || 'No especificado' }; }).filter(Boolean); } catch (e) { return []; } };
 const getDepartments = () => Promise.resolve(MOCK_DEPARTMENTS);
-
-// Función auxiliar para extraer género del CURP
-const getGenderFromCurp = (curp) => {
-    if (!curp || curp.length < 11) return '';
-    const genderChar = curp.charAt(10).toUpperCase();
-    if (genderChar === 'H') return 'Hombre';
-    if (genderChar === 'M') return 'Mujer';
-    return '';
-};
 
 const checkRegistration = async (curp, fullName) => {
     try {
@@ -154,9 +145,6 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
     useEffect(() => {
         if(formData.curp.length === 18 && formData.curp !== lastChecked.current.curp) {
             triggerCheck(formData.curp, formData.fullName);
-            // Auto-detectar género al completar CURP
-            const gender = getGenderFromCurp(formData.curp);
-            if (gender) setFormData(prev => ({ ...prev, gender }));
         }
     }, [formData.curp]);
 
@@ -166,20 +154,13 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
     };
 
     const handleSuggestionClick = (teacher) => {
-        // Extraer género del CURP del docente
-        const autoGender = teacher.curp ? getGenderFromCurp(teacher.curp) : formData.gender;
-        
         setFormData(prev => ({ 
             ...prev, 
             fullName: teacher.nombreCompleto, 
             curp: teacher.curp || prev.curp, 
-            email: teacher.email || prev.email,
-            gender: autoGender
+            email: teacher.email || prev.email 
         }));
-        
-        setShowSuggestions(false); // Ocultar sugerencias inmediatamente
-        
-        // Verificar inmediatamente
+        setShowSuggestions(false);
         triggerCheck(teacher.curp || '', teacher.nombreCompleto);
     };
 
@@ -274,7 +255,7 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                     React.createElement('input', { 
                         className: 'w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-all uppercase', 
                         value: formData.fullName, onChange: handleNameChange, onBlur: handleNameBlur,
-                        placeholder: 'Nombre Apellido Paterno Materno',
+                        placeholder: 'Apellido Paterno, Materno y Nombres',
                         autoComplete: 'off'
                     }),
                     showSuggestions && suggestions.length > 0 && React.createElement('ul', { className: 'absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1 max-h-60 overflow-auto' },
@@ -292,15 +273,7 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                     React.createElement('input', { 
                         className: 'w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-all uppercase', 
                         value: formData.curp, maxLength: 18, 
-                        onChange: e => {
-                            const val = e.target.value.toUpperCase();
-                            setFormData({...formData, curp: val});
-                            // Auto-genero manual si escribe curp
-                            if (val.length === 18) {
-                                const gen = getGenderFromCurp(val);
-                                if (gen) setFormData(prev => ({...prev, curp: val, gender: gen}));
-                            }
-                        }
+                        onChange: e => setFormData({...formData, curp: e.target.value.toUpperCase()}) 
                     }),
                     errors.curp && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, errors.curp)
                 ),
@@ -489,6 +462,7 @@ const Step4Success = ({ registrationResult, applicantName, emailSent }) => React
     
     React.createElement('a', { href: 'index.html', className: 'inline-block bg-slate-800 text-white px-10 py-4 rounded-xl font-bold hover:bg-slate-700 transition-all shadow-lg' }, 'Volver al Inicio'),
     
+    // FOOTER EN PANTALLA FINAL
     React.createElement('footer', { className: 'mt-12 pt-8 border-t border-slate-100 text-center text-xs text-slate-400' },
         React.createElement('p', { className: 'font-bold mb-1' }, 'Coordinación de Actualización Docente'),
         React.createElement('p', null, `Instituto Tecnológico de Durango • ${new Date().getFullYear()}`)
