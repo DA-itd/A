@@ -1,7 +1,7 @@
 
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
-// Versión: 6.0.0 - Diseño Limpio, Correos Oficiales, Autocomplete 3 chars
+// Versión: 7.2.0 - UI Fixes & Auto Gender
 // =============================================================================
 
 const COURSES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv';
@@ -14,6 +14,14 @@ const cleanCSVValue = (val) => { let cleaned = val.trim(); if (cleaned.startsWit
 const getTeachers = async () => { try { const response = await fetch(`${TEACHERS_CSV_URL}&_=${Date.now()}`); if (!response.ok) throw new Error('Error'); const csvText = await response.text(); return csvText.trim().split(/\r?\n/).slice(1).map(line => { const v = parseCSVLine(line); return v.length < 3 ? null : { nombreCompleto: cleanCSVValue(v[0]), curp: cleanCSVValue(v[1]), email: cleanCSVValue(v[2]) }; }).filter(Boolean); } catch (e) { return []; } };
 const getCourses = async () => { try { const response = await fetch(`${COURSES_CSV_URL}&_=${Date.now()}`); if (!response.ok) throw new Error('Error'); const csvText = await response.text(); return csvText.trim().split(/\r?\n/).slice(1).map(line => { const v = parseCSVLine(line); return v.length < 8 ? null : { id: cleanCSVValue(v[0]), name: cleanCSVValue(v[1]), dates: cleanCSVValue(v[2]), period: cleanCSVValue(v[3]), hours: parseInt(cleanCSVValue(v[4])) || 30, location: cleanCSVValue(v[5]), schedule: cleanCSVValue(v[6]), type: cleanCSVValue(v[7]) || 'No especificado' }; }).filter(Boolean); } catch (e) { return []; } };
 const getDepartments = () => Promise.resolve(MOCK_DEPARTMENTS);
+
+const getGenderFromCurp = (curp) => {
+    if (!curp || curp.length < 11) return '';
+    const genderChar = curp.charAt(10).toUpperCase();
+    if (genderChar === 'H') return 'Hombre';
+    if (genderChar === 'M') return 'Mujer';
+    return '';
+};
 
 const checkRegistration = async (curp, fullName) => {
     try {
@@ -116,7 +124,6 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
     const [showSuggestions, setShowSuggestions] = useState(false);
     const lastChecked = useRef({ curp: '', name: '' });
 
-    // Filtrar sugerencias solo si input > 3 caracteres
     const suggestions = useMemo(() => {
         const input = formData.fullName ? formData.fullName.toUpperCase() : '';
         if (input.length < 3) return []; 
@@ -145,6 +152,8 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
     useEffect(() => {
         if(formData.curp.length === 18 && formData.curp !== lastChecked.current.curp) {
             triggerCheck(formData.curp, formData.fullName);
+            const gender = getGenderFromCurp(formData.curp);
+            if (gender) setFormData(prev => ({ ...prev, gender }));
         }
     }, [formData.curp]);
 
@@ -154,20 +163,20 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
     };
 
     const handleSuggestionClick = (teacher) => {
+        const autoGender = teacher.curp ? getGenderFromCurp(teacher.curp) : formData.gender;
         setFormData(prev => ({ 
             ...prev, 
             fullName: teacher.nombreCompleto, 
             curp: teacher.curp || prev.curp, 
-            email: teacher.email || prev.email 
+            email: teacher.email || prev.email,
+            gender: autoGender
         }));
         setShowSuggestions(false);
         triggerCheck(teacher.curp || '', teacher.nombreCompleto);
     };
 
     const handleNameBlur = () => {
-        // Pequeño delay para permitir clic en sugerencia
         setTimeout(() => setShowSuggestions(false), 200);
-        
         if(formData.fullName.length > 5 && formData.fullName !== lastChecked.current.name) {
             triggerCheck(formData.curp, formData.fullName);
         }
@@ -195,28 +204,13 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
 
     const handleCancelAll = async () => {
         if (!confirm("¿Estás seguro de que deseas dar de baja TODOS los cursos actuales? Esta acción es irreversible.")) return;
-        
         setIsDeletingAll(true);
         try {
-            const courseIds = existingCourses.map(c => c.id);
-            await cancelSelectedCourses({
-                curp: formData.curp,
-                fullName: formData.fullName,
-                email: formData.email,
-                courseIds: courseIds
-            });
-            
-            // Limpiar estado
-            setExistingCourses([]);
-            setOriginalSelectedCourses([]);
-            setSelectedCourses([]);
-            setIsModalOpen(false);
+            await cancelSelectedCourses({ curp: formData.curp, fullName: formData.fullName, email: formData.email, courseIds: existingCourses.map(c => c.id) });
+            setExistingCourses([]); setOriginalSelectedCourses([]); setSelectedCourses([]); setIsModalOpen(false);
             alert("Se han dado de baja todos los cursos exitosamente.");
-        } catch (e) {
-            alert("Error al cancelar cursos: " + e.message);
-        } finally {
-            setIsDeletingAll(false);
-        }
+        } catch (e) { alert("Error al cancelar cursos: " + e.message); } 
+        finally { setIsDeletingAll(false); }
     };
 
     const handleModify = () => {
@@ -255,7 +249,7 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                     React.createElement('input', { 
                         className: 'w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-all uppercase', 
                         value: formData.fullName, onChange: handleNameChange, onBlur: handleNameBlur,
-                        placeholder: 'Apellido Paterno, Materno y Nombres',
+                        placeholder: 'Nombre Apellido Paterno Materno',
                         autoComplete: 'off'
                     }),
                     showSuggestions && suggestions.length > 0 && React.createElement('ul', { className: 'absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1 max-h-60 overflow-auto' },
@@ -273,7 +267,11 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                     React.createElement('input', { 
                         className: 'w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-all uppercase', 
                         value: formData.curp, maxLength: 18, 
-                        onChange: e => setFormData({...formData, curp: e.target.value.toUpperCase()}) 
+                        onChange: e => {
+                            const val = e.target.value.toUpperCase();
+                            const autoGender = getGenderFromCurp(val);
+                            setFormData(prev => ({...prev, curp: val, ...(autoGender && {gender: autoGender})}));
+                        }
                     }),
                     errors.curp && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, errors.curp)
                 ),
@@ -321,7 +319,6 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
     );
 };
 
-// PASO 2: SELECCIÓN DE CURSOS (AGRUPADOS POR FECHA)
 const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, originalSelectedCourses, onNext, onBack }) => {
     const toggle = (c) => {
         if (selectedCourses.some(sc => sc.id === c.id)) setSelectedCourses(selectedCourses.filter(sc => sc.id !== c.id));
