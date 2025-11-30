@@ -1,7 +1,7 @@
 
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
-// Versión: 7.0.0 - Diseño Completo & Correos
+// Versión: 7.1.0 - Corrección UI Nombre, Género Auto y Baja Masiva Real
 // =============================================================================
 
 const COURSES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv';
@@ -14,6 +14,15 @@ const cleanCSVValue = (val) => { let cleaned = val.trim(); if (cleaned.startsWit
 const getTeachers = async () => { try { const response = await fetch(`${TEACHERS_CSV_URL}&_=${Date.now()}`); if (!response.ok) throw new Error('Error'); const csvText = await response.text(); return csvText.trim().split(/\r?\n/).slice(1).map(line => { const v = parseCSVLine(line); return v.length < 3 ? null : { nombreCompleto: cleanCSVValue(v[0]), curp: cleanCSVValue(v[1]), email: cleanCSVValue(v[2]) }; }).filter(Boolean); } catch (e) { return []; } };
 const getCourses = async () => { try { const response = await fetch(`${COURSES_CSV_URL}&_=${Date.now()}`); if (!response.ok) throw new Error('Error'); const csvText = await response.text(); return csvText.trim().split(/\r?\n/).slice(1).map(line => { const v = parseCSVLine(line); return v.length < 8 ? null : { id: cleanCSVValue(v[0]), name: cleanCSVValue(v[1]), dates: cleanCSVValue(v[2]), period: cleanCSVValue(v[3]), hours: parseInt(cleanCSVValue(v[4])) || 30, location: cleanCSVValue(v[5]), schedule: cleanCSVValue(v[6]), type: cleanCSVValue(v[7]) || 'No especificado' }; }).filter(Boolean); } catch (e) { return []; } };
 const getDepartments = () => Promise.resolve(MOCK_DEPARTMENTS);
+
+// Función auxiliar para extraer género del CURP
+const getGenderFromCurp = (curp) => {
+    if (!curp || curp.length < 11) return '';
+    const genderChar = curp.charAt(10).toUpperCase();
+    if (genderChar === 'H') return 'Hombre';
+    if (genderChar === 'M') return 'Mujer';
+    return '';
+};
 
 const checkRegistration = async (curp, fullName) => {
     try {
@@ -37,6 +46,18 @@ const cancelSingleCourse = async (payload) => {
     } catch (e) { throw new Error("No se pudo cancelar. " + e.message); }
 };
 
+const cancelSelectedCourses = async (payload) => {
+    try {
+        const res = await fetch(window.CONFIG.APPS_SCRIPT_URL, { 
+            method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+            body: JSON.stringify({ ...payload, action: 'cancelSelectedCourses' }) 
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message);
+        return json;
+    } catch (e) { throw new Error("No se pudo cancelar todo. " + e.message); }
+};
+
 const submitRegistration = async (data) => {
     try {
         const res = await fetch(window.CONFIG.APPS_SCRIPT_URL, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
@@ -50,7 +71,7 @@ const submitRegistration = async (data) => {
 // COMPONENTES UI
 // =============================================================================
 
-const ExistingRegistrationModal = ({ isOpen, courses, onModify, onClose, onDeleteCourse, deletingCourseId, onCancelAll }) => {
+const ExistingRegistrationModal = ({ isOpen, courses, onModify, onClose, onDeleteCourse, deletingCourseId, onCancelAll, isDeletingAll }) => {
     if (!isOpen) return null;
     return React.createElement('div', { className: 'fixed inset-0 bg-slate-900 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 backdrop-blur-sm' },
         React.createElement('div', { className: 'relative mx-auto p-6 border w-full max-w-lg shadow-2xl rounded-xl bg-white' },
@@ -64,15 +85,30 @@ const ExistingRegistrationModal = ({ isOpen, courses, onModify, onClose, onDelet
                     React.createElement('span', { className: 'font-semibold text-sm text-slate-800' }, c.name),
                     React.createElement('button', {
                         onClick: () => onDeleteCourse(c.id),
-                        disabled: !!deletingCourseId,
+                        disabled: !!deletingCourseId || isDeletingAll,
                         className: 'text-red-500 hover:bg-red-50 px-3 py-1 rounded-md text-xs font-bold border border-red-200 transition-colors'
                     }, deletingCourseId === c.id ? '⏳' : 'BAJA')
                 ))
             ),
             React.createElement('div', { className: 'flex flex-col gap-3' },
-                React.createElement('button', { onClick: onModify, className: 'bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 shadow-lg transition-all' }, '✏️ Modificar Mi Inscripción'),
-                React.createElement('button', { onClick: onCancelAll, className: 'bg-white text-red-600 border border-red-200 font-bold py-2 px-4 rounded-lg hover:bg-red-50' }, '❌ Cancelar Todo'),
-                React.createElement('button', { onClick: onClose, className: 'text-slate-400 hover:text-slate-600 text-sm mt-2' }, 'Cerrar ventana')
+                React.createElement('button', { 
+                    onClick: onModify, 
+                    disabled: isDeletingAll,
+                    className: 'bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 shadow-lg transition-all disabled:opacity-50' 
+                }, '✏️ Modificar Mi Inscripción'),
+                
+                React.createElement('button', { 
+                    onClick: onCancelAll, 
+                    disabled: isDeletingAll,
+                    className: 'bg-white text-red-600 border border-red-200 font-bold py-2 px-4 rounded-lg hover:bg-red-50 disabled:opacity-50 flex justify-center items-center gap-2' 
+                }, isDeletingAll ? React.createElement('span', {className: 'animate-spin h-4 w-4 border-2 border-red-600 rounded-full border-t-transparent'}) : null, 
+                   isDeletingAll ? 'Procesando Baja...' : '❌ Dar de Baja TODOS los Cursos'),
+                
+                React.createElement('button', { 
+                    onClick: onClose, 
+                    disabled: isDeletingAll,
+                    className: 'text-slate-400 hover:text-slate-600 text-sm mt-2 disabled:opacity-50' 
+                }, 'Cerrar ventana')
             )
         )
     );
@@ -85,13 +121,15 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [existingCourses, setExistingCourses] = useState([]);
     const [deletingId, setDeletingId] = useState(null);
+    const [isDeletingAll, setIsDeletingAll] = useState(false);
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const lastChecked = useRef({ curp: '', name: '' });
 
-    // Filtrar profesores solo si hay más de 3 letras
+    // Filtrar sugerencias solo si input > 3 caracteres
     const suggestions = useMemo(() => {
         const input = formData.fullName ? formData.fullName.toUpperCase() : '';
         if (input.length < 3) return []; 
-        return teachers.filter(t => t.nombreCompleto.includes(input)).slice(0, 10);
+        return teachers.filter(t => t.nombreCompleto.includes(input)).slice(0, 8);
     }, [teachers, formData.fullName]);
 
     const triggerCheck = async (curp, name) => {
@@ -116,25 +154,39 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
     useEffect(() => {
         if(formData.curp.length === 18 && formData.curp !== lastChecked.current.curp) {
             triggerCheck(formData.curp, formData.fullName);
+            // Auto-detectar género al completar CURP
+            const gender = getGenderFromCurp(formData.curp);
+            if (gender) setFormData(prev => ({ ...prev, gender }));
         }
     }, [formData.curp]);
 
     const handleNameChange = (e) => {
         setFormData({...formData, fullName: e.target.value.toUpperCase()});
+        setShowSuggestions(true);
     };
 
     const handleSuggestionClick = (teacher) => {
+        // Extraer género del CURP del docente
+        const autoGender = teacher.curp ? getGenderFromCurp(teacher.curp) : formData.gender;
+        
         setFormData(prev => ({ 
             ...prev, 
             fullName: teacher.nombreCompleto, 
             curp: teacher.curp || prev.curp, 
             email: teacher.email || prev.email,
-            // No sobreescribir género automáticamente para dejarlo editable, pero se podría prellenar si hubiera dato
+            gender: autoGender
         }));
+        
+        setShowSuggestions(false); // Ocultar sugerencias inmediatamente
+        
+        // Verificar inmediatamente
         triggerCheck(teacher.curp || '', teacher.nombreCompleto);
     };
 
     const handleNameBlur = () => {
+        // Pequeño delay para permitir clic en sugerencia
+        setTimeout(() => setShowSuggestions(false), 200);
+        
         if(formData.fullName.length > 5 && formData.fullName !== lastChecked.current.name) {
             triggerCheck(formData.curp, formData.fullName);
         }
@@ -160,6 +212,32 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
         finally { setDeletingId(null); }
     };
 
+    const handleCancelAll = async () => {
+        if (!confirm("¿Estás seguro de que deseas dar de baja TODOS los cursos actuales? Esta acción es irreversible.")) return;
+        
+        setIsDeletingAll(true);
+        try {
+            const courseIds = existingCourses.map(c => c.id);
+            await cancelSelectedCourses({
+                curp: formData.curp,
+                fullName: formData.fullName,
+                email: formData.email,
+                courseIds: courseIds
+            });
+            
+            // Limpiar estado
+            setExistingCourses([]);
+            setOriginalSelectedCourses([]);
+            setSelectedCourses([]);
+            setIsModalOpen(false);
+            alert("Se han dado de baja todos los cursos exitosamente.");
+        } catch (e) {
+            alert("Error al cancelar cursos: " + e.message);
+        } finally {
+            setIsDeletingAll(false);
+        }
+    };
+
     const handleModify = () => {
         setSelectedCourses(existingCourses);
         setOriginalSelectedCourses(existingCourses);
@@ -183,7 +261,7 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
             isOpen: isModalOpen, courses: existingCourses,
             onModify: handleModify, onClose: () => setIsModalOpen(false),
             onDeleteCourse: handleDelete, deletingCourseId: deletingId,
-            onCancelAll: () => { setSelectedCourses([]); setOriginalSelectedCourses(existingCourses); setIsModalOpen(false); }
+            onCancelAll: handleCancelAll, isDeletingAll: isDeletingAll
         }),
         React.createElement('div', { className: 'bg-white p-8 rounded-2xl shadow-xl border-t-8 border-blue-900' },
             React.createElement('div', { className: 'mb-8 pb-4 border-b border-gray-100' },
@@ -196,12 +274,13 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                     React.createElement('input', { 
                         className: 'w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-all uppercase', 
                         value: formData.fullName, onChange: handleNameChange, onBlur: handleNameBlur,
-                        placeholder: 'APELLIDO PATERNO MATERNO NOMBRES'
+                        placeholder: 'Nombre Apellido Paterno Materno',
+                        autoComplete: 'off'
                     }),
-                    suggestions.length > 0 && React.createElement('ul', { className: 'absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1 max-h-60 overflow-auto' },
+                    showSuggestions && suggestions.length > 0 && React.createElement('ul', { className: 'absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1 max-h-60 overflow-auto' },
                         suggestions.map((t, idx) => React.createElement('li', {
                             key: idx,
-                            onMouseDown: () => handleSuggestionClick(t),
+                            onMouseDown: (e) => { e.preventDefault(); handleSuggestionClick(t); },
                             className: 'px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 border-b border-gray-100 last:border-0'
                         }, t.nombreCompleto))
                     ),
@@ -213,7 +292,15 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                     React.createElement('input', { 
                         className: 'w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-all uppercase', 
                         value: formData.curp, maxLength: 18, 
-                        onChange: e => setFormData({...formData, curp: e.target.value.toUpperCase()}) 
+                        onChange: e => {
+                            const val = e.target.value.toUpperCase();
+                            setFormData({...formData, curp: val});
+                            // Auto-genero manual si escribe curp
+                            if (val.length === 18) {
+                                const gen = getGenderFromCurp(val);
+                                if (gen) setFormData(prev => ({...prev, curp: val, gender: gen}));
+                            }
+                        }
                     }),
                     errors.curp && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, errors.curp)
                 ),
@@ -222,7 +309,8 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
                     React.createElement('input', { 
                         className: 'w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-all', 
                         type: 'email', value: formData.email, 
-                        onChange: e => setFormData({...formData, email: e.target.value.toLowerCase()}) 
+                        onChange: e => setFormData({...formData, email: e.target.value.toLowerCase()}),
+                        placeholder: '@itdurango.edu.mx'
                     }),
                     errors.email && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, errors.email)
                 ),
@@ -260,6 +348,7 @@ const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCo
     );
 };
 
+// PASO 2: SELECCIÓN DE CURSOS (AGRUPADOS POR FECHA)
 const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, originalSelectedCourses, onNext, onBack }) => {
     const toggle = (c) => {
         if (selectedCourses.some(sc => sc.id === c.id)) setSelectedCourses(selectedCourses.filter(sc => sc.id !== c.id));
