@@ -1,3 +1,4 @@
+
 // =============================================================================
 // SISTEMA DE INSCRIPCIÓN A CURSOS - INSTITUTO TECNOLÓGICO DE DURANGO
 // Versión: 7.3.0 - Layout Compacto & Botón Reubicado
@@ -94,6 +95,9 @@ onClick: onModify,
 disabled: isDeletingAll,
 className: 'bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 shadow-lg transition-all disabled:opacity-50'
 }, '✏️ Modificar Mi Inscripción'),
+
+code
+Code
 React.createElement('button', { 
                 onClick: onCancelAll, 
                 disabled: isDeletingAll,
@@ -121,6 +125,8 @@ const [isDeletingAll, setIsDeletingAll] = useState(false);
 const [showSuggestions, setShowSuggestions] = useState(false);
 const lastChecked = useRef({ curp: '', name: '' });
 
+code
+Code
 // Validación de formulario
 const errors = useMemo(() => {
     const errs = {};
@@ -329,6 +335,8 @@ else if (selectedCourses.length < 3) setSelectedCourses([...selectedCourses, c])
 else alert("Máximo 3 cursos permitidos");
 };
 
+code
+Code
 const groupedCourses = courses.reduce((groups, course) => {
     const dateKey = course.dates || 'Fechas por definir';
     if (!groups[dateKey]) groups[dateKey] = [];
@@ -396,6 +404,8 @@ const toDrop = originalCourses.filter(oc => !courses.some(c => c.id === oc.id));
 return React.createElement('div', { className: 'bg-white p-8 rounded-2xl shadow-xl border-t-8 border-blue-900 max-w-3xl mx-auto' },
 React.createElement('h2', { className: 'text-3xl font-bold mb-6 text-slate-800 text-center' }, 'Confirmar Movimientos'),
 
+code
+Code
 React.createElement('div', { className: 'bg-slate-50 p-5 rounded-xl mb-6 border border-slate-100' },
         React.createElement('div', { className: 'grid md:grid-cols-2 gap-4' },
             React.createElement('div', null,
@@ -438,7 +448,6 @@ React.createElement('div', { className: 'bg-slate-50 p-5 rounded-xl mb-6 border 
         React.createElement('button', { onClick: onSubmit, className: 'flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1' }, '✅ Confirmar Inscripción')
     )
 );
-
 };
 
 const Step4Success = ({ registrationResult, applicantName, emailSent }) => React.createElement('div', { className: 'text-center p-8 sm:p-12 bg-white rounded-2xl shadow-2xl max-w-3xl mx-auto border-t-8 border-green-500' },
@@ -446,6 +455,8 @@ React.createElement('div', { className: 'text-7xl sm:text-8xl mb-6' }, '🎉'),
 React.createElement('h2', { className: 'text-3xl sm:text-4xl font-bold text-slate-800 mb-4' }, '¡Todo Listo!'),
 React.createElement('p', { className: 'text-lg text-slate-600 mb-8' }, Gracias ${applicantName}, el proceso ha finalizado correctamente.),
 
+code
+Code
 registrationResult && registrationResult.length > 0 && React.createElement('div', { className: 'bg-slate-50 p-6 rounded-xl mb-8 text-left border border-slate-100' },
     React.createElement('h3', { className: 'font-bold text-slate-400 uppercase text-xs tracking-wider mb-4' }, 'Comprobantes Generados'),
     registrationResult.map((r, i) => React.createElement('div', { key: i, className: 'flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 pb-4 border-b border-slate-200 last:border-0 last:pb-0 last:mb-0' },
@@ -485,6 +496,8 @@ const [result, setResult] = useState(null);
 const [loading, setLoading] = useState(true);
 const [error, setError] = useState(null);
 
+code
+Code
 useEffect(() => {
     Promise.all([getCourses(), getTeachers(), getDepartments()])
         .then(([c, t, d]) => { setAllCourses(c); setTeachers(t); setDepartments(d); setLoading(false); })
@@ -544,13 +557,9 @@ return React.createElement('div', { className: 'bg-slate-50 py-4 font-sans flex 
         })
     )
 );
-
 };
 
 window.addEventListener('load', () => {
 const root = document.getElementById('root');
 if (root) ReactDOM.createRoot(root).render(React.createElement(App));
 });
-]]></content>
-</change>
-</changes>
