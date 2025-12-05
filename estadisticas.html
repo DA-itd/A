@@ -1,6 +1,6 @@
 <change>
 <file>estadisticas.html</file>
-<description>Frontend actualizado: Se reemplazó la gráfica de 'Tipo de Curso' por 'Cursos por Docente' (Frecuencia de 1-6), se actualizó la base de cobertura a 417 en la UI y el PDF, y se optimizó la visualización de gráficas.</description>
+<description>Frontend actualizado: Se restaura la gráfica 'Tipo de Curso' (Docente/Profesional) junto a 'Cursos por Docente' (Frecuencia). Se implementa paginación automática en PDF para soportar múltiples gráficas.</description>
 <content><![CDATA[
 <!DOCTYPE html>
 <html lang="es">
@@ -84,7 +84,7 @@ Code
         if (!label) return '';
         return label.replace(/DEPARTAMENTO DE /gi, 'D. ').replace(/DEPARTAMENTO/gi, 'D.').replace(/DIVISION DE ESTUDIOS DE /gi, 'Div. ').replace(/DIVISION DE /gi, 'Div. ').replace(/CENTRO DE INFORMACIÓN/gi, 'C. Información').replace(/CENTRO DE /gi, 'C. ').replace(/INGENIERÍA/gi, 'Ing.').replace(/CIENCIAS/gi, 'Cs.').replace(/ECONOMICO-ADMINISTRATIVAS/gi, 'Eco-Admin').trim();
     };
-
+    
     const getChartHeight = (count) => Math.max(400, count * 28) + "px";
 
     const Login = ({ onLogin, loginError }) => {
@@ -188,10 +188,19 @@ Code
             setPdfState({ generating: true, preview: null, blob: null });
             try {
                 const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'letter'); const W = pdf.internal.pageSize.getWidth(); const H = pdf.internal.pageSize.getHeight(); const M = 10;
-                pdf.setFillColor(27, 57, 106); pdf.rect(0, 0, W, 20, 'F');
-                pdf.setFontSize(15); pdf.setFont('helvetica', 'bold'); pdf.setTextColor(255, 255, 255); pdf.text('INSTITUTO TECNOLOGICO DE DURANGO', W/2, 9, { align: 'center' });
-                pdf.setFontSize(10); pdf.setFont('helvetica', 'normal'); pdf.text('Reporte Estadistico - Actualizacion Docente', W/2, 15, { align: 'center' });
                 
+                const addHeader = () => {
+                    pdf.setFillColor(27, 57, 106); pdf.rect(0, 0, W, 20, 'F');
+                    pdf.setFontSize(15); pdf.setFont('helvetica', 'bold'); pdf.setTextColor(255, 255, 255); pdf.text('INSTITUTO TECNOLOGICO DE DURANGO', W/2, 9, { align: 'center' });
+                    pdf.setFontSize(10); pdf.setFont('helvetica', 'normal'); pdf.text('Reporte Estadistico - Actualizacion Docente', W/2, 15, { align: 'center' });
+                };
+                const addFooter = (pageNo, pageCount) => {
+                    pdf.setFillColor(27, 57, 106); pdf.rect(0, H - 10, W, 10, 'F');
+                    pdf.setFontSize(8); pdf.setTextColor(255); pdf.text('Coordinacion de Actualizacion Docente - ITD', M, H - 4);
+                    pdf.text(`Pagina ${pageNo} de ${pageCount}`, W - M, H - 4, { align: 'right' });
+                };
+
+                addHeader();
                 let y = 30; pdf.setTextColor(0); pdf.setFontSize(11); pdf.text(`PERIODO: ${period}`, M, y); pdf.setFontSize(9); pdf.setTextColor(100); pdf.text(`Generado: ${new Date().toLocaleDateString()}`, W-M, y, { align: 'right' }); y += 10;
 
                 const kpis = [{v:stats.totalInscripciones,l:'Inscritos'},{v:stats.coberturaDocente?.actualizados||0,l:'Unicos'},{v:stats.coberturaDocente?.recurrentes||0,l:'Recurrentes'},{v:(stats.coberturaDocente?.porcentaje||0)+'%',l:'Cobertura (417)'}];
@@ -203,11 +212,20 @@ Code
                 });
                 y += 25;
 
-                const [imgC, imgG, imgD, imgF, imgH] = await Promise.all(['chartBox-chartCourses','chartBox-chartGender','chartBox-chartDepts','chartBox-chartFreq','chartBox-chartHistory'].map(id=>captureElement(id)));
+                // Capturar imágenes
+                const [imgC, imgG, imgD, imgF, imgT, imgH] = await Promise.all(['chartBox-chartCourses','chartBox-chartGender','chartBox-chartDepts','chartBox-chartFreq','chartBox-chartType','chartBox-chartHistory'].map(id=>captureElement(id)));
                 
-                if (imgC) pdf.addImage(imgC, 'PNG', M, y, W*0.7, 65); if (imgG) pdf.addImage(imgG, 'PNG', M+(W*0.72), y+5, W*0.2, 50); y += 70;
-                if (imgD) pdf.addImage(imgD, 'PNG', M, y, W*0.65, 70); if (imgF) pdf.addImage(imgF, 'PNG', M+(W*0.67), y, W*0.28, 70); y += 75;
-                if (imgH) pdf.addImage(imgH, 'PNG', M, y, W-(M*2), 50);
+                if (imgC) pdf.addImage(imgC, 'PNG', M, y, W*0.7, 60); if (imgG) pdf.addImage(imgG, 'PNG', M+(W*0.72), y+5, W*0.2, 50); y += 65;
+                if (imgD) pdf.addImage(imgD, 'PNG', M, y, W*0.65, 65); if (imgF) pdf.addImage(imgF, 'PNG', M+(W*0.67), y, W*0.28, 65); y += 70;
+                
+                // Paginación si es necesario
+                if (y + 60 > H - 20) { pdf.addPage(); addHeader(); y = 30; }
+                
+                if (imgT) pdf.addImage(imgT, 'PNG', M, y, W*0.45, 60); 
+                if (imgH) pdf.addImage(imgH, 'PNG', M+(W*0.48), y, W*0.45, 60);
+
+                const pageCount = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) { pdf.setPage(i); addFooter(i, pageCount); }
 
                 const blob = pdf.output('blob'); setPdfState({ generating: false, preview: URL.createObjectURL(blob), blob: blob, filename: `Reporte_${period}.pdf` });
             } catch (e) { alert('Error PDF'); setPdfState({ generating: false, preview: null, blob: null }); }
@@ -227,11 +245,11 @@ Code
         return (
             <div className="container mx-auto px-4 py-6 max-w-7xl animate-fadeIn flex-grow">
                 {pdfState.generating && <div className="pdf-overlay"><div className="pdf-modal"><div className="pdf-spinner"></div><p>Generando PDF...</p></div></div>}
-                {pdfState.preview && <div className="preview-overlay"><div className="preview-header"><h3>Vista Previa</h3><div><button onClick={()=>{const l=document.createElement('a');l.href=URL.createObjectURL(pdfState.blob);l.download=pdfState.filename;l.click();}} className="bg-green-500 text-white px-4 py-2 rounded mr-2">Descargar</button><button onClick={()=>{URL.revokeObjectURL(pdfState.preview);setPdfState({generating:false,preview:null,blob:null});}} className="bg-gray-500 text-white px-4 py-2 rounded">Cerrar</button></div></div><div className="preview-body"><iframe src={pdfState.preview} style={{width:'100%',height:'100%'}}></iframe></div></div>}
+                {pdfState.preview && <div className="preview-overlay"><div className="preview-header"><h3>Vista Previa</h3><div><button onClick={()=>{const l=document.createElement('a');l.href=URL.createObjectURL(pdfState.blob);l.download=pdfState.filename;l.click();}} className="bg-green-500 text-white px-4 py-2 rounded mr-2 font-bold">Descargar</button><button onClick={()=>{URL.revokeObjectURL(pdfState.preview);setPdfState({generating:false,preview:null,blob:null});}} className="bg-gray-500 text-white px-4 py-2 rounded font-bold">Cerrar</button></div></div><div className="preview-body"><iframe src={pdfState.preview} style={{width:'100%',height:'100%'}}></iframe></div></div>}
                 
                 <div className="bg-white rounded-xl shadow p-4 mb-6 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#9D2449] gap-4">
                     <div className="flex-1"><h2 className="text-xl font-bold text-[#1B396A]">Dashboard</h2><p className="text-sm font-bold text-gray-500">Usuario: {user.name}</p></div>
-                    <div className="flex gap-3"><select value={period} onChange={(e)=>setPeriod(e.target.value)} className="border p-2 rounded"><option value="ACTUAL">Actual</option>{availableYears.filter(y=>y!=='ACTUAL').map(y=><option key={y} value={y}>{y}</option>)}</select><button onClick={generatePDF} className="bg-[#1B396A] text-white px-4 py-2 rounded font-bold">PDF</button><button onClick={onLogout} className="bg-gray-100 px-4 py-2 rounded border">Salir</button></div>
+                    <div className="flex gap-3"><select value={period} onChange={(e)=>setPeriod(e.target.value)} className="border p-2 rounded bg-gray-50"><option value="ACTUAL">Actual</option>{availableYears.filter(y=>y!=='ACTUAL').map(y=><option key={y} value={y}>{y}</option>)}</select><button onClick={generatePDF} className="bg-[#1B396A] text-white px-4 py-2 rounded font-bold shadow">PDF</button><button onClick={onLogout} className="bg-white border px-4 py-2 rounded text-gray-700">Salir</button></div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -248,7 +266,11 @@ Code
                     <div className="lg:col-span-4"><ChartBox type="bar" data={stats.frecuenciaParticipacion} title="📋 Cursos por Docente" id="chartFreq" horizontal={false} minHeight="450px" /></div>
                 </div>
                 
-                <div className="mb-6"><ChartBox type="line" data={stats.historicalTrend||{}} title="📈 Evolución Histórica" id="chartHistory" minHeight="380px" /></div>
+                {/* Nueva fila para Tipo de Curso y Evolución Histórica */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+                    <div className="lg:col-span-4"><ChartBox type="bar" data={stats.distribucionTipo} title="🏫 Tipo de Curso" id="chartType" horizontal={false} minHeight="380px" /></div>
+                    <div className="lg:col-span-8"><ChartBox type="line" data={stats.historicalTrend||{}} title="📈 Evolución Histórica" id="chartHistory" minHeight="380px" /></div>
+                </div>
             </div>
         );
     };
