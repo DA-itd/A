@@ -1,186 +1,220 @@
+<change>
+<file>estadisticas.html</file>
+<description>Frontend actualizado: Reorganización de gráficas en 4 filas (Cursos demandados, Depto/Género, Docente/Tipo, Histórico), eliminación de texto residual y ajuste en generación de PDF para nuevo layout.</description>
+<content><![CDATA[
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Estadísticas</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estadísticas - Portal de Actualización Docente ITD</title>
 
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-JH1X2720VL');</script>
 
-    <!-- DARK MODE -->
-    <script>
-/* ---------- Estado global y utilidades ---------- */
-let stats = null;
-let years = [];
-const CHARTS = {};
-if (window.Chart && window.ChartDataLabels) { try { Chart.register(ChartDataLabels); } catch(e) {} }
-function destroyChartIfExists(id){ if(CHARTS[id]){ try{CHARTS[id].destroy();}catch(e){} delete CHARTS[id]; } }
-function createBarChart(id,labels,data){ destroyChartIfExists(id); const el=document.getElementById(id); if(!el)return; const ctx=el.getContext('2d'); CHARTS[id]=new Chart(ctx,{type:"bar",data:{labels:labels||[],datasets:[{data:data||[],backgroundColor:"#8b0000"}]},options:{responsive:true,maintainAspectRatio:false}});} 
-function createPieChart(id,labels,data){ destroyChartIfExists(id); const el=document.getElementById(id); if(!el)return; const ctx=el.getContext('2d'); CHARTS[id]=new Chart(ctx,{type:"pie",data:{labels:labels||[],datasets:[{data:data||[]}]},options:{responsive:true,maintainAspectRatio:false}});} 
-function createLineChart(id,labels,data){ destroyChartIfExists(id); const el=document.getElementById(id); if(!el)return; const ctx=el.getContext('2d'); CHARTS[id]=new Chart(ctx,{type:"line",data:{labels:labels||[],datasets:[{data:data||[],borderColor:"#8b0000"}]},options:{responsive:true,maintainAspectRatio:false}});} 
-function loadStats(){ try{ google.script.run.withSuccessHandler(result=>{ renderStats(result); }).withFailureHandler(err=>{ console.error("ERROR cargando estadísticas:",err); }).getStatisticsData({period:document.getElementById('yearSelector')?.value||"ACTUAL"}); }catch(e){ console.error("google.script.run no disponible:",e);} }
-function renderStats(result){ try{ if(!result||!result.success){ console.error("Datos inválidos",result); return;} stats=result.data||{}; years=result.availableYears||[]; document.getElementById("kpi1").textContent=stats.totalInscripciones??0; document.getElementById("kpi2").textContent=stats.coberturaDocente?.actualizados??0; document.getElementById("kpi3").textContent=stats.coberturaDocente?.recurrentes??0; document.getElementById("kpi4").textContent=(stats.coberturaDocente?.porcentaje??0)+"%"; const sel=document.getElementById("yearSelector"); if(sel){ sel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join(""); } setTimeout(()=>renderCharts(),120);}catch(e){ console.error("renderStats error",e);} }
-function renderCharts(){ if(!stats){console.warn("No stats"); return;} let topCursosArr=Array.isArray(stats.topCursos)?stats.topCursos:Object.entries(stats.topCursos||{}); let topDeptArr=Array.isArray(stats.topDepartamentos)?stats.topDepartamentos:Object.entries(stats.topDepartamentos||{}); const cursosLabels=topCursosArr.slice(0,10).map(x=>x[0]||'ND'); const cursosData=topCursosArr.slice(0,10).map(x=>Number(x[1]||0)); const deptLabels=topDeptArr.map(x=>x[0]||'ND'); const deptData=topDeptArr.map(x=>Number(x[1]||0)); createBarChart("chartCursos",cursosLabels,cursosData); createBarChart("chartDept",deptLabels,deptData); createPieChart("chartGenero", Object.keys(stats.distribucionGenero||{}), Object.values(stats.distribucionGenero||{}).map(v=>Number(v||0)) ); createBarChart("chartFreq", Object.keys(stats.frecuenciaParticipacion||{}), Object.values(stats.frecuenciaParticipacion||{}).map(v=>Number(v||0)) ); createPieChart("chartTipo", Object.keys(stats.distribucionTipo||{}), Object.values(stats.distribucionTipo||{}).map(v=>Number(v||0)) ); const histKeys=Object.keys(stats.historicalTrend||{}); const histRegs=histKeys.map(k=>Number(stats.historicalTrend[k]?.registros||0)); createLineChart("chartHist",histKeys,histRegs); const last3=histKeys.slice(-3); const last3Vals=last3.map(y=>Number(stats.historicalTrend[y]?.registros||0)); createBarChart("chart3Y",last3,last3Vals); }
-async function generatePDF(){ try{ const el=document.getElementById("statsContainer"); if(!el)return alert("No se encontró contenedor"); const canvas=await html2canvas(el,{scale:4,useCORS:true,backgroundColor:'#ffffff'}); const img=canvas.toDataURL("image/png",1.0); const pdf=new jspdf.jsPDF({unit:"mm",format:"letter",compress:false}); const W=pdf.internal.pageSize.getWidth(); const mmW=W-10; const hh=(canvas.height*mmW)/canvas.width; pdf.addImage(img,"PNG",5,10,mmW,hh); pdf.save("Estadisticas.pdf"); }catch(e){ console.error("PDF error",e);} }
-document.addEventListener('DOMContentLoaded',()=>{ loadStats(); const sel=document.getElementById("yearSelector"); if(sel)sel.addEventListener('change',()=>loadStats()); });
-</script>
-
-    <style>
-        .dark body { background: #0f0f0f !important; color: white !important; }
-        .dark .card { background: #1a1a1a !important; color: white !important; }
-        .card { background: white; border-radius: 12px; padding: 20px; }
-    </style>
+<style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+    .pdf-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px); }
+    .pdf-modal { background: white; padding: 40px 60px; border-radius: 16px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3); max-width: 400px; border-top: 6px solid #1B396A; }
+    .pdf-spinner { width: 60px; height: 60px; border: 5px solid #e5e7eb; border-top-color: #1B396A; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .preview-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; z-index: 10000; }
+    .preview-header { background: #1B396A; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+    .preview-body { flex: 1; overflow: auto; padding: 20px; display: flex; justify-content: center; background: #525659; }
+    .preview-body iframe { background: white; box-shadow: 0 10px 40px rgba(0,0,0,0.5); max-width: 100%; height: 100%; border: none; }
+</style>
 </head>
-<body class="p-6">
+<body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800 flex flex-col">
 
-    <a href="index.html" class="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300 mb-4 inline-block">← Regresar al panel principal</a>
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">📊 Panel de Estadísticas</h1>
-        <button onclick="toggleDarkMode()" class="px-4 py-2 bg-black text-white rounded">🌙 Modo Noche</button>
+<header id="web-header" class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A]">
+    <div class="container mx-auto px-4 py-4 sm:py-6 flex items-center justify-between gap-4">
+        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
+        <div class="text-center flex-1 px-2 sm:px-4">
+            <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#1B396A] leading-tight">PANEL DE ESTADÍSTICAS</h1>
+            <p class="text-xs sm:text-sm md:text-base text-[#9D2449] mt-1 font-semibold">Desarrollo Académico</p>
+        </div>
+        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
     </div>
+</header>
 
-    <div class="mb-4 flex gap-4">
-        <select id="yearSelector" class="p-2 border rounded"></select>
-        <button onclick="generatePDF()" class="px-4 py-2 bg-red-700 text-white rounded">📄 Exportar PDF</button>
+<div id="back-link" class="container mx-auto px-4 py-4">
+    <a href="index.html" class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center gap-1 text-sm font-bold transition-colors">← Volver al Portal Principal</a>
+</div>
+
+<div id="root" class="flex-grow flex flex-col"><div class="flex justify-center items-center h-64 flex-grow"><div class="animate-spin h-12 w-12 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div></div>
+
+<footer id="web-footer" class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449]">
+    <div class="container mx-auto px-4">
+         <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
+         <p class="text-xs sm:text-sm opacity-90">M.C. Alejandro Calderón Rentería</p>
+         <p id="copyright-year" class="text-xs sm:text-sm opacity-75 mt-1"></p>
     </div>
+</footer>
 
-    <div id="statsContainer" class="space-y-6">
+<script>document.addEventListener('DOMContentLoaded', function() { var yearEl = document.getElementById('copyright-year'); if (yearEl) yearEl.textContent = new Date().getFullYear(); });</script>
 
-        <!-- KPIs -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="card"><div class="text-gray-600 dark:text-gray-300">Inscripciones</div><div id="kpi1" class="text-3xl font-bold"></div></div>
-            <div class="card"><div class="text-gray-600 dark:text-gray-300">Docentes Únicos</div><div id="kpi2" class="text-3xl font-bold"></div></div>
-            <div class="card"><div class="text-gray-600 dark:text-gray-300">Recurrentes</div><div id="kpi3" class="text-3xl font-bold"></div></div>
-            <div class="card"><div class="text-gray-600 dark:text-gray-300">Cobertura</div><div id="kpi4" class="text-3xl font-bold"></div></div>
-        </div>
+<script type="text/babel">
+    const React = window.React; const ReactDOM = window.ReactDOM;
+    const CONFIG = { GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec' };
+    const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
+    const VIBRANT_COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC926', '#1982C4', '#E91E63', '#009688'];
+    const shortenLabel = (l) => l ? l.replace(/DEPARTAMENTO DE /gi, 'D. ').replace(/DEPARTAMENTO/gi, 'D.').replace(/DIVISION DE ESTUDIOS DE /gi, 'Div. ').replace(/CENTRO DE INFORMACIÓN/gi, 'C. Inf').replace(/INGENIERÍA/gi, 'Ing.').replace(/CIENCIAS/gi, 'Cs.').replace(/ECONOMICO-ADMINISTRATIVAS/gi, 'Eco-Admin').trim() : '';
+    const getChartHeight = (count) => Math.max(400, count * 28) + "px";
 
-        <!-- Cursos -->
-        <div class="card">
-            <h2 class="text-xl font-bold mb-2">Top Cursos</h2>
-            <canvas id="chartCursos"></canvas>
-        </div>
+    const Login = ({ onLogin, loginError }) => {
+        const ref = React.useRef(null);
+        React.useEffect(() => {
+            const init = () => { if (window.google?.accounts && ref.current) { try { window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin }); window.google.accounts.id.renderButton(ref.current, { theme: "outline", size: "large" }); return true; } catch (e) { return false; } } return false; };
+            if (!init()) { const i = setInterval(() => { if (init()) clearInterval(i); }, 500); return () => clearInterval(i); }
+        }, [onLogin]);
+        return <div className="flex flex-col justify-center items-center py-20 animate-fadeIn px-4 flex-grow"><div className="bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-8 border-[#9D2449]"><div className="text-5xl mb-6">🔒</div><h2 className="text-3xl font-bold text-[#1B396A] mb-2">Acceso Restringido</h2><p className="text-gray-500 mb-8 text-sm font-medium uppercase tracking-wide">Estadísticas</p>{loginError && <div className="mb-6 bg-red-100 text-red-700 px-4 py-3 rounded font-bold">{loginError}</div>}<div className="flex justify-center" ref={ref}></div></div></div>;
+    };
 
-        <!-- Departamentos y Género -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="card"><h2 class="text-xl font-bold mb-2">Departamentos</h2><canvas id="chartDept"></canvas></div>
-            <div class="card"><h2 class="text-xl font-bold mb-2">Género</h2><canvas id="chartGenero"></canvas></div>
-        </div>
+    const ChartBox = ({ type, data, title, id, horizontal=false, shortenLabels=false, minHeight="350px" }) => {
+        const canvasRef = React.useRef(null); const chartRef = React.useRef(null);
+        React.useEffect(() => {
+            if (!canvasRef.current || !data || !window.Chart) return;
+            if (chartRef.current) chartRef.current.destroy();
+            const ctx = canvasRef.current.getContext('2d');
+            const isHistory = id === 'chartHistory', isPie = type === 'pie'||type==='doughnut';
+            const config = {
+                type: isHistory ? 'line' : type,
+                data: { labels: [], datasets: [] },
+                plugins: [ChartDataLabels],
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: horizontal?'y':'x', 
+                    scales: isPie ? {} : { y: { beginAtZero: true, ticks: { color:'#374151', font:{size:11,weight:'600'}, autoSkip:false, callback:(v)=>v%1===0?v:null }, grid:{color:'#e5e7eb',borderDash:[5,5]} }, x: { beginAtZero: true, ticks:{color:'#374151'}, grid:{display:false} } },
+                    plugins: { datalabels: { display: true, align: isHistory?'top':(horizontal?'end':'top'), anchor: isHistory?'center':(horizontal?'end':'end'), backgroundColor: isHistory?'rgba(255,255,255,0.9)':(isPie?'rgba(0,0,0,0.6)':'transparent'), borderRadius:4, color:isHistory?'#1B396A':(isPie?'#fff':'#374151'), font:{weight:'bold',size:11}, formatter:Math.round, offset:4, clip:false }, legend: { display: isPie||isHistory, position: 'bottom' } },
+                    layout: { padding: { top: 25, right: 40, left: 10, bottom: 10 } }
+                }
+            };
+            if (isHistory) {
+                const years = Object.keys(data).sort((a,b) => parseInt(a) - parseInt(b));
+                config.data = { labels: years, datasets: [ { label: 'Inscritos', data: years.map(y=>data[y]?.registros||0), borderColor: '#36A2EB', backgroundColor: 'rgba(54,162,235,0.2)', fill: true, tension: 0.4 }, { label: 'Cursos', data: years.map(y=>data[y]?.cursos||0), borderColor: '#FF6384', backgroundColor: 'rgba(255,99,132,0.2)', fill: true, tension: 0.4 } ] };
+            } else {
+                const labels = Object.keys(data).map(l => shortenLabels ? shortenLabel(l) : l);
+                config.data = { labels: labels, datasets: [{ label: title, data: Object.values(data), backgroundColor: isPie?INSTITUTIONAL_COLORS:VIBRANT_COLORS }] };
+            }
+            chartRef.current = new Chart(ctx, config);
+            return () => { if (chartRef.current) chartRef.current.destroy(); };
+        }, [data, type, title, horizontal, id, shortenLabels]);
+        return <div id={`chartBox-${id}`} className="bg-white p-5 rounded-xl shadow h-full flex flex-col" style={{ minHeight }}><h3 className="text-gray-700 font-bold mb-4 text-center border-b pb-3">{title}</h3><div className="flex-1 relative"><canvas ref={canvasRef}></canvas></div></div>;
+    };
 
-        <!-- Frecuencia y Tipo -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="card"><h2 class="text-xl font-bold mb-2">Frecuencia</h2><canvas id="chartFreq"></canvas></div>
-            <div class="card"><h2 class="text-xl font-bold mb-2">Tipo</h2><canvas id="chartTipo"></canvas></div>
-        </div>
+    const Dashboard = ({ user, onLogout }) => {
+        const [stats, setStats] = React.useState(null), [loading, setLoading] = React.useState(true), [error, setError] = React.useState(null), [period, setPeriod] = React.useState('ACTUAL'), [availableYears, setYears] = React.useState([]), [pdfState, setPdfState] = React.useState({ generating: false, preview: null });
+        React.useEffect(() => {
+            setLoading(true); setError(null);
+            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}`).then(r=>r.json()).then(res=>{ if(res.success){ setStats(res.data); if(res.availableYears) setYears(res.availableYears); } else throw new Error(res.message); }).catch(e=>setError(e.message)).finally(()=>setLoading(false));
+        }, [period]);
 
-        <!-- Histórico -->
-        <div class="card"><h2 class="text-xl font-bold mb-2">Histórico</h2><canvas id="chartHist"></canvas></div>
+        const captureElement = async (id) => { const el = document.getElementById(id); if (!el) return null; try { return (await html2canvas(el, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false, ignoreElements: (e) => e.tagName === 'BUTTON' })).toDataURL('image/png'); } catch (e) { return null; } };
+        const generatePDF = async () => {
+            setPdfState({ generating: true, preview: null });
+            try {
+                const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'letter'); const W = pdf.internal.pageSize.getWidth(); const H = pdf.internal.pageSize.getHeight(); const M = 10;
+                const addHeader = () => { pdf.setFillColor(27, 57, 106); pdf.rect(0, 0, W, 20, 'F'); pdf.setFontSize(15); pdf.setTextColor(255); pdf.text('INSTITUTO TECNOLOGICO DE DURANGO', W/2, 9, { align: 'center' }); pdf.setFontSize(10); pdf.text('Reporte Estadistico - Actualizacion Docente', W/2, 15, { align: 'center' }); };
+                const addFooter = (pn, pc) => { pdf.setFillColor(27, 57, 106); pdf.rect(0, H - 10, W, 10, 'F'); pdf.setFontSize(8); pdf.setTextColor(255); pdf.text('Coordinacion de Actualizacion Docente - ITD', M, H - 4); pdf.text(`Pagina ${pn} de ${pc}`, W - M, H - 4, { align: 'right' }); };
+                
+                addHeader();
+                let y = 30; pdf.setTextColor(0); pdf.setFontSize(11); pdf.text(`PERIODO: ${period}`, M, y); pdf.setFontSize(9); pdf.setTextColor(100); pdf.text(`Generado: ${new Date().toLocaleDateString()}`, W-M, y, { align: 'right' }); y += 10;
 
-        <!-- Comparativa 3 años -->
-        <div class="card"><h2 class="text-xl font-bold mb-2">Comparativa 3 Años</h2><canvas id="chart3Y"></canvas></div>
+                const kpis = [{v:stats.totalInscripciones,l:'Inscritos'},{v:stats.coberturaDocente?.actualizados||0,l:'Unicos'},{v:stats.coberturaDocente?.recurrentes||0,l:'Recurrentes'},{v:(stats.coberturaDocente?.porcentaje||0)+'%',l:'Cobertura (417)'}];
+                const kw = (W-(M*2)-15)/4;
+                kpis.forEach((k, i) => {
+                    const x = M+(i*(kw+5)); pdf.setFillColor(245,245,245); pdf.roundedRect(x,y,kw,16,2,2,'F');
+                    pdf.setFontSize(14); pdf.setTextColor(0); pdf.text(String(k.v), x+kw/2, y+7, {align:'center'});
+                    pdf.setFontSize(7); pdf.setTextColor(100); pdf.text(k.l, x+kw/2, y+12, {align:'center'});
+                });
+                y += 25;
 
-    </div>
+                const [imgC, imgD, imgG, imgF, imgT, imgH] = await Promise.all(['chartBox-chartCourses','chartBox-chartDepts','chartBox-chartGender','chartBox-chartFreq','chartBox-chartType','chartBox-chartHistory'].map(id=>captureElement(id)));
+                
+                // P1: Cursos (Full)
+                if (imgC) pdf.addImage(imgC, 'PNG', M, y, W-(M*2), 80); y += 85;
+                
+                // P1: Deptos (Full)
+                if (y + 80 > H - 20) { pdf.addPage(); addHeader(); y = 30; }
+                if (imgD) pdf.addImage(imgD, 'PNG', M, y, W-(M*2), 80); y += 85;
 
-<script>
-let stats = null;
-let years = [];
+                // P1/P2: Género y Tipo (Mitad)
+                if (y + 60 > H - 20) { pdf.addPage(); addHeader(); y = 30; }
+                if (imgG) pdf.addImage(imgG, 'PNG', M, y, (W/2)-M-2, 60);
+                if (imgT) pdf.addImage(imgT, 'PNG', (W/2)+2, y, (W/2)-M-2, 60);
+                y += 65;
 
-async function loadStats() {
-    google.script.run
-        .withSuccessHandler(function(result) {
-            renderStats(result);
-        })
-        .withFailureHandler(function(err) {
-            console.error("ERROR cargando estadísticas:", err);
-        })
-        .getStatisticsData({ period: "ACTUAL" });
-}
+                // P2: Frecuencia y Histórico
+                if (y + 80 > H - 20) { pdf.addPage(); addHeader(); y = 30; }
+                if (imgF) pdf.addImage(imgF, 'PNG', M, y, W-(M*2), 70); y += 75;
+                
+                if (y + 60 > H - 20) { pdf.addPage(); addHeader(); y = 30; }
+                if (imgH) pdf.addImage(imgH, 'PNG', M, y, W-(M*2), 60);
 
-function renderStats(result) {
-    if (!result || !result.success) {
-        console.error("Error obteniendo datos:", result);
-        return;
-    }
+                const pc = pdf.internal.getNumberOfPages();
+                for (let i=1; i<=pc; i++) { pdf.setPage(i); addFooter(i, pc); }
 
-    stats = result.data;
-    years = result.availableYears;
+                const blob = pdf.output('blob'); setPdfState({ generating: false, preview: URL.createObjectURL(blob) });
+            } catch (e) { setPdfState({ generating: false }); alert('Error PDF'); }
+        };
 
-    document.getElementById("kpi1").textContent = stats.totalInscripciones;
-    document.getElementById("kpi2").textContent = stats.coberturaDocente.actualizados;
-    document.getElementById("kpi3").textContent = stats.coberturaDocente.recurrentes;
-    document.getElementById("kpi4").textContent = stats.coberturaDocente.porcentaje + "%";
+        if (loading && !stats) return <div className="flex justify-center items-center h-96 flex-grow"><div className="animate-spin h-16 w-16 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div>;
+        if (error) return <div className="text-center py-20 text-red-600 font-bold">Error: {error}<br/><button onClick={()=>window.location.reload()} className="underline">Recargar</button></div>;
+        if (!stats) return null;
 
-    const sel = document.getElementById("yearSelector");
-    sel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
+        return (
+            <div className="container mx-auto px-4 py-6 max-w-7xl animate-fadeIn flex-grow">
+                {pdfState.generating && <div className="pdf-overlay"><div className="pdf-modal"><div className="pdf-spinner"></div><p>Generando PDF...</p></div></div>}
+                {pdfState.preview && <div className="preview-overlay"><div className="preview-header"><h3>Vista Previa</h3><div><button onClick={()=>{const l=document.createElement('a');l.href=pdfState.preview;l.download=`Reporte_${period}.pdf`;l.click();}} className="bg-green-500 text-white px-4 py-2 rounded mr-2">Descargar</button><button onClick={()=>{URL.revokeObjectURL(pdfState.preview);setPdfState({generating:false,preview:null});}} className="bg-gray-500 text-white px-4 py-2 rounded">Cerrar</button></div></div><div className="preview-body"><iframe src={pdfState.preview} width="100%" height="100%"></iframe></div></div>}
+                
+                <div className="bg-white rounded-xl shadow p-4 mb-6 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#9D2449] gap-4">
+                    <div className="flex-1"><h2 className="text-xl font-bold text-[#1B396A]">Dashboard</h2><p className="text-sm font-bold text-gray-500">{user.name}</p></div>
+                    <div className="flex gap-3"><select value={period} onChange={(e)=>setPeriod(e.target.value)} className="border p-2 rounded"><option value="ACTUAL">Actual</option>{availableYears.filter(y=>y!=='ACTUAL').map(y=><option key={y} value={y}>{y}</option>)}</select><button onClick={generatePDF} className="bg-[#1B396A] text-white px-4 py-2 rounded font-bold">PDF</button><button onClick={onLogout} className="bg-gray-100 px-4 py-2 rounded border">Salir</button></div>
+                </div>
 
-    setTimeout(() => { renderCharts(); }, 150);
-}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    {[{v:stats.totalInscripciones,l:'Inscritos',i:'📝'},{v:stats.coberturaDocente.actualizados,l:'Unicos',i:'👩‍🏫'},{v:stats.coberturaDocente.recurrentes,l:'Recurrentes',i:'🔁'},{v:`${stats.coberturaDocente.porcentaje}%`,l:'Cobertura (417)',i:'🎯'}].map((k,i)=><div key={i} className="bg-white p-4 rounded shadow border-b-4 border-[#1B396A] flex gap-3"><div className="text-3xl">{k.i}</div><div><div className="text-2xl font-bold">{k.v}</div><div className="text-xs font-bold text-gray-500 uppercase">{k.l}</div></div></div>)}
+                </div>
 
-function renderCharts() {
-    createBarChart("chartCursos", stats.topCursos.slice(0,10).map(x => x[0]), stats.topCursos.slice(0,10).map(x => x[1]));
-    createBarChart("chartDept", stats.topDepartamentos.map(x=>x[0]), stats.topDepartamentos.map(x=>x[1]));
-    createPieChart("chartGenero", Object.keys(stats.distribucionGenero), Object.values(stats.distribucionGenero));
-    createBarChart("chartFreq", Object.keys(stats.frecuenciaParticipacion), Object.values(stats.frecuenciaParticipacion));
-    createPieChart("chartTipo", Object.keys(stats.distribucionTipo), Object.values(stats.distribucionTipo));
+                {/* Fila 1: Cursos (Full Width) */}
+                <div className="mb-6"><ChartBox type="bar" data={Object.fromEntries(stats.topCursos||[])} title="📚 Cursos Más Demandados" id="chartCourses" horizontal={true} minHeight="400px" /></div>
 
-    createLineChart("chartHist",
-        Object.keys(stats.historicalTrend),
-        Object.values(stats.historicalTrend).map(x=>x.registros));
+                {/* Fila 2: Deptos + Género */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+                    <div className="lg:col-span-8"><ChartBox type="bar" data={Object.fromEntries(stats.topDepartamentos||[])} title="🏢 Participación por Departamento" id="chartDepts" horizontal={true} shortenLabels={true} minHeight="450px" /></div>
+                    <div className="lg:col-span-4"><ChartBox type="doughnut" data={stats.distribucionGenero} title="👥 Género" id="chartGender" minHeight="450px" /></div>
+                </div>
 
-    const last3 = Object.keys(stats.historicalTrend).slice(-3);
-    createBarChart("chart3Y",
-        last3,
-        last3.map(y => stats.historicalTrend[y].registros)
-    );
-}
+                {/* Fila 3: Frecuencia + Tipo */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <ChartBox type="bar" data={stats.frecuenciaParticipacion} title="📋 Cursos por Docente" id="chartFreq" horizontal={false} minHeight="400px" />
+                    <ChartBox type="bar" data={stats.distribucionTipo} title="🏫 Tipo de Curso" id="chartType" horizontal={false} minHeight="400px" />
+                </div>
+                
+                {/* Fila 4: Histórico (Full) */}
+                <div className="mb-6"><ChartBox type="line" data={stats.historicalTrend||{}} title="📈 Evolución Histórica" id="chartHistory" minHeight="400px" /></div>
+            </div>
+        );
+    };
 
-function createBarChart(id, labels, data) {
-    new Chart(document.getElementById(id), {
-        type: "bar",
-        data: { labels, datasets: [{ data, backgroundColor: "#8b0000" }] },
-        options: { responsive: true }
-    });
-}
-
-function createPieChart(id, labels, data) {
-    new Chart(document.getElementById(id), {
-        type: "pie",
-        data: { labels, datasets: [{ data }] },
-        options: { responsive: true }
-    });
-}
-
-function createLineChart(id, labels, data) {
-    new Chart(document.getElementById(id), {
-        type: "line",
-        data: { labels, datasets: [{ data, borderColor: "#8b0000" }] },
-        options: { responsive: true }
-    });
-}
-
-async function generatePDF() {
-    const el = document.getElementById("statsContainer");
-    const canvas = await html2canvas(el, { scale: 4 });
-
-    const img = canvas.toDataURL("image/png", 1.0);
-    const pdf = new jspdf.jsPDF({ unit: "mm", format: "letter", compress: false });
-
-    const w = 210;
-    const h = (canvas.height * 210) / canvas.width;
-
-    pdf.addImage(img, "PNG", 0, 0, w, h, undefined, "SLOW");
-    pdf.save("Estadisticas.pdf");
-}
-
-loadStats();
+    const App = () => {
+        const [user, setUser] = React.useState(null);
+        const handleLogin = (res) => { try { const p = JSON.parse(atob(res.credential.split('.')[1])); setUser({ name: p.name, email: p.email }); } catch (e) {} };
+        return user ? <Dashboard user={user} onLogout={()=>setUser(null)} /> : <Login onLogin={handleLogin} />;
+    };
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
 </body>
 </html>
+]]></content>
+</change>
