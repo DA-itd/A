@@ -87,22 +87,37 @@ let stats = null;
 let years = [];
 
 async function loadStats() {
-    const res = await google.script.run.withSuccessHandler(renderStats).getStatisticsData({ period: "ACTUAL" });
+    google.script.run
+        .withSuccessHandler(function(result) {
+            renderStats(result);
+        })
+        .withFailureHandler(function(err) {
+            console.error("ERROR cargando estadísticas:", err);
+        })
+        .getStatisticsData({ period: "ACTUAL" });({ period: "ACTUAL" });
 }
 
 function renderStats(result) {
+    if (!result || !result.success) {
+        console.error("Error obteniendo datos:", result);
+        return;
+    }
+
     stats = result.data;
     years = result.availableYears;
-
-    const sel = document.getElementById("yearSelector");
-    sel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
 
     document.getElementById("kpi1").textContent = stats.totalInscripciones;
     document.getElementById("kpi2").textContent = stats.coberturaDocente.actualizados;
     document.getElementById("kpi3").textContent = stats.coberturaDocente.recurrentes;
     document.getElementById("kpi4").textContent = stats.coberturaDocente.porcentaje + "%";
 
-    renderCharts();
+    const sel = document.getElementById("yearSelector");
+    sel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
+
+    setTimeout(() => { renderCharts(); }, 150);
+}
+
+function renderCharts();
 }
 
 function renderCharts() {
