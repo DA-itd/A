@@ -18,15 +18,21 @@
 
     <!-- DARK MODE -->
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const toggle = () => {
-                document.documentElement.classList.toggle("dark");
-                localStorage.setItem("DARK", document.documentElement.classList.contains("dark"));
-            };
-            if (localStorage.getItem("DARK") === "true") document.documentElement.classList.add("dark");
-            window.toggleDarkMode = toggle;
-        });
-    </script>
+/* ---------- Estado global y utilidades ---------- */
+let stats = null;
+let years = [];
+const CHARTS = {};
+if (window.Chart && window.ChartDataLabels) { try { Chart.register(ChartDataLabels); } catch(e) {} }
+function destroyChartIfExists(id){ if(CHARTS[id]){ try{CHARTS[id].destroy();}catch(e){} delete CHARTS[id]; } }
+function createBarChart(id,labels,data){ destroyChartIfExists(id); const el=document.getElementById(id); if(!el)return; const ctx=el.getContext('2d'); CHARTS[id]=new Chart(ctx,{type:"bar",data:{labels:labels||[],datasets:[{data:data||[],backgroundColor:"#8b0000"}]},options:{responsive:true,maintainAspectRatio:false}});} 
+function createPieChart(id,labels,data){ destroyChartIfExists(id); const el=document.getElementById(id); if(!el)return; const ctx=el.getContext('2d'); CHARTS[id]=new Chart(ctx,{type:"pie",data:{labels:labels||[],datasets:[{data:data||[]}]},options:{responsive:true,maintainAspectRatio:false}});} 
+function createLineChart(id,labels,data){ destroyChartIfExists(id); const el=document.getElementById(id); if(!el)return; const ctx=el.getContext('2d'); CHARTS[id]=new Chart(ctx,{type:"line",data:{labels:labels||[],datasets:[{data:data||[],borderColor:"#8b0000"}]},options:{responsive:true,maintainAspectRatio:false}});} 
+function loadStats(){ try{ google.script.run.withSuccessHandler(result=>{ renderStats(result); }).withFailureHandler(err=>{ console.error("ERROR cargando estadísticas:",err); }).getStatisticsData({period:document.getElementById('yearSelector')?.value||"ACTUAL"}); }catch(e){ console.error("google.script.run no disponible:",e);} }
+function renderStats(result){ try{ if(!result||!result.success){ console.error("Datos inválidos",result); return;} stats=result.data||{}; years=result.availableYears||[]; document.getElementById("kpi1").textContent=stats.totalInscripciones??0; document.getElementById("kpi2").textContent=stats.coberturaDocente?.actualizados??0; document.getElementById("kpi3").textContent=stats.coberturaDocente?.recurrentes??0; document.getElementById("kpi4").textContent=(stats.coberturaDocente?.porcentaje??0)+"%"; const sel=document.getElementById("yearSelector"); if(sel){ sel.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join(""); } setTimeout(()=>renderCharts(),120);}catch(e){ console.error("renderStats error",e);} }
+function renderCharts(){ if(!stats){console.warn("No stats"); return;} let topCursosArr=Array.isArray(stats.topCursos)?stats.topCursos:Object.entries(stats.topCursos||{}); let topDeptArr=Array.isArray(stats.topDepartamentos)?stats.topDepartamentos:Object.entries(stats.topDepartamentos||{}); const cursosLabels=topCursosArr.slice(0,10).map(x=>x[0]||'ND'); const cursosData=topCursosArr.slice(0,10).map(x=>Number(x[1]||0)); const deptLabels=topDeptArr.map(x=>x[0]||'ND'); const deptData=topDeptArr.map(x=>Number(x[1]||0)); createBarChart("chartCursos",cursosLabels,cursosData); createBarChart("chartDept",deptLabels,deptData); createPieChart("chartGenero", Object.keys(stats.distribucionGenero||{}), Object.values(stats.distribucionGenero||{}).map(v=>Number(v||0)) ); createBarChart("chartFreq", Object.keys(stats.frecuenciaParticipacion||{}), Object.values(stats.frecuenciaParticipacion||{}).map(v=>Number(v||0)) ); createPieChart("chartTipo", Object.keys(stats.distribucionTipo||{}), Object.values(stats.distribucionTipo||{}).map(v=>Number(v||0)) ); const histKeys=Object.keys(stats.historicalTrend||{}); const histRegs=histKeys.map(k=>Number(stats.historicalTrend[k]?.registros||0)); createLineChart("chartHist",histKeys,histRegs); const last3=histKeys.slice(-3); const last3Vals=last3.map(y=>Number(stats.historicalTrend[y]?.registros||0)); createBarChart("chart3Y",last3,last3Vals); }
+async function generatePDF(){ try{ const el=document.getElementById("statsContainer"); if(!el)return alert("No se encontró contenedor"); const canvas=await html2canvas(el,{scale:4,useCORS:true,backgroundColor:'#ffffff'}); const img=canvas.toDataURL("image/png",1.0); const pdf=new jspdf.jsPDF({unit:"mm",format:"letter",compress:false}); const W=pdf.internal.pageSize.getWidth(); const mmW=W-10; const hh=(canvas.height*mmW)/canvas.width; pdf.addImage(img,"PNG",5,10,mmW,hh); pdf.save("Estadisticas.pdf"); }catch(e){ console.error("PDF error",e);} }
+document.addEventListener('DOMContentLoaded',()=>{ loadStats(); const sel=document.getElementById("yearSelector"); if(sel)sel.addEventListener('change',()=>loadStats()); });
+</script>
 
     <style>
         .dark body { background: #0f0f0f !important; color: white !important; }
@@ -116,9 +122,6 @@ function renderStats(result) {
     sel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
 
     setTimeout(() => { renderCharts(); }, 150);
-}
-
-
 }
 
 function renderCharts() {
