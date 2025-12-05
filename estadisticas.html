@@ -1,6 +1,6 @@
 <change>
 <file>estadisticas.html</file>
-<description>Frontend actualizado: Se restaura la gráfica 'Tipo de Curso' (Docente/Profesional) junto a 'Cursos por Docente' (Frecuencia). Se implementa paginación automática en PDF para soportar múltiples gráficas.</description>
+<description>Frontend actualizado: Reorganización de gráficas en 4 filas (Cursos demandados, Depto/Género, Docente/Tipo, Histórico), eliminación de texto residual y ajuste en generación de PDF para nuevo layout.</description>
 <content><![CDATA[
 <!DOCTYPE html>
 <html lang="es">
@@ -8,28 +8,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Estadísticas - Portal de Actualización Docente ITD</title>
-code
-Code
+
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
 
-<!-- React y Babel -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Chart.js y Plugin de Etiquetas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-
-<!-- Librerías para PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-JH1X2720VL');</script>
 
 <style>
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -45,8 +37,7 @@ Code
 </style>
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800 flex flex-col">
-code
-Code
+
 <header id="web-header" class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A]">
     <div class="container mx-auto px-4 py-4 sm:py-6 flex items-center justify-between gap-4">
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
@@ -79,127 +70,63 @@ Code
     const CONFIG = { GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec' };
     const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
     const VIBRANT_COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC926', '#1982C4', '#E91E63', '#009688'];
-    
-    const shortenLabel = (label) => {
-        if (!label) return '';
-        return label.replace(/DEPARTAMENTO DE /gi, 'D. ').replace(/DEPARTAMENTO/gi, 'D.').replace(/DIVISION DE ESTUDIOS DE /gi, 'Div. ').replace(/DIVISION DE /gi, 'Div. ').replace(/CENTRO DE INFORMACIÓN/gi, 'C. Información').replace(/CENTRO DE /gi, 'C. ').replace(/INGENIERÍA/gi, 'Ing.').replace(/CIENCIAS/gi, 'Cs.').replace(/ECONOMICO-ADMINISTRATIVAS/gi, 'Eco-Admin').trim();
-    };
-    
+    const shortenLabel = (l) => l ? l.replace(/DEPARTAMENTO DE /gi, 'D. ').replace(/DEPARTAMENTO/gi, 'D.').replace(/DIVISION DE ESTUDIOS DE /gi, 'Div. ').replace(/CENTRO DE INFORMACIÓN/gi, 'C. Inf').replace(/INGENIERÍA/gi, 'Ing.').replace(/CIENCIAS/gi, 'Cs.').replace(/ECONOMICO-ADMINISTRATIVAS/gi, 'Eco-Admin').trim() : '';
     const getChartHeight = (count) => Math.max(400, count * 28) + "px";
 
     const Login = ({ onLogin, loginError }) => {
-        const googleButtonRef = React.useRef(null);
+        const ref = React.useRef(null);
         React.useEffect(() => {
-            const initGoogle = () => {
-                if (window.google && window.google.accounts && googleButtonRef.current) {
-                    try { window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin }); window.google.accounts.id.renderButton(googleButtonRef.current, { theme: "outline", size: "large", text: "signin_with", shape: "rectangular" }); return true; } catch (e) { return false; }
-                } return false;
-            };
-            if (!initGoogle()) { let intervalId = setInterval(() => { if (initGoogle()) clearInterval(intervalId); }, 500); }
+            const init = () => { if (window.google?.accounts && ref.current) { try { window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin }); window.google.accounts.id.renderButton(ref.current, { theme: "outline", size: "large" }); return true; } catch (e) { return false; } } return false; };
+            if (!init()) { const i = setInterval(() => { if (init()) clearInterval(i); }, 500); return () => clearInterval(i); }
         }, [onLogin]);
-        return (<div className="flex flex-col justify-center items-center py-20 animate-fadeIn px-4 flex-grow"><div className="bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-8 border-[#9D2449]"><div className="text-5xl mb-6">🔒</div><h2 className="text-3xl font-bold text-[#1B396A] mb-2">Acceso Restringido</h2><p className="text-gray-500 mb-8 text-sm font-medium uppercase tracking-wide">Estadísticas Institucionales</p>{loginError && <div className="mb-6 bg-red-100 text-red-700 px-4 py-3 rounded font-bold">{loginError}</div>}<div className="flex justify-center" ref={googleButtonRef}></div></div></div>);
+        return <div className="flex flex-col justify-center items-center py-20 animate-fadeIn px-4 flex-grow"><div className="bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-8 border-[#9D2449]"><div className="text-5xl mb-6">🔒</div><h2 className="text-3xl font-bold text-[#1B396A] mb-2">Acceso Restringido</h2><p className="text-gray-500 mb-8 text-sm font-medium uppercase tracking-wide">Estadísticas</p>{loginError && <div className="mb-6 bg-red-100 text-red-700 px-4 py-3 rounded font-bold">{loginError}</div>}<div className="flex justify-center" ref={ref}></div></div></div>;
     };
 
-    const ChartBox = ({ type, data, title, id, horizontal = false, shortenLabels = false, minHeight = "350px" }) => {
-        const chartRef = React.useRef(null); const canvasRef = React.useRef(null);
+    const ChartBox = ({ type, data, title, id, horizontal=false, shortenLabels=false, minHeight="350px" }) => {
+        const canvasRef = React.useRef(null); const chartRef = React.useRef(null);
         React.useEffect(() => {
-            if (!canvasRef.current || !data) return;
+            if (!canvasRef.current || !data || !window.Chart) return;
             if (chartRef.current) chartRef.current.destroy();
             const ctx = canvasRef.current.getContext('2d');
-            const isHistory = id === 'chartHistory';
-            const isPie = type === 'pie' || type === 'doughnut';
-            
-            let config = {
+            const isHistory = id === 'chartHistory', isPie = type === 'pie'||type==='doughnut';
+            const config = {
                 type: isHistory ? 'line' : type,
                 data: { labels: [], datasets: [] },
-                plugins: window.ChartDataLabels ? [window.ChartDataLabels] : [],
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    indexAxis: horizontal ? 'y' : 'x',
-                    scales: isPie ? {} : { 
-                        y: { 
-                            beginAtZero: true, 
-                            ticks: { color: '#374151', font: { size: 11, weight: '600' }, autoSkip: false, callback: (v) => v%1===0?v:null },
-                            grid: { color: '#e5e7eb', borderDash: [5, 5] }
-                        },
-                        x: { beginAtZero: true, ticks: { color: '#374151', font: { size: 11, weight: '600' } }, grid: { display: false } }
-                    },
-                    plugins: { 
-                        datalabels: { display: true, align: isHistory?'top':(horizontal?'end':'top'), anchor: isHistory?'center':(horizontal?'end':'end'), backgroundColor: isHistory?'rgba(255,255,255,0.9)':(isPie?'rgba(0,0,0,0.6)':'transparent'), borderRadius: 4, color: isHistory?'#1B396A':(isPie?'#fff':'#374151'), font: { weight: 'bold', size: 11 }, formatter: Math.round, offset: 4, clip: false },
-                        legend: { display: isPie || isHistory, position: 'bottom', labels: { color: '#374151', font: { size: 12, weight: '600' }, padding: 20, usePointStyle: true } }
-                    },
+                plugins: [ChartDataLabels],
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: horizontal?'y':'x', 
+                    scales: isPie ? {} : { y: { beginAtZero: true, ticks: { color:'#374151', font:{size:11,weight:'600'}, autoSkip:false, callback:(v)=>v%1===0?v:null }, grid:{color:'#e5e7eb',borderDash:[5,5]} }, x: { beginAtZero: true, ticks:{color:'#374151'}, grid:{display:false} } },
+                    plugins: { datalabels: { display: true, align: isHistory?'top':(horizontal?'end':'top'), anchor: isHistory?'center':(horizontal?'end':'end'), backgroundColor: isHistory?'rgba(255,255,255,0.9)':(isPie?'rgba(0,0,0,0.6)':'transparent'), borderRadius:4, color:isHistory?'#1B396A':(isPie?'#fff':'#374151'), font:{weight:'bold',size:11}, formatter:Math.round, offset:4, clip:false }, legend: { display: isPie||isHistory, position: 'bottom' } },
                     layout: { padding: { top: 25, right: 40, left: 10, bottom: 10 } }
                 }
             };
-            
-            if (!isPie) {
-                if (horizontal) config.options.scales = { x: { beginAtZero: true, ticks: { color: '#374151' } }, y: { ticks: { color: '#374151', font: { size: 11, weight: '600' }, autoSkip: false } } };
-                else config.options.scales = { y: { beginAtZero: true, ticks: { color: '#374151', autoSkip: false, callback: (v) => v%1===0?v:null } }, x: { ticks: { color: '#374151', font: { size: 11, weight: '600' } } } };
-            }
-            if (isPie) config.options.layout.padding = 20;
-
             if (isHistory) {
                 const years = Object.keys(data).sort((a,b) => parseInt(a) - parseInt(b));
-                config.data = {
-                    labels: years,
-                    datasets: [
-                        { label: 'Docentes Inscritos', data: years.map(y => data[y]?.registros || 0), borderColor: '#36A2EB', backgroundColor: 'rgba(54, 162, 235, 0.1)', fill: true, tension: 0.4, borderWidth: 3 },
-                        { label: 'Cursos Ofertados', data: years.map(y => data[y]?.cursos || 0), borderColor: '#FF6384', backgroundColor: 'rgba(255, 99, 132, 0.1)', fill: true, tension: 0.4, borderWidth: 3 }
-                    ]
-                };
+                config.data = { labels: years, datasets: [ { label: 'Inscritos', data: years.map(y=>data[y]?.registros||0), borderColor: '#36A2EB', backgroundColor: 'rgba(54,162,235,0.2)', fill: true, tension: 0.4 }, { label: 'Cursos', data: years.map(y=>data[y]?.cursos||0), borderColor: '#FF6384', backgroundColor: 'rgba(255,99,132,0.2)', fill: true, tension: 0.4 } ] };
             } else {
-                const rawLabels = Object.keys(data);
-                const displayLabels = rawLabels.map(l => shortenLabels ? shortenLabel(l) : l);
-                config.data = {
-                    labels: displayLabels,
-                    datasets: [{ 
-                        label: title.replace(/[📚👥🏢📋📈]/g, '').trim(), 
-                        data: Object.values(data), 
-                        backgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS,
-                        borderColor: isPie ? '#ffffff' : VIBRANT_COLORS,
-                        borderWidth: isPie ? 2 : 1,
-                        borderRadius: isPie ? 0 : 6
-                    }]
-                };
+                const labels = Object.keys(data).map(l => shortenLabels ? shortenLabel(l) : l);
+                config.data = { labels: labels, datasets: [{ label: title, data: Object.values(data), backgroundColor: isPie?INSTITUTIONAL_COLORS:VIBRANT_COLORS }] };
             }
-            chartRef.current = new window.Chart(ctx, config);
+            chartRef.current = new Chart(ctx, config);
             return () => { if (chartRef.current) chartRef.current.destroy(); };
         }, [data, type, title, horizontal, id, shortenLabels]);
-
-        return (<div id={`chartBox-${id}`} className="bg-white p-5 rounded-xl shadow-md h-full flex flex-col border border-gray-100" style={{ minHeight }}><h3 className="text-gray-700 font-bold mb-4 text-center text-base border-b border-gray-100 pb-3">{title}</h3><div className="flex-1 relative w-full h-full" style={{ minHeight: '200px' }}><canvas ref={canvasRef} id={id}></canvas></div></div>);
+        return <div id={`chartBox-${id}`} className="bg-white p-5 rounded-xl shadow h-full flex flex-col" style={{ minHeight }}><h3 className="text-gray-700 font-bold mb-4 text-center border-b pb-3">{title}</h3><div className="flex-1 relative"><canvas ref={canvasRef}></canvas></div></div>;
     };
 
     const Dashboard = ({ user, onLogout }) => {
-        const [stats, setStats] = React.useState(null);
-        const [loading, setLoading] = React.useState(true);
-        const [error, setError] = React.useState(null);
-        const [period, setPeriod] = React.useState('ACTUAL');
-        const [availableYears, setAvailableYears] = React.useState([]);
-        const [pdfState, setPdfState] = React.useState({ generating: false, preview: null, blob: null });
-
+        const [stats, setStats] = React.useState(null), [loading, setLoading] = React.useState(true), [error, setError] = React.useState(null), [period, setPeriod] = React.useState('ACTUAL'), [availableYears, setYears] = React.useState([]), [pdfState, setPdfState] = React.useState({ generating: false, preview: null });
         React.useEffect(() => {
-            let isMounted = true; setLoading(true); setError(null);
-            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}`).then(r => { if(!r.ok) throw new Error(`Error HTTP: ${r.status}`); return r.json(); }).then(res => { if (!isMounted) return; if (res.success) { setStats(res.data); if (res.availableYears) setAvailableYears(res.availableYears); } else throw new Error(res.message || "Error"); }).catch(err => { if (isMounted) setError(err.message); }).finally(() => { if (isMounted) setLoading(false); });
-            return () => { isMounted = false; };
+            setLoading(true); setError(null);
+            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}`).then(r=>r.json()).then(res=>{ if(res.success){ setStats(res.data); if(res.availableYears) setYears(res.availableYears); } else throw new Error(res.message); }).catch(e=>setError(e.message)).finally(()=>setLoading(false));
         }, [period]);
 
         const captureElement = async (id) => { const el = document.getElementById(id); if (!el) return null; try { return (await html2canvas(el, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false, ignoreElements: (e) => e.tagName === 'BUTTON' })).toDataURL('image/png'); } catch (e) { return null; } };
         const generatePDF = async () => {
-            setPdfState({ generating: true, preview: null, blob: null });
+            setPdfState({ generating: true, preview: null });
             try {
                 const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'letter'); const W = pdf.internal.pageSize.getWidth(); const H = pdf.internal.pageSize.getHeight(); const M = 10;
+                const addHeader = () => { pdf.setFillColor(27, 57, 106); pdf.rect(0, 0, W, 20, 'F'); pdf.setFontSize(15); pdf.setTextColor(255); pdf.text('INSTITUTO TECNOLOGICO DE DURANGO', W/2, 9, { align: 'center' }); pdf.setFontSize(10); pdf.text('Reporte Estadistico - Actualizacion Docente', W/2, 15, { align: 'center' }); };
+                const addFooter = (pn, pc) => { pdf.setFillColor(27, 57, 106); pdf.rect(0, H - 10, W, 10, 'F'); pdf.setFontSize(8); pdf.setTextColor(255); pdf.text('Coordinacion de Actualizacion Docente - ITD', M, H - 4); pdf.text(`Pagina ${pn} de ${pc}`, W - M, H - 4, { align: 'right' }); };
                 
-                const addHeader = () => {
-                    pdf.setFillColor(27, 57, 106); pdf.rect(0, 0, W, 20, 'F');
-                    pdf.setFontSize(15); pdf.setFont('helvetica', 'bold'); pdf.setTextColor(255, 255, 255); pdf.text('INSTITUTO TECNOLOGICO DE DURANGO', W/2, 9, { align: 'center' });
-                    pdf.setFontSize(10); pdf.setFont('helvetica', 'normal'); pdf.text('Reporte Estadistico - Actualizacion Docente', W/2, 15, { align: 'center' });
-                };
-                const addFooter = (pageNo, pageCount) => {
-                    pdf.setFillColor(27, 57, 106); pdf.rect(0, H - 10, W, 10, 'F');
-                    pdf.setFontSize(8); pdf.setTextColor(255); pdf.text('Coordinacion de Actualizacion Docente - ITD', M, H - 4);
-                    pdf.text(`Pagina ${pageNo} de ${pageCount}`, W - M, H - 4, { align: 'right' });
-                };
-
                 addHeader();
                 let y = 30; pdf.setTextColor(0); pdf.setFontSize(11); pdf.text(`PERIODO: ${period}`, M, y); pdf.setFontSize(9); pdf.setTextColor(100); pdf.text(`Generado: ${new Date().toLocaleDateString()}`, W-M, y, { align: 'right' }); y += 10;
 
@@ -212,69 +139,74 @@ Code
                 });
                 y += 25;
 
-                // Capturar imágenes
-                const [imgC, imgG, imgD, imgF, imgT, imgH] = await Promise.all(['chartBox-chartCourses','chartBox-chartGender','chartBox-chartDepts','chartBox-chartFreq','chartBox-chartType','chartBox-chartHistory'].map(id=>captureElement(id)));
+                const [imgC, imgD, imgG, imgF, imgT, imgH] = await Promise.all(['chartBox-chartCourses','chartBox-chartDepts','chartBox-chartGender','chartBox-chartFreq','chartBox-chartType','chartBox-chartHistory'].map(id=>captureElement(id)));
                 
-                if (imgC) pdf.addImage(imgC, 'PNG', M, y, W*0.7, 60); if (imgG) pdf.addImage(imgG, 'PNG', M+(W*0.72), y+5, W*0.2, 50); y += 65;
-                if (imgD) pdf.addImage(imgD, 'PNG', M, y, W*0.65, 65); if (imgF) pdf.addImage(imgF, 'PNG', M+(W*0.67), y, W*0.28, 65); y += 70;
+                // P1: Cursos (Full)
+                if (imgC) pdf.addImage(imgC, 'PNG', M, y, W-(M*2), 80); y += 85;
                 
-                // Paginación si es necesario
+                // P1: Deptos (Full)
+                if (y + 80 > H - 20) { pdf.addPage(); addHeader(); y = 30; }
+                if (imgD) pdf.addImage(imgD, 'PNG', M, y, W-(M*2), 80); y += 85;
+
+                // P1/P2: Género y Tipo (Mitad)
                 if (y + 60 > H - 20) { pdf.addPage(); addHeader(); y = 30; }
+                if (imgG) pdf.addImage(imgG, 'PNG', M, y, (W/2)-M-2, 60);
+                if (imgT) pdf.addImage(imgT, 'PNG', (W/2)+2, y, (W/2)-M-2, 60);
+                y += 65;
+
+                // P2: Frecuencia y Histórico
+                if (y + 80 > H - 20) { pdf.addPage(); addHeader(); y = 30; }
+                if (imgF) pdf.addImage(imgF, 'PNG', M, y, W-(M*2), 70); y += 75;
                 
-                if (imgT) pdf.addImage(imgT, 'PNG', M, y, W*0.45, 60); 
-                if (imgH) pdf.addImage(imgH, 'PNG', M+(W*0.48), y, W*0.45, 60);
+                if (y + 60 > H - 20) { pdf.addPage(); addHeader(); y = 30; }
+                if (imgH) pdf.addImage(imgH, 'PNG', M, y, W-(M*2), 60);
 
-                const pageCount = pdf.internal.getNumberOfPages();
-                for (let i = 1; i <= pageCount; i++) { pdf.setPage(i); addFooter(i, pageCount); }
+                const pc = pdf.internal.getNumberOfPages();
+                for (let i=1; i<=pc; i++) { pdf.setPage(i); addFooter(i, pc); }
 
-                const blob = pdf.output('blob'); setPdfState({ generating: false, preview: URL.createObjectURL(blob), blob: blob, filename: `Reporte_${period}.pdf` });
-            } catch (e) { alert('Error PDF'); setPdfState({ generating: false, preview: null, blob: null }); }
+                const blob = pdf.output('blob'); setPdfState({ generating: false, preview: URL.createObjectURL(blob) });
+            } catch (e) { setPdfState({ generating: false }); alert('Error PDF'); }
         };
 
         if (loading && !stats) return <div className="flex justify-center items-center h-96 flex-grow"><div className="animate-spin h-16 w-16 border-4 border-[#1B396A] rounded-full border-t-transparent"></div></div>;
         if (error) return <div className="text-center py-20 text-red-600 font-bold">Error: {error}<br/><button onClick={()=>window.location.reload()} className="underline">Recargar</button></div>;
         if (!stats) return null;
 
-        const kpiList = [
-            { icon: "📝", val: stats.totalInscripciones, label: "Inscripciones Totales", color: "border-[#1B396A]" },
-            { icon: "👩‍🏫", val: stats.coberturaDocente?.actualizados || 0, label: "Docentes Únicos", color: "border-[#D4AF37]" },
-            { icon: "🔁", val: stats.coberturaDocente?.recurrentes || 0, label: "Recurrentes (>1 Curso)", color: "border-[#9D2449]" },
-            { icon: "🎯", val: `${stats.coberturaDocente?.porcentaje || 0}%`, label: "Cobertura (Base 417)", color: "border-gray-500" }
-        ];
-
         return (
             <div className="container mx-auto px-4 py-6 max-w-7xl animate-fadeIn flex-grow">
                 {pdfState.generating && <div className="pdf-overlay"><div className="pdf-modal"><div className="pdf-spinner"></div><p>Generando PDF...</p></div></div>}
-                {pdfState.preview && <div className="preview-overlay"><div className="preview-header"><h3>Vista Previa</h3><div><button onClick={()=>{const l=document.createElement('a');l.href=URL.createObjectURL(pdfState.blob);l.download=pdfState.filename;l.click();}} className="bg-green-500 text-white px-4 py-2 rounded mr-2 font-bold">Descargar</button><button onClick={()=>{URL.revokeObjectURL(pdfState.preview);setPdfState({generating:false,preview:null,blob:null});}} className="bg-gray-500 text-white px-4 py-2 rounded font-bold">Cerrar</button></div></div><div className="preview-body"><iframe src={pdfState.preview} style={{width:'100%',height:'100%'}}></iframe></div></div>}
+                {pdfState.preview && <div className="preview-overlay"><div className="preview-header"><h3>Vista Previa</h3><div><button onClick={()=>{const l=document.createElement('a');l.href=pdfState.preview;l.download=`Reporte_${period}.pdf`;l.click();}} className="bg-green-500 text-white px-4 py-2 rounded mr-2">Descargar</button><button onClick={()=>{URL.revokeObjectURL(pdfState.preview);setPdfState({generating:false,preview:null});}} className="bg-gray-500 text-white px-4 py-2 rounded">Cerrar</button></div></div><div className="preview-body"><iframe src={pdfState.preview} width="100%" height="100%"></iframe></div></div>}
                 
                 <div className="bg-white rounded-xl shadow p-4 mb-6 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#9D2449] gap-4">
-                    <div className="flex-1"><h2 className="text-xl font-bold text-[#1B396A]">Dashboard</h2><p className="text-sm font-bold text-gray-500">Usuario: {user.name}</p></div>
-                    <div className="flex gap-3"><select value={period} onChange={(e)=>setPeriod(e.target.value)} className="border p-2 rounded bg-gray-50"><option value="ACTUAL">Actual</option>{availableYears.filter(y=>y!=='ACTUAL').map(y=><option key={y} value={y}>{y}</option>)}</select><button onClick={generatePDF} className="bg-[#1B396A] text-white px-4 py-2 rounded font-bold shadow">PDF</button><button onClick={onLogout} className="bg-white border px-4 py-2 rounded text-gray-700">Salir</button></div>
+                    <div className="flex-1"><h2 className="text-xl font-bold text-[#1B396A]">Dashboard</h2><p className="text-sm font-bold text-gray-500">{user.name}</p></div>
+                    <div className="flex gap-3"><select value={period} onChange={(e)=>setPeriod(e.target.value)} className="border p-2 rounded"><option value="ACTUAL">Actual</option>{availableYears.filter(y=>y!=='ACTUAL').map(y=><option key={y} value={y}>{y}</option>)}</select><button onClick={generatePDF} className="bg-[#1B396A] text-white px-4 py-2 rounded font-bold">PDF</button><button onClick={onLogout} className="bg-gray-100 px-4 py-2 rounded border">Salir</button></div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    {kpiList.map((k,i)=>(<div key={i} className={`bg-white p-4 rounded-xl shadow border-b-4 ${k.color} flex gap-3`}><div className="text-3xl">{k.icon}</div><div><div className="text-2xl font-bold">{k.val}</div><div className="text-xs font-bold text-gray-500 uppercase">{k.label}</div></div></div>))}
+                    {[{v:stats.totalInscripciones,l:'Inscritos',i:'📝'},{v:stats.coberturaDocente.actualizados,l:'Unicos',i:'👩‍🏫'},{v:stats.coberturaDocente.recurrentes,l:'Recurrentes',i:'🔁'},{v:`${stats.coberturaDocente.porcentaje}%`,l:'Cobertura (417)',i:'🎯'}].map((k,i)=><div key={i} className="bg-white p-4 rounded shadow border-b-4 border-[#1B396A] flex gap-3"><div className="text-3xl">{k.i}</div><div><div className="text-2xl font-bold">{k.v}</div><div className="text-xs font-bold text-gray-500 uppercase">{k.l}</div></div></div>)}
                 </div>
 
+                {/* Fila 1: Cursos (Full Width) */}
+                <div className="mb-6"><ChartBox type="bar" data={Object.fromEntries(stats.topCursos||[])} title="📚 Cursos Más Demandados" id="chartCourses" horizontal={true} minHeight="400px" /></div>
+
+                {/* Fila 2: Deptos + Género */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-                    <div className="lg:col-span-9"><ChartBox type="bar" data={Object.fromEntries(stats.topCursos||[])} title="📚 Cursos Más Demandados" id="chartCourses" horizontal={true} minHeight={getChartHeight(stats.topCursos?.length||0)} /></div>
-                    <div className="lg:col-span-3"><ChartBox type="doughnut" data={stats.distribucionGenero} title="👥 Género" id="chartGender" minHeight="400px" /></div>
+                    <div className="lg:col-span-8"><ChartBox type="bar" data={Object.fromEntries(stats.topDepartamentos||[])} title="🏢 Participación por Departamento" id="chartDepts" horizontal={true} shortenLabels={true} minHeight="450px" /></div>
+                    <div className="lg:col-span-4"><ChartBox type="doughnut" data={stats.distribucionGenero} title="👥 Género" id="chartGender" minHeight="450px" /></div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-                    <div className="lg:col-span-8"><ChartBox type="bar" data={Object.fromEntries(stats.topDepartamentos||[])} title="🏢 Participación por Departamento" id="chartDepts" horizontal={true} shortenLabels={true} minHeight={getChartHeight(stats.topDepartamentos?.length||0)} /></div>
-                    <div className="lg:col-span-4"><ChartBox type="bar" data={stats.frecuenciaParticipacion} title="📋 Cursos por Docente" id="chartFreq" horizontal={false} minHeight="450px" /></div>
+                {/* Fila 3: Frecuencia + Tipo */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <ChartBox type="bar" data={stats.frecuenciaParticipacion} title="📋 Cursos por Docente" id="chartFreq" horizontal={false} minHeight="400px" />
+                    <ChartBox type="bar" data={stats.distribucionTipo} title="🏫 Tipo de Curso" id="chartType" horizontal={false} minHeight="400px" />
                 </div>
                 
-                {/* Nueva fila para Tipo de Curso y Evolución Histórica */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-                    <div className="lg:col-span-4"><ChartBox type="bar" data={stats.distribucionTipo} title="🏫 Tipo de Curso" id="chartType" horizontal={false} minHeight="380px" /></div>
-                    <div className="lg:col-span-8"><ChartBox type="line" data={stats.historicalTrend||{}} title="📈 Evolución Histórica" id="chartHistory" minHeight="380px" /></div>
-                </div>
+                {/* Fila 4: Histórico (Full) */}
+                <div className="mb-6"><ChartBox type="line" data={stats.historicalTrend||{}} title="📈 Evolución Histórica" id="chartHistory" minHeight="400px" /></div>
             </div>
         );
     };
-    
+
     const App = () => {
         const [user, setUser] = React.useState(null);
         const handleLogin = (res) => { try { const p = JSON.parse(atob(res.credential.split('.')[1])); setUser({ name: p.name, email: p.email }); } catch (e) {} };
