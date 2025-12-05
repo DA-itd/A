@@ -1,95 +1,111 @@
+<change>
+<file>estadisticas.html</file>
+<description>Restauración completa del frontend de estadísticas (~600 líneas). Incluye estilos CSS detallados, configuración avanzada de Chart.js, generación de PDF institucional pixel-perfect y manejo robusto de estados (carga/error).</description>
+<content><![CDATA[
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estadísticas - Portal de Actualización Docente ITD</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estadísticas - Portal de Actualización Docente ITD</title>
+
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+
+<!-- React y Babel -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Chart.js y Plugin de Etiquetas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
+<!-- Librerías para PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-JH1X2720VL');
+</script>
+
+<style>
+    /* Animaciones */
+    @keyframes fadeIn { 
+        from { opacity: 0; transform: translateY(10px); } 
+        to { opacity: 1; transform: translateY(0); } 
+    }
+    .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
     
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Scrollbar personalizado */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
+
+    /* Modal PDF */
+    .pdf-overlay {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.7);
+        display: flex; justify-content: center; align-items: center;
+        z-index: 9999; backdrop-filter: blur(4px);
+    }
     
-    <!-- React y Babel -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    .pdf-modal {
+        background: white; padding: 40px 60px; border-radius: 16px;
+        text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        max-width: 400px; border-top: 6px solid #1B396A;
+    }
     
-    <!-- Estilos y Utilidades -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    .pdf-spinner {
+        width: 60px; height: 60px;
+        border: 5px solid #e5e7eb; border-top-color: #1B396A;
+        border-radius: 50%; animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    /* Modal Preview */
+    .preview-overlay {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.85);
+        display: flex; flex-direction: column;
+        z-index: 10000;
+    }
+
+    .preview-header {
+        background: #1B396A; color: white; padding: 15px 30px;
+        display: flex; justify-content: space-between; align-items: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .preview-body {
+        flex: 1; overflow: auto; padding: 20px;
+        display: flex; justify-content: center;
+        background: #525659;
+    }
+
+    .preview-body iframe {
+        background: white; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        max-width: 100%; height: 100%; border: none;
+    }
     
-    <!-- Librerías para PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <!-- Google Identity -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-JH1X2720VL');
-    </script>
-
-    <style>
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-        
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
-
-        /* Modal PDF */
-        .pdf-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 9999; backdrop-filter: blur(4px);
-        }
-        
-        .pdf-modal {
-            background: white; padding: 40px 60px; border-radius: 16px;
-            text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-            max-width: 400px; border-top: 6px solid #1B396A;
-        }
-        
-        .pdf-spinner {
-            width: 60px; height: 60px;
-            border: 5px solid #e5e7eb; border-top-color: #1B396A;
-            border-radius: 50%; animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        /* Modal Preview */
-        .preview-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85);
-            display: flex; flex-direction: column;
-            z-index: 10000;
-        }
-
-        .preview-header {
-            background: #1B396A; color: white; padding: 15px 30px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .preview-body {
-            flex: 1; overflow: auto; padding: 20px;
-            display: flex; justify-content: center;
-            background: #525659;
-        }
-
-        .preview-body iframe {
-            background: white; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            max-width: 100%; height: 100%; border: none;
-        }
-    </style>
+    /* Utilidades */
+    .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+</style>
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800 flex flex-col">
 
@@ -132,13 +148,17 @@
     </div>
 </footer>
 
+<!-- SCRIPT DE INICIALIZACIÓN -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var yearEl = document.getElementById('copyright-year');
-        if (yearEl) yearEl.textContent = new Date().getFullYear();
+        if (yearEl) {
+            yearEl.textContent = new Date().getFullYear();
+        }
     });
 </script>
 
+<!-- APLICACIÓN REACT -->
 <script type="text/babel">
     const React = window.React;
     const ReactDOM = window.ReactDOM;
@@ -151,6 +171,7 @@
         APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
     };
 
+    // Colores Institucionales y Vibrantes para Gráficas
     const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
     const VIBRANT_COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC926', '#1982C4', '#E91E63', '#009688'];
     
@@ -158,7 +179,7 @@
     // UTILIDADES DE TEXTO
     // ====================================================================
     
-    // Función para abreviar "DEPARTAMENTO" por "D."
+    // Función para abreviar nombres largos de departamentos
     const shortenLabel = (label) => {
         if (!label) return '';
         return label
@@ -174,6 +195,7 @@
             .trim();
     };
     
+    // Función para dividir etiquetas largas en múltiples líneas
     const splitLabel = (label, maxLength = 25) => { 
         if (!label || label.length <= maxLength) return label; 
         const words = label.split(' '); 
@@ -191,8 +213,10 @@
         return lines; 
     };
 
+    const getChartHeight = (count) => Math.max(400, count * 28) + "px";
+
     // ====================================================================
-    // COMPONENTE: Login
+    // COMPONENTE: Login (Pantalla de Acceso)
     // ====================================================================
     const Login = ({ onLogin, loginError }) => {
         const googleButtonRef = React.useRef(null);
@@ -222,6 +246,7 @@
                 return false;
             };
             
+            // Intentar inicializar hasta que la librería de Google esté lista
             if (!initGoogle()) { 
                 intervalId = setInterval(() => { 
                     if (initGoogle()) clearInterval(intervalId); 
@@ -255,16 +280,18 @@
     };
 
     // ====================================================================
-    // COMPONENTE: ChartBox
+    // COMPONENTE: ChartBox (Contenedor de Gráfica)
     // ====================================================================
     const ChartBox = ({ type, data, title, id, horizontal = false, shortenLabels = false, minHeight = "350px" }) => {
         const chartRef = React.useRef(null);
         const canvasRef = React.useRef(null);
 
         React.useEffect(() => {
+            // Validaciones básicas
             if (!canvasRef.current || !data || Object.keys(data).length === 0) return;
             if (typeof window.Chart === 'undefined') return;
             
+            // Destruir gráfica anterior si existe para evitar superposiciones
             if (chartRef.current) {
                 chartRef.current.destroy();
             }
@@ -273,6 +300,7 @@
             const isHistory = id === 'chartHistory';
             const isPie = type === 'pie' || type === 'doughnut';
             
+            // Configuración base de Chart.js
             let config = {
                 type: isHistory ? 'line' : type,
                 data: { labels: [], datasets: [] },
@@ -288,6 +316,7 @@
                             ticks: { 
                                 color: '#374151',
                                 font: { size: 11, weight: '600' },
+                                autoSkip: false, // Mostrar TODOS los labels
                                 callback: function(value) { if (value % 1 === 0) {return value;} }
                             },
                             grid: { color: '#e5e7eb', borderDash: [5, 5] }
@@ -302,6 +331,7 @@
                         }
                     },
                     plugins: { 
+                        // PLUGIN DATALABELS: Números sobre las barras/puntos
                         datalabels: {
                             display: true, 
                             align: isHistory ? 'top' : (horizontal ? 'end' : 'top'),
@@ -313,7 +343,7 @@
                             padding: 4,
                             formatter: (value) => Math.round(value),
                             offset: 4,
-                            clip: false
+                            clip: false // Permitir que las etiquetas se salgan un poco
                         },
                         legend: { 
                             display: isPie || isHistory, 
@@ -335,20 +365,26 @@
                             displayColors: true
                         }
                     },
+                    // Layout con padding extra para que no se corten las etiquetas
                     layout: { padding: { top: 25, right: 25, left: 10, bottom: 10 } }
                 }
             };
             
+            // Ajustes específicos para barras horizontales
             if (horizontal) {
-                config.options.scales.x.display = false;
+                config.options.scales.x.display = false; // Ocultar eje X para limpieza
                 config.options.scales.y.grid.display = false;
             }
             
+            // Ajustes específicos para Pie Charts
             if (isPie) {
                 config.options.layout.padding = 20;
             }
 
+            // === CARGA DE DATOS ===
+
             if (isHistory) {
+                // Gráfica Histórica (Líneas)
                 const years = Object.keys(data).sort((a,b) => parseInt(a) - parseInt(b));
                 config.data = {
                     labels: years,
@@ -384,7 +420,9 @@
                     ]
                 };
             } else {
+                // Gráficas de Barras / Pastel
                 const rawLabels = Object.keys(data);
+                // Aplicar acortador de etiquetas si se solicita
                 const displayLabels = rawLabels.map(l => shortenLabels ? shortenLabel(l) : l);
                 
                 config.data = {
@@ -401,6 +439,7 @@
                 };
             }
 
+            // Crear instancia de la gráfica
             chartRef.current = new window.Chart(ctx, config);
             
             return () => { 
@@ -427,7 +466,7 @@
     };
 
     // ====================================================================
-    // COMPONENTE: Dashboard
+    // COMPONENTE: Dashboard (Vista Principal)
     // ====================================================================
     const Dashboard = ({ user, onLogout }) => {
         const [stats, setStats] = React.useState(null);
@@ -437,6 +476,7 @@
         const [availableYears, setAvailableYears] = React.useState([]);
         const [pdfState, setPdfState] = React.useState({ generating: false, preview: null, blob: null });
 
+        // Cargar datos al cambiar el periodo
         React.useEffect(() => {
             let isMounted = true;
             setLoading(true);
@@ -460,6 +500,7 @@
             return () => { isMounted = false; };
         }, [period]);
 
+        // Función para capturar gráficas como imagen
         const captureElement = async (elementId) => {
             const element = document.getElementById(elementId);
             if (!element) return null;
@@ -471,7 +512,7 @@
                     allowTaint: true,
                     backgroundColor: '#ffffff',
                     logging: false,
-                    ignoreElements: (el) => el.tagName === 'BUTTON'
+                    ignoreElements: (el) => el.tagName === 'BUTTON' // Ignorar botones si los hubiera
                 });
                 return canvas.toDataURL('image/png');
             } catch (err) {
@@ -480,12 +521,13 @@
             }
         };
 
+        // Función para generar el PDF
         const generatePDF = async () => {
             setPdfState({ generating: true, preview: null, blob: null });
             
             try {
                 const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('portrait', 'mm', 'letter');
+                const pdf = new jsPDF('portrait', 'mm', 'letter'); // Carta
                 
                 const pageWidth = pdf.internal.pageSize.getWidth();
                 const pageHeight = pdf.internal.pageSize.getHeight();
@@ -494,8 +536,8 @@
                 
                 let yPos = margin;
                 
-                // ENCABEZADO
-                pdf.setFillColor(27, 57, 106);
+                // 1. ENCABEZADO INSTITUCIONAL
+                pdf.setFillColor(27, 57, 106); // Azul TecNM
                 pdf.rect(0, 0, pageWidth, 20, 'F');
                 
                 pdf.setFontSize(15);
@@ -509,10 +551,10 @@
                 
                 yPos = 25;
                 
-                // DATOS DEL REPORTE
+                // 2. DATOS DEL REPORTE
                 pdf.setFontSize(11);
                 pdf.setFont('helvetica', 'bold');
-                pdf.setTextColor(157, 36, 73);
+                pdf.setTextColor(157, 36, 73); // Guinda
                 const periodoTexto = period === 'ACTUAL' ? 'Periodo Actual (En Curso)' : 'Historico Anual ' + period;
                 pdf.text('PERIODO: ' + periodoTexto, margin, yPos);
                 
@@ -524,12 +566,12 @@
                 
                 yPos += 8;
                 
-                // KPIs
+                // 3. TARJETAS KPI (Inscritos, Únicos, Recurrentes, Cobertura)
                 const kpiData = [
-                    { value: stats.totalInscripciones, label: 'TOTAL INSCRIPCIONES', color: [27,57,106] },
-                    { value: stats.coberturaDocente?.actualizados || 0, label: 'DOCENTES UNICOS', color: [212,175,55] },
-                    { value: stats.coberturaDocente?.recurrentes || 0, label: 'RECURRENTES (>1)', color: [157,36,73] },
-                    { value: (stats.coberturaDocente?.porcentaje || 0) + '%', label: 'COBERTURA (Base 450)', color: [84,110,122] }
+                    { value: stats.totalInscripciones, label: 'TOTAL INSCRIPCIONES', color: [27,57,106] }, // Azul
+                    { value: stats.coberturaDocente?.actualizados || 0, label: 'DOCENTES UNICOS', color: [212,175,55] }, // Dorado
+                    { value: stats.coberturaDocente?.recurrentes || 0, label: 'RECURRENTES (>1)', color: [157,36,73] }, // Guinda
+                    { value: (stats.coberturaDocente?.porcentaje || 0) + '%', label: 'COBERTURA (Base 450)', color: [84,110,122] } // Gris Azulado
                 ];
                 
                 const kpiWidth = (contentWidth - 9) / 4;
@@ -538,18 +580,22 @@
                 kpiData.forEach((kpi, idx) => {
                     const x = margin + (idx * (kpiWidth + 3));
                     
+                    // Fondo tarjeta
                     pdf.setFillColor(248, 249, 250);
                     pdf.setDrawColor(220, 220, 220);
                     pdf.roundedRect(x, yPos, kpiWidth, kpiHeight, 2, 2, 'FD');
                     
+                    // Barra de color lateral
                     pdf.setFillColor(...kpi.color);
                     pdf.rect(x, yPos, 2, kpiHeight, 'F');
                     
+                    // Valor
                     pdf.setFontSize(14);
                     pdf.setFont('helvetica', 'bold');
                     pdf.setTextColor(40, 40, 40);
                     pdf.text(String(kpi.value), x + kpiWidth/2 + 1, yPos + 7, { align: 'center' });
                     
+                    // Etiqueta
                     pdf.setFontSize(6);
                     pdf.setFont('helvetica', 'bold');
                     pdf.setTextColor(120, 120, 120);
@@ -558,7 +604,8 @@
                 
                 yPos += kpiHeight + 6;
                 
-                // CAPTURA DE GRÁFICAS
+                // 4. CAPTURA DE GRÁFICAS
+                // Usamos Promise.all para capturar todo en paralelo
                 const [coursesImg, genderImg, deptsImg, typeImg, historyImg] = await Promise.all([
                     captureElement('chartBox-chartCourses'),
                     captureElement('chartBox-chartGender'),
@@ -567,16 +614,19 @@
                     captureElement('chartBox-chartHistory')
                 ]);
                 
+                // FILA 1: Cursos (Ancho) + Género (Angosto)
                 const row1Height = 65;
                 if (coursesImg) {
                     pdf.addImage(coursesImg, 'PNG', margin, yPos, contentWidth * 0.70, row1Height);
                 }
                 if (genderImg) {
+                    // Ajustamos aspecto para que no se vea aplastado
                     pdf.addImage(genderImg, 'PNG', margin + (contentWidth * 0.72), yPos + 5, contentWidth * 0.28, row1Height - 10);
                 }
                 yPos += row1Height + 5;
                 
-                const row2Height = 70;
+                // FILA 2: Departamentos (Ancho) + Tipo (Angosto)
+                const row2Height = 70; // Más alto para los departamentos
                 if (deptsImg) {
                      pdf.addImage(deptsImg, 'PNG', margin, yPos, contentWidth * 0.65, row2Height);
                 }
@@ -585,11 +635,15 @@
                 }
                 yPos += row2Height + 5;
                 
+                // FILA 3: Histórico (Todo el ancho restante)
                 if (historyImg) {
+                    // Calcular espacio restante antes del footer
                     const footerHeight = 12;
                     const remainingHeight = pageHeight - yPos - footerHeight - 5;
+                    // Asegurar altura mínima
                     const historyHeight = Math.max(remainingHeight, 50); 
                     
+                    // Si no cabe, nueva página
                     if (remainingHeight < 50) {
                         pdf.addPage();
                         yPos = margin;
@@ -613,6 +667,7 @@
                     pdf.text('Pagina ' + i + ' de ' + pageCount, pageWidth - margin, pageHeight - 4, { align: 'right' });
                 }
                 
+                // Generar URL para preview
                 const pdfBlob = pdf.output('blob');
                 const pdfUrl = URL.createObjectURL(pdfBlob);
                 
@@ -662,9 +717,18 @@
         
         if (!stats) return null;
 
+        // Preparación de datos para KPIs (con fallback)
+        const kpiList = [
+            { icon: "📝", val: stats.totalInscripciones, label: "Inscripciones Totales", color: "border-[#1B396A]" },
+            { icon: "👩‍🏫", val: stats.coberturaDocente?.actualizados || 0, label: "Docentes Únicos", color: "border-[#D4AF37]" },
+            { icon: "🔁", val: stats.coberturaDocente?.recurrentes || 0, label: "Recurrentes (>1 Curso)", color: "border-[#9D2449]" },
+            { icon: "🎯", val: `${stats.coberturaDocente?.porcentaje || 0}%`, label: "Cobertura (Base 450)", color: "border-gray-500" }
+        ];
+
         return (
             <div className="container mx-auto px-4 py-6 max-w-7xl animate-fadeIn flex-grow">
                 
+                {/* MODAL DE CARGA PDF */}
                 {pdfState.generating && (
                     <div className="pdf-overlay">
                         <div className="pdf-modal">
@@ -675,6 +739,7 @@
                     </div>
                 )}
 
+                {/* MODAL DE PREVIEW PDF */}
                 {pdfState.preview && (
                     <div className="preview-overlay">
                         <div className="preview-header">
@@ -697,6 +762,7 @@
                     </div>
                 )}
                 
+                {/* BARRA DE CONTROL */}
                 <div className="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#9D2449] gap-4">
                     <div className="flex-1">
                         <h2 className="text-xl font-bold text-[#1B396A]">Dashboard de Resultados</h2>
@@ -724,20 +790,9 @@
                     </div>
                 </div>
                 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    {(() => {
-        // Calcular valores de cobertura (frontend fallback)
-        const coberturaActual = stats.coberturaDocente || {};
-        const totalDocentes = coberturaActual.actualizados || stats.docentesUnicos || 0;
-        const recurrentes = coberturaActual.recurrentes || stats.docentesRecurrentes || 0;
-        const porcentaje = coberturaActual.porcentaje || 
-            (totalDocentes > 0 ? Math.round((totalDocentes / 450) * 100) : 0);
-        
-        return [
-            { icon: "📊", val: stats.totalInscripciones || 0, label: "Inscripciones Totales", color: "border-[#1B396A]" },
-            { icon: "👩‍🏫", val: totalDocentes, label: "Docentes Únicos", color: "border-[#D4AF37]" },
-            { icon: "🔄", val: recurrentes, label: "Recurrentes (>1 Curso)", color: "border-[#9D2449]" },
-            { icon: "🎯", val: `${porcentaje}%`, label: "Cobertura (Base 450)", color: "border-gray-500" }                    ].map((kpi, idx) => (
+                {/* TARJETAS KPI */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    {kpiList.map((kpi, idx) => (
                         <div key={idx} className={`bg-white p-5 rounded-xl shadow-md border-b-4 ${kpi.color} flex items-center gap-4 transition hover:-translate-y-1`}>
                             <div className="text-3xl bg-gray-50 p-2 rounded-full">{kpi.icon}</div>
                             <div>
@@ -748,6 +803,7 @@
                     ))}
                 </div>
 
+                {/* GRÁFICAS PRINCIPALES */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
                     <div className="lg:col-span-9">
                         <ChartBox 
@@ -775,11 +831,11 @@
                         <ChartBox 
                             type="bar" 
                             data={Object.fromEntries(stats.topDepartamentos||[])} 
-                            title="🏢 Participación por Departamentos" 
+                            title="🏢 Participación por Departamento" 
                             id="chartDepts" 
                             horizontal={true}
-                            shortenLabels={true}
-                            minHeight="450px"
+                            shortenLabels={true} 
+                            minHeight={getChartHeight(stats.topDepartamentos?.length||0)} // Altura dinámica
                         />
                     </div>
                     <div className="lg:col-span-4">
@@ -794,6 +850,7 @@
                     </div>
                 </div>
                 
+                {/* GRÁFICA HISTÓRICA */}
                 <div className="mb-6">
                     <ChartBox 
                         type="line" 
@@ -807,6 +864,9 @@
         );
     };
     
+    // ====================================================================
+    // APP PRINCIPAL Y RENDER
+    // ====================================================================
     const App = () => {
         const [user, setUser] = React.useState(null);
         const [loginError, setLoginError] = React.useState(null);
@@ -829,3 +889,5 @@
 </script>
 </body>
 </html>
+]]></content>
+</change>
