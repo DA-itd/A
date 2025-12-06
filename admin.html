@@ -43,6 +43,23 @@
             'desarrollo.academico@itdurango.edu.mx'
         ];
 
+        const ALL_DEPARTMENTS = [
+            "CIENCIAS BASICAS",
+            "CIENCIAS DE LA TIERRA",
+            "CIENCIAS ECONOMICO-ADMINISTRATIVAS",
+            "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA",
+            "INGENIERÍA INDUSTRIAL",
+            "INGENIERÍA QUÍMICA-BIOQUÍMICA",
+            "METAL-MECÁNICA",
+            "SISTEMAS Y COMPUTACION",
+            "POSGRADO E INVESTIGACION",
+            "DESARROLLO ACADÉMICO",
+            "CENTRO DE INFORMACIÓN",
+            "GESTION TECNOLOGICA",
+            "ADMINISTRATIVO",
+            "EXTERNO"
+        ];
+
         const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
 
         // --- UTILIDADES ---
@@ -315,7 +332,7 @@
         };
 
         // ==========================================
-        // MÓDULO 2: ENCUESTAS
+        // MÓDULO 2: ENCUESTAS (TODOS LOS DEPTOS)
         // ==========================================
         const SurveyPanel = () => {
             const [stats, setStats] = useState(null);
@@ -335,17 +352,40 @@
             }, []);
 
             useEffect(() => {
-                if (stats && chartRef.current && stats.participacion) {
-                    const dataEntries = Object.entries(stats.participacion).sort((a, b) => b[1] - a[1]);
+                if (stats && chartRef.current) {
+                    // Mapear todos los departamentos, usando 0 si no hay datos
+                    const dataValues = ALL_DEPARTMENTS.map(dept => {
+                        // Buscar coincidencia normalizada o directa
+                        const key = Object.keys(stats.participacion || {}).find(
+                            k => removeAccents(k).toUpperCase() === removeAccents(dept).toUpperCase()
+                        );
+                        return key ? stats.participacion[key] : 0;
+                    });
+
                     if(chartInstance.current) chartInstance.current.destroy();
                     const colors = ['#4f46e5', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+                    
                     chartInstance.current = new Chart(chartRef.current.getContext('2d'), {
                         type: 'bar',
                         data: {
-                            labels: dataEntries.map(p => p[0]),
-                            datasets: [{ label: 'Evaluaciones Completadas', data: dataEntries.map(p => p[1]), backgroundColor: colors, borderRadius: 6 }]
+                            labels: ALL_DEPARTMENTS, // Mostrar todos
+                            datasets: [{ 
+                                label: 'Evaluaciones Completadas', 
+                                data: dataValues, 
+                                backgroundColor: ALL_DEPARTMENTS.map((_, i) => colors[i % colors.length]), 
+                                borderRadius: 4 
+                            }]
                         },
-                        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } } }
+                        options: { 
+                            indexAxis: 'y', 
+                            responsive: true, 
+                            maintainAspectRatio: false, 
+                            plugins: { legend: { display: false } }, 
+                            scales: { 
+                                x: { beginAtZero: true },
+                                y: { ticks: { font: { size: 10 } } }
+                            } 
+                        }
                     });
                 }
             }, [stats]);
@@ -368,12 +408,12 @@
                     const tempCanvas = document.createElement('canvas'); tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
                     const ctx = tempCanvas.getContext('2d'); ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height); ctx.drawImage(canvas, 0, 0);
                     const imgData = tempCanvas.toDataURL("image/png");
-                    doc.addImage(imgData, 'PNG', 15, 50, 180, 120);
+                    doc.addImage(imgData, 'PNG', 15, 50, 180, 140); // Aumentado altura para caber todos
                 }
                 const dateStr = new Date().toLocaleDateString('es-MX', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
                 doc.setFontSize(10); doc.setTextColor(80); 
-                doc.text(`Total de Evaluaciones: ${stats?.total || 0}`, 15, 180);
-                doc.text(`Fecha de corte: ${dateStr}`, 15, 185);
+                doc.text(`Total de Evaluaciones: ${stats?.total || 0}`, 15, 200);
+                doc.text(`Fecha de corte: ${dateStr}`, 15, 205);
                 doc.save('Reporte_Eficacia.pdf');
             };
 
@@ -394,7 +434,7 @@
                                         <p className="text-4xl font-bold text-blue-900">{stats?.total || 0}</p>
                                     </div>
                                 </div>
-                                <div className="h-[500px]"><canvas ref={chartRef}></canvas></div>
+                                <div className="h-[600px]"><canvas ref={chartRef}></canvas></div>
                             </div>
                         )}
                     </div>
@@ -403,27 +443,60 @@
         };
 
         // ==========================================
-        // MÓDULO 3: REPORTES
+        // MÓDULO 3: REPORTES (FILTROS MEJORADOS)
         // ==========================================
         const ReportsPanel = ({ user }) => {
             const [year, setYear] = useState('ACTUAL');
             const [dept, setDept] = useState('');
+            const [month, setMonth] = useState('');
             const [departments, setDepartments] = useState([]);
             const [data, setData] = useState([]);
             const [filtered, setFiltered] = useState([]);
             const [loading, setLoading] = useState(false);
 
+            // Mapeo de códigos a departamentos (simple) para extraction de folio
+            const DEPT_CODES = {
+                'CB': 'CIENCIAS BASICAS', 'CT': 'CIENCIAS DE LA TIERRA', 'CEA': 'CIENCIAS ECONOMICO-ADMINISTRATIVAS',
+                'IEE': 'INGENIERÍA ELÉCTRICA Y ELECTRÓNICA', 'II': 'INGENIERÍA INDUSTRIAL', 'IQB': 'INGENIERÍA QUÍMICA-BIOQUÍMICA',
+                'MM': 'METAL-MECÁNICA', 'DSC': 'SISTEMAS Y COMPUTACION', 'DEP': 'POSGRADO E INVESTIGACION', 'DA': 'DESARROLLO ACADÉMICO',
+                'CI': 'CENTRO DE INFORMACIÓN', 'GT': 'GESTION TECNOLOGICA', 'ADM': 'ADMINISTRATIVO'
+            };
+
+            const MONTHS = [
+                {v: '', l: '-- Todos los Meses --'},
+                {v: '1', l: 'Enero'}, {v: '2', l: 'Febrero'}, {v: '3', l: 'Marzo'}, {v: '4', l: 'Abril'},
+                {v: '5', l: 'Mayo'}, {v: '6', l: 'Junio'}, {v: '7', l: 'Julio'}, {v: '8', l: 'Agosto'},
+                {v: '9', l: 'Septiembre'}, {v: '10', l: 'Octubre'}, {v: '11', l: 'Noviembre'}, {v: '12', l: 'Diciembre'}
+            ];
+
             useEffect(() => {
                 setLoading(true);
                 setDept('');
+                setMonth('');
                 setFiltered([]);
                 
                 fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getReportData&period=${year}&id_token=${user.token}`)
                     .then(r => r.json())
                     .then(res => {
                         if(res.success) {
-                            setData(res.data);
-                            const uniqueDepts = [...new Set(res.data.map(i => i.departamento).filter(Boolean).map(d => d.trim().toUpperCase()))].sort();
+                            // Procesar Depto Oferente basado en Folio si no viene
+                            const processedData = res.data.map(item => {
+                                let oferta = item.depto_oferente;
+                                if (!oferta || oferta === 'N/A' || oferta === 'undefined') {
+                                    // Intentar extraer del folio: TNM-054-CODE-YEAR-SEQ
+                                    const parts = item.folio.split('-');
+                                    if (parts.length >= 3) {
+                                        const code = parts[2];
+                                        oferta = DEPT_CODES[code] || code;
+                                    } else {
+                                        oferta = 'N/A';
+                                    }
+                                }
+                                return { ...item, depto_oferente: oferta };
+                            });
+
+                            setData(processedData);
+                            const uniqueDepts = [...new Set(processedData.map(i => i.departamento).filter(Boolean).map(d => d.trim().toUpperCase()))].sort();
                             setDepartments(uniqueDepts);
                         } else { setData([]); setDepartments([]); }
                     })
@@ -431,9 +504,30 @@
             }, [year]);
 
             useEffect(() => {
-                if(!dept) setFiltered(data); 
-                else setFiltered(data.filter(i => i.departamento && i.departamento.trim().toUpperCase() === dept));
-            }, [dept, data]);
+                let temp = data;
+
+                // Filtro Departamento Docente
+                if(dept) {
+                    temp = temp.filter(i => i.departamento && i.departamento.trim().toUpperCase() === dept);
+                }
+
+                // Filtro Mes
+                if(month) {
+                    temp = temp.filter(i => {
+                        // i.fechas viene como "dd/mm/yyyy" o similar desde Apps Script
+                        // Extraemos el mes.
+                        if (!i.fechas) return false;
+                        const parts = i.fechas.split('/'); 
+                        if (parts.length > 1) {
+                            // parts[1] es el mes
+                            return parseInt(parts[1], 10) === parseInt(month, 10);
+                        }
+                        return false;
+                    });
+                }
+
+                setFiltered(temp);
+            }, [dept, month, data]);
 
             const exportPdf = async () => {
                 if(filtered.length === 0) return;
@@ -450,19 +544,22 @@
                 doc.setFontSize(14); doc.setTextColor(128, 0, 0);
                 doc.text(`REPORTE GENERAL ${year}`, pageWidth/2, 30, { align: "center" });
                 
-                if(dept) { doc.setFontSize(10); doc.setTextColor(0); doc.text("Departamento: " + dept, 14, 38); }
+                let subtitle = "";
+                if(dept) subtitle += ` Depto: ${dept}`;
+                if(month) subtitle += ` | Mes: ${MONTHS.find(m=>m.v===month)?.l}`;
+                if(subtitle) { doc.setFontSize(10); doc.setTextColor(0); doc.text(subtitle, 14, 38); }
                 
                 doc.text(`Total: ${filtered.length}`, pageWidth-14, 38, { align: "right" });
 
                 doc.autoTable({
                     head: [['Nombre', 'Curso', 'Folio', 'Fecha', 'Depto. Oferente']],
-                    body: filtered.map(r => [r.nombre, r.curso, r.folio, r.fechas, r.depto_oferente || '']),
+                    body: filtered.map(r => [r.nombre, r.curso, r.folio, r.fechas, r.depto_oferente]),
                     startY: 42, theme: 'striped', 
                     headStyles: { fillColor: [27, 57, 106], textColor: 255, halign: 'center' }, 
                     styles: { fontSize: 8, cellPadding: 2 }
                 });
                 
-                doc.save(`Reporte_${year}_${dept || 'General'}.pdf`);
+                doc.save(`Reporte_${year}.pdf`);
             };
 
             const exportExcel = () => {
@@ -472,7 +569,7 @@
                 const ws = XLSX.utils.json_to_sheet(rows);
                 const wb = XLSX.utils.book_new(); 
                 XLSX.utils.book_append_sheet(wb, ws, "Reporte");
-                XLSX.writeFile(wb, `Reporte_${year}_${dept || 'General'}.xlsx`);
+                XLSX.writeFile(wb, `Reporte_${year}.xlsx`);
             };
 
             return (
@@ -482,13 +579,21 @@
                             <span className="bg-green-100 p-2 rounded-lg text-green-600">📋</span> Reportes Masivos
                         </h2>
                         <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                 <div>
                                     <label className="block text-sm font-bold mb-2 text-slate-700">Año</label>
                                     <select value={year} onChange={e=>setYear(e.target.value)} className="w-full p-2 border rounded">
                                         <option value="ACTUAL">🟢 Periodo Actual</option>
                                         <option value="2025">2025</option>
                                         <option value="2024">2024</option>
+                                        <option value="2023">2023</option>
+                                        <option value="2022">2022</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-2 text-slate-700">Mes</label>
+                                    <select value={month} onChange={e=>setMonth(e.target.value)} className="w-full p-2 border rounded">
+                                        {MONTHS.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
                                     </select>
                                 </div>
                                 <div>
@@ -504,29 +609,32 @@
                                 <button onClick={exportExcel} disabled={!filtered.length} className="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed shadow transition flex items-center gap-2"><span>📊</span> Descargar Excel</button>
                             </div>
                             {loading ? <p className="text-center p-4">Cargando...</p> : (
-                                <div className="overflow-x-auto border rounded-lg">
-                                    <table className="w-full text-xs text-left">
-                                        <thead className="bg-slate-100 font-bold sticky top-0 text-slate-700">
-                                            <tr>
-                                                <th className="p-3 border-b">Nombre Docente</th>
-                                                <th className="p-3 border-b">Curso</th>
-                                                <th className="p-3 border-b">Folio</th>
-                                                <th className="p-3 border-b">Fecha</th>
-                                                <th className="p-3 border-b text-blue-700">Depto. Oferente</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-100">
-                                            {filtered.map((r, i) => (
-                                                <tr key={i} className="hover:bg-gray-50">
-                                                    <td className="p-3 font-medium">{r.nombre}</td>
-                                                    <td className="p-3">{r.curso}</td>
-                                                    <td className="p-3 font-mono text-gray-500">{r.folio}</td>
-                                                    <td className="p-3">{r.fechas}</td>
-                                                    <td className="p-3 font-semibold text-blue-800 bg-blue-50">{r.depto_oferente || 'N/A'}</td>
+                                <div>
+                                    <p className="text-sm text-gray-500 mb-2">Mostrando {filtered.length} registros</p>
+                                    <div className="overflow-x-auto border rounded-lg max-h-[500px]">
+                                        <table className="w-full text-xs text-left">
+                                            <thead className="bg-slate-100 font-bold sticky top-0 text-slate-700 z-10">
+                                                <tr>
+                                                    <th className="p-3 border-b">Nombre Docente</th>
+                                                    <th className="p-3 border-b">Curso</th>
+                                                    <th className="p-3 border-b">Folio</th>
+                                                    <th className="p-3 border-b">Fecha</th>
+                                                    <th className="p-3 border-b text-blue-700">Depto. Oferente</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100">
+                                                {filtered.map((r, i) => (
+                                                    <tr key={i} className="hover:bg-gray-50">
+                                                        <td className="p-3 font-medium">{r.nombre}</td>
+                                                        <td className="p-3">{r.curso}</td>
+                                                        <td className="p-3 font-mono text-gray-500">{r.folio}</td>
+                                                        <td className="p-3">{r.fechas}</td>
+                                                        <td className="p-3 font-semibold text-blue-800 bg-blue-50">{r.depto_oferente}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             )}
                         </div>
