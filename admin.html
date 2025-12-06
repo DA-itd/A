@@ -454,19 +454,47 @@
             const [filtered, setFiltered] = useState([]);
             const [loading, setLoading] = useState(false);
 
-            // Mapeo de códigos a departamentos (simple) para extraction de folio
+            // Mapeo ampliado incluyendo códigos numéricos para cubrir 04, 06, 08, etc.
             const DEPT_CODES = {
-                'CB': 'CIENCIAS BASICAS', 'CT': 'CIENCIAS DE LA TIERRA', 'CEA': 'CIENCIAS ECONOMICO-ADMINISTRATIVAS',
-                'IEE': 'INGENIERÍA ELÉCTRICA Y ELECTRÓNICA', 'II': 'INGENIERÍA INDUSTRIAL', 'IQB': 'INGENIERÍA QUÍMICA-BIOQUÍMICA',
-                'MM': 'METAL-MECÁNICA', 'DSC': 'SISTEMAS Y COMPUTACION', 'DEP': 'POSGRADO E INVESTIGACION', 'DA': 'DESARROLLO ACADÉMICO',
-                'CI': 'CENTRO DE INFORMACIÓN', 'GT': 'GESTION TECNOLOGICA', 'ADM': 'ADMINISTRATIVO'
+                // Acrónimos
+                'CB': 'CIENCIAS BASICAS',
+                'CT': 'CIENCIAS DE LA TIERRA',
+                'CEA': 'CIENCIAS ECONOMICO-ADMINISTRATIVAS',
+                'IEE': 'INGENIERÍA ELÉCTRICA Y ELECTRÓNICA',
+                'II': 'INGENIERÍA INDUSTRIAL',
+                'IQB': 'INGENIERÍA QUÍMICA-BIOQUÍMICA',
+                'MM': 'METAL-MECÁNICA',
+                'DSC': 'SISTEMAS Y COMPUTACION',
+                'DEP': 'POSGRADO E INVESTIGACION',
+                'DA': 'DESARROLLO ACADÉMICO',
+                'CI': 'CENTRO DE INFORMACIÓN',
+                'GT': 'GESTION TECNOLOGICA',
+                'ADM': 'ADMINISTRATIVO',
+                'EXT': 'EXTERNO',
+                // Códigos numéricos
+                '01': 'CIENCIAS BASICAS',
+                '02': 'CIENCIAS DE LA TIERRA',
+                '03': 'INGENIERIA CIVIL', // Hipotético
+                '04': 'CIENCIAS ECONOMICO-ADMINISTRATIVAS',
+                '05': 'INGENIERÍA ELÉCTRICA Y ELECTRÓNICA',
+                '06': 'INGENIERÍA QUÍMICA-BIOQUÍMICA',
+                '07': 'INGENIERÍA INDUSTRIAL',
+                '08': 'METAL-MECÁNICA',
+                '09': 'SISTEMAS Y COMPUTACION',
+                '10': 'POSGRADO E INVESTIGACION',
+                '11': 'DESARROLLO ACADÉMICO',
+                '12': 'CENTRO DE INFORMACIÓN',
+                '13': 'GESTION TECNOLOGICA',
+                '14': 'ADMINISTRATIVO',
+                '15': 'EXTERNO'
             };
 
+            // Solo Enero, Junio, Agosto
             const MONTHS = [
-                {v: '', l: '-- Todos los Meses --'},
-                {v: '1', l: 'Enero'}, {v: '2', l: 'Febrero'}, {v: '3', l: 'Marzo'}, {v: '4', l: 'Abril'},
-                {v: '5', l: 'Mayo'}, {v: '6', l: 'Junio'}, {v: '7', l: 'Julio'}, {v: '8', l: 'Agosto'},
-                {v: '9', l: 'Septiembre'}, {v: '10', l: 'Octubre'}, {v: '11', l: 'Noviembre'}, {v: '12', l: 'Diciembre'}
+                {v: '', l: '-- Todos --'},
+                {v: '1', l: 'Enero'},
+                {v: '6', l: 'Junio'},
+                {v: '8', l: 'Agosto'}
             ];
 
             useEffect(() => {
@@ -486,7 +514,7 @@
                                     // Intentar extraer del folio: TNM-054-CODE-YEAR-SEQ
                                     const parts = item.folio.split('-');
                                     if (parts.length >= 3) {
-                                        const code = parts[2];
+                                        const code = parts[2]; // Puede ser 'DSC', '04', '08', etc.
                                         oferta = DEPT_CODES[code] || code;
                                     } else {
                                         oferta = 'N/A';
@@ -511,15 +539,14 @@
                     temp = temp.filter(i => i.departamento && i.departamento.trim().toUpperCase() === dept);
                 }
 
-                // Filtro Mes
+                // Filtro Mes mejorado
                 if(month) {
                     temp = temp.filter(i => {
-                        // i.fechas viene como "dd/mm/yyyy" o similar desde Apps Script
-                        // Extraemos el mes.
                         if (!i.fechas) return false;
-                        const parts = i.fechas.split('/'); 
-                        if (parts.length > 1) {
-                            // parts[1] es el mes
+                        // Apps Script suele enviar "dd/mm/yyyy" o "dd-mm-yyyy"
+                        const parts = i.fechas.split(/[\/\-]/);
+                        if (parts.length >= 2) {
+                            // parts[1] es el mes en formato dd/mm/yyyy
                             return parseInt(parts[1], 10) === parseInt(month, 10);
                         }
                         return false;
@@ -591,7 +618,7 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold mb-2 text-slate-700">Mes</label>
+                                    <label className="block text-sm font-bold mb-2 text-slate-700">Mes de Inicio</label>
                                     <select value={month} onChange={e=>setMonth(e.target.value)} className="w-full p-2 border rounded">
                                         {MONTHS.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
                                     </select>
