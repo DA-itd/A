@@ -353,9 +353,7 @@
 
             useEffect(() => {
                 if (stats && chartRef.current) {
-                    // Mapear todos los departamentos, usando 0 si no hay datos
                     const dataValues = ALL_DEPARTMENTS.map(dept => {
-                        // Buscar coincidencia normalizada o directa
                         const key = Object.keys(stats.participacion || {}).find(
                             k => removeAccents(k).toUpperCase() === removeAccents(dept).toUpperCase()
                         );
@@ -368,7 +366,7 @@
                     chartInstance.current = new Chart(chartRef.current.getContext('2d'), {
                         type: 'bar',
                         data: {
-                            labels: ALL_DEPARTMENTS, // Mostrar todos
+                            labels: ALL_DEPARTMENTS, 
                             datasets: [{ 
                                 label: 'Evaluaciones Completadas', 
                                 data: dataValues, 
@@ -408,7 +406,7 @@
                     const tempCanvas = document.createElement('canvas'); tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
                     const ctx = tempCanvas.getContext('2d'); ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height); ctx.drawImage(canvas, 0, 0);
                     const imgData = tempCanvas.toDataURL("image/png");
-                    doc.addImage(imgData, 'PNG', 15, 50, 180, 140); // Aumentado altura para caber todos
+                    doc.addImage(imgData, 'PNG', 15, 50, 180, 140); 
                 }
                 const dateStr = new Date().toLocaleDateString('es-MX', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
                 doc.setFontSize(10); doc.setTextColor(80); 
@@ -454,9 +452,7 @@
             const [filtered, setFiltered] = useState([]);
             const [loading, setLoading] = useState(false);
 
-            // Mapeo ampliado incluyendo códigos numéricos para cubrir 04, 06, 08, etc.
             const DEPT_CODES = {
-                // Acrónimos
                 'CB': 'CIENCIAS BASICAS',
                 'CT': 'CIENCIAS DE LA TIERRA',
                 'CEA': 'CIENCIAS ECONOMICO-ADMINISTRATIVAS',
@@ -471,10 +467,9 @@
                 'GT': 'GESTION TECNOLOGICA',
                 'ADM': 'ADMINISTRATIVO',
                 'EXT': 'EXTERNO',
-                // Códigos numéricos
                 '01': 'CIENCIAS BASICAS',
                 '02': 'CIENCIAS DE LA TIERRA',
-                '03': 'INGENIERIA CIVIL', // Hipotético
+                '03': 'INGENIERIA CIVIL',
                 '04': 'CIENCIAS ECONOMICO-ADMINISTRATIVAS',
                 '05': 'INGENIERÍA ELÉCTRICA Y ELECTRÓNICA',
                 '06': 'INGENIERÍA QUÍMICA-BIOQUÍMICA',
@@ -489,7 +484,6 @@
                 '15': 'EXTERNO'
             };
 
-            // Solo Enero, Junio, Agosto
             const MONTHS = [
                 {v: '', l: '-- Todos --'},
                 {v: '1', l: 'Enero'},
@@ -507,15 +501,14 @@
                     .then(r => r.json())
                     .then(res => {
                         if(res.success) {
-                            // Procesar Depto Oferente basado en Folio si no viene
                             const processedData = res.data.map(item => {
                                 let oferta = item.depto_oferente;
                                 if (!oferta || oferta === 'N/A' || oferta === 'undefined') {
-                                    // Intentar extraer del folio: TNM-054-CODE-YEAR-SEQ
                                     const parts = item.folio.split('-');
                                     if (parts.length >= 3) {
-                                        const code = parts[2]; // Puede ser 'DSC', '04', '08', etc.
-                                        oferta = DEPT_CODES[code] || code;
+                                        const code = parts[2];
+                                        // Intenta mapear el código, si no existe, lo formatea
+                                        oferta = DEPT_CODES[code] || DEPT_CODES[code.toString().padStart(2, '0')] || `Depto. ${code}`;
                                     } else {
                                         oferta = 'N/A';
                                     }
@@ -534,21 +527,18 @@
             useEffect(() => {
                 let temp = data;
 
-                // Filtro Departamento Docente
                 if(dept) {
                     temp = temp.filter(i => i.departamento && i.departamento.trim().toUpperCase() === dept);
                 }
 
-                // Filtro Mes mejorado
                 if(month) {
                     temp = temp.filter(i => {
                         if (!i.fechas) return false;
-                        // Apps Script suele enviar "dd/mm/yyyy" o "dd-mm-yyyy"
-                        const parts = i.fechas.split(/[\/\-]/);
-                        if (parts.length >= 2) {
-                            // parts[1] es el mes en formato dd/mm/yyyy
-                            return parseInt(parts[1], 10) === parseInt(month, 10);
-                        }
+                        // Búsqueda de texto flexible para cubrir formatos variados (dd/mm/yyyy o texto)
+                        const d = i.fechas.toUpperCase();
+                        if (month === '1') return d.includes('ENE') || d.includes('JAN') || d.includes('/01/') || d.includes('-01-') || d.startsWith('01/');
+                        if (month === '6') return d.includes('JUN') || d.includes('/06/') || d.includes('-06-') || d.startsWith('06/');
+                        if (month === '8') return d.includes('AGO') || d.includes('AUG') || d.includes('/08/') || d.includes('-08-') || d.startsWith('08/');
                         return false;
                     });
                 }
