@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -452,38 +453,6 @@
             const [filtered, setFiltered] = useState([]);
             const [loading, setLoading] = useState(false);
 
-            const DEPT_CODES = {
-                'CB': 'CIENCIAS BASICAS',
-                'CT': 'CIENCIAS DE LA TIERRA',
-                'CEA': 'CIENCIAS ECONOMICO-ADMINISTRATIVAS',
-                'IEE': 'INGENIERÍA ELÉCTRICA Y ELECTRÓNICA',
-                'II': 'INGENIERÍA INDUSTRIAL',
-                'IQB': 'INGENIERÍA QUÍMICA-BIOQUÍMICA',
-                'MM': 'METAL-MECÁNICA',
-                'DSC': 'SISTEMAS Y COMPUTACION',
-                'DEP': 'POSGRADO E INVESTIGACION',
-                'DA': 'DESARROLLO ACADÉMICO',
-                'CI': 'CENTRO DE INFORMACIÓN',
-                'GT': 'GESTION TECNOLOGICA',
-                'ADM': 'ADMINISTRATIVO',
-                'EXT': 'EXTERNO',
-                '01': 'CIENCIAS BASICAS',
-                '02': 'CIENCIAS DE LA TIERRA',
-                '03': 'INGENIERIA CIVIL',
-                '04': 'CIENCIAS ECONOMICO-ADMINISTRATIVAS',
-                '05': 'INGENIERÍA ELÉCTRICA Y ELECTRÓNICA',
-                '06': 'INGENIERÍA QUÍMICA-BIOQUÍMICA',
-                '07': 'INGENIERÍA INDUSTRIAL',
-                '08': 'METAL-MECÁNICA',
-                '09': 'SISTEMAS Y COMPUTACION',
-                '10': 'POSGRADO E INVESTIGACION',
-                '11': 'DESARROLLO ACADÉMICO',
-                '12': 'CENTRO DE INFORMACIÓN',
-                '13': 'GESTION TECNOLOGICA',
-                '14': 'ADMINISTRATIVO',
-                '15': 'EXTERNO'
-            };
-
             const MONTHS = [
                 {v: '', l: '-- Todos --'},
                 {v: '1', l: 'Enero'},
@@ -502,18 +471,9 @@
                     .then(res => {
                         if(res.success) {
                             const processedData = res.data.map(item => {
-                                let oferta = item.depto_oferente;
-                                if (!oferta || oferta === 'N/A' || oferta === 'undefined') {
-                                    const parts = item.folio.split('-');
-                                    if (parts.length >= 3) {
-                                        const code = parts[2];
-                                        // Intenta mapear el código, si no existe, lo formatea
-                                        oferta = DEPT_CODES[code] || DEPT_CODES[code.toString().padStart(2, '0')] || `Depto. ${code}`;
-                                    } else {
-                                        oferta = 'N/A';
-                                    }
-                                }
-                                return { ...item, depto_oferente: oferta };
+                                // "Depto. Oferente" se obtiene directamente de la columna "Departamento" (índice 6 en el sheet).
+                                // La API devuelve ese valor en item.departamento.
+                                return { ...item, depto_oferente: item.departamento };
                             });
 
                             setData(processedData);
@@ -534,7 +494,6 @@
                 if(month) {
                     temp = temp.filter(i => {
                         if (!i.fechas) return false;
-                        // Búsqueda de texto flexible para cubrir formatos variados (dd/mm/yyyy o texto)
                         const d = i.fechas.toUpperCase();
                         if (month === '1') return d.includes('ENE') || d.includes('JAN') || d.includes('/01/') || d.includes('-01-') || d.startsWith('01/');
                         if (month === '6') return d.includes('JUN') || d.includes('/06/') || d.includes('-06-') || d.startsWith('06/');
