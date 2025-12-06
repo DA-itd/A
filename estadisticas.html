@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -384,115 +385,89 @@
             return () => { isMounted = false; };
         }, [period]);
 
-        const generateHistoryChartData = () => {
+        // Generar Datos para Gráfica de Cursos (Ene, Jun, Ago, Total)
+        const generateCourseEvolutionData = () => {
             if (!stats || !stats.historicalTrend) return {};
-            
+
             const years = Object.keys(stats.historicalTrend).sort();
-            // Si no hay desglose por periodos desde el backend, generamos mock data para visualización
-            const hasPeriodData = stats.periodTrend && Object.keys(stats.periodTrend).length > 0;
-            
-            // Preparamos etiquetas y datasets
-            // Estructura: 2023, 2023 Ene, 2023 Jun, 2023 Ago, 2024 ...
+            // Filtrar para mostrar desde 2022 a 2025 preferentemente si existen
+            const startYear = 2022;
+            const targetYears = years.filter(y => parseInt(y) >= startYear && parseInt(y) <= 2025);
+
             let labels = [];
-            let totalData = [];
-            let eneroData = [];
-            let junioData = [];
-            let agostoData = [];
+            let dataPoints = [];
+            let backgroundColors = [];
             
-            years.forEach(year => {
+            // Colores
+            const colorEne = '#FF6384'; // Rosa/Rojo suave
+            const colorJun = '#36A2EB'; // Azul
+            const colorAgo = '#FFCE56'; // Amarillo
+            const colorTotal = '#1B396A'; // Azul Institucional (Total)
+
+            targetYears.forEach(year => {
                 const totalCursos = stats.historicalTrend[year].cursos || 0;
                 
-                // Puntos principales (Total Anual)
-                labels.push(year);
-                totalData.push(totalCursos);
-                eneroData.push(null);
-                junioData.push(null);
-                agostoData.push(null);
+                // Extraer datos de periodos si existen, sino usar 0
+                const pEnero = stats.periodTrend?.[`${year}-Enero`]?.cursos || 0;
+                const pJunio = stats.periodTrend?.[`${year}-Junio`]?.cursos || 0;
+                const pAgosto = stats.periodTrend?.[`${year}-Agosto`]?.cursos || 0;
 
-                // Desglose (Enero, Junio, Agosto)
-                // Si existe data real en periodTrend, usarla. Si no, usar porcentajes estimados para demo.
-                let pEnero = 0, pJunio = 0, pAgosto = 0;
+                // Solo agregar periodos si hay datos significativos o es un año relevante
+                // Orden: Ene, Jun, Ago, Total
                 
-                if (hasPeriodData) {
-                    pEnero = stats.periodTrend[`${year}-Enero`]?.cursos || 0;
-                    pJunio = stats.periodTrend[`${year}-Junio`]?.cursos || 0;
-                    pAgosto = stats.periodTrend[`${year}-Agosto`]?.cursos || 0;
-                } 
-                
-                // Fallback Mock si no hay data real de periodos (para que se vea la gráfica "prueba")
-                if (pEnero === 0 && pJunio === 0 && pAgosto === 0 && totalCursos > 0) {
-                     pEnero = Math.round(totalCursos * 0.3);
-                     pJunio = Math.round(totalCursos * 0.3);
-                     pAgosto = Math.round(totalCursos * 0.4);
-                }
+                // Enero
+                labels.push(`Ene`);
+                dataPoints.push(pEnero);
+                backgroundColors.push(colorEne);
 
-                if (pEnero > 0 || pJunio > 0 || pAgosto > 0) {
-                    labels.push(`${year} Ene`);
-                    totalData.push(null);
-                    eneroData.push(pEnero);
-                    junioData.push(null);
-                    agostoData.push(null);
+                // Junio
+                labels.push(`Jun`);
+                dataPoints.push(pJunio);
+                backgroundColors.push(colorJun);
 
-                    labels.push(`${year} Jun`);
-                    totalData.push(null);
-                    eneroData.push(null);
-                    junioData.push(pJunio);
-                    agostoData.push(null);
+                // Agosto
+                labels.push(`Ago`);
+                dataPoints.push(pAgosto);
+                backgroundColors.push(colorAgo);
 
-                    labels.push(`${year} Ago`);
-                    totalData.push(null);
-                    eneroData.push(null);
-                    junioData.push(null);
-                    agostoData.push(pAgosto);
-                }
+                // Total Anual (Etiqueta con el Año)
+                labels.push(`${year}`);
+                dataPoints.push(totalCursos);
+                backgroundColors.push(colorTotal);
             });
 
             return {
                 labels: labels,
                 datasets: [
                     {
-                        label: 'Total Anual',
-                        data: totalData,
-                        borderColor: '#1B396A',
+                        label: 'Cursos Ofertados',
+                        data: dataPoints,
+                        backgroundColor: backgroundColors,
+                        borderRadius: 4,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.9
+                    }
+                ]
+            };
+        };
+
+        // Generar Datos para Gráfica de Docentes (Total por Año)
+        const generateTeacherEvolutionData = () => {
+            if (!stats || !stats.historicalTrend) return {};
+            const years = Object.keys(stats.historicalTrend).sort().filter(y => parseInt(y) >= 2022 && parseInt(y) <= 2025);
+            
+            const dataPoints = years.map(y => stats.historicalTrend[y].registros || 0);
+
+            return {
+                labels: years,
+                datasets: [
+                    {
+                        label: 'Total Docentes (Registros)',
+                        data: dataPoints,
                         backgroundColor: '#1B396A',
+                        borderColor: '#1B396A',
                         borderWidth: 2,
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        tension: 0,
-                        spanGaps: true
-                    },
-                    {
-                        label: 'Enero',
-                        data: eneroData,
-                        borderColor: '#FF6384',
-                        backgroundColor: '#FF6384',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        pointStyle: 'rectRot',
-                        spanGaps: false,
-                        showLine: false
-                    },
-                    {
-                        label: 'Junio',
-                        data: junioData,
-                        borderColor: '#36A2EB',
-                        backgroundColor: '#36A2EB',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        pointStyle: 'rectRot',
-                        spanGaps: false,
-                        showLine: false
-                    },
-                    {
-                        label: 'Agosto',
-                        data: agostoData,
-                        borderColor: '#FFCE56',
-                        backgroundColor: '#FFCE56',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        pointStyle: 'rectRot',
-                        spanGaps: false,
-                        showLine: false
+                        borderRadius: 6
                     }
                 ]
             };
@@ -529,10 +504,11 @@
                 kpis.forEach((k, i) => { const x = M+(i*(kw+5)); pdf.setFillColor(245,245,245); pdf.roundedRect(x,y,kw,16,2,2,'F'); pdf.setFontSize(14); pdf.setTextColor(0); pdf.text(String(k.v), x+kw/2, y+7, {align:'center'}); pdf.setFontSize(7); pdf.setTextColor(100); pdf.text(k.l, x+kw/2, y+12, {align:'center'}); });
                 y += 25;
 
-                const [imgC, imgD, imgG, imgF, imgT, imgH] = await Promise.all([
+                const [imgC, imgD, imgG, imgF, imgT, imgH, imgTeach] = await Promise.all([
                     captureElement('chartBox-chartCourses'), captureElement('chartBox-chartDepts'),
                     captureElement('chartBox-chartGender'), captureElement('chartBox-chartFreq'),
-                    captureElement('chartBox-chartType'), captureElement('chartBox-chartHistory')
+                    captureElement('chartBox-chartType'), captureElement('chartBox-chartHistory'),
+                    captureElement('chartBox-chartTeachers')
                 ]);
                 
                 if (imgC) pdf.addImage(imgC, 'PNG', M, y, W*0.9, 80); y += 85;
@@ -545,7 +521,8 @@
                 
                 if (imgF) pdf.addImage(imgF, 'PNG', M, y, W-2*M, 70); y += 75;
                 
-                if (imgH) pdf.addImage(imgH, 'PNG', M, y, W-2*M, 60);
+                if (imgH) pdf.addImage(imgH, 'PNG', M, y, W-2*M, 60); y += 65;
+                if (imgTeach) pdf.addImage(imgTeach, 'PNG', M, y, W-2*M, 60);
 
                 const pc = pdf.internal.getNumberOfPages();
                 for (let i=1; i<=pc; i++) { pdf.setPage(i); addFooter(i, pc); }
@@ -595,16 +572,28 @@
 
                 <div className="grid grid-cols-1 gap-6 mb-6"><div className="w-full"><ChartBox type="bar" data={stats.frecuenciaParticipacion} title="📋 Cursos por Docente" id="chartFreq" horizontal={false} minHeight="400px" /></div></div>
                 
-                {/* Gráfica de Historia Evolutiva con Desglose */}
-                <div className="mb-6">
-                    <ChartBox 
-                        type="line" 
-                        data={generateHistoryChartData()} 
-                        title="📈 Evolución Histórica de Cursos Ofertados (Total y Por Periodo)" 
-                        id="chartHistory" 
-                        minHeight="450px" 
-                        isHistory={true} 
-                    />
+                {/* Gráficas de Evolución Histórica */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <ChartBox 
+                            type="bar" 
+                            data={generateCourseEvolutionData()} 
+                            title="📈 Cursos Ofertados (Periodos vs Total Anual)" 
+                            id="chartHistory" 
+                            minHeight="450px" 
+                            isHistory={true} 
+                        />
+                    </div>
+                    <div>
+                        <ChartBox 
+                            type="bar" 
+                            data={generateTeacherEvolutionData()} 
+                            title="👨‍🏫 Total Docentes por Año (2022-2025)" 
+                            id="chartTeachers" 
+                            minHeight="450px" 
+                            isHistory={true} 
+                        />
+                    </div>
                 </div>
             </div>
         );
