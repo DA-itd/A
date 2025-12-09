@@ -1,3 +1,6 @@
+
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -170,13 +173,13 @@
         return label
             .replace(/DEPARTAMENTO DE /gi, 'D. ')
             .replace(/DEPARTAMENTO/gi, 'D.')
-            .replace(/DIVISION DE ESTUDIOS DE /gi, 'DIV. ')
-            .replace(/DIVISION DE /gi, 'DIV. ')
+            .replace(/DIVISION DE ESTUDIOS DE /gi, 'Div. ')
+            .replace(/DIVISION DE /gi, 'Div. ')
             .replace(/CENTRO DE INFORMACIÓN/gi, 'C. Información')
             .replace(/CENTRO DE /gi, 'C. ')
-            .replace(/INGENIERÍA/gi, 'ING.')
-            .replace(/CIENCIAS/gi, 'CIENCIAS.')
-            .replace(/ECONOMICO-ADMINISTRATIVAS/gi, 'ECO-ADMIN')
+            .replace(/INGENIERÍA/gi, 'Ing.')
+            .replace(/CIENCIAS/gi, 'Cs.')
+            .replace(/ECONOMICO-ADMINISTRATIVAS/gi, 'Eco-Admin')
             .trim();
     };
     
@@ -383,54 +386,73 @@
             return () => { isMounted = false; };
         }, [period]);
 
-        // Generar Datos para Gráfica de Cursos (Total Anual primero, luego desglose)
+        // Generar Datos para Gráfica de Cursos (Enero P1/P2, Junio P1/P2, Agosto P1/P2, Total)
         const generateCourseEvolutionData = () => {
             if (!stats || !stats.historicalTrend) return {};
 
-            const years = Object.keys(stats.historicalTrend).sort();
             // Filtrar para mostrar desde 2022 a 2025 preferentemente si existen
             const startYear = 2022;
-            const targetYears = years.filter(y => parseInt(y) >= startYear && parseInt(y) <= 2025);
+            const years = Object.keys(stats.historicalTrend).sort().filter(y => parseInt(y) >= startYear && parseInt(y) <= 2025);
 
             let labels = [];
             let dataPoints = [];
             let backgroundColors = [];
             
-            // Colores
-            const colorTotal = '#1B396A'; // Azul Institucional (Total)
+            // Paleta de Colores
             const colorEne = '#FF6384'; // Rosa/Rojo suave
             const colorJun = '#36A2EB'; // Azul
             const colorAgo = '#FFCE56'; // Amarillo
+            const colorTotal = '#1B396A'; // Azul Institucional (Total)
 
-            targetYears.forEach(year => {
+            years.forEach(year => {
                 const totalCursos = stats.historicalTrend[year].cursos || 0;
                 
-                // Extraer datos de periodos si existen, sino usar 0
-                const pEnero = stats.periodTrend?.[`${year}-Enero`]?.cursos || 0;
-                const pJunio = stats.periodTrend?.[`${year}-Junio`]?.cursos || 0;
-                const pAgosto = stats.periodTrend?.[`${year}-Agosto`]?.cursos || 0;
+                // Extraer datos de periodos
+                const pEnero1 = stats.periodTrend?.[`${year}-Enero-1`]?.cursos || 0;
+                const pEnero2 = stats.periodTrend?.[`${year}-Enero-2`]?.cursos || 0;
+                
+                const pJunio1 = stats.periodTrend?.[`${year}-Junio-1`]?.cursos || 0;
+                const pJunio2 = stats.periodTrend?.[`${year}-Junio-2`]?.cursos || 0;
+                
+                const pAgosto1 = stats.periodTrend?.[`${year}-Agosto-1`]?.cursos || 0;
+                const pAgosto2 = stats.periodTrend?.[`${year}-Agosto-2`]?.cursos || 0;
 
-                // Orden solicitado: Total del año, luego Ene, Jun, Ago.
+                // Orden solicitado: Ene P1, Ene P2, Jun P1, Jun P2, Ago P1, Ago P2, Total Year
 
-                // Total Anual (Etiqueta con el Año)
-                labels.push(`${year}`);
-                dataPoints.push(totalCursos);
-                backgroundColors.push(colorTotal);
-
-                // Enero
-                labels.push(`Ene`);
-                dataPoints.push(pEnero);
+                // Enero P1
+                labels.push(`Ene 1`);
+                dataPoints.push(pEnero1);
+                backgroundColors.push(colorEne);
+                
+                // Enero P2
+                labels.push(`Ene 2`);
+                dataPoints.push(pEnero2);
                 backgroundColors.push(colorEne);
 
-                // Junio
-                labels.push(`Jun`);
-                dataPoints.push(pJunio);
+                // Junio P1
+                labels.push(`Jun 1`);
+                dataPoints.push(pJunio1);
+                backgroundColors.push(colorJun);
+                
+                // Junio P2
+                labels.push(`Jun 2`);
+                dataPoints.push(pJunio2);
                 backgroundColors.push(colorJun);
 
-                // Agosto
-                labels.push(`Ago`);
-                dataPoints.push(pAgosto);
+                // Agosto P1
+                labels.push(`Ago 1`);
+                dataPoints.push(pAgosto1);
                 backgroundColors.push(colorAgo);
+                
+                // Agosto P2
+                labels.push(`Ago 2`);
+                dataPoints.push(pAgosto2);
+                backgroundColors.push(colorAgo);
+
+                // Total Annual
+                labels.push(`Total '${year.substring(2)}`);
+                dataPoints.push(totalCursos);
+                backgroundColors.push(colorTotal);
             });
 
             return {
@@ -441,8 +463,8 @@
                         data: dataPoints,
                         backgroundColor: backgroundColors,
                         borderRadius: 4,
-                        barPercentage: 0.8,
-                        categoryPercentage: 0.9
+                        barPercentage: 0.9,
+                        categoryPercentage: 0.95
                     }
                 ]
             };
@@ -462,7 +484,7 @@
                 labels: years,
                 datasets: [
                     {
-                        label: 'Total Docentes (Registros)',
+                        label: 'Total Docentes',
                         data: dataPoints,
                         backgroundColor: bgColors,
                         borderColor: bgColors,
