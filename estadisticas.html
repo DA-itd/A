@@ -383,7 +383,7 @@
             return () => { isMounted = false; };
         }, [period]);
 
-        // Generar Datos para Gráfica de Cursos (Enero P1/P2, Junio P1/P2, Agosto P1/P2, Total)
+        // Generar Datos para Gráfica de Cursos (Total Anual, luego Ene, Jun, Ago)
         const generateCourseEvolutionData = () => {
             if (!stats || !stats.historicalTrend) return {};
 
@@ -404,52 +404,32 @@
             years.forEach(year => {
                 const totalCursos = stats.historicalTrend[year].cursos || 0;
                 
-                // Extraer datos de periodos
-                const pEnero1 = stats.periodTrend?.[`${year}-Enero-1`]?.cursos || 0;
-                const pEnero2 = stats.periodTrend?.[`${year}-Enero-2`]?.cursos || 0;
-                
-                const pJunio1 = stats.periodTrend?.[`${year}-Junio-1`]?.cursos || 0;
-                const pJunio2 = stats.periodTrend?.[`${year}-Junio-2`]?.cursos || 0;
-                
-                const pAgosto1 = stats.periodTrend?.[`${year}-Agosto-1`]?.cursos || 0;
-                const pAgosto2 = stats.periodTrend?.[`${year}-Agosto-2`]?.cursos || 0;
+                // Extraer datos de periodos (Backend devuelve keys como "2024-Enero")
+                const pEnero = stats.periodTrend?.[`${year}-Enero`]?.cursos || 0;
+                const pJunio = stats.periodTrend?.[`${year}-Junio`]?.cursos || 0;
+                const pAgosto = stats.periodTrend?.[`${year}-Agosto`]?.cursos || 0;
 
-                // Orden solicitado: Ene P1, Ene P2, Jun P1, Jun P2, Ago P1, Ago P2, Total Year
-
-                // Enero P1
-                labels.push(`Ene 1`);
-                dataPoints.push(pEnero1);
-                backgroundColors.push(colorEne);
+                // Orden solicitado: Total, Ene, Jun, Ago
                 
-                // Enero P2
-                labels.push(`Ene 2`);
-                dataPoints.push(pEnero2);
-                backgroundColors.push(colorEne);
-
-                // Junio P1
-                labels.push(`Jun 1`);
-                dataPoints.push(pJunio1);
-                backgroundColors.push(colorJun);
-                
-                // Junio P2
-                labels.push(`Jun 2`);
-                dataPoints.push(pJunio2);
-                backgroundColors.push(colorJun);
-
-                // Agosto P1
-                labels.push(`Ago 1`);
-                dataPoints.push(pAgosto1);
-                backgroundColors.push(colorAgo);
-                
-                // Agosto P2
-                labels.push(`Ago 2`);
-                dataPoints.push(pAgosto2);
-                backgroundColors.push(colorAgo);
-
                 // Total Annual
                 labels.push(`Total '${year.substring(2)}`);
                 dataPoints.push(totalCursos);
                 backgroundColors.push(colorTotal);
+
+                // Enero
+                labels.push(`Ene`);
+                dataPoints.push(pEnero);
+                backgroundColors.push(colorEne);
+
+                // Junio
+                labels.push(`Jun`);
+                dataPoints.push(pJunio);
+                backgroundColors.push(colorJun);
+
+                // Agosto
+                labels.push(`Ago`);
+                dataPoints.push(pAgosto);
+                backgroundColors.push(colorAgo);
             });
 
             return {
@@ -460,8 +440,8 @@
                         data: dataPoints,
                         backgroundColor: backgroundColors,
                         borderRadius: 4,
-                        barPercentage: 0.9,
-                        categoryPercentage: 0.95
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.9
                     }
                 ]
             };
