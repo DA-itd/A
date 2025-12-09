@@ -293,6 +293,7 @@
                                 color: '#374151',
                                 font: { size: 11, weight: '600' },
                                 autoSkip: false,
+                                padding: 10,
                                 callback: function(value) { 
                                     if (this.getLabelForValue && !isHistory && horizontal) {
                                         return this.getLabelForValue(value);
@@ -342,7 +343,7 @@
                             }
                         }
                     },
-                    layout: { padding: { top: 25, right: 20, left: 10, bottom: 10 } }
+                    layout: { padding: { top: 25, right: 25, left: horizontal ? 10 : 10, bottom: 10 } }
                 }
             };
 
@@ -380,7 +381,7 @@
                         const finalCanvas = document.createElement('canvas');
                         const ctx = finalCanvas.getContext('2d');
                         
-                        const headerHeight = 180; // Aumentado para dar espacio
+                        const headerHeight = 220; // Aumentado para evitar solapamiento
                         const margin = 40;
                         finalCanvas.width = canvas.width;
                         finalCanvas.height = canvas.height + headerHeight;
@@ -389,36 +390,36 @@
                         ctx.fillStyle = '#ffffff';
                         ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
 
-                        // 1. Logo (Calculado por altura para no chocar con la línea)
+                        // 1. Logo
                         if (logoData) {
                             const img = new Image();
                             img.src = logoData;
                             await new Promise(r => img.onload = r);
                             
-                            const maxLogoHeight = 120; // Altura máxima permitida
+                            const maxLogoHeight = 100;
                             const ratio = img.width / img.height;
                             const logoW = maxLogoHeight * ratio;
                             const logoH = maxLogoHeight;
                             
-                            ctx.drawImage(img, margin, 20, logoW, logoH);
+                            ctx.drawImage(img, margin, 30, logoW, logoH);
                         }
 
                         // 2. Títulos
                         ctx.fillStyle = BLUE_COLOR;
                         ctx.font = 'bold 42px Helvetica, Arial, sans-serif';
                         ctx.textAlign = 'center';
-                        ctx.fillText('INSTITUTO TECNOLÓGICO DE DURANGO', finalCanvas.width / 2, 80);
+                        ctx.fillText('INSTITUTO TECNOLÓGICO DE DURANGO', finalCanvas.width / 2, 70);
                         
                         ctx.fillStyle = '#666';
                         ctx.font = '30px Helvetica, Arial, sans-serif';
                         ctx.fillText(cleanTitle, finalCanvas.width / 2, 130);
 
-                        // 3. Línea Guinda (Posicionada debajo de todo)
+                        // 3. Línea Guinda (Bajada para no tocar el logo)
                         ctx.strokeStyle = GUINDA_COLOR;
                         ctx.lineWidth = 6;
                         ctx.beginPath();
-                        ctx.moveTo(margin, 165); // Bajada a 165px
-                        ctx.lineTo(finalCanvas.width - margin, 165);
+                        ctx.moveTo(margin, 190);
+                        ctx.lineTo(finalCanvas.width - margin, 190);
                         ctx.stroke();
 
                         // 4. Gráfica
@@ -439,12 +440,12 @@
                         const pdfHeight = pdf.internal.pageSize.getHeight();
                         const margin = 10;
 
-                        // --- 1. Encabezado Institucional (Sin recuadro azul) ---
-                        // Logo (Proporcional)
+                        // --- 1. Encabezado Institucional ---
+                        // Logo
                         if (logoData) {
                             const imgProps = pdf.getImageProperties(logoData);
-                            const logoWidth = 22; // Ancho fijo en mm
-                            const logoHeight = (imgProps.height * logoWidth) / imgProps.width; // Altura calculada
+                            const logoWidth = 22;
+                            const logoHeight = (imgProps.height * logoWidth) / imgProps.width;
                             pdf.addImage(logoData, 'PNG', margin, 5, logoWidth, logoHeight); 
                         }
                         
@@ -462,7 +463,7 @@
                         // Línea Guinda
                         pdf.setDrawColor(157, 36, 73); // #9D2449
                         pdf.setLineWidth(1);
-                        pdf.line(margin, 28, pdfWidth - margin, 28); // Bajada ligeramente
+                        pdf.line(margin, 28, pdfWidth - margin, 28);
 
                         // --- 2. Título de la Gráfica ---
                         pdf.setFontSize(12);
