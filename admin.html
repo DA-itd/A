@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -42,21 +44,17 @@
             'desarrollo.academico@itdurango.edu.mx'
         ];
 
-        const ALL_DEPARTMENTS = [
-            "CIENCIAS BASICAS",
-            "CIENCIAS DE LA TIERRA",
-            "CIENCIAS ECONOMICO-ADMINISTRATIVAS",
-            "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA",
-            "INGENIERÍA INDUSTRIAL",
-            "INGENIERÍA QUÍMICA-BIOQUÍMICA",
-            "METAL-MECÁNICA",
-            "SISTEMAS Y COMPUTACION",
-            "POSGRADO E INVESTIGACION",
-            "DESARROLLO ACADÉMICO",
-            "CENTRO DE INFORMACIÓN",
-            "GESTION TECNOLOGICA",
-            "ADMINISTRATIVO",
-            "EXTERNO"
+        const CHART_LABELS = [
+            "INGENIERIA INDUSTRIAL", 
+            "SISTEMAS Y COMPUTACIÓN", 
+            "CIENCIAS BÁSICAS", 
+            "QUÍMICA BIOQUÍMICA", 
+            "METAL MECÁNICA", 
+            "CIENCIAS ECONÓMICO ADMINISTRATIVAS", 
+            "POSGRADO E INVESTIGACIÓN", 
+            "CIENCIAS DE LA TIERRA", 
+            "ELECTRICA ELECTRÓNICA",
+            "OTRO"
         ];
 
         const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
@@ -339,26 +337,21 @@
             const chartRef = useRef(null);
             const chartInstance = useRef(null);
 
-            // Mapping for department name variations
-            const mapDepartment = (rawName) => {
-                const normalized = removeAccents(rawName || '').toUpperCase().trim();
+            // Mapping function to specific chart labels
+            const mapToChartLabel = (rawName) => {
+                const r = removeAccents(rawName || '').toUpperCase().trim();
                 
-                if (normalized.includes("SISTEMAS") || normalized.includes("COMPUTACION") || normalized.includes("ISC")) return "SISTEMAS Y COMPUTACION";
-                if (normalized.includes("INDUSTRIAL")) return "INGENIERÍA INDUSTRIAL";
-                if (normalized.includes("BASICAS") || normalized.includes("CB")) return "CIENCIAS BASICAS";
-                if (normalized.includes("TIERRA")) return "CIENCIAS DE LA TIERRA";
-                if (normalized.includes("ECONOMICO") || normalized.includes("ADMINISTRATIVAS") || normalized.includes("CEA")) return "CIENCIAS ECONOMICO-ADMINISTRATIVAS";
-                if (normalized.includes("ELECTRICA") || normalized.includes("ELECTRONICA")) return "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA";
-                if (normalized.includes("QUIMICA") || normalized.includes("BIOQUIMICA")) return "INGENIERÍA QUÍMICA-BIOQUÍMICA";
-                if (normalized.includes("METAL") || normalized.includes("MECANICA")) return "METAL-MECÁNICA";
-                if (normalized.includes("POSGRADO") || normalized.includes("INVESTIGACION")) return "POSGRADO E INVESTIGACION";
-                if (normalized.includes("DESARROLLO")) return "DESARROLLO ACADÉMICO";
-                if (normalized.includes("INFORMACION") || normalized.includes("CENTRO DE COMPUTO")) return "CENTRO DE INFORMACIÓN";
-                if (normalized.includes("GESTION")) return "GESTION TECNOLOGICA";
-                if (normalized.includes("ADMINISTRATIVO") || normalized.includes("RECURSOS HUMANOS")) return "ADMINISTRATIVO";
-                if (normalized.includes("EXTERNO")) return "EXTERNO";
+                if(r.includes("INDUSTRIAL")) return "INGENIERIA INDUSTRIAL";
+                if(r.includes("SISTEMAS") || r.includes("COMPUTACIÓN") || r.includes("COMPUTACION") || r.includes("ISC")) return "SISTEMAS Y COMPUTACIÓN";
+                if(r.includes("BÁSICAS") || r.includes("BASICAS") || r.includes("CB")) return "CIENCIAS BÁSICAS";
+                if(r.includes("QUÍMICA") || r.includes("QUIMICA") || r.includes("BIOQUÍMICA")) return "QUÍMICA BIOQUÍMICA";
+                if(r.includes("METAL") || r.includes("MECÁNICA") || r.includes("MECANICA")) return "METAL MECÁNICA";
+                if(r.includes("ECONÓMICO") || r.includes("ECONOMICO") || r.includes("ADMINISTRATIVAS") || r.includes("CEA")) return "CIENCIAS ECONÓMICO ADMINISTRATIVAS";
+                if(r.includes("POSGRADO") || r.includes("INVESTIGACIÓN") || r.includes("INVESTIGACION")) return "POSGRADO E INVESTIGACIÓN";
+                if(r.includes("TIERRA")) return "CIENCIAS DE LA TIERRA";
+                if(r.includes("ELECTRICA") || r.includes("ELECTRÓNICA") || r.includes("ELECTRONICA")) return "ELECTRICA ELECTRÓNICA";
                 
-                return normalized; // Fallback
+                return "OTRO";
             };
 
             useEffect(() => {
@@ -382,46 +375,37 @@
 
             useEffect(() => {
                 if (!loading && stats && chartRef.current) {
-                    // Aggregate counts based on mapping
                     const aggregatedCounts = {};
                     
-                    // Initialize all departments with 0
-                    ALL_DEPARTMENTS.forEach(d => { aggregatedCounts[d] = 0; });
+                    // Initialize with 0
+                    CHART_LABELS.forEach(label => { aggregatedCounts[label] = 0; });
 
-                    // Process incoming data
+                    // Process data
                     if (stats.participacion) {
-                        Object.entries(stats.participacion).forEach(([rawDept, count]) => {
-                            const mappedDept = mapDepartment(rawDept);
-                            // Find the official key that matches the mapped dept
-                            const officialKey = ALL_DEPARTMENTS.find(d => removeAccents(d).toUpperCase() === mappedDept) || mappedDept;
-                            
-                            if (aggregatedCounts.hasOwnProperty(officialKey)) {
-                                aggregatedCounts[officialKey] += count;
-                            } else {
-                                // If mapped department is not in ALL_DEPARTMENTS (edge case), add it? 
-                                // Or ignore? Requirement said "show all departments", so let's stick to the list.
-                                // We can log unmapped departments if needed.
-                                console.warn(`Unmapped department: ${rawDept} mapped to ${mappedDept}`);
+                        Object.entries(stats.participacion).forEach(([raw, count]) => {
+                            const label = mapToChartLabel(raw);
+                            if (aggregatedCounts.hasOwnProperty(label)) {
+                                aggregatedCounts[label] += count;
                             }
                         });
                     }
 
-                    const dataValues = ALL_DEPARTMENTS.map(dept => aggregatedCounts[dept] || 0);
+                    const dataValues = CHART_LABELS.map(l => aggregatedCounts[l] || 0);
 
                     if(chartInstance.current) {
                         chartInstance.current.destroy();
                     }
 
-                    const colors = ['#4f46e5', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+                    const colors = ['#4f46e5', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1', '#9ca3af'];
                     
                     chartInstance.current = new Chart(chartRef.current.getContext('2d'), {
                         type: 'bar',
                         data: {
-                            labels: ALL_DEPARTMENTS, 
+                            labels: CHART_LABELS, 
                             datasets: [{ 
                                 label: 'Evaluaciones Completadas', 
                                 data: dataValues, 
-                                backgroundColor: ALL_DEPARTMENTS.map((_, i) => colors[i % colors.length]), 
+                                backgroundColor: colors, 
                                 borderRadius: 4,
                                 borderWidth: 1
                             }]
