@@ -1,224 +1,7 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Estadísticas - Portal de Actualización Docente ITD</title>
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
-
-<!-- React y Babel -->
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Chart.js y Plugin de Etiquetas -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-
-<!-- Librerías para PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<!-- Google Identity Services -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-
-<style>
-    /* Animaciones */
-    @keyframes fadeIn { 
-        from { opacity: 0; transform: translateY(10px); } 
-        to { opacity: 1; transform: translateY(0); } 
-    }
-    .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-    
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    /* Scrollbar personalizado */
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
-
-    /* Modal PDF */
-    .pdf-overlay {
-        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.7);
-        display: flex; justify-content: center; align-items: center;
-        z-index: 9999; backdrop-filter: blur(4px);
-    }
-    
-    .pdf-modal {
-        background: white; padding: 40px 60px; border-radius: 16px;
-        text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-        max-width: 400px; border-top: 6px solid #1B396A;
-    }
-    
-    .pdf-spinner {
-        width: 60px; height: 60px;
-        border: 5px solid #e5e7eb; border-top-color: #1B396A;
-        border-radius: 50%; animation: spin 1s linear infinite;
-        margin: 0 auto 20px;
-    }
-    
-    /* Utilidades */
-    .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-</style>
-</head>
-<body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800 flex flex-col">
-
-<!-- HEADER WEB -->
-<header id="web-header" class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A]">
-    <div class="container mx-auto px-4 py-4 sm:py-6 flex items-center justify-between gap-4">
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
-        <div class="text-center flex-1 px-2 sm:px-4">
-            <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#1B396A] leading-tight">PANEL DE ESTADÍSTICAS</h1>
-            <p class="text-xs sm:text-sm md:text-base text-[#9D2449] mt-1 font-semibold">Desarrollo Académico</p>
-        </div>
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
-    </div>
-</header>
-
-<!-- ENLACE DE NAVEGACIÓN -->
-<div id="back-link" class="container mx-auto px-4 py-4">
-    <a href="index.html" 
-       class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center gap-1 text-sm font-bold transition-colors">
-        ← Volver al Portal Principal
-    </a>
-</div>
-
-<!-- CONTENEDOR PRINCIPAL DE REACT -->
-<div id="root" class="flex-grow flex flex-col">
-    <div class="flex justify-center items-center h-64 flex-grow">
-        <div class="text-center">
-            <div class="animate-spin h-12 w-12 border-4 border-[#1B396A] rounded-full border-t-transparent mx-auto mb-4"></div>
-            <p class="text-gray-600 font-semibold text-lg">Inicializando sistema...</p>
-        </div>
-    </div>
-</div>
-
-<!-- FOOTER WEB -->
-<footer id="web-footer" class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449]">
-    <div class="container mx-auto px-4">
-         <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
-         <p class="text-xs sm:text-sm opacity-90">M.C. Alejandro Calderón Rentería</p>
-         <p id="copyright-year" class="text-xs sm:text-sm opacity-75 mt-1"></p>
-    </div>
-</footer>
-
-<!-- SCRIPT DE INICIALIZACIÓN -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var yearEl = document.getElementById('copyright-year');
-        if (yearEl) {
-            yearEl.textContent = new Date().getFullYear();
-        }
-    });
-</script>
-
-<!-- APLICACIÓN REACT -->
-<script type="text/babel">
-    const React = window.React;
-    const ReactDOM = window.ReactDOM;
-
-    // ====================================================================
-    // CONFIGURACIÓN GLOBAL
-    // ====================================================================
-    const CONFIG = {
-        GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', 
-        APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
-    };
-
-    // Colores Institucionales y Vibrantes
-    const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
-    const VIBRANT_COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC926', '#1982C4', '#E91E63', '#009688'];
-    const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
-    const GUINDA_COLOR = '#9D2449';
-    const BLUE_COLOR = '#1B396A';
-    
-    // ====================================================================
-    // UTILIDADES
-    // ====================================================================
-    
-    const shortenLabel = (label) => {
-        if (!label) return '';
-        return label
-            .replace(/DEPARTAMENTO DE /gi, 'D. ')
-            .replace(/DEPARTAMENTO/gi, 'D.')
-            .replace(/DIVISION DE ESTUDIOS DE /gi, 'Div. ')
-            .replace(/DIVISION DE /gi, 'Div. ')
-            .replace(/CENTRO DE INFORMACIÓN/gi, 'C. Información')
-            .replace(/CENTRO DE /gi, 'C. ')
-            .replace(/INGENIERÍA/gi, 'Ing.')
-            .replace(/CIENCIAS/gi, 'Cs.')
-            .replace(/ECONOMICO-ADMINISTRATIVAS/gi, 'Eco-Admin')
-            .trim();
-    };
-    
-    const getChartHeight = (count) => Math.max(400, count * 28) + "px";
-
-    const getImageDataFromURL = (url) => {
-        return new Promise((resolve) => {
-            const img = new Image(); img.crossOrigin = 'Anonymous';
-            img.onload = () => {
-                const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height;
-                const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
-                try { resolve(canvas.toDataURL('image/png')); } catch (e) { resolve(null); }
-            };
-            img.onerror = () => resolve(null); img.src = url;
-        });
-    };
-
-    // ====================================================================
-    // COMPONENTE: Login
-    // ====================================================================
-    const Login = ({ onLogin, loginError }) => {
-        const googleButtonRef = React.useRef(null);
-
-        React.useEffect(() => {
-            let intervalId;
-            const initGoogle = () => {
-                if (window.google && window.google.accounts && googleButtonRef.current) {
-                    try {
-                        window.google.accounts.id.initialize({ 
-                            client_id: CONFIG.GOOGLE_CLIENT_ID, 
-                            callback: onLogin 
-                        });
-                        window.google.accounts.id.renderButton(googleButtonRef.current, { 
-                            theme: "outline", size: "large", text: "signin_with", shape: "rectangular", logo_alignment: "left"
-                        });
-                        return true;
-                    } catch (e) { return false; }
-                }
-                return false;
-            };
-            
-            if (!initGoogle()) { 
-                intervalId = setInterval(() => { if (initGoogle()) clearInterval(intervalId); }, 500); 
-            }
-            return () => { if(intervalId) clearInterval(intervalId); };
-        }, [onLogin]);
-
-        return (
-            <div className="flex flex-col justify-center items-center py-20 animate-fadeIn px-4 flex-grow">
-                <div className="bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-8 border-[#9D2449]">
-                    <img src={ITD_LOGO_URL} alt="Logo ITD" className="h-24 mx-auto mb-6 object-contain" />
-                    <h2 className="text-3xl font-bold text-[#1B396A] mb-2">Acceso Restringido</h2>
-                    <p className="text-gray-500 mb-8 text-sm font-medium uppercase tracking-wide">Estadísticas Institucionales</p>
-                    {loginError && (<div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm font-bold">{loginError}</div>)}
-                    <div className="flex justify-center min-h-[50px]" ref={googleButtonRef}></div>
-                </div>
-            </div>
-        );
-    };
-
     // ====================================================================
     // COMPONENTE: ChartBox
     // ====================================================================
-    const ChartBox = ({ type, data, title, id, horizontal = false, shortenLabels = false, minHeight = "350px", isHistory = false }) => {
+    const ChartBox = ({ type, data, title, id, horizontal = false, shortenLabels = false, minHeight = "350px", isHistory = false, customColors = null }) => {
         const chartRef = React.useRef(null);
         const canvasRef = React.useRef(null);
         const [menuOpen, setMenuOpen] = React.useState(false);
@@ -255,13 +38,18 @@
                 // Modo estándar: 'data' es un objeto clave-valor simple
                 const rawLabels = Object.keys(data);
                 const displayLabels = rawLabels.map(l => shortenLabels ? shortenLabel(l) : l);
+                
+                // Determinación de colores
+                const bgColors = customColors || (isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS);
+                const borderColors = isPie ? '#ffffff' : (customColors || VIBRANT_COLORS);
+
                 chartDataConfig = {
                     labels: displayLabels,
                     datasets: [{ 
                         label: title.replace(/[📚👥🏢📋📈🏫👨‍🏫]/g, '').trim(), 
                         data: Object.values(data), 
-                        backgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS,
-                        borderColor: isPie ? '#ffffff' : VIBRANT_COLORS,
+                        backgroundColor: bgColors,
+                        borderColor: borderColors,
                         borderWidth: isPie ? 2 : 1,
                         borderRadius: isPie ? 0 : 6,
                         barPercentage: 0.6,
@@ -348,7 +136,7 @@
 
             chartRef.current = new window.Chart(ctx, config);
             return () => { if (chartRef.current) chartRef.current.destroy(); };
-        }, [data, type, title, horizontal, id, shortenLabels, isHistory]);
+        }, [data, type, title, horizontal, id, shortenLabels, isHistory, customColors]);
 
         const downloadSingleChart = (format) => {
             setMenuOpen(false);
@@ -375,7 +163,7 @@
                         const finalCanvas = document.createElement('canvas');
                         const ctx = finalCanvas.getContext('2d');
                         
-                        const headerHeight = 160; 
+                        const headerHeight = 180; // Aumentado para dar espacio
                         const margin = 40;
                         finalCanvas.width = canvas.width;
                         finalCanvas.height = canvas.height + headerHeight;
@@ -384,14 +172,18 @@
                         ctx.fillStyle = '#ffffff';
                         ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
 
-                        // 1. Logo
+                        // 1. Logo (Calculado por altura para no chocar con la línea)
                         if (logoData) {
                             const img = new Image();
                             img.src = logoData;
                             await new Promise(r => img.onload = r);
-                            const logoTargetW = 180;
-                            const logoTargetH = (img.height / img.width) * logoTargetW;
-                            ctx.drawImage(img, margin, 20, logoTargetW, logoTargetH);
+                            
+                            const maxLogoHeight = 120; // Altura máxima permitida
+                            const ratio = img.width / img.height;
+                            const logoW = maxLogoHeight * ratio;
+                            const logoH = maxLogoHeight;
+                            
+                            ctx.drawImage(img, margin, 20, logoW, logoH);
                         }
 
                         // 2. Títulos
@@ -404,12 +196,12 @@
                         ctx.font = '30px Helvetica, Arial, sans-serif';
                         ctx.fillText(cleanTitle, finalCanvas.width / 2, 130);
 
-                        // 3. Línea Guinda
+                        // 3. Línea Guinda (Posicionada debajo de todo)
                         ctx.strokeStyle = GUINDA_COLOR;
                         ctx.lineWidth = 6;
                         ctx.beginPath();
-                        ctx.moveTo(margin, 150);
-                        ctx.lineTo(finalCanvas.width - margin, 150);
+                        ctx.moveTo(margin, 165); // Bajada a 165px
+                        ctx.lineTo(finalCanvas.width - margin, 165);
                         ctx.stroke();
 
                         // 4. Gráfica
@@ -431,9 +223,12 @@
                         const margin = 10;
 
                         // --- 1. Encabezado Institucional (Sin recuadro azul) ---
-                        // Logo
+                        // Logo (Proporcional)
                         if (logoData) {
-                            pdf.addImage(logoData, 'PNG', margin, 5, 20, 20); 
+                            const imgProps = pdf.getImageProperties(logoData);
+                            const logoWidth = 22; // Ancho fijo en mm
+                            const logoHeight = (imgProps.height * logoWidth) / imgProps.width; // Altura calculada
+                            pdf.addImage(logoData, 'PNG', margin, 5, logoWidth, logoHeight); 
                         }
                         
                         // Textos
@@ -450,13 +245,13 @@
                         // Línea Guinda
                         pdf.setDrawColor(157, 36, 73); // #9D2449
                         pdf.setLineWidth(1);
-                        pdf.line(margin, 25, pdfWidth - margin, 25);
+                        pdf.line(margin, 28, pdfWidth - margin, 28); // Bajada ligeramente
 
                         // --- 2. Título de la Gráfica ---
                         pdf.setFontSize(12);
                         pdf.setTextColor(27, 57, 106);
                         pdf.setFont('helvetica', 'bold');
-                        pdf.text(cleanTitle, pdfWidth / 2, 35, { align: 'center' });
+                        pdf.text(cleanTitle, pdfWidth / 2, 38, { align: 'center' });
 
                         // --- 3. Imagen de la Gráfica ---
                         const imgData = canvas.toDataURL('image/png');
@@ -464,7 +259,7 @@
                         const ratio = imgProps.width / imgProps.height;
                         
                         const availWidth = pdfWidth - (margin * 2);
-                        const availHeight = pdfHeight - 40 - 15 - 10 - (margin * 2);
+                        const availHeight = pdfHeight - 45 - 15 - 10 - (margin * 2);
                         
                         let finalW = availWidth;
                         let finalH = finalW / ratio;
@@ -475,7 +270,7 @@
                         }
                         
                         const x = (pdfWidth - finalW) / 2;
-                        const y = 40 + ((availHeight - finalH) / 2); 
+                        const y = 45 + ((availHeight - finalH) / 2); 
 
                         pdf.addImage(imgData, 'PNG', x, y, finalW, finalH);
 
@@ -845,10 +640,22 @@
                 {/* Sección Secundaria */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                     <div className="md:col-span-1">
-                        <ChartBox id="genero" type="doughnut" title="👥 Distribución por Género" data={statsData.distribucionGenero} />
+                        <ChartBox 
+                            id="genero" 
+                            type="doughnut" 
+                            title="👥 Distribución por Género" 
+                            data={statsData.distribucionGenero}
+                            customColors={['#36A2EB', '#FF6384']} // Azul y Rosa
+                        />
                     </div>
                     <div className="md:col-span-1">
-                        <ChartBox id="tipo" type="pie" title="📋 Tipo de Curso" data={statsData.distribucionTipo} />
+                        <ChartBox 
+                            id="tipo" 
+                            type="pie" 
+                            title="📋 Tipo de Curso" 
+                            data={statsData.distribucionTipo}
+                            customColors={['#10b981', '#f59e0b']} // Esmeralda y Ámbar
+                        />
                     </div>
                     <div className="md:col-span-1">
                         <ChartBox id="frecuencia" type="bar" title="📈 Cursos por Docente" data={statsData.frecuenciaParticipacion} />
@@ -875,40 +682,3 @@
             </div>
         );
     };
-
-    // ====================================================================
-    // COMPONENTE PRINCIPAL: App
-    // ====================================================================
-    const App = () => {
-        const [user, setUser] = React.useState(null);
-        const [loginError, setLoginError] = React.useState('');
-
-        const handleLogin = (response) => {
-            try {
-                const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                if (['alejandro.calderon@itdurango.edu.mx', 'desarrollo.academico@itdurango.edu.mx'].includes(payload.email)) {
-                    setUser({ name: payload.name, email: payload.email, picture: payload.picture });
-                } else {
-                    setLoginError("Acceso denegado: Cuenta no autorizada para ver estadísticas.");
-                }
-            } catch (error) {
-                setLoginError("Error de autenticación.");
-            }
-        };
-
-        const handleLogout = () => {
-            setUser(null);
-            setLoginError('');
-            if (window.google) window.google.accounts.id.disableAutoSelect();
-        };
-
-        if (!user) return <Login onLogin={handleLogin} loginError={loginError} />;
-        return <Dashboard user={user} onLogout={handleLogout} />;
-    };
-
-    // Renderizado
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-</script>
-</body>
-</html>
