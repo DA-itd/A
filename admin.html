@@ -84,7 +84,7 @@
             "CIENCIAS BÁSICAS", 
             "QUÍMICA BIOQUÍMICA", 
             "METAL MECÁNICA", 
-            "CIENCIAS ECONÓMICO ADMINISTRATIVAS", 
+            "C. ECONÓMICO ADMINISTRATIVAS", 
             "POSGRADO E INVESTIGACIÓN", 
             "CIENCIAS DE LA TIERRA", 
             "ELECTRICA ELECTRÓNICA",
@@ -409,14 +409,14 @@
             // Render Chart 1: Eficacia
             useEffect(() => {
                 if (!loading && efficacyStats && chartRef1.current) {
-                    renderChart(chartRef1.current, chartInstance1, efficacyStats, 'Encuesta de Eficacia', ['#4f46e5', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1', '#9ca3af']);
+                    renderChart(chartRef1.current, chartInstance1, efficacyStats, 'Participación en Encuesta de Eficacia por Fefaturas', ['#4f46e5', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1', '#9ca3af']);
                 }
             }, [efficacyStats, loading]);
 
             // Render Chart 2: Docentes
             useEffect(() => {
                 if (!loading && teacherStats && chartRef2.current) {
-                    renderChart(chartRef2.current, chartInstance2, teacherStats, 'Encuesta de Docentes', ['#be123c', '#e11d48', '#f43f5e', '#fb7185', '#fda4af', '#9f1239', '#881337', '#be123c', '#e11d48', '#f43f5e']);
+                    renderChart(chartRef2.current, chartInstance2, teacherStats, 'Participación en Encuesta de Eficacia por Docentes', ['#be123c', '#e11d48', '#f43f5e', '#fb7185', '#fda4af', '#9f1239', '#881337', '#be123c', '#e11d48', '#f43f5e']);
                 }
             }, [teacherStats, loading]);
 
