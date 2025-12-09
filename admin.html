@@ -15,6 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 
     <style>
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } 
@@ -416,7 +417,7 @@
             // Render Chart 2: Docentes
             useEffect(() => {
                 if (!loading && teacherStats && chartRef2.current) {
-                    renderChart(chartRef2.current, chartInstance2, teacherStats, 'Participación en Encuesta de Eficacia por Docentes', ['#be123c', '#e11d48', '#f43f5e', '#fb7185', '#fda4af', '#9f1239', '#881337', '#be123c', '#e11d48', '#f43f5e']);
+                    renderChart(chartRef2.current, chartInstance2, teacherStats, 'Participación en Encuesta de Docentes', ['#be123c', '#e11d48', '#f43f5e', '#fb7185', '#fda4af', '#9f1239', '#881337', '#be123c', '#e11d48', '#f43f5e']);
                 }
             }, [teacherStats, loading]);
 
@@ -451,6 +452,7 @@
                             borderWidth: 1
                         }]
                     },
+                    plugins: [ChartDataLabels],
                     options: { 
                         indexAxis: 'y', // Horizontal chart
                         responsive: true, 
@@ -459,8 +461,22 @@
                             legend: { display: false },
                             tooltip: {
                                 callbacks: { label: (ctx) => `${ctx.raw} evaluaciones` }
+                            },
+                            datalabels: {
+                                color: '#000',
+                                anchor: 'end',
+                                align: 'end',
+                                font: {
+                                    weight: 'bold'
+                                },
+                                formatter: (value) => value > 0 ? value : ''
                             }
                         }, 
+                        layout: {
+                            padding: {
+                                right: 30
+                            }
+                        },
                         scales: { 
                             x: { beginAtZero: true, ticks: { stepSize: 1 } },
                             y: { 
