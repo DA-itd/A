@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -24,6 +22,42 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        /* RELOJ DE ESPERA (Loader) */
+        .loader-clock {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #1B396A;
+            border-radius: 50%;
+            position: relative;
+            background: rgba(255, 255, 255, 0.5);
+            margin: 0 auto;
+        }
+        .loader-clock::before {
+            content: '';
+            position: absolute;
+            width: 6px; height: 6px;
+            background: #1B396A;
+            border-radius: 50%;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        .loader-clock::after {
+            content: '';
+            position: absolute;
+            width: 3px; height: 18px;
+            background: #9D2449; /* Color guinda */
+            top: 50%; left: 50%;
+            margin-left: -1.5px;
+            margin-top: -18px;
+            transform-origin: bottom center;
+            border-radius: 2px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen font-sans text-slate-900">
@@ -282,7 +316,7 @@
                                     disabled={loading || !query.trim()} 
                                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-lg shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                                 >
-                                    {loading ? <span className="animate-spin h-5 w-5 border-2 border-white rounded-full border-t-transparent mr-2"></span> : 'Buscar'}
+                                    {loading ? <div className="loader-clock !w-5 !h-5 !border-2"></div> : 'Buscar'}
                                 </button>
                             </div>
                         </div>
@@ -329,13 +363,17 @@
         };
 
         // ==========================================
-        // MÓDULO 2: ENCUESTAS (TODOS LOS DEPTOS)
+        // MÓDULO 2: ENCUESTAS (EFICACIA + DOCENTES)
         // ==========================================
         const SurveyPanel = () => {
-            const [stats, setStats] = useState(null);
+            const [efficacyStats, setEfficacyStats] = useState(null);
+            const [teacherStats, setTeacherStats] = useState(null);
             const [loading, setLoading] = useState(true);
-            const chartRef = useRef(null);
-            const chartInstance = useRef(null);
+            
+            const chartRef1 = useRef(null);
+            const chartInstance1 = useRef(null);
+            const chartRef2 = useRef(null);
+            const chartInstance2 = useRef(null);
 
             // Mapping function to specific chart labels
             const mapToChartLabel = (rawName) => {
@@ -356,90 +394,84 @@
 
             useEffect(() => {
                 setLoading(true);
-                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getSurveyStats`)
-                    .then(r => r.json())
-                    .then(res => { 
-                        if(res.success) {
-                            setStats(res.data);
-                        } else {
-                            alert("Error cargando encuestas: " + (res.message || "Desconocido"));
-                            setStats({ total: 0, participacion: {} });
-                        }
-                    })
-                    .catch(e => {
-                        console.error(e);
-                        setStats({ total: 0, participacion: {} });
-                    })
-                    .finally(() => setLoading(false));
+                Promise.all([
+                    fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getSurveyStats`).then(r => r.json()),
+                    fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeacherSurveyStats`).then(r => r.json())
+                ])
+                .then(([res1, res2]) => {
+                    if(res1.success) setEfficacyStats(res1.data);
+                    if(res2.success) setTeacherStats(res2.data);
+                })
+                .catch(e => console.error(e))
+                .finally(() => setLoading(false));
             }, []);
 
+            // Render Chart 1: Eficacia
             useEffect(() => {
-                if (!loading && stats && chartRef.current) {
-                    const aggregatedCounts = {};
-                    
-                    // Initialize with 0
-                    CHART_LABELS.forEach(label => { aggregatedCounts[label] = 0; });
+                if (!loading && efficacyStats && chartRef1.current) {
+                    renderChart(chartRef1.current, chartInstance1, efficacyStats, 'Encuesta de Eficacia', ['#4f46e5', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1', '#9ca3af']);
+                }
+            }, [efficacyStats, loading]);
 
-                    // Process data
-                    if (stats.participacion) {
-                        Object.entries(stats.participacion).forEach(([raw, count]) => {
-                            const label = mapToChartLabel(raw);
-                            if (aggregatedCounts.hasOwnProperty(label)) {
-                                aggregatedCounts[label] += count;
-                            }
-                        });
-                    }
+            // Render Chart 2: Docentes
+            useEffect(() => {
+                if (!loading && teacherStats && chartRef2.current) {
+                    renderChart(chartRef2.current, chartInstance2, teacherStats, 'Encuesta de Docentes', ['#be123c', '#e11d48', '#f43f5e', '#fb7185', '#fda4af', '#9f1239', '#881337', '#be123c', '#e11d48', '#f43f5e']);
+                }
+            }, [teacherStats, loading]);
 
-                    const dataValues = CHART_LABELS.map(l => aggregatedCounts[l] || 0);
+            const renderChart = (canvas, instanceRef, stats, label, colors) => {
+                const aggregatedCounts = {};
+                CHART_LABELS.forEach(label => { aggregatedCounts[label] = 0; });
 
-                    if(chartInstance.current) {
-                        chartInstance.current.destroy();
-                    }
-
-                    const colors = ['#4f46e5', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1', '#9ca3af'];
-                    
-                    chartInstance.current = new Chart(chartRef.current.getContext('2d'), {
-                        type: 'bar',
-                        data: {
-                            labels: CHART_LABELS, 
-                            datasets: [{ 
-                                label: 'Evaluaciones Completadas', 
-                                data: dataValues, 
-                                backgroundColor: colors, 
-                                borderRadius: 4,
-                                borderWidth: 1
-                            }]
-                        },
-                        options: { 
-                            indexAxis: 'y', 
-                            responsive: true, 
-                            maintainAspectRatio: false, 
-                            plugins: { 
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        label: (ctx) => `${ctx.raw} evaluaciones`
-                                    }
-                                }
-                            }, 
-                            scales: { 
-                                x: { 
-                                    beginAtZero: true,
-                                    ticks: { stepSize: 1 }
-                                },
-                                y: { 
-                                    ticks: { 
-                                        font: { size: 10, weight: 'bold' },
-                                        autoSkip: false
-                                    } 
-                                }
-                            } 
+                if (stats.participacion) {
+                    Object.entries(stats.participacion).forEach(([raw, count]) => {
+                        const label = mapToChartLabel(raw);
+                        if (aggregatedCounts.hasOwnProperty(label)) {
+                            aggregatedCounts[label] += count;
                         }
                     });
                 }
-            }, [stats, loading]);
 
-            const exportPdf = async () => {
+                const dataValues = CHART_LABELS.map(l => aggregatedCounts[l] || 0);
+
+                if(instanceRef.current) {
+                    instanceRef.current.destroy();
+                }
+                
+                instanceRef.current = new Chart(canvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: CHART_LABELS, 
+                        datasets: [{ 
+                            label: label, 
+                            data: dataValues, 
+                            backgroundColor: colors, 
+                            borderRadius: 4,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { 
+                        indexAxis: 'y', // Horizontal chart
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: { label: (ctx) => `${ctx.raw} evaluaciones` }
+                            }
+                        }, 
+                        scales: { 
+                            x: { beginAtZero: true, ticks: { stepSize: 1 } },
+                            y: { 
+                                ticks: { font: { size: 10, weight: 'bold' }, autoSkip: false } 
+                            }
+                        } 
+                    }
+                });
+            };
+
+            const exportPdf = async (stats, chartRef, title, filename) => {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('p', 'mm', 'a4');
                 const pageWidth = doc.internal.pageSize.getWidth();
@@ -450,8 +482,9 @@
                 doc.setFontSize(10); doc.setTextColor(100); 
                 doc.text("Coordinación de Actualización Docente", pageWidth / 2, 24, { align: "center" });
                 doc.setFontSize(12); doc.setTextColor(0); 
-                doc.text("ENCUESTA DE EFICACIA - AVANCE POR DEPARTAMENTO", pageWidth / 2, 35, { align: "center" });
+                doc.text(title.toUpperCase(), pageWidth / 2, 35, { align: "center" });
                 doc.setDrawColor(27, 57, 106); doc.setLineWidth(0.5); doc.line(15, 40, pageWidth - 15, 40);
+                
                 if(chartRef.current) {
                     const canvas = chartRef.current;
                     const tempCanvas = document.createElement('canvas'); tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
@@ -463,28 +496,57 @@
                 doc.setFontSize(10); doc.setTextColor(80); 
                 doc.text(`Total de Evaluaciones: ${stats?.total || 0}`, 15, 200);
                 doc.text(`Fecha de corte: ${dateStr}`, 15, 205);
-                doc.save('Reporte_Eficacia.pdf');
+                doc.save(filename);
             };
 
             return (
                 <div className="animate-fadeIn p-6">
-                    <div className="max-w-5xl mx-auto">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                                <span className="bg-yellow-100 p-2 rounded-lg text-yellow-600">📊</span> Encuesta de Eficacia
-                            </h2>
-                            <button onClick={exportPdf} className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition shadow">Descargar Gráfica PDF</button>
-                        </div>
-                        {loading ? <div className="text-center py-10"><div className="animate-spin h-10 w-10 border-4 border-indigo-600 rounded-full border-t-transparent mx-auto"></div><p className="mt-2 text-gray-500">Analizando respuestas...</p></div> : (
-                            <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
-                                <div className="mb-6 flex gap-4">
-                                    <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 shadow-sm">
-                                        <p className="text-xs font-bold text-blue-600 uppercase mb-1">Total Respuestas</p>
-                                        <p className="text-4xl font-bold text-blue-900">{stats?.total || 0}</p>
+                    <div className="max-w-5xl mx-auto space-y-12">
+                        {loading ? (
+                             <div className="text-center py-20">
+                                <div className="loader-clock"></div>
+                                <p className="mt-4 text-slate-500 font-semibold">Cargando encuestas...</p>
+                             </div>
+                        ) : (
+                            <>
+                                {/* Gráfica 1: Eficacia */}
+                                <div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                                            <span className="bg-yellow-100 p-2 rounded-lg text-yellow-600">📊</span> Encuesta de Eficacia
+                                        </h2>
+                                        <button onClick={() => exportPdf(efficacyStats, chartRef1, 'Encuesta de Eficacia - Avance por Departamento', 'Reporte_Eficacia.pdf')} className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition shadow flex items-center gap-2">
+                                            <span>📄</span> PDF
+                                        </button>
+                                    </div>
+                                    <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
+                                        <div className="mb-4 bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500 inline-block">
+                                            <span className="text-xs font-bold text-blue-600 uppercase block">Total</span>
+                                            <span className="text-2xl font-bold text-blue-900">{efficacyStats?.total || 0}</span>
+                                        </div>
+                                        <div className="h-[500px] w-full"><canvas ref={chartRef1}></canvas></div>
                                     </div>
                                 </div>
-                                <div className="h-[800px]"><canvas ref={chartRef}></canvas></div>
-                            </div>
+
+                                {/* Gráfica 2: Docentes */}
+                                <div>
+                                    <div className="flex justify-between items-center mb-4 border-t pt-8 border-slate-200">
+                                        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                                            <span className="bg-rose-100 p-2 rounded-lg text-rose-600">🎓</span> Encuesta de Docentes
+                                        </h2>
+                                        <button onClick={() => exportPdf(teacherStats, chartRef2, 'Encuesta de Docentes - Avance por Departamento', 'Reporte_Docentes.pdf')} className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition shadow flex items-center gap-2">
+                                            <span>📄</span> PDF
+                                        </button>
+                                    </div>
+                                    <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
+                                        <div className="mb-4 bg-rose-50 p-3 rounded-lg border-l-4 border-rose-500 inline-block">
+                                            <span className="text-xs font-bold text-rose-600 uppercase block">Total</span>
+                                            <span className="text-2xl font-bold text-rose-900">{teacherStats?.total || 0}</span>
+                                        </div>
+                                        <div className="h-[500px] w-full"><canvas ref={chartRef2}></canvas></div>
+                                    </div>
+                                </div>
+                            </>
                         )}
                     </div>
                 </div>
@@ -634,7 +696,7 @@
                                 <button onClick={exportPdf} disabled={!filtered.length} className="bg-red-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed shadow transition flex items-center gap-2"><span>📄</span> Descargar PDF</button>
                                 <button onClick={exportExcel} disabled={!filtered.length} className="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed shadow transition flex items-center gap-2"><span>📊</span> Descargar Excel</button>
                             </div>
-                            {loading ? <p className="text-center p-4">Cargando...</p> : (
+                            {loading ? <div className="text-center py-10"><div className="loader-clock"></div><p className="mt-2 text-gray-500">Cargando...</p></div> : (
                                 <div>
                                     <p className="text-sm text-gray-500 mb-2">Mostrando {filtered.length} registros</p>
                                     <div className="overflow-x-auto border rounded-lg max-h-[500px]">
