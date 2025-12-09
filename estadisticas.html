@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -368,8 +369,9 @@
                 if (!element) return;
 
                 try {
+                    // Escala 3 para mayor calidad
                     const canvas = await html2canvas(element, { 
-                        scale: 2, 
+                        scale: 3, 
                         useCORS: true, 
                         backgroundColor: '#ffffff',
                         ignoreElements: (el) => el.id === `menu-btn-${id}` // Ignorar el botón del menú
@@ -382,21 +384,42 @@
                         link.click();
                     } else if (format === 'pdf') {
                         const { jsPDF } = window.jspdf;
-                        // Orientación basada en proporciones
+                        
+                        // Orientación basada en proporciones de la gráfica
                         const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
-                        const pdf = new jsPDF(orientation, 'mm', 'a4');
-                        const imgData = canvas.toDataURL('image/png');
+                        const pdf = new jsPDF(orientation, 'mm', 'letter');
                         
                         const pdfWidth = pdf.internal.pageSize.getWidth();
                         const pdfHeight = pdf.internal.pageSize.getHeight();
-                        
-                        // Ajustar imagen para que quepa con margenes
                         const margin = 10;
-                        const availWidth = pdfWidth - (margin * 2);
-                        const availHeight = pdfHeight - (margin * 2);
+
+                        // --- 1. Encabezado Institucional ---
+                        pdf.setFillColor(27, 57, 106); // Azul ITD #1B396A
+                        pdf.rect(0, 0, pdfWidth, 20, 'F');
                         
+                        pdf.setFontSize(14);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setTextColor(255, 255, 255);
+                        pdf.text('INSTITUTO TECNOLÓGICO DE DURANGO', pdfWidth / 2, 9, { align: 'center' });
+                        
+                        pdf.setFontSize(9);
+                        pdf.setFont('helvetica', 'normal');
+                        pdf.text('Coordinación de Actualización Docente - Reporte Individual', pdfWidth / 2, 16, { align: 'center' });
+
+                        // --- 2. Título de la Gráfica ---
+                        pdf.setFontSize(12);
+                        pdf.setTextColor(27, 57, 106);
+                        pdf.setFont('helvetica', 'bold');
+                        const cleanTitle = title.replace(/[📚👥🏢📋📈🏫👨‍🏫]/g, '').trim();
+                        pdf.text(cleanTitle, pdfWidth / 2, 30, { align: 'center' });
+
+                        // --- 3. Imagen de la Gráfica ---
+                        const imgData = canvas.toDataURL('image/png');
                         const imgProps = pdf.getImageProperties(imgData);
                         const ratio = imgProps.width / imgProps.height;
+                        
+                        const availWidth = pdfWidth - (margin * 2);
+                        const availHeight = pdfHeight - 20 - 15 - 10 - (margin * 2);
                         
                         let finalW = availWidth;
                         let finalH = finalW / ratio;
@@ -407,10 +430,21 @@
                         }
                         
                         const x = (pdfWidth - finalW) / 2;
-                        const y = (pdfHeight - finalH) / 2;
+                        const y = 35 + ((availHeight - finalH) / 2); 
 
                         pdf.addImage(imgData, 'PNG', x, y, finalW, finalH);
-                        pdf.save(`${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
+
+                        // --- 4. Pie de Página ---
+                        pdf.setFillColor(27, 57, 106);
+                        pdf.rect(0, pdfHeight - 10, pdfWidth, 10, 'F');
+                        
+                        pdf.setFontSize(8);
+                        pdf.setTextColor(255, 255, 255);
+                        const dateStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+                        pdf.text(`Generado: ${dateStr}`, margin, pdfHeight - 4);
+                        pdf.text('ITD - Estadística Oficial', pdfWidth - margin, pdfHeight - 4, { align: 'right' });
+
+                        pdf.save(`${cleanTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
                     }
                 } catch (err) {
                     console.error("Error descargando gráfica", err);
@@ -422,7 +456,7 @@
         return (
             <div id={`chartBox-${id}`} className="bg-white p-5 rounded-xl shadow-md h-full flex flex-col border border-gray-100 transition-all hover:shadow-lg relative" style={{ minHeight }}>
                 <div className="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
-                    <div className="w-8"></div> {/* Espaciador para centrar título visualmente */}
+                    <div className="w-8"></div> 
                     <h3 className="text-gray-700 font-bold text-center text-base flex items-center justify-center gap-2 flex-grow">
                         {title}
                     </h3>
