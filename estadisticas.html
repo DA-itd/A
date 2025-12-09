@@ -43,7 +43,7 @@
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
 
-    /* Modal PDF */
+    /* Modal PDF y Loaders */
     .pdf-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0,0,0,0.7);
@@ -57,10 +57,13 @@
         max-width: 400px; border-top: 6px solid #1B396A;
     }
     
-    .pdf-spinner {
+    /* Clase específica para el spinner/reloj de carga */
+    .loader-spinner {
         width: 60px; height: 60px;
-        border: 5px solid #e5e7eb; border-top-color: #1B396A;
-        border-radius: 50%; animation: spin 1s linear infinite;
+        border: 6px solid #e5e7eb; 
+        border-top-color: #1B396A; /* Azul ITD */
+        border-radius: 50%; 
+        animation: spin 1s linear infinite;
         margin: 0 auto 20px;
     }
     
@@ -92,9 +95,10 @@
 
 <!-- CONTENEDOR PRINCIPAL DE REACT -->
 <div id="root" class="flex-grow flex flex-col">
+    <!-- Loader Inicial (HTML puro para feedback inmediato) -->
     <div class="flex justify-center items-center h-64 flex-grow">
         <div class="text-center">
-            <div class="animate-spin h-12 w-12 border-4 border-[#1B396A] rounded-full border-t-transparent mx-auto mb-4"></div>
+            <div class="loader-spinner"></div>
             <p class="text-gray-600 font-semibold text-lg">Inicializando sistema...</p>
         </div>
     </div>
@@ -369,7 +373,7 @@
                         scale: 3, 
                         useCORS: true, 
                         backgroundColor: '#ffffff',
-                        ignoreElements: (el) => el.id === `menu-btn-${id}` // Ignorar el botón del menú
+                        ignoreElements: (el) => el.id === `menu-btn-${id}` 
                     });
 
                     // Cargar Logo
@@ -381,7 +385,8 @@
                         const finalCanvas = document.createElement('canvas');
                         const ctx = finalCanvas.getContext('2d');
                         
-                        const headerHeight = 220; // Aumentado para evitar solapamiento
+                        // Altura de encabezado optimizada para evitar solapamientos
+                        const headerHeight = 240; 
                         const margin = 40;
                         finalCanvas.width = canvas.width;
                         finalCanvas.height = canvas.height + headerHeight;
@@ -390,33 +395,41 @@
                         ctx.fillStyle = '#ffffff';
                         ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
 
-                        // 1. Logo
+                        // 1. Logo (Izquierda)
                         if (logoData) {
                             const img = new Image();
                             img.src = logoData;
                             await new Promise(r => img.onload = r);
                             
-                            const maxLogoHeight = 100;
+                            const maxLogoHeight = 90;
                             const ratio = img.width / img.height;
                             const logoW = maxLogoHeight * ratio;
                             const logoH = maxLogoHeight;
                             
-                            ctx.drawImage(img, margin, 30, logoW, logoH);
+                            ctx.drawImage(img, margin, 40, logoW, logoH);
                         }
 
-                        // 2. Títulos
-                        ctx.fillStyle = BLUE_COLOR;
-                        ctx.font = 'bold 42px Helvetica, Arial, sans-serif';
+                        // 2. Títulos (Centrados y distribuidos)
                         ctx.textAlign = 'center';
-                        ctx.fillText('INSTITUTO TECNOLÓGICO DE DURANGO', finalCanvas.width / 2, 70);
                         
+                        // Instituto
+                        ctx.fillStyle = BLUE_COLOR;
+                        ctx.font = 'bold 38px Helvetica, Arial, sans-serif';
+                        ctx.fillText('INSTITUTO TECNOLÓGICO DE DURANGO', finalCanvas.width / 2, 75);
+                        
+                        // Subtítulo
                         ctx.fillStyle = '#666';
-                        ctx.font = '30px Helvetica, Arial, sans-serif';
-                        ctx.fillText(cleanTitle, finalCanvas.width / 2, 130);
+                        ctx.font = '24px Helvetica, Arial, sans-serif';
+                        ctx.fillText('Coordinación de Actualización Docente', finalCanvas.width / 2, 110);
 
-                        // 3. Línea Guinda (Bajada para no tocar el logo)
+                        // Título de la Gráfica
+                        ctx.fillStyle = BLUE_COLOR;
+                        ctx.font = 'bold 30px Helvetica, Arial, sans-serif';
+                        ctx.fillText(cleanTitle, finalCanvas.width / 2, 160);
+
+                        // 3. Línea Guinda (Separador)
                         ctx.strokeStyle = GUINDA_COLOR;
-                        ctx.lineWidth = 6;
+                        ctx.lineWidth = 5;
                         ctx.beginPath();
                         ctx.moveTo(margin, 190);
                         ctx.lineTo(finalCanvas.width - margin, 190);
@@ -684,7 +697,6 @@
             const pTrend = statsData.periodTrend;
             const hTrend = statsData.historicalTrend;
             
-            // Ordenar años descendente para visualización lógica cronológica en el eje X
             const sortedYears = Object.keys(hTrend).sort();
             
             const labels = [];
@@ -697,11 +709,9 @@
                 const jun = pTrend[`${year}-Junio`]?.cursos || 0;
                 const ago = pTrend[`${year}-Agosto`]?.cursos || 0;
 
-                // Orden Solicitado: Total -> Ene -> Jun -> Ago
                 labels.push(`Total '${year.substring(2)}`, 'Ene', 'Jun', 'Ago');
                 dataValues.push(total, ene, jun, ago);
                 
-                // Colores específicos
                 bgColors.push('#1e3a8a'); // Navy para Total
                 bgColors.push('#f472b6'); // Pink para Ene
                 bgColors.push('#3b82f6'); // Blue para Jun
@@ -725,7 +735,6 @@
             if (!statsData || !statsData.historicalTrend) return { labels: [], datasets: [] };
             
             const years = Object.keys(statsData.historicalTrend).sort();
-            // Colores vibrantes para cada año
             const colors = ['#4f46e5', '#06b6d4', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']; 
             
             return {
@@ -741,10 +750,12 @@
             };
         };
 
+        // --- RELOJ DE CARGA (LOADER) ---
         if (loading) {
             return (
-                <div className="flex justify-center items-center h-full">
-                    <div className="animate-spin h-12 w-12 border-4 border-[#1B396A] rounded-full border-t-transparent"></div>
+                <div className="flex justify-center items-center h-full flex-col">
+                    <div className="loader-spinner"></div>
+                    <p className="text-[#1B396A] font-bold text-lg animate-pulse">Cargando estadísticas...</p>
                 </div>
             );
         }
@@ -755,7 +766,7 @@
                 {generatingPDF && (
                     <div className="pdf-overlay">
                         <div className="pdf-modal">
-                            <div className="pdf-spinner"></div>
+                            <div className="loader-spinner"></div>
                             <h3 className="text-xl font-bold text-gray-800 mb-2">Generando Reporte PDF</h3>
                             <p className="text-gray-500">Por favor espere, procesando gráficas...</p>
                         </div>
