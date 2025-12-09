@@ -1,3 +1,9 @@
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -254,12 +260,14 @@
                 chartDataConfig = {
                     labels: displayLabels,
                     datasets: [{ 
-                        label: title.replace(/[📚👥🏢📋📈🏫]/g, '').trim(), 
+                        label: title.replace(/[📚👥🏢📋📈🏫👨‍🏫]/g, '').trim(), 
                         data: Object.values(data), 
                         backgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS,
                         borderColor: isPie ? '#ffffff' : VIBRANT_COLORS,
                         borderWidth: isPie ? 2 : 1,
-                        borderRadius: isPie ? 0 : 6
+                        borderRadius: isPie ? 0 : 6,
+                        barPercentage: 0.6, // Barras más angostas por defecto para elegancia
+                        maxBarThickness: 50 // Límite de ancho para que no se vean gigantes si hay pocos datos
                     }]
                 };
             }
@@ -440,8 +448,9 @@
                         data: dataPoints,
                         backgroundColor: backgroundColors,
                         borderRadius: 4,
-                        barPercentage: 0.8,
-                        categoryPercentage: 0.9
+                        barPercentage: 0.7, // Ajustado para ser más angosto
+                        categoryPercentage: 0.9,
+                        maxBarThickness: 40 // Ancho máximo
                     }
                 ]
             };
@@ -466,7 +475,9 @@
                         backgroundColor: bgColors,
                         borderColor: bgColors,
                         borderWidth: 1,
-                        borderRadius: 6
+                        borderRadius: 6,
+                        barPercentage: 0.5, // Barras mucho más angostas y elegantes
+                        maxBarThickness: 50
                     }
                 ]
             };
@@ -493,6 +504,7 @@
                     pdf.text(`Pagina ${pageNo} de ${pageCount}`, W - M, H - 4, { align: 'right' });
                 };
 
+                // --- PAGINA 1: Resumen y Rankings ---
                 addHeader();
                 let y = 30; pdf.setTextColor(0); pdf.setFontSize(11); pdf.text(`PERIODO: ${period}`, M, y); 
                 pdf.setFontSize(9); pdf.setTextColor(100); pdf.text(`Generado: ${new Date().toLocaleDateString()}`, W-M, y, { align: 'right' }); 
@@ -511,17 +523,20 @@
                 ]);
                 
                 if (imgC) pdf.addImage(imgC, 'PNG', M, y, W*0.9, 80); y += 85;
-                if (imgD) pdf.addImage(imgD, 'PNG', M, y, W*0.9, 80); y += 85;
+                if (imgD) pdf.addImage(imgD, 'PNG', M, y, W*0.9, 80); 
                 
+                // --- PAGINA 2: Demografía y Frecuencia ---
                 pdf.addPage(); addHeader(); y = 30;
                 if (imgG) pdf.addImage(imgG, 'PNG', M, y, (W/2)-M-2, 60);
                 if (imgT) pdf.addImage(imgT, 'PNG', (W/2)+2, y, (W/2)-M-2, 60);
-                y += 65;
-                
-                if (imgF) pdf.addImage(imgF, 'PNG', M, y, W-2*M, 70); y += 75;
-                
-                if (imgH) pdf.addImage(imgH, 'PNG', M, y, W-2*M, 60); y += 65;
-                if (imgTeach) pdf.addImage(imgTeach, 'PNG', M, y, W-2*M, 60);
+                y += 70;
+                if (imgF) pdf.addImage(imgF, 'PNG', M, y, W-2*M, 80); 
+
+                // --- PAGINA 3: Histórico ---
+                pdf.addPage(); addHeader(); y = 30;
+                pdf.setFontSize(12); pdf.setTextColor(0); pdf.text("Evolución Histórica", M, y); y += 10;
+                if (imgH) pdf.addImage(imgH, 'PNG', M, y, W-2*M, 70); y += 80;
+                if (imgTeach) pdf.addImage(imgTeach, 'PNG', M, y, W-2*M, 70);
 
                 const pc = pdf.internal.getNumberOfPages();
                 for (let i=1; i<=pc; i++) { pdf.setPage(i); addFooter(i, pc); }
