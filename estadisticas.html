@@ -1,51 +1,3 @@
-<change>
-<file>estadisticas.html</file>
-<description>Replace lock emoji with ITD logo in Login component</description>
-<content><![CDATA[
-    // ====================================================================
-    // COMPONENTE: Login
-    // ====================================================================
-    const Login = ({ onLogin, loginError }) => {
-        const googleButtonRef = React.useRef(null);
-
-        React.useEffect(() => {
-            let intervalId;
-            const initGoogle = () => {
-                if (window.google && window.google.accounts && googleButtonRef.current) {
-                    try {
-                        window.google.accounts.id.initialize({ 
-                            client_id: CONFIG.GOOGLE_CLIENT_ID, 
-                            callback: onLogin 
-                        });
-                        window.google.accounts.id.renderButton(googleButtonRef.current, { 
-                            theme: "outline", size: "large", text: "signin_with", shape: "rectangular", logo_alignment: "left"
-                        });
-                        return true;
-                    } catch (e) { return false; }
-                }
-                return false;
-            };
-            
-            if (!initGoogle()) { 
-                intervalId = setInterval(() => { if (initGoogle()) clearInterval(intervalId); }, 500); 
-            }
-            return () => { if(intervalId) clearInterval(intervalId); };
-        }, [onLogin]);
-
-        return (
-            <div className="flex flex-col justify-center items-center py-20 animate-fadeIn px-4 flex-grow">
-                <div className="bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-8 border-[#9D2449]">
-                    <img src={ITD_LOGO_URL} alt="Logo ITD" className="h-24 mx-auto mb-6 object-contain" />
-                    <h2 className="text-3xl font-bold text-[#1B396A] mb-2">Acceso Restringido</h2>
-                    <p className="text-gray-500 mb-8 text-sm font-medium uppercase tracking-wide">Estadísticas Institucionales</p>
-                    {loginError && (<div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm font-bold">{loginError}</div>)}
-                    <div className="flex justify-center min-h-[50px]" ref={googleButtonRef}></div>
-                </div>
-            </div>
-        );
-    };
-]]></content>
-</change>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -221,6 +173,10 @@
         });
     };
 
+  <change>
+<file>estadisticas.html</file>
+<description>Replace lock emoji with ITD logo in Login component</description>
+<content><![CDATA[
     // ====================================================================
     // COMPONENTE: Login
     // ====================================================================
@@ -254,7 +210,7 @@
         return (
             <div className="flex flex-col justify-center items-center py-20 animate-fadeIn px-4 flex-grow">
                 <div className="bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-8 border-[#9D2449]">
-                    <div className="text-5xl mb-6">🔒</div>
+                    <img src={ITD_LOGO_URL} alt="Logo ITD" className="h-24 mx-auto mb-6 object-contain" />
                     <h2 className="text-3xl font-bold text-[#1B396A] mb-2">Acceso Restringido</h2>
                     <p className="text-gray-500 mb-8 text-sm font-medium uppercase tracking-wide">Estadísticas Institucionales</p>
                     {loginError && (<div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm font-bold">{loginError}</div>)}
@@ -263,7 +219,9 @@
             </div>
         );
     };
-
+]]></content>
+</change>
+      
     // ====================================================================
     // COMPONENTE: ChartBox
     // ====================================================================
