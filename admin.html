@@ -353,10 +353,20 @@
             }, []);
 
             useEffect(() => {
-                if (stats && chartRef.current) {
+                // Se agregó !loading para asegurar que el canvas ya esté renderizado
+                if (!loading && stats && chartRef.current) {
+                    const normalize = (text) => {
+                        return removeAccents(text || '')
+                            .toUpperCase()
+                            .replace(/^DEPARTAMENTO\s+(DE\s+)?/, '')
+                            .replace(/^DEPTO\.?\s+(DE\s+)?/, '')
+                            .trim();
+                    };
+
                     const dataValues = ALL_DEPARTMENTS.map(dept => {
+                        const target = normalize(dept);
                         const key = Object.keys(stats.participacion || {}).find(
-                            k => removeAccents(k).toUpperCase() === removeAccents(dept).toUpperCase()
+                            k => normalize(k) === target
                         );
                         return key ? stats.participacion[key] : 0;
                     });
@@ -387,7 +397,7 @@
                         }
                     });
                 }
-            }, [stats]);
+            }, [stats, loading]);
 
             const exportPdf = async () => {
                 const { jsPDF } = window.jspdf;
@@ -669,7 +679,7 @@
                             <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
                                 {activeTab === 'search' && '🔎 Buscador del Historial Académico'}
                                 {activeTab === 'surveys' && '📈 Panel de Encuestas de Eficacia'}
-                                {activeTab === 'reports' && '📑 Generador de Reportes por Departamento'}
+                                {activeTab === 'reports' && '📑 Generador de Reportes Masivos'}
                             </h1>
                         </header>
                         <div className="px-6 pb-12">
