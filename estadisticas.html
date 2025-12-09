@@ -300,7 +300,24 @@
                                 padding: 10,
                                 callback: function(value) { 
                                     if (this.getLabelForValue && !isHistory && horizontal) {
-                                        return this.getLabelForValue(value);
+                                        // Auto-wrap para etiquetas largas
+                                        const label = this.getLabelForValue(value);
+                                        if (typeof label === 'string' && label.length > 35) {
+                                            const words = label.split(' ');
+                                            const lines = [];
+                                            let currentLine = words[0];
+                                            for (let i = 1; i < words.length; i++) {
+                                                if (currentLine.length + words[i].length < 35) {
+                                                    currentLine += ' ' + words[i];
+                                                } else {
+                                                    lines.push(currentLine);
+                                                    currentLine = words[i];
+                                                }
+                                            }
+                                            lines.push(currentLine);
+                                            return lines;
+                                        }
+                                        return label;
                                     }
                                     if (value % 1 === 0) return value; 
                                 } 
@@ -806,8 +823,8 @@
                     </div>
                 </div>
 
-                {/* KPIs */}
-                <div id="kpi-section" className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                {/* KPIs (Modificado: 3 columnas, eliminado Cursos Activos) */}
+                <div id="kpi-section" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-blue-600 flex items-center justify-between">
                         <div>
                             <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Total Inscripciones</p>
@@ -821,13 +838,6 @@
                             <p className="text-3xl font-bold text-gray-800 mt-1">{statsData.coberturaDocente.actualizados}</p>
                         </div>
                         <div className="text-3xl bg-green-100 p-3 rounded-full text-green-600">👥</div>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-purple-500 flex items-center justify-between">
-                        <div>
-                            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Cursos Activos</p>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{statsData.topCursos.length}</p>
-                        </div>
-                        <div className="text-3xl bg-purple-100 p-3 rounded-full text-purple-600">📚</div>
                     </div>
                     <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-yellow-500 flex items-center justify-between">
                         <div>
