@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -57,14 +58,42 @@
         max-width: 400px; border-top: 6px solid #1B396A;
     }
     
-    /* Clase específica para el spinner/reloj de carga */
+    /* RELOJ DE ESPERA (Loader) */
     .loader-spinner {
-        width: 60px; height: 60px;
-        border: 6px solid #e5e7eb; 
-        border-top-color: #1B396A; /* Azul ITD */
-        border-radius: 50%; 
-        animation: spin 1s linear infinite;
+        width: 64px;
+        height: 64px;
+        border: 4px solid #1B396A; /* Aro exterior azul */
+        border-radius: 50%;
+        position: relative;
         margin: 0 auto 20px;
+        background: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Punto central */
+    .loader-spinner::before {
+        content: '';
+        position: absolute;
+        width: 8px; height: 8px;
+        background: #1B396A;
+        border-radius: 50%;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+    }
+
+    /* Manecilla giratoria */
+    .loader-spinner::after {
+        content: '';
+        position: absolute;
+        width: 4px; height: 24px;
+        background: #9D2449; /* Color guinda para la manecilla */
+        top: 50%; left: 50%;
+        margin-left: -2px; /* Centrar horizontalmente */
+        margin-top: -24px; /* Mover arriba para que pivote desde el centro */
+        transform-origin: bottom center;
+        border-radius: 2px;
+        animation: spin 2s linear infinite;
     }
     
     /* Utilidades */
@@ -162,7 +191,7 @@
             .trim();
     };
     
-    const getChartHeight = (count) => Math.max(400, count * 28) + "px";
+    const getChartHeight = (count) => Math.max(400, count * 35) + "px"; // Aumentado ligeramente el alto por barra
 
     const getImageDataFromURL = (url) => {
         return new Promise((resolve) => {
@@ -302,12 +331,14 @@
                                     if (this.getLabelForValue && !isHistory && horizontal) {
                                         // Auto-wrap para etiquetas largas
                                         const label = this.getLabelForValue(value);
-                                        if (typeof label === 'string' && label.length > 35) {
+                                        // Aumentado el límite de caracteres antes de cortar línea para aprovechar el ancho completo
+                                        const charLimit = 80; 
+                                        if (typeof label === 'string' && label.length > charLimit) {
                                             const words = label.split(' ');
                                             const lines = [];
                                             let currentLine = words[0];
                                             for (let i = 1; i < words.length; i++) {
-                                                if (currentLine.length + words[i].length < 35) {
+                                                if (currentLine.length + words[i].length < charLimit) {
                                                     currentLine += ' ' + words[i];
                                                 } else {
                                                     lines.push(currentLine);
@@ -848,10 +879,10 @@
                     </div>
                 </div>
 
-                {/* Sección Principal de Gráficas */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                    {/* Top Cursos */}
-                    <div className="lg:col-span-1">
+                {/* Sección Principal de Gráficas: AHORA CADA UNA EN SU PROPIA FILA (Full Width) */}
+                <div className="mb-8 space-y-8">
+                    {/* Top Cursos - ANCHO COMPLETO */}
+                    <div className="w-full">
                         <ChartBox 
                             id="topCursos"
                             type="bar" 
@@ -862,8 +893,8 @@
                         />
                     </div>
                     
-                    {/* Top Departamentos */}
-                    <div className="lg:col-span-1">
+                    {/* Top Departamentos - ANCHO COMPLETO */}
+                    <div className="w-full">
                         <ChartBox 
                             id="topDeptos"
                             type="bar" 
