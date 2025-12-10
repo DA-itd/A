@@ -179,14 +179,14 @@
     const shortenLabel = (label) => {
         if (!label) return '';
         return label
-            .replace(/DEPARTAMENTO DE /gi, 'D. ')
-            .replace(/DEPARTAMENTO/gi, 'D.')
+            .replace(/DEPARTAMENTO DE /gi, 'DEPTO. ')
+            .replace(/DEPARTAMENTO/gi, 'DEPTO.')
             .replace(/DIVISION DE ESTUDIOS DE /gi, 'DIV. ')
             .replace(/DIVISION DE /gi, 'DIV. ')
             .replace(/CENTRO DE INFORMACIÓN/gi, 'C. Información')
             .replace(/CENTRO DE /gi, 'C. ')
             .replace(/INGENIERÍA/gi, 'ING.')
-            .replace(/CIENCIAS/gi, 'C.')
+            .replace(/CIENCIAS/gi, 'CIENCIAS.')
             .replace(/ECONOMICO-ADMINISTRATIVAS/gi, 'ECO-ADMIN')
             .trim();
     };
