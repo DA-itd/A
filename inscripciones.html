@@ -493,8 +493,8 @@
         // =============================================================================
 
         const ExistingRegistrationModal = ({ isOpen, courses, onModify, onClose, onDeleteCourse, deletingCourseId, onCancelAll }) => {
-            const { useEffect } = React;
-            
+            const [confirmingId, setConfirmingId] = useState(null);
+
             useEffect(() => {
                 const handleEsc = (event) => { if (event.key === 'Escape') onClose(); };
                 if (isOpen) window.addEventListener('keydown', handleEsc);
@@ -522,9 +522,35 @@
                                             <span className="text-green-600 text-lg">✓</span>
                                             <span className="font-semibold text-sm sm:text-base text-blue-900">{course.name}</span>
                                         </div>
-                                        <button onClick={() => onDeleteCourse(course.id)} disabled={!!deletingCourseId} className="text-xs text-red-500 hover:text-red-700 underline px-2" aria-label={`Dar de baja ${course.name}`}>
-                                            {deletingCourseId === course.id ? 'Procesando...' : 'Dar de baja'}
-                                        </button>
+                                        <div>
+                                            {confirmingId === course.id ? (
+                                                <div className="flex items-center gap-2">
+                                                    <button 
+                                                        onClick={() => { setConfirmingId(null); onDeleteCourse(course.id); }} 
+                                                        disabled={!!deletingCourseId} 
+                                                        className="bg-red-600 text-white text-xs px-2 py-1 rounded font-bold hover:bg-red-700 transition-colors"
+                                                    >
+                                                        {deletingCourseId === course.id ? '...' : 'Confirmar'}
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => setConfirmingId(null)} 
+                                                        disabled={!!deletingCourseId}
+                                                        className="text-gray-500 text-xs hover:text-gray-700"
+                                                    >
+                                                        ✘
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <button 
+                                                    onClick={() => setConfirmingId(course.id)} 
+                                                    disabled={!!deletingCourseId} 
+                                                    className="text-xs text-red-500 hover:text-red-700 underline px-2" 
+                                                    aria-label={`Dar de baja ${course.name}`}
+                                                >
+                                                    Dar de baja
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 )) : <p className="text-gray-500 italic text-sm">Sin cursos activos.</p>}
                             </div>
@@ -654,18 +680,29 @@
                 setDeletingCourseId(cid);
                 try {
                     const c = existingCourses.find(x => x.id === cid);
-                    await fetch(CONFIG.APPS_SCRIPT_URL, {
+                    const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
                         method: 'POST', body: JSON.stringify({
                             action: 'cancelSingle', curp: formData.curp, email: formData.email, fullName: formData.fullName,
                             courseToCancel: { id: c.id, name: c.name }
                         })
                     });
-                    const left = existingCourses.filter(x => x.id !== cid);
-                    setExistingCourses(left);
-                    setOriginalSelectedCourses(left);
-                    if(left.length === 0) setIsModalOpen(false);
-                } catch(e) { alert("Error al cancelar"); }
-                setDeletingCourseId(null);
+                    
+                    const json = await response.json();
+                    
+                    if (json.success) {
+                        alert(`El curso "${c.name}" ha sido dado de baja exitosamente.\n\nSe ha enviado un comprobante de cancelación a tu correo (${formData.email}).\n\nRegresando al portal principal...`);
+                        
+                        // Redirigir al portal principal
+                        window.location.href = 'index.html';
+                    } else {
+                        throw new Error(json.message || "Error al cancelar");
+                    }
+
+                } catch(e) { 
+                    alert("Error al cancelar: " + e.message); 
+                } finally {
+                    setDeletingCourseId(null);
+                }
             };
 
             const handleCancelAll = () => {
