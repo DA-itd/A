@@ -60,7 +60,6 @@
 
     <!-- Contenedor React -->
     <div id="root" class="flex-grow container mx-auto px-4 pb-12 min-h-[400px]">
-        <!-- Loader HTML estático inicial -->
         <div class="flex justify-center items-center py-20">
             <div class="loader-spinner"></div>
         </div>
@@ -83,7 +82,7 @@
     </script>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = window.React;
+        const { useState, useEffect, useRef } = window.React;
         const ReactDOM = window.ReactDOM;
 
         const CONFIG = {
@@ -91,62 +90,48 @@
             SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
         };
 
-        // --- COMPONENTES ---
+        // --- COMPONENTES DE AYUDA ---
 
-        const LoginScreen = ({ onLogin, errorMsg }) => {
-            const btnRef = useRef(null);
-            const [isReady, setIsReady] = useState(false);
-            const [hasError, setHasError] = useState(false);
+        // Componente GoogleButton Aislado: No se actualiza nunca después de montar
+        const GoogleSignInButton = React.memo(({ onLogin, onReady }) => {
+            const divRef = useRef(null);
 
             useEffect(() => {
-                let interval;
-                let mounted = true;
-
-                const renderGoogleButton = () => {
-                    if (window.google && window.google.accounts && btnRef.current) {
+                const init = () => {
+                    if (window.google && window.google.accounts && divRef.current) {
                         try {
-                            window.google.accounts.id.initialize({ 
-                                client_id: CONFIG.CLIENT_ID, 
+                            window.google.accounts.id.initialize({
+                                client_id: CONFIG.CLIENT_ID,
                                 callback: onLogin,
                                 auto_select: false,
                                 cancel_on_tap_outside: false
                             });
                             
-                            // Limpiamos manualmente una vez antes de renderizar
-                            btnRef.current.innerHTML = '';
-                            
+                            // Renderizado en el div ref
                             window.google.accounts.id.renderButton(
-                                btnRef.current, 
+                                divRef.current,
                                 { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill", width: "280" }
                             );
                             
-                            if (mounted) setIsReady(true);
-                            return true;
-                        } catch (err) {
-                            console.error("Google Auth Error:", err);
-                            return false;
+                            // Notificar que está listo para ocultar el loader
+                            if(onReady) onReady();
+                        } catch (e) {
+                            console.error("GSI Error:", e);
                         }
+                    } else {
+                        // Reintentar si no ha cargado
+                        setTimeout(init, 300);
                     }
-                    return false;
                 };
+                init();
+            }, []); // Array vacío: Solo se ejecuta una vez al montar
 
-                // Intentar renderizar inmediatamente, si no, esperar
-                if (!renderGoogleButton()) {
-                    let attempts = 0;
-                    interval = setInterval(() => {
-                        attempts++;
-                        if (renderGoogleButton() || attempts > 20) {
-                            clearInterval(interval);
-                            if (attempts > 20 && mounted) setHasError(true);
-                        }
-                    }, 500);
-                }
+            return <div ref={divRef}></div>;
+        });
 
-                return () => {
-                    mounted = false;
-                    if (interval) clearInterval(interval);
-                };
-            }, [onLogin]);
+        const LoginScreen = ({ onLogin, errorMsg }) => {
+            // Controlamos visibilidad con estado, pero el renderizado del DOM es estático (display:none vs block)
+            const [buttonReady, setButtonReady] = useState(false);
 
             return (
                 <div className="flex flex-col items-center justify-center py-20 animate-fadeIn px-4">
@@ -166,29 +151,57 @@
                         )}
 
                         <div className="flex flex-col items-center justify-center min-h-[60px]">
-                            {/* 
-                                IMPORTANTE: Usamos style display:none en lugar de renderizado condicional { !isReady && ... }
-                                Esto evita que React intente eliminar el nodo del DOM mientras Google lo está modificando,
-                                previniendo el error "Failed to execute 'removeChild' on 'Node'".
-                            */}
-                            
-                            {/* Estado de Carga / Error */}
-                            <div style={{ display: isReady ? 'none' : 'flex' }} className="flex-col items-center gap-2">
-                                {hasError ? (
-                                    <div className="text-amber-600 text-sm bg-amber-50 p-3 rounded border border-amber-200">
-                                        <p>No se pudo cargar el botón de Google.</p>
-                                        <button onClick={() => window.location.reload()} className="mt-2 text-blue-600 underline text-xs font-bold">Recargar página</button>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-2 text-slate-400 text-sm">
-                                        <div className="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
-                                        Cargando acceso...
-                                    </div>
-                                )}
+                            {/* Loader: Se oculta con CSS, NO se desmonta del DOM */}
+                            <div className={`flex items-center gap-2 text-slate-400 text-sm mb-2 transition-opacity duration-300 ${buttonReady ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
+                                <div className="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
+                                Cargando acceso...
                             </div>
 
-                            {/* Contenedor Botón Google (Siempre presente en el DOM) */}
-                            <div ref={btnRef} style={{ display: isReady ? 'block' : 'none' }}></div>
+                            {/* Botón: Se muestra con CSS */}
+                            <div className={`transition-opacity duration-500 ${buttonReady ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
+                                <GoogleSignInButton onLogin={onLogin} onReady={() => setButtonReady(true)} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const CourseSelectionCard = ({ course, isSelected, isDisabled, onToggle, overlapMessage }) => {
+            return (
+                <div 
+                    className={`relative border rounded-xl p-5 transition-all duration-200 cursor-pointer ${
+                        isSelected 
+                            ? 'border-blue-500 bg-blue-50 shadow-md' 
+                            : isDisabled 
+                                ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed' 
+                                : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
+                    }`}
+                    onClick={() => !isDisabled && onToggle(course)}
+                >
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex-grow">
+                            <h3 className={`font-bold text-lg leading-tight mb-2 ${isSelected ? 'text-blue-800' : 'text-slate-800'}`}>
+                                {course.name}
+                            </h3>
+                            <div className="space-y-1 text-sm text-gray-600">
+                                <p>📅 {course.dates}</p>
+                                <p className="font-medium text-slate-700">⏰ {course.schedule}</p>
+                                <p>📍 {course.location || 'Por definir'}</p>
+                                <span className="inline-block mt-1 text-xs bg-slate-100 px-2 py-0.5 rounded">⏳ {course.hours} horas</span>
+                            </div>
+                            {overlapMessage && (
+                                <div className="mt-3 text-xs bg-red-50 text-red-700 px-2 py-1 rounded border border-red-100">
+                                    ⚠️ {overlapMessage}
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex-shrink-0">
+                            <div className={`w-6 h-6 rounded border flex items-center justify-center ${
+                                isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300'
+                            }`}>
+                                {isSelected && <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -196,12 +209,6 @@
         };
 
         const ExistingRegistrationModal = ({ isOpen, courses, onModify, onDeleteCourse, deletingCourseId }) => {
-            useEffect(() => {
-                if (isOpen) document.body.style.overflow = 'hidden';
-                else document.body.style.overflow = 'unset';
-                return () => document.body.style.overflow = 'unset';
-            }, [isOpen]);
-
             if (!isOpen) return null;
 
             return (
@@ -244,47 +251,6 @@
                             <button onClick={() => window.location.href='index.html'} className="w-full bg-white text-slate-600 border border-slate-300 font-semibold py-3 px-6 rounded-xl hover:bg-slate-50 text-sm">
                                 <span>🚪</span> Salir sin guardar cambios
                             </button>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const CourseSelectionCard = ({ course, isSelected, isDisabled, onToggle, overlapMessage }) => {
-            return (
-                <div 
-                    className={`relative border rounded-xl p-5 transition-all duration-200 cursor-pointer ${
-                        isSelected 
-                            ? 'border-blue-500 bg-blue-50 shadow-md' 
-                            : isDisabled 
-                                ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed' 
-                                : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
-                    }`}
-                    onClick={() => !isDisabled && onToggle(course)}
-                >
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex-grow">
-                            <h3 className={`font-bold text-lg leading-tight mb-2 ${isSelected ? 'text-blue-800' : 'text-slate-800'}`}>
-                                {course.name}
-                            </h3>
-                            <div className="space-y-1 text-sm text-gray-600">
-                                <p>📅 {course.dates}</p>
-                                <p className="font-medium text-slate-700">⏰ {course.schedule}</p>
-                                <p>📍 {course.location || 'Por definir'}</p>
-                                <span className="inline-block mt-1 text-xs bg-slate-100 px-2 py-0.5 rounded">⏳ {course.hours} horas</span>
-                            </div>
-                            {overlapMessage && (
-                                <div className="mt-3 text-xs bg-red-50 text-red-700 px-2 py-1 rounded border border-red-100">
-                                    ⚠️ {overlapMessage}
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex-shrink-0">
-                            <div className={`w-6 h-6 rounded border flex items-center justify-center ${
-                                isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300'
-                            }`}>
-                                {isSelected && <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>}
-                            </div>
                         </div>
                     </div>
                 </div>
