@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -690,7 +689,17 @@
                     const json = await response.json();
                     
                     if (json.success) {
-                        alert(`El curso "${c.name}" ha sido dado de baja exitosamente.\n\nSe ha enviado un comprobante de cancelación a tu correo (${formData.email}).\n\nRegresando al portal principal...`);
+                        let msg = `El curso "${c.name}" ha sido dado de baja exitosamente.`;
+                        
+                        // Check if email was actually sent
+                        if (json.emailSent) {
+                             msg += `\n\nSe ha enviado un comprobante de cancelación a tu correo (${formData.email}).`;
+                        } else {
+                             msg += `\n\n⚠️ AVISO: El sistema NO pudo enviar el correo de confirmación. Por favor verifica en tu Historial de Cursos que la baja se haya procesado.`;
+                        }
+
+                        msg += `\n\nRegresando al portal principal...`;
+                        alert(msg);
                         
                         // Redirigir al portal principal
                         window.location.href = 'index.html';
