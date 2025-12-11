@@ -35,14 +35,18 @@
             display: block;
         }
         
-        /* Estilos para scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-900">
+
+    <!-- Manejador de Errores Visual (Por si React falla antes de cargar) -->
+    <div id="global-error" style="display:none; padding: 20px; background: #fee2e2; color: #991b1b; text-align: center; border-bottom: 2px solid #ef4444;">
+        <h3 style="font-weight: bold;">⚠️ Ocurrió un error al cargar la aplicación</h3>
+        <p id="global-error-msg">Por favor recarga la página.</p>
+    </div>
 
     <!-- Header -->
     <header class="bg-white shadow-md sticky top-0 z-40">
@@ -64,7 +68,12 @@
     </div>
 
     <!-- Contenedor React -->
-    <div id="root" class="flex-grow container mx-auto px-4 pb-12"></div>
+    <div id="root" class="flex-grow container mx-auto px-4 pb-12 min-h-[400px]">
+        <!-- Loader Inicial HTML (se reemplaza cuando React carga) -->
+        <div class="flex justify-center items-center py-20">
+            <div class="loader-spinner"></div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-blue-900 text-white text-center py-6 mt-auto">
@@ -74,21 +83,28 @@
         </div>
     </footer>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
+    <script>
+        // Captura de errores globales
+        window.onerror = function(message, source, lineno, colno, error) {
+            document.getElementById('global-error').style.display = 'block';
+            document.getElementById('global-error-msg').innerText = message + " (Línea: " + lineno + ")";
+            console.error("Error global:", error);
+        };
+    </script>
 
-        // URL del Backend (Google Apps Script)
-        // Asegúrate de que esta URL sea la correcta de tu implementación actual
+    <script type="text/babel">
+        // Asegurar acceso a React globalmente
+        const { useState, useEffect, useRef, useMemo } = window.React;
+        const ReactDOM = window.ReactDOM;
+
         const CONFIG = {
             CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
             SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
         };
 
-        // ==========================================
-        // COMPONENTE: MODAL REGISTRO EXISTENTE
-        // ==========================================
-        const ExistingRegistrationModal = ({ isOpen, courses, onModify, onClose, onDeleteCourse, deletingCourseId, onCancelAll }) => {
-            // Evitar scroll de fondo cuando el modal está abierto
+        // --- COMPONENTES ---
+
+        const ExistingRegistrationModal = ({ isOpen, courses, onModify, onDeleteCourse, deletingCourseId, onCancelAll }) => {
             useEffect(() => {
                 if (isOpen) document.body.style.overflow = 'hidden';
                 else document.body.style.overflow = 'unset';
@@ -101,14 +117,6 @@
                 <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
                     <div className="relative mx-auto p-6 sm:p-8 border w-full max-w-lg shadow-2xl rounded-2xl bg-white transform transition-all scale-100 animate-fadeIn">
                         
-                        <div className="absolute top-4 right-4">
-                            <button onClick={() => window.location.href='index.html'} className="text-gray-400 hover:text-gray-600 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
                         <div className="text-center mb-6">
                             <div className="text-5xl mb-3">📋</div>
                             <h3 className="text-xl sm:text-2xl font-bold text-blue-900">Tu Inscripción Actual</h3>
@@ -118,7 +126,7 @@
                         <div className="mb-6">
                             <div className="space-y-3 bg-blue-50 p-4 rounded-xl border border-blue-100 max-h-60 overflow-y-auto custom-scrollbar">
                                 {courses.length > 0 ? courses.map(course => (
-                                    <div key={course.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100 shadow-sm hover:shadow-md transition-shadow">
+                                    <div key={course.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100 shadow-sm">
                                         <div className="flex flex-col gap-1 overflow-hidden">
                                             <span className="font-bold text-sm text-blue-900 truncate">{course.name}</span>
                                             <span className="text-xs text-gray-500 font-mono bg-gray-100 px-2 py-0.5 rounded w-fit">Folio: {course.folio}</span>
@@ -127,31 +135,29 @@
                                             onClick={() => onDeleteCourse(course.id)} 
                                             disabled={!!deletingCourseId} 
                                             className="ml-3 text-xs font-bold text-red-500 hover:text-white hover:bg-red-500 border border-red-200 px-3 py-1.5 rounded transition-all flex-shrink-0"
-                                            title="Dar de baja este curso"
                                         >
                                             {deletingCourseId === course.id ? '...' : 'BAJA'}
                                         </button>
                                     </div>
-                                )) : <p className="text-gray-500 italic text-sm text-center py-4">No tienes cursos registrados actualmente.</p>}
+                                )) : <p className="text-gray-500 italic text-sm text-center py-4">No tienes cursos registrados.</p>}
                             </div>
                             
                             <div className="flex justify-between items-center mt-3 text-xs text-gray-500 px-1">
                                 <span>Cursos inscritos: <strong>{courses.length}</strong>/3</span>
-                                <span>Cupo sujeto a disponibilidad</span>
                             </div>
                         </div>
 
                         <div className="flex flex-col gap-3">
                             <button 
                                 onClick={onModify} 
-                                className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-transform hover:scale-[1.02] flex justify-center items-center gap-2"
+                                className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 shadow-lg"
                             >
                                 <span>➕</span> Agregar / Modificar Cursos
                             </button>
                             
                             <button 
                                 onClick={() => window.location.href='index.html'} 
-                                className="w-full bg-white text-slate-600 border border-slate-300 font-semibold py-3 px-6 rounded-xl hover:bg-slate-50 text-sm flex justify-center items-center gap-2 transition-colors"
+                                className="w-full bg-white text-slate-600 border border-slate-300 font-semibold py-3 px-6 rounded-xl hover:bg-slate-50 text-sm"
                             >
                                 <span>🚪</span> Salir sin guardar cambios
                             </button>
@@ -161,20 +167,19 @@
             );
         };
 
-        // ==========================================
-        // COMPONENTE: LOGIN SCREEN (MEJORADO)
-        // ==========================================
         const LoginScreen = ({ onLogin, errorMsg }) => {
             const btnRef = useRef(null);
             const [isGoogleReady, setIsGoogleReady] = useState(false);
+            const [timeoutError, setTimeoutError] = useState(false);
 
             useEffect(() => {
-                // Verificar periódicamente si google.accounts está listo
+                let attempts = 0;
                 const intervalId = setInterval(() => {
+                    attempts++;
+                    // Verificar si la librería de Google cargó
                     if (window.google && window.google.accounts && btnRef.current) {
                         clearInterval(intervalId);
                         setIsGoogleReady(true);
-                        
                         try {
                             window.google.accounts.id.initialize({ 
                                 client_id: CONFIG.CLIENT_ID, 
@@ -183,13 +188,18 @@
                             });
                             window.google.accounts.id.renderButton(
                                 btnRef.current, 
-                                { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill", width: "300" }
+                                { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill", width: "280" }
                             );
                         } catch (err) {
-                            console.error("Error inicializando Google Auth:", err);
+                            console.error("Google Auth Error:", err);
                         }
                     }
-                }, 500); // Checar cada medio segundo
+                    // Timeout después de 5 segundos
+                    if (attempts > 10) {
+                        clearInterval(intervalId);
+                        setTimeoutError(true);
+                    }
+                }, 500);
 
                 return () => clearInterval(intervalId);
             }, [onLogin]);
@@ -201,42 +211,42 @@
                         
                         <div className="text-6xl mb-6">👋</div>
                         <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-3">Bienvenido Docente</h2>
-                        <p className="text-slate-500 mb-8 text-sm sm:text-base leading-relaxed">
-                            Para inscribirte o gestionar tus cursos, inicia sesión con tu cuenta institucional.
+                        <p className="text-slate-500 mb-8 text-sm sm:text-base">
+                            Para inscribirte, inicia sesión con tu cuenta institucional.
                         </p>
                         
                         {errorMsg && (
-                            <div className="mb-6 bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100 flex items-start gap-2 text-left">
+                            <div className="mb-6 bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100 text-left">
                                 <span className="font-bold">Error:</span> {errorMsg}
                             </div>
                         )}
 
                         <div className="flex justify-center min-h-[50px]" ref={btnRef}>
-                            {!isGoogleReady && (
+                            {!isGoogleReady && !timeoutError && (
                                 <div className="flex items-center gap-2 text-slate-400 text-sm">
                                     <div className="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
-                                    Cargando acceso...
+                                    Cargando botón de acceso...
+                                </div>
+                            )}
+                            {timeoutError && (
+                                <div className="text-amber-600 text-sm bg-amber-50 p-3 rounded border border-amber-200">
+                                    <p>El botón de Google tardó demasiado.</p>
+                                    <p className="text-xs mt-1">Verifica tu conexión o si tienes bloqueadores de anuncios.</p>
+                                    <button onClick={() => window.location.reload()} className="mt-2 text-blue-600 underline text-xs font-bold">Recargar página</button>
                                 </div>
                             )}
                         </div>
-                        
-                        <p className="mt-6 text-xs text-slate-400">
-                            Solo se permiten cuentas @itdurango.edu.mx
-                        </p>
                     </div>
                 </div>
             );
         };
 
-        // ==========================================
-        // COMPONENTE: TARJETA DE CURSO
-        // ==========================================
         const CourseSelectionCard = ({ course, isSelected, isDisabled, onToggle, overlapMessage }) => {
             return (
                 <div 
-                    className={`relative border rounded-xl p-5 transition-all duration-200 cursor-pointer group ${
+                    className={`relative border rounded-xl p-5 transition-all duration-200 cursor-pointer ${
                         isSelected 
-                            ? 'border-blue-500 bg-blue-50/50 shadow-md ring-1 ring-blue-500' 
+                            ? 'border-blue-500 bg-blue-50 shadow-md' 
                             : isDisabled 
                                 ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed' 
                                 : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
@@ -245,48 +255,26 @@
                 >
                     <div className="flex items-start justify-between gap-4">
                         <div className="flex-grow">
-                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                                <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                                    course.type === 'Curso' ? 'bg-indigo-100 text-indigo-700' : 'bg-purple-100 text-purple-700'
-                                }`}>
-                                    {course.type || 'Curso'}
-                                </span>
-                                <span className="text-xs text-gray-400 font-mono">ID: {course.id}</span>
-                            </div>
-                            
                             <h3 className={`font-bold text-lg leading-tight mb-2 ${isSelected ? 'text-blue-800' : 'text-slate-800'}`}>
                                 {course.name}
                             </h3>
-                            
-                            <div className="space-y-1.5 text-sm text-gray-600">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-base">📅</span> {course.dates}
-                                </div>
-                                <div className="flex items-center gap-2 font-medium text-slate-700">
-                                    <span className="text-base">⏰</span> {course.schedule}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-base">📍</span> {course.location || 'Por definir'}
-                                </div>
-                                <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-100 w-fit px-2 py-0.5 rounded">
-                                    <span>⏳</span> {course.hours} horas
-                                </div>
+                            <div className="space-y-1 text-sm text-gray-600">
+                                <p>📅 {course.dates}</p>
+                                <p className="font-medium text-slate-700">⏰ {course.schedule}</p>
+                                <p>📍 {course.location || 'Por definir'}</p>
+                                <span className="inline-block mt-1 text-xs bg-slate-100 px-2 py-0.5 rounded">⏳ {course.hours} horas</span>
                             </div>
-
                             {overlapMessage && (
-                                <div className="mt-3 text-xs bg-red-50 text-red-700 px-3 py-2 rounded border border-red-100 flex items-start gap-2">
-                                    <span>⚠️</span> {overlapMessage}
+                                <div className="mt-3 text-xs bg-red-50 text-red-700 px-2 py-1 rounded border border-red-100">
+                                    ⚠️ {overlapMessage}
                                 </div>
                             )}
                         </div>
-
                         <div className="flex-shrink-0">
-                            <div className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${
-                                isSelected 
-                                    ? 'bg-blue-600 border-blue-600 text-white' 
-                                    : 'bg-white border-gray-300 text-transparent group-hover:border-blue-400'
+                            <div className={`w-6 h-6 rounded border flex items-center justify-center ${
+                                isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300'
                             }`}>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                                {isSelected && <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>}
                             </div>
                         </div>
                     </div>
@@ -294,12 +282,9 @@
             );
         };
 
-        // ==========================================
-        // APP PRINCIPAL
-        // ==========================================
         const App = () => {
             const [user, setUser] = useState(null);
-            const [step, setStep] = useState('login'); // login, loading, form
+            const [step, setStep] = useState('login'); 
             const [errorMsg, setErrorMsg] = useState(null);
             
             const [availableCourses, setAvailableCourses] = useState([]);
@@ -310,56 +295,46 @@
             const [deletingCourseId, setDeletingCourseId] = useState(null);
             const [isSaving, setIsSaving] = useState(false);
             
-            // Datos del formulario
             const [formData, setFormData] = useState({
                 fullName: '', email: '', curp: '', phone: '', department: ''
             });
 
-            // 1. MANEJO DE LOGIN
             const handleLogin = (response) => {
                 setErrorMsg(null);
                 try {
                     const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                    
-                    // Validación de dominio (Opcional, comentado si no se requiere estricto)
                     if (!payload.email.endsWith('@itdurango.edu.mx')) {
                          setErrorMsg("Por favor, utiliza una cuenta institucional (@itdurango.edu.mx).");
                          return;
                     }
-
                     setUser(payload);
                     setFormData(prev => ({ ...prev, fullName: payload.name, email: payload.email }));
                     checkUserStatus(payload.email);
                 } catch (e) { 
-                    console.error("Login decode error", e); 
-                    setErrorMsg("Error al procesar la cuenta. Intente nuevamente.");
+                    console.error("Login Error", e); 
+                    setErrorMsg("Error al procesar la cuenta.");
                 }
             };
 
-            // 2. CARGA DE DATOS INICIALES
             const checkUserStatus = async (email) => {
                 setStep('loading');
                 try {
-                    // Llamadas paralelas para optimizar tiempo
                     const [coursesRes, userRes] = await Promise.all([
                         fetch(`${CONFIG.SCRIPT_URL}?action=getAvailableCourses`),
                         fetch(`${CONFIG.SCRIPT_URL}?action=checkUserRegistration&email=${email}`)
                     ]);
                     
-                    if (!coursesRes.ok || !userRes.ok) throw new Error("Error en la respuesta del servidor");
-
                     const coursesData = await coursesRes.json();
                     const userData = await userRes.json();
 
                     if(coursesData.success) {
                         setAvailableCourses(coursesData.data);
                     } else {
-                        throw new Error(coursesData.message || "No se pudieron cargar los cursos");
+                        throw new Error("No se pudieron cargar los cursos");
                     }
                     
                     if (userData.registered && userData.courses.length > 0) {
                         setExistingCourses(userData.courses);
-                        // Prellenar formulario con datos guardados
                         if(userData.teacherInfo) {
                             setFormData(prev => ({ 
                                 ...prev, 
@@ -368,25 +343,22 @@
                                 department: userData.teacherInfo.department || ''
                             }));
                         }
-                        setIsModalOpen(true); // Abrir modal si ya tiene cursos
+                        setIsModalOpen(true);
                     }
-                    
                     setStep('form');
                 } catch (e) {
-                    console.error("Connection Error:", e);
-                    setErrorMsg("No se pudo conectar con el sistema. Verifique su internet o intente más tarde.");
+                    console.error(e);
+                    setErrorMsg("Error de conexión. Intente más tarde.");
                     setStep('login');
                 }
             };
 
-            // 3. BAJA DE CURSO
             const handleDeleteCourse = async (courseIdToDelete) => {
-                if(!confirm("¿Confirmas que deseas dar de baja este curso?\nSe liberará tu lugar para otro docente.")) return;
-                
+                if(!confirm("¿Deseas dar de baja este curso?")) return;
                 setDeletingCourseId(courseIdToDelete);
                 try {
                     const courseToDelete = existingCourses.find(c => c.id === courseIdToDelete);
-                    if (!courseToDelete) throw new Error("Curso no encontrado en local");
+                    if (!courseToDelete) throw new Error("Curso no encontrado");
                     
                     await fetch(CONFIG.SCRIPT_URL, {
                         method: 'POST',
@@ -400,56 +372,39 @@
                         })
                     });
 
-                    // Actualizar estado local sin recargar
                     const updated = existingCourses.filter(c => c.id !== courseIdToDelete);
                     setExistingCourses(updated);
-                    
-                    alert(`✅ BAJA EXITOSA\n\nEl curso "${courseToDelete.name}" ha sido eliminado.\nSe ha enviado un comprobante a ${formData.email}.`);
-                    
+                    alert(`✅ Baja exitosa del curso: ${courseToDelete.name}`);
                     if (updated.length === 0) setIsModalOpen(false);
-
                 } catch (error) {
-                    alert("Error al procesar la baja. Por favor intente de nuevo.");
-                    console.error(error);
+                    alert("Error al procesar la baja.");
                 } finally {
                     setDeletingCourseId(null);
                 }
             };
 
-            // 4. VALIDACIÓN DE HORARIOS (Lógica simple)
             const parseSchedule = (scheduleStr) => {
                 if (!scheduleStr) return null;
-                // Busca patrón HH:MM - HH:MM
                 const times = scheduleStr.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
                 if (!times) return null;
-                // Convertir a minutos para comparar fácil
-                const toMinutes = (t) => {
-                    const [h, m] = t.split(':').map(Number);
-                    return h * 60 + m;
-                };
+                const toMinutes = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
                 return { start: toMinutes(times[1]), end: toMinutes(times[2]) };
             };
 
-            const isTimeOverlap = (t1, t2) => {
-                if (!t1 || !t2) return false;
-                return (t1.start < t2.end && t1.end > t2.start);
-            };
-
             const checkOverlap = (courseToCheck) => {
-                // Revisar contra cursos ya inscritos (BD)
-                for (let existing of existingCourses) {
-                    const t1 = parseSchedule(courseToCheck.schedule);
-                    const t2 = parseSchedule(existing.schedule);
-                    if (isTimeOverlap(t1, t2)) return `Horario empalmado con: ${existing.name}`;
-                }
-                // Revisar contra cursos seleccionados (Local)
-                for (let id of selectedCourseIds) {
-                    if (id === courseToCheck.id) continue;
-                    const selectedCourse = availableCourses.find(c => c.id === id);
-                    if (!selectedCourse) continue;
-                    const t1 = parseSchedule(courseToCheck.schedule);
-                    const t2 = parseSchedule(selectedCourse.schedule);
-                    if (isTimeOverlap(t1, t2)) return `Horario empalmado con selección: ${selectedCourse.name}`;
+                const t1 = parseSchedule(courseToCheck.schedule);
+                if (!t1) return null;
+
+                const allCourses = [
+                    ...existingCourses,
+                    ...availableCourses.filter(c => selectedCourseIds.includes(c.id) && c.id !== courseToCheck.id)
+                ];
+
+                for (let other of allCourses) {
+                    const t2 = parseSchedule(other.schedule);
+                    if (t2 && t1.start < t2.end && t1.end > t2.start) {
+                        return `Se empalma con: ${other.name}`;
+                    }
                 }
                 return null;
             };
@@ -459,34 +414,22 @@
                     setSelectedCourseIds(prev => prev.filter(id => id !== course.id));
                 } else {
                     const overlap = checkOverlap(course);
-                    if (overlap) {
-                        alert(overlap);
-                        return;
-                    }
-                    // Validar límite total (existentes + nuevos)
-                    const totalCourses = existingCourses.length + selectedCourseIds.length;
-                    if (totalCourses >= 3) {
-                        alert("Has alcanzado el límite máximo de 3 cursos por periodo.");
+                    if (overlap) { alert(overlap); return; }
+                    if (existingCourses.length + selectedCourseIds.length >= 3) {
+                        alert("Límite de 3 cursos alcanzado.");
                         return;
                     }
                     setSelectedCourseIds(prev => [...prev, course.id]);
                 }
             };
 
-            // 5. GUARDAR INSCRIPCIÓN
             const handleSaveRegistration = async (e) => {
                 e.preventDefault();
-                
                 if (!formData.curp || !formData.phone || !formData.department) {
-                    alert("Por favor completa todos los campos de Datos Personales.");
-                    // Scroll al inicio
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    return;
+                    alert("Completa tus datos personales."); return;
                 }
-                
                 if (selectedCourseIds.length === 0) {
-                    alert("Debes seleccionar al menos un curso nuevo para inscribirte.");
-                    return;
+                    alert("Selecciona al menos un curso."); return;
                 }
 
                 setIsSaving(true);
@@ -510,26 +453,24 @@
                     
                     const result = await response.json();
                     if (result.success) {
-                        alert("✅ ¡INSCRIPCIÓN EXITOSA!\n\nRevisa tu correo institucional para ver tu comprobante.");
-                        window.location.href = "historial.html"; // Redirigir al historial
+                        alert("✅ Inscripción Exitosa. Revisa tu correo.");
+                        window.location.href = "historial.html";
                     } else {
                         throw new Error(result.message);
                     }
                 } catch (error) {
-                    alert("Ocurrió un error al guardar: " + error.message);
+                    alert("Error: " + error.message);
                 } finally {
                     setIsSaving(false);
                 }
             };
 
-            // 6. RENDERIZADO CONDICIONAL
             if (step === 'login') return <LoginScreen onLogin={handleLogin} errorMsg={errorMsg} />;
             
             if (step === 'loading') return (
                 <div className="flex flex-col items-center justify-center py-32 animate-fadeIn">
                     <div className="loader-spinner mb-6"></div>
-                    <h3 className="text-xl font-bold text-blue-900">Cargando sistema...</h3>
-                    <p className="text-slate-500 text-sm mt-2">Obteniendo oferta académica y estado del usuario.</p>
+                    <h3 className="text-xl font-bold text-blue-900">Cargando...</h3>
                 </div>
             );
 
@@ -539,66 +480,35 @@
                         isOpen={isModalOpen}
                         courses={existingCourses}
                         onModify={() => setIsModalOpen(false)}
-                        onClose={() => {}} 
                         onDeleteCourse={handleDeleteCourse}
                         deletingCourseId={deletingCourseId}
-                        onCancelAll={() => alert("Función de cancelar todo no disponible. Por favor, da de baja curso por curso.")}
                     />
 
                     <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-                        {/* Header Usuario */}
                         <div className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
                             <img src={user?.picture} className="w-20 h-20 rounded-full border-4 border-white/20 shadow-lg" referrerPolicy="no-referrer" />
                             <div className="text-center sm:text-left">
                                 <h2 className="text-2xl font-bold">{user?.name}</h2>
                                 <p className="text-blue-100 text-sm sm:text-base">{user?.email}</p>
-                                <div className="mt-3 inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium border border-white/20">
-                                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                                    Sesión Activa
-                                </div>
                             </div>
                         </div>
 
                         <form onSubmit={handleSaveRegistration} className="p-6 sm:p-8">
-                            
-                            {/* Sección 1: Datos Personales */}
                             <div className="mb-10">
-                                <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-3 border-b pb-3">
-                                    <span className="bg-blue-100 text-blue-700 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm">1</span>
-                                    Datos Personales
-                                </h3>
+                                <h3 className="text-lg font-bold text-gray-800 mb-6 border-b pb-3">1. Datos Personales</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">CURP *</label>
-                                        <input 
-                                            type="text" 
-                                            value={formData.curp} 
-                                            onChange={e => setFormData({...formData, curp: e.target.value.toUpperCase()})} 
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none uppercase transition-all bg-gray-50 focus:bg-white" 
-                                            required 
-                                            placeholder="Ingrese su clave única..." 
-                                        />
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1">CURP</label>
+                                        <input type="text" value={formData.curp} onChange={e => setFormData({...formData, curp: e.target.value.toUpperCase()})} className="w-full p-3 border rounded-lg uppercase" required />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Teléfono Celular *</label>
-                                        <input 
-                                            type="tel" 
-                                            value={formData.phone} 
-                                            onChange={e => setFormData({...formData, phone: e.target.value})} 
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-gray-50 focus:bg-white" 
-                                            required 
-                                            placeholder="10 dígitos" 
-                                        />
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono</label>
+                                        <input type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full p-3 border rounded-lg" required />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Departamento de Adscripción *</label>
-                                        <select 
-                                            value={formData.department} 
-                                            onChange={e => setFormData({...formData, department: e.target.value})} 
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-gray-50 focus:bg-white cursor-pointer" 
-                                            required
-                                        >
-                                            <option value="">-- Seleccione su departamento --</option>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Departamento</label>
+                                        <select value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} className="w-full p-3 border rounded-lg" required>
+                                            <option value="">-- Seleccione --</option>
                                             <option value="Ingeniería Industrial">Ingeniería Industrial</option>
                                             <option value="Sistemas y Computación">Sistemas y Computación</option>
                                             <option value="Ciencias Básicas">Ciencias Básicas</option>
@@ -614,62 +524,40 @@
                                 </div>
                             </div>
 
-                            {/* Sección 2: Selección de Cursos */}
                             <div className="mb-8">
-                                <div className="flex flex-wrap justify-between items-end border-b pb-3 mb-6 gap-4">
-                                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-3">
-                                        <span className="bg-blue-100 text-blue-700 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm">2</span>
-                                        Selección de Cursos
-                                    </h3>
-                                    <div className="bg-slate-100 px-4 py-2 rounded-lg text-sm font-semibold text-slate-600">
-                                        Total seleccionados: <span className="text-blue-600 font-bold text-lg">{existingCourses.length + selectedCourseIds.length}</span> / 3
-                                    </div>
+                                <div className="flex justify-between items-end border-b pb-3 mb-6">
+                                    <h3 className="text-lg font-bold text-gray-800">2. Selección de Cursos</h3>
+                                    <span className="text-sm font-bold text-blue-600">Total: {existingCourses.length + selectedCourseIds.length} / 3</span>
                                 </div>
 
-                                {availableCourses.length === 0 ? (
-                                    <div className="text-center py-16 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-                                        <p className="text-slate-400 text-lg font-medium">No hay cursos disponibles para mostrar.</p>
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-1 gap-4">
-                                        {availableCourses.map(course => {
-                                            const isSelected = selectedCourseIds.includes(course.id);
-                                            const isAlreadyRegistered = existingCourses.some(ec => ec.id === course.id);
-                                            const overlapMsg = checkOverlap(course);
-                                            
-                                            // Deshabilitar si ya está inscrito O si llegó al límite Y no está seleccionado este
-                                            const isDisabled = isAlreadyRegistered || (existingCourses.length + selectedCourseIds.length >= 3 && !isSelected);
+                                <div className="grid grid-cols-1 gap-4">
+                                    {availableCourses.map(course => {
+                                        const isSelected = selectedCourseIds.includes(course.id);
+                                        const isAlreadyRegistered = existingCourses.some(ec => ec.id === course.id);
+                                        const overlapMsg = checkOverlap(course);
+                                        const isDisabled = isAlreadyRegistered || (existingCourses.length + selectedCourseIds.length >= 3 && !isSelected);
 
-                                            // Si ya está inscrito, mostramos un indicador visual diferente o lo ocultamos según preferencia.
-                                            // Aquí lo mostraremos "disabled" con un mensaje.
-                                            
-                                            return (
-                                                <CourseSelectionCard 
-                                                    key={course.id} 
-                                                    course={course}
-                                                    isSelected={isSelected}
-                                                    isDisabled={isDisabled}
-                                                    onToggle={toggleCourse}
-                                                    overlapMessage={!isSelected ? overlapMsg : null}
-                                                />
-                                            );
-                                        })}
-                                    </div>
-                                )}
+                                        return (
+                                            <CourseSelectionCard 
+                                                key={course.id} 
+                                                course={course}
+                                                isSelected={isSelected}
+                                                isDisabled={isDisabled}
+                                                onToggle={toggleCourse}
+                                                overlapMessage={!isSelected ? overlapMsg : null}
+                                            />
+                                        );
+                                    })}
+                                </div>
                             </div>
 
-                            {/* Botón Final */}
-                            <div className="sticky bottom-0 bg-white/95 backdrop-blur pt-6 pb-2 border-t mt-8 flex flex-col sm:flex-row justify-end gap-4">
-                                <div className="text-xs text-gray-400 sm:w-1/2 mb-2 sm:mb-0">
-                                    * Al dar clic en finalizar, confirmas que los datos son correctos y te comprometes a asistir a los cursos seleccionados.
-                                </div>
+                            <div className="sticky bottom-0 bg-white/95 backdrop-blur pt-6 pb-2 border-t mt-8 flex justify-end">
                                 <button 
                                     type="submit" 
                                     disabled={isSaving || selectedCourseIds.length === 0}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transform transition-all hover:-translate-y-1 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3 sm:w-auto w-full"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg disabled:opacity-50 flex items-center justify-center gap-3 w-full sm:w-auto"
                                 >
-                                    {isSaving ? <div className="loader-spinner !w-6 !h-6 !border-2 !border-white/50 !border-t-white"></div> : <span className="text-xl">💾</span>}
-                                    <span>{isSaving ? 'Procesando Inscripción...' : 'FINALIZAR INSCRIPCIÓN'}</span>
+                                    {isSaving ? 'Procesando...' : 'FINALIZAR INSCRIPCIÓN'}
                                 </button>
                             </div>
                         </form>
