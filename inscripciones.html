@@ -4,252 +4,540 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscripciones - Actualización Docente ITD</title>
+    <title>Inscripción a Cursos - ITD</title>
+    <meta name="description" content="Inscríbete a los cursos de actualización docente del Instituto Tecnológico de Durango.">
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
     
-    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JH1X2720VL');
+    </script>
 
     <style>
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } 
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-        .loader-spinner {
-            border: 4px solid #f3f3f3; border-top: 4px solid #1B396A; border-radius: 50%;
-            width: 40px; height: 40px; animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .step-active { background-color: #1e40af; color: white; border-color: #1e40af; }
+        .step-completed { background-color: #1e40af; color: white; border-color: #1e40af; }
+        .step-inactive { background-color: white; color: #9ca3af; border-color: #e5e7eb; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-900">
-
-    <!-- Manejador de Errores Visual -->
-    <div id="global-error" style="display:none; padding: 20px; background: #fee2e2; color: #991b1b; text-align: center; border-bottom: 2px solid #ef4444;">
-        <h3 style="font-weight: bold;">⚠️ Ocurrió un error al cargar la aplicación</h3>
-        <p id="global-error-msg">Por favor recarga la página.</p>
-    </div>
+<body class="bg-slate-50 min-h-screen flex flex-col font-sans">
 
     <!-- Header -->
-    <header class="bg-white shadow-md sticky top-0 z-40">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center gap-4">
-            <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-10 sm:h-14 object-contain">
-            <div class="text-center">
-                <h1 class="text-lg sm:text-2xl font-bold text-blue-900 uppercase">Inscripción a Cursos</h1>
-                <p class="text-xs sm:text-sm text-blue-700 font-semibold">Desarrollo Académico</p>
+    <header class="bg-white shadow-xl sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
+            <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 object-contain">
+            <div class="text-center flex-1">
+                <h1 class="text-sm sm:text-xl font-bold text-blue-900 leading-tight">INSCRIPCIÓN A CURSOS</h1>
+                <p class="text-xs sm:text-sm text-blue-700 font-semibold mt-1">Actualización Docente ITD</p>
             </div>
-            <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-10 sm:h-14 object-contain">
+            <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 object-contain">
         </div>
     </header>
 
-    <!-- Botón Volver -->
-    <div class="container mx-auto px-4 py-4">
-        <a href="index.html" class="text-indigo-700 hover:text-indigo-900 font-bold text-sm flex items-center gap-1 transition-colors">
-            ← Volver al Portal Principal
-        </a>
-    </div>
-
-    <!-- Contenedor React -->
-    <div id="root" class="flex-grow container mx-auto px-4 pb-12 min-h-[400px]">
-        <div class="flex justify-center items-center py-20">
-            <div class="loader-spinner"></div>
-        </div>
-    </div>
+    <div id="root" class="flex-grow"></div>
 
     <!-- Footer -->
-    <footer class="bg-blue-900 text-white text-center py-6 mt-auto">
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 mt-auto">
         <div class="container mx-auto px-4">
-            <p class="font-bold text-sm">© Coordinación de Actualización Docente</p>
-            <p class="text-xs opacity-80 mt-1">Instituto Tecnológico de Durango</p>
+            <p class="font-bold text-sm mb-1">© Coordinación de Actualización Docente</p>
+            <p class="text-xs opacity-75">Instituto Tecnológico de Durango</p>
         </div>
     </footer>
 
-    <script>
-        window.onerror = function(message, source, lineno, colno, error) {
-            document.getElementById('global-error').style.display = 'block';
-            document.getElementById('global-error-msg').innerText = message;
-            console.error("Error global:", error);
-        };
-    </script>
-
     <script type="text/babel">
-        const { useState, useEffect, useRef } = window.React;
-        const ReactDOM = window.ReactDOM;
+        const { useState, useEffect, useRef, useMemo } = React;
 
+        // --- CONFIGURACIÓN ---
         const CONFIG = {
-            CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
-            SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
+            COURSES_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv',
+            TEACHERS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv'
         };
 
-        // --- COMPONENTES DE AYUDA ---
+        const DEPARTMENTS = [
+            "CIENCIAS DE LA TIERRA", "CIENCIAS BASICAS", "INGENIERÍA INDUSTRIAL", 
+            "CIENCIAS ECONOMICO-ADMINISTRATIVAS", "SISTEMAS Y COMPUTACION", 
+            "INGENIERÍA QUÍMICA-BIOQUÍMICA", "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA", 
+            "METAL-MECÁNICA", "POSGRADO E INVESTIGACION", "DESARROLLO ACADÉMICO", 
+            "CENTRO DE INFORMACIÓN", "GESTION TECNOLOGICA", "ADMINISTRATIVO", "EXTERNO"
+        ];
 
-        // Componente GoogleButton Aislado: No se actualiza nunca después de montar
-        const GoogleSignInButton = React.memo(({ onLogin, onReady }) => {
-            const divRef = useRef(null);
+        const removeAccents = (text) => text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+
+        const parseCSV = (text) => {
+            const lines = text.trim().split(/\r?\n/).slice(1);
+            return lines.map(line => {
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+                for (let char of line) {
+                    if (char === '"') { inQuotes = !inQuotes; }
+                    else if (char === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
+                    else { current += char; }
+                }
+                values.push(current.trim());
+                return values;
+            }).filter(row => row.length > 1);
+        };
+
+        const cleanStr = (s) => s ? s.replace(/^"|"$/g, '').trim() : '';
+
+        // --- COMPONENTES ---
+        const StepIndicator = ({ currentStep }) => {
+            const steps = ["Información", "Cursos", "Confirmar", "Finalizado"];
+            return (
+                <div className="flex justify-center items-center mb-8 px-4">
+                    {steps.map((label, idx) => {
+                        const stepNum = idx + 1;
+                        let statusClass = "step-inactive";
+                        if (stepNum < currentStep) statusClass = "step-completed";
+                        if (stepNum === currentStep) statusClass = "step-active";
+                        
+                        return (
+                            <div key={idx} className="flex flex-col items-center mx-2 sm:mx-6 relative z-10">
+                                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base border-2 transition-all duration-300 ${statusClass}`}>
+                                    {stepNum}
+                                </div>
+                                <span className={`text-[10px] sm:text-xs mt-1 font-semibold ${stepNum === currentStep ? 'text-blue-800' : 'text-gray-400'}`}>
+                                    {label}
+                                </span>
+                                {idx < steps.length - 1 && (
+                                    <div className={`hidden sm:block absolute top-4 sm:top-5 left-1/2 w-full h-[2px] -z-10 ${stepNum < currentStep ? 'bg-blue-800' : 'bg-gray-200'}`} style={{ width: 'calc(100% + 3rem)', left: '50%' }}></div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        };
+
+        const AutocompleteInput = ({ teachers, onSelect, value, onChange, name, placeholder, required = false }) => {
+            const [suggestions, setSuggestions] = useState([]);
+            const [showSuggestions, setShowSuggestions] = useState(false);
+            const containerRef = useRef(null);
 
             useEffect(() => {
-                const init = () => {
-                    if (window.google && window.google.accounts && divRef.current) {
-                        try {
-                            window.google.accounts.id.initialize({
-                                client_id: CONFIG.CLIENT_ID,
-                                callback: onLogin,
-                                auto_select: false,
-                                cancel_on_tap_outside: false
-                            });
-                            
-                            // Renderizado en el div ref
-                            window.google.accounts.id.renderButton(
-                                divRef.current,
-                                { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill", width: "280" }
-                            );
-                            
-                            // Notificar que está listo para ocultar el loader
-                            if(onReady) onReady();
-                        } catch (e) {
-                            console.error("GSI Error:", e);
-                        }
-                    } else {
-                        // Reintentar si no ha cargado
-                        setTimeout(init, 300);
+                const handleClickOutside = (event) => {
+                    if (containerRef.current && !containerRef.current.contains(event.target)) {
+                        setShowSuggestions(false);
                     }
                 };
-                init();
-            }, []); // Array vacío: Solo se ejecuta una vez al montar
+                document.addEventListener('mousedown', handleClickOutside);
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+            }, []);
 
-            return <div ref={divRef}></div>;
-        });
+            const handleInputChange = (e) => {
+                const currentValue = e.target.value;
+                onChange(e);
+                if (currentValue && currentValue.length > 0) {
+                    const normalizedInput = removeAccents(currentValue.toLowerCase());
+                    const filtered = teachers.filter(teacher =>
+                        removeAccents(teacher.name.toLowerCase()).includes(normalizedInput)
+                    ).slice(0, 5);
+                    setSuggestions(filtered);
+                    setShowSuggestions(filtered.length > 0);
+                } else {
+                    setSuggestions([]);
+                    setShowSuggestions(false);
+                }
+            };
 
-        const LoginScreen = ({ onLogin, errorMsg }) => {
-            // Controlamos visibilidad con estado, pero el renderizado del DOM es estático (display:none vs block)
-            const [buttonReady, setButtonReady] = useState(false);
+            const handleSelect = (teacher) => {
+                onSelect(teacher);
+                setShowSuggestions(false);
+            };
 
             return (
-                <div className="flex flex-col items-center justify-center py-20 animate-fadeIn px-4">
-                    <div className="bg-white p-8 sm:p-12 rounded-3xl shadow-xl text-center max-w-md w-full border border-slate-100 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
-                        
-                        <div className="text-6xl mb-6">👋</div>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-3">Bienvenido Docente</h2>
-                        <p className="text-slate-500 mb-8 text-sm sm:text-base">
-                            Para inscribirte, inicia sesión con tu cuenta institucional.
-                        </p>
-                        
-                        {errorMsg && (
-                            <div className="mb-6 bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100 text-left">
-                                <span className="font-bold">Error:</span> {errorMsg}
+                <div className="relative" ref={containerRef}>
+                    <input
+                        type="text"
+                        name={name}
+                        value={value}
+                        onChange={handleInputChange}
+                        onFocus={(e) => {
+                            const val = e.target.value;
+                            if (val) {
+                                const normalizedInput = removeAccents(val.toLowerCase());
+                                const filtered = teachers.filter(t =>
+                                    removeAccents(t.name.toLowerCase()).includes(normalizedInput)
+                                ).slice(0, 5);
+                                setSuggestions(filtered);
+                                setShowSuggestions(filtered.length > 0);
+                            }
+                        }}
+                        placeholder={placeholder || "Escriba su nombre"}
+                        className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base uppercase"
+                        required={required}
+                        autoComplete="off"
+                    />
+                    {showSuggestions && suggestions.length > 0 && (
+                        <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
+                            {suggestions.map((teacher) => (
+                                <li key={teacher.curp || teacher.name} onMouseDown={(e) => { e.preventDefault(); handleSelect(teacher); }} className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm sm:text-base">
+                                    {teacher.name}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            );
+        };
+
+        const InfoForm = ({ formData, setFormData, departments, teachers, onNext }) => {
+            const [errors, setErrors] = useState({});
+            
+            const handleTeacherSelect = (teacher) => {
+                let inferredGender = 'Mujer';
+                const curp = teacher.curp || '';
+                
+                if (teacher.gender) {
+                    inferredGender = teacher.gender;
+                } else if (curp.length >= 11) {
+                    const genderChar = curp.charAt(10).toUpperCase();
+                    if (genderChar === 'H') inferredGender = 'Hombre';
+                    else if (genderChar === 'M') inferredGender = 'Mujer';
+                }
+
+                setFormData(prev => ({
+                    ...prev,
+                    fullName: (teacher.name || '').toUpperCase(),
+                    curp: (teacher.curp || '').toUpperCase(),
+                    email: (teacher.email || '').toLowerCase(),
+                    gender: inferredGender,
+                    department: (teacher.dept && teacher.dept.length > 3) ? teacher.dept.toUpperCase() : prev.department
+                }));
+            };
+
+            const validate = () => {
+                const newErrors = {};
+                if (!formData.fullName) newErrors.fullName = "Campo obligatorio";
+                if (!formData.curp || formData.curp.length < 18) newErrors.curp = "CURP inválido (18 caracteres)";
+                if (!formData.email) newErrors.email = "Campo obligatorio";
+                if (!formData.department) newErrors.department = "Seleccione departamento";
+                setErrors(newErrors);
+                return Object.keys(newErrors).length === 0;
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (validate()) onNext();
+            };
+
+            return (
+                <div className="animate-fadeIn max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-slate-200">
+                    <h2 className="text-xl font-bold text-slate-800 mb-6 border-b pb-2">Datos Personales</h2>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-1">Nombre Completo *</label>
+                            <AutocompleteInput teachers={teachers} onSelect={handleTeacherSelect} value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value.toUpperCase()})} name="fullName" required />
+                            {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">CURP *</label>
+                                <input type="text" value={formData.curp} onChange={e => setFormData({...formData, curp: e.target.value.toUpperCase()})} className="w-full p-2 border rounded uppercase" maxLength={18} />
+                                {errors.curp && <p className="text-red-500 text-xs mt-1">{errors.curp}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">Email *</label>
+                                <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value.toLowerCase()})} className="w-full p-2 border rounded" />
+                                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">Departamento *</label>
+                                <select value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} className="w-full p-2 border rounded">
+                                    <option value="">-- Seleccione --</option>
+                                    {departments.map(d => <option key={d} value={d}>{d}</option>)}
+                                </select>
+                                {errors.department && <p className="text-red-500 text-xs mt-1">{errors.department}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">Género</label>
+                                <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})} className="w-full p-2 border rounded">
+                                    <option value="Mujer">Mujer</option><option value="Hombre">Hombre</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="mt-8 flex justify-end">
+                            <button type="submit" className="bg-blue-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-900 transition-colors">Siguiente ➝</button>
+                        </div>
+                    </form>
+                </div>
+            );
+        };
+
+        const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, onNext, onBack }) => {
+            const [searchTerm, setSearchTerm] = useState('');
+
+            // VALIDACIÓN DE TRASLAPE
+            const checkOverlap = (newCourse) => {
+                const newDates = newCourse.dates.trim().toUpperCase();
+                const newSchedule = newCourse.schedule.trim().toUpperCase();
+
+                for (const existing of selectedCourses) {
+                    if (existing.id === newCourse.id) continue;
+                    
+                    const exDates = existing.dates.trim().toUpperCase();
+                    const exSchedule = existing.schedule.trim().toUpperCase();
+
+                    if (exDates === newDates && exSchedule === newSchedule) {
+                        return { overlap: true, conflict: existing.name };
+                    }
+                }
+                return { overlap: false };
+            };
+
+            const toggleCourse = (course) => {
+                const isSelected = selectedCourses.some(c => c.id === course.id);
+                if (isSelected) {
+                    setSelectedCourses(prev => prev.filter(c => c.id !== course.id));
+                } else {
+                    if (selectedCourses.length >= 3) {
+                        alert("Máximo 3 cursos permitidos.");
+                        return;
+                    }
+                    
+                    const { overlap, conflict } = checkOverlap(course);
+                    if (overlap) {
+                        alert(`⚠️ EMPALME DE HORARIO DETECTADO:\n\nNo puedes inscribirte a "${course.name}" porque tiene el mismo horario que "${conflict}".`);
+                        return;
+                    }
+
+                    setSelectedCourses(prev => [...prev, course]);
+                }
+            };
+
+            const filteredCourses = useMemo(() => courses.filter(c => removeAccents(c.name.toLowerCase()).includes(removeAccents(searchTerm.toLowerCase()))), [searchTerm, courses]);
+            const groupedCourses = useMemo(() => filteredCourses.reduce((acc, c) => {
+                const p = c.period || 'Sin Periodo';
+                if (!acc[p]) acc[p] = { courses: [], dates: c.dates || '' };
+                acc[p].courses.push(c);
+                return acc;
+            }, {}), [filteredCourses]);
+
+            return (
+                <div className="animate-fadeIn max-w-6xl mx-auto">
+                    <h2 className="text-xl font-bold text-slate-800 mb-2">Selección de Cursos</h2>
+                    <p className="text-sm text-gray-600 mb-4">Seleccionados: {selectedCourses.length} de 3. (Incluye los cursos que ya tenías inscritos)</p>
+                    <input type="text" placeholder="Buscar curso..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full px-4 py-2 mb-6 border rounded-md" />
+                    
+                    {Object.keys(groupedCourses).length === 0 && <p className="text-center">No hay cursos.</p>}
+
+                    {Object.entries(groupedCourses).map(([period, data]) => {
+                        const isPeriod1 = period.toUpperCase().includes('PERIODO 1') || period.toUpperCase().includes('ENERO') || period.toUpperCase().includes('JUNIO');
+                        const headerClass = isPeriod1 ? 'text-teal-800 border-teal-300' : 'text-indigo-800 border-indigo-300';
+                        const headerIcon = isPeriod1 ? '☀️' : '🍂';
+
+                        return (
+                            <div key={period} className="mb-8 bg-white rounded-xl shadow-sm border overflow-hidden">
+                                <div className={`px-6 py-3 font-bold border-b bg-slate-50 ${headerClass} flex items-center gap-2`}>
+                                    <span className="text-xl">{headerIcon}</span>
+                                    <span>{period} {data.dates && `| ${data.dates}`}</span>
+                                </div>
+                                <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {data.courses.map(course => {
+                                        const isSelected = selectedCourses.some(c => c.id === course.id);
+                                        
+                                        let cardClass = "bg-white border-transparent hover:shadow-md";
+                                        if (isSelected) {
+                                            cardClass = isPeriod1 
+                                                ? 'bg-teal-50 border-teal-500 ring-1 ring-teal-500' 
+                                                : 'bg-indigo-50 border-indigo-500 ring-1 ring-indigo-500';
+                                        } else {
+                                            cardClass = isPeriod1 
+                                                ? 'bg-slate-50 hover:bg-teal-50/50 hover:border-teal-200' 
+                                                : 'bg-slate-50 hover:bg-indigo-50/50 hover:border-indigo-200';
+                                        }
+
+                                        return (
+                                            <div key={course.id} onClick={() => toggleCourse(course)} className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${cardClass}`}>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className={`text-[10px] px-2 rounded font-bold uppercase ${course.type.includes('PROFESIONAL') ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>{course.type}</span>
+                                                    {isSelected && <span className="text-lg">✅</span>}
+                                                </div>
+                                                <h3 className="font-bold text-sm text-slate-800 mb-2 leading-tight">{course.name}</h3>
+                                                <div className="text-xs text-gray-500 space-y-1">
+                                                    <p>📅 {course.dates}</p>
+                                                    <p>⏰ {course.schedule}</p>
+                                                    <p>📍 {course.location}</p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                    <div className="flex justify-between mt-8">
+                        <button onClick={onBack} className="bg-gray-200 px-6 py-2 rounded font-bold hover:bg-gray-300">Atrás</button>
+                        <button onClick={onNext} disabled={selectedCourses.length===0} className="bg-blue-800 text-white px-6 py-2 rounded font-bold hover:bg-blue-900 disabled:opacity-50">Siguiente</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const Confirmation = ({ formData, courses, onBack, onSubmit }) => {
+            const [sending, setSending] = useState(false);
+            const handleSubmit = () => { setSending(true); onSubmit(); };
+            return (
+                <div className="animate-fadeIn max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg border">
+                    <h2 className="text-2xl font-bold mb-6">Confirmar Inscripción</h2>
+                    <div className="mb-6 border-b pb-4">
+                        <h3 className="font-bold text-gray-500 text-sm uppercase">Datos</h3>
+                        <p className="font-bold">{formData.fullName}</p>
+                        <p className="text-sm">{formData.email} | {formData.curp}</p>
+                        <p className="text-sm text-gray-600">{formData.department}</p>
+                    </div>
+                    <div className="mb-6">
+                        <h3 className="font-bold text-gray-500 text-sm uppercase mb-2">Cursos ({courses.length})</h3>
+                        <ul className="space-y-2">
+                            {courses.map(c => (
+                                <li key={c.id} className="bg-blue-50 p-3 rounded border border-blue-100 font-bold text-sm text-blue-900">
+                                    {c.name} <br/><span className="font-normal text-xs text-gray-600">{c.dates} - {c.schedule}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="flex justify-between">
+                        <button onClick={onBack} disabled={sending} className="bg-gray-200 px-6 py-2 rounded font-bold">Regresar</button>
+                        <button onClick={handleSubmit} disabled={sending} className="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 disabled:opacity-50 flex items-center gap-2">
+                            {sending ? 'Enviando...' : 'Confirmar Inscripción'}
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const FinalStep = ({ result, emailSent, cancelledCourses }) => {
+            const isFullCancellation = result.length === 0 && cancelledCourses.length > 0;
+            const hasActiveCourses = result.length > 0;
+
+            return (
+                <div className="animate-fadeIn max-w-2xl mx-auto bg-white p-10 rounded-xl shadow-xl text-center border-t-4 border-green-500">
+                    <div className="text-6xl mb-4">{isFullCancellation ? '✅' : '🎉'}</div>
+                    <h2 className="text-3xl font-bold text-slate-800 mb-2">
+                        {isFullCancellation ? 'Baja Procesada' : '¡Trámite Exitoso!'}
+                    </h2>
+                    <p className="text-slate-600 mb-8">
+                        {isFullCancellation 
+                            ? 'Los cursos seleccionados han sido dados de baja correctamente.' 
+                            : 'Tu carga académica ha sido actualizada.'}
+                    </p>
+
+                    <div className="text-left mb-6 space-y-6">
+                        {/* SECCIÓN DE CURSOS ACTIVOS (FOLIOS) */}
+                        {hasActiveCourses && (
+                            <div className="bg-blue-50 p-6 rounded border border-blue-100">
+                                <h3 className="font-bold border-b border-blue-200 pb-2 mb-2 text-blue-900 flex items-center gap-2">
+                                    <span>📝</span> Cursos Inscritos / Activos
+                                </h3>
+                                {result.map((r, i) => (
+                                    <div key={i} className="flex justify-between py-2 border-b border-blue-100 last:border-0">
+                                        <div className="pr-4">
+                                            <span className="block text-sm font-bold text-gray-700">{r.name || ('Curso ID: ' + r.registrationId)}</span>
+                                            {r.schedule && <span className="text-xs text-gray-500">{r.schedule}</span>}
+                                        </div>
+                                        <span className="font-mono font-bold text-blue-700 whitespace-nowrap">{r.folio}</span>
+                                    </div>
+                                ))}
                             </div>
                         )}
 
-                        <div className="flex flex-col items-center justify-center min-h-[60px]">
-                            {/* Loader: Se oculta con CSS, NO se desmonta del DOM */}
-                            <div className={`flex items-center gap-2 text-slate-400 text-sm mb-2 transition-opacity duration-300 ${buttonReady ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
-                                <div className="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
-                                Cargando acceso...
+                        {/* SECCIÓN DE CURSOS DADOS DE BAJA */}
+                        {cancelledCourses && cancelledCourses.length > 0 && (
+                            <div className="bg-red-50 p-6 rounded border border-red-100">
+                                <h3 className="font-bold border-b border-red-200 pb-2 mb-2 text-red-900 flex items-center gap-2">
+                                    <span>🗑️</span> Cursos Dados de Baja
+                                </h3>
+                                {cancelledCourses.map((c, i) => (
+                                    <div key={i} className="py-2 border-b border-red-100 last:border-0">
+                                        <span className="block text-sm font-bold text-gray-700">{c.name}</span>
+                                        <span className="text-xs text-red-500">Estado: BAJA</span>
+                                    </div>
+                                ))}
                             </div>
-
-                            {/* Botón: Se muestra con CSS */}
-                            <div className={`transition-opacity duration-500 ${buttonReady ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
-                                <GoogleSignInButton onLogin={onLogin} onReady={() => setButtonReady(true)} />
-                            </div>
-                        </div>
+                        )}
                     </div>
+
+                    {/* MENSAJES DE CORREO */}
+                    {!emailSent && hasActiveCourses && (
+                        <div className="bg-yellow-100 text-yellow-800 p-4 rounded mb-6 text-sm">
+                            ⚠️ No se pudo enviar el correo de confirmación de inscripción. <strong>Toma captura de esta pantalla.</strong>
+                        </div>
+                    )}
+                    {!emailSent && isFullCancellation && (
+                        <div className="bg-gray-100 text-gray-600 p-4 rounded mb-6 text-xs">
+                            ℹ️ La baja se procesó en el sistema. Es posible que no recibas correo de confirmación para bajas, guarda esta captura.
+                        </div>
+                    )}
+
+                    <a href="index.html" className="bg-blue-800 text-white font-bold py-3 px-8 rounded hover:bg-blue-900 transition-colors">Volver al Inicio</a>
                 </div>
             );
         };
 
-        const CourseSelectionCard = ({ course, isSelected, isDisabled, onToggle, overlapMessage }) => {
-            return (
-                <div 
-                    className={`relative border rounded-xl p-5 transition-all duration-200 cursor-pointer ${
-                        isSelected 
-                            ? 'border-blue-500 bg-blue-50 shadow-md' 
-                            : isDisabled 
-                                ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed' 
-                                : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
-                    }`}
-                    onClick={() => !isDisabled && onToggle(course)}
-                >
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex-grow">
-                            <h3 className={`font-bold text-lg leading-tight mb-2 ${isSelected ? 'text-blue-800' : 'text-slate-800'}`}>
-                                {course.name}
-                            </h3>
-                            <div className="space-y-1 text-sm text-gray-600">
-                                <p>📅 {course.dates}</p>
-                                <p className="font-medium text-slate-700">⏰ {course.schedule}</p>
-                                <p>📍 {course.location || 'Por definir'}</p>
-                                <span className="inline-block mt-1 text-xs bg-slate-100 px-2 py-0.5 rounded">⏳ {course.hours} horas</span>
-                            </div>
-                            {overlapMessage && (
-                                <div className="mt-3 text-xs bg-red-50 text-red-700 px-2 py-1 rounded border border-red-100">
-                                    ⚠️ {overlapMessage}
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex-shrink-0">
-                            <div className={`w-6 h-6 rounded border flex items-center justify-center ${
-                                isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300'
-                            }`}>
-                                {isSelected && <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
+        // =============================================================================
+        // == MODAL DE REGISTRO EXISTENTE (Mejorado para permitir agregar)
+        // =============================================================================
 
-        const ExistingRegistrationModal = ({ isOpen, courses, onModify, onDeleteCourse, deletingCourseId }) => {
+        const ExistingRegistrationModal = ({ isOpen, courses, onModify, onClose, onDeleteCourse, deletingCourseId, onCancelAll }) => {
+            const { useEffect } = React;
+            
+            useEffect(() => {
+                const handleEsc = (event) => { if (event.key === 'Escape') onClose(); };
+                if (isOpen) window.addEventListener('keydown', handleEsc);
+                return () => window.removeEventListener('keydown', handleEsc);
+            }, [isOpen, onClose]);
+
             if (!isOpen) return null;
 
             return (
-                <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-                    <div className="relative mx-auto p-6 sm:p-8 border w-full max-w-lg shadow-2xl rounded-2xl bg-white transform transition-all scale-100 animate-fadeIn">
-                        <div className="text-center mb-6">
-                            <div className="text-5xl mb-3">📋</div>
-                            <h3 className="text-xl sm:text-2xl font-bold text-blue-900">Tu Inscripción Actual</h3>
-                            <p className="text-sm text-gray-500 mt-1">Estos son los cursos registrados en tu cuenta</p>
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-70 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="relative mx-auto p-6 sm:p-8 border w-full max-w-lg shadow-2xl rounded-xl bg-white transform transition-all scale-100">
+                        <div className="text-center mb-4">
+                            <div className="text-4xl mb-2">👋</div>
+                            <h3 className="text-xl sm:text-2xl font-bold text-blue-900">Registro Académico Encontrado</h3>
                         </div>
-                        
-                        <div className="mb-6">
-                            <div className="space-y-3 bg-blue-50 p-4 rounded-xl border border-blue-100 max-h-60 overflow-y-auto custom-scrollbar">
+                        <div className="mt-4">
+                            <p className="text-sm sm:text-base text-gray-600 mb-4 text-center">
+                                Hola, detectamos que ya estás inscrito en los siguientes cursos. 
+                                <br/><strong>¿Deseas agregar más cursos a tu carga?</strong>
+                            </p>
+                            <div className="space-y-2 bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6">
                                 {courses.length > 0 ? courses.map(course => (
-                                    <div key={course.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100 shadow-sm">
-                                        <div className="flex flex-col gap-1 overflow-hidden">
-                                            <span className="font-bold text-sm text-blue-900 truncate">{course.name}</span>
-                                            <span className="text-xs text-gray-500 font-mono bg-gray-100 px-2 py-0.5 rounded w-fit">Folio: {course.folio}</span>
+                                    <div key={course.id} className="flex items-center justify-between py-2 border-b border-blue-200 last:border-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-green-600 text-lg">✓</span>
+                                            <span className="font-semibold text-sm sm:text-base text-blue-900">{course.name}</span>
                                         </div>
-                                        <button 
-                                            onClick={() => onDeleteCourse(course.id)} 
-                                            disabled={!!deletingCourseId} 
-                                            className="ml-3 text-xs font-bold text-red-500 hover:text-white hover:bg-red-500 border border-red-200 px-3 py-1.5 rounded transition-all flex-shrink-0"
-                                        >
-                                            {deletingCourseId === course.id ? '...' : 'BAJA'}
+                                        <button onClick={() => onDeleteCourse(course.id)} disabled={!!deletingCourseId} className="text-xs text-red-500 hover:text-red-700 underline px-2" aria-label={`Dar de baja ${course.name}`}>
+                                            {deletingCourseId === course.id ? 'Procesando...' : 'Dar de baja'}
                                         </button>
                                     </div>
-                                )) : <p className="text-gray-500 italic text-sm text-center py-4">No tienes cursos registrados.</p>}
+                                )) : <p className="text-gray-500 italic text-sm">Sin cursos activos.</p>}
                             </div>
-                            
-                            <div className="flex justify-between items-center mt-3 text-xs text-gray-500 px-1">
-                                <span>Cursos inscritos: <strong>{courses.length}</strong>/3</span>
-                            </div>
+                            <p className="text-xs text-gray-500 text-center mb-6">
+                                Puedes inscribirte hasta en 3 cursos en total. Al continuar, verás tus cursos actuales ya seleccionados.
+                            </p>
                         </div>
-
                         <div className="flex flex-col gap-3">
-                            <button onClick={onModify} className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 shadow-lg">
-                                <span>➕</span> Agregar / Modificar Cursos
+                            <button onClick={onModify} className="w-full bg-blue-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-800 shadow-md flex justify-center items-center gap-2">
+                                <span>➕</span> Continuar / Agregar Cursos
                             </button>
-                            <button onClick={() => window.location.href='index.html'} className="w-full bg-white text-slate-600 border border-slate-300 font-semibold py-3 px-6 rounded-xl hover:bg-slate-50 text-sm">
-                                <span>🚪</span> Salir sin guardar cambios
+                            <button onClick={onCancelAll} className="w-full bg-white text-red-600 border border-red-200 font-semibold py-2 px-6 rounded-lg hover:bg-red-50 text-sm">
+                                Cancelar Toda mi Inscripción
                             </button>
                         </div>
                     </div>
@@ -258,283 +546,185 @@
         };
 
         const App = () => {
-            const [user, setUser] = useState(null);
-            const [step, setStep] = useState('login'); 
-            const [errorMsg, setErrorMsg] = useState(null);
+            const [step, setStep] = useState(1);
+            const [formData, setFormData] = useState({ fullName: '', curp: '', email: '', gender: 'Mujer', department: '' });
+            const [selectedCourses, setSelectedCourses] = useState([]);
+            const [allCourses, setAllCourses] = useState([]);
+            const [teachers, setTeachers] = useState([]);
+            const [result, setResult] = useState([]);
+            const [emailSent, setEmailSent] = useState(true);
+            const [error, setError] = useState(null);
             
-            const [availableCourses, setAvailableCourses] = useState([]);
-            const [existingCourses, setExistingCourses] = useState([]); 
-            const [selectedCourseIds, setSelectedCourseIds] = useState([]); 
-            
+            // --- New State for tracking cancellations ---
+            const [cancelledCoursesList, setCancelledCoursesList] = useState([]);
+
+            // --- Step 1 States for Modal ---
+            const [isCheckingCurp, setIsCheckingCurp] = useState(false);
             const [isModalOpen, setIsModalOpen] = useState(false);
+            const [existingCourses, setExistingCourses] = useState([]);
             const [deletingCourseId, setDeletingCourseId] = useState(null);
-            const [isSaving, setIsSaving] = useState(false);
-            
-            const [formData, setFormData] = useState({ fullName: '', email: '', curp: '', phone: '', department: '' });
+            const [originalSelectedCourses, setOriginalSelectedCourses] = useState([]);
+            const lastCheckedCurp = useRef('');
 
-            const handleLogin = (response) => {
-                setErrorMsg(null);
-                try {
-                    const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                    if (payload.email && !payload.email.endsWith('@itdurango.edu.mx')) {
-                         setErrorMsg("Por favor, utiliza una cuenta institucional (@itdurango.edu.mx).");
-                         return;
-                    }
-                    setUser(payload);
-                    setFormData(prev => ({ ...prev, fullName: payload.name, email: payload.email }));
-                    checkUserStatus(payload.email);
-                } catch (e) { 
-                    console.error("Login Error", e); 
-                    setErrorMsg("Error al procesar la cuenta.");
-                }
-            };
-
-            const checkUserStatus = async (email) => {
-                setStep('loading');
-                try {
-                    const [coursesRes, userRes] = await Promise.all([
-                        fetch(`${CONFIG.SCRIPT_URL}?action=getAvailableCourses`),
-                        fetch(`${CONFIG.SCRIPT_URL}?action=checkUserRegistration&email=${email}`)
-                    ]);
+            useEffect(() => {
+                Promise.all([
+                    fetch(CONFIG.COURSES_CSV_URL).then(r => r.text()),
+                    fetch(CONFIG.TEACHERS_CSV_URL).then(r => r.text())
+                ]).then(([cText, tText]) => {
+                    const cRows = parseCSV(cText);
+                    setAllCourses(cRows.map(r => ({ 
+                        id: cleanStr(r[0]), 
+                        name: cleanStr(r[1]), 
+                        dates: cleanStr(r[2]), 
+                        period: cleanStr(r[3]), 
+                        location: cleanStr(r[5]), 
+                        schedule: cleanStr(r[6]), 
+                        type: cleanStr(r[7]) 
+                    })));
                     
-                    const coursesData = await coursesRes.json();
-                    const userData = await userRes.json();
+                    const tRows = parseCSV(tText);
+                    setTeachers(tRows.map(r => ({ 
+                        name: cleanStr(r[0]), 
+                        curp: cleanStr(r[1]), 
+                        email: cleanStr(r[2]), 
+                        dept: cleanStr(r[3]), 
+                        gender: cleanStr(r[5]) 
+                    })));
+                }).catch(() => setError("Error cargando datos."));
+            }, []);
 
-                    if(coursesData.success) {
-                        setAvailableCourses(coursesData.data);
-                    } else {
-                        throw new Error("No se pudieron cargar los cursos");
-                    }
-                    
-                    if (userData.registered && userData.courses.length > 0) {
-                        setExistingCourses(userData.courses);
-                        if(userData.teacherInfo) {
-                            setFormData(prev => ({ 
-                                ...prev, 
-                                curp: userData.teacherInfo.curp || '',
-                                phone: userData.teacherInfo.phone || '',
-                                department: userData.teacherInfo.department || ''
-                            }));
+            // --- Logic for Modal Step 1 ---
+            useEffect(() => {
+                const getRegistrationByCurp = async (curp) => {
+                    try {
+                        const url = new URL(CONFIG.APPS_SCRIPT_URL);
+                        url.searchParams.append('action', 'lookupByCurp');
+                        url.searchParams.append('curp', curp.toUpperCase());
+                        const res = await fetch(url);
+                        const json = await res.json();
+                        return json.success ? json.data.registeredCourses : [];
+                    } catch { return []; }
+                };
+
+                const check = async () => {
+                    setIsCheckingCurp(true);
+                    const regIds = await getRegistrationByCurp(formData.curp);
+                    // Volver a verificar la CURP actual por si cambió durante la petición
+                    if (formData.curp === lastCheckedCurp.current) {
+                        if (regIds.length > 0) {
+                            const found = allCourses.filter(c => regIds.includes(c.id));
+                            if (found.length > 0) {
+                                setExistingCourses(found);
+                                setOriginalSelectedCourses(found);
+                                setIsModalOpen(true);
+                            }
+                        } else {
+                            setExistingCourses([]);
+                            setOriginalSelectedCourses([]);
+                            setIsModalOpen(false);
                         }
-                        setIsModalOpen(true);
                     }
-                    setStep('form');
-                } catch (e) {
-                    console.error(e);
-                    setErrorMsg("Error de conexión. Intente más tarde.");
-                    setStep('login');
+                    if (formData.curp === lastCheckedCurp.current) setIsCheckingCurp(false);
+                };
+
+                // VALIDACIÓN RIGUROSA: Solo buscar si TODOS los campos obligatorios están llenos
+                const isFormComplete = formData.curp.length === 18 && 
+                                       formData.fullName && formData.fullName.trim() !== '' && 
+                                       formData.email && formData.email.trim() !== '' && 
+                                       formData.department && formData.department.trim() !== '';
+
+                if (isFormComplete && lastCheckedCurp.current !== formData.curp && allCourses.length > 0) {
+                    lastCheckedCurp.current = formData.curp;
+                    check();
+                } else if (formData.curp.length !== 18) {
+                    // Si borran la CURP, reseteamos el estado
+                    lastCheckedCurp.current = '';
+                    setIsModalOpen(false);
                 }
+            }, [formData.curp, formData.department, formData.fullName, formData.email, allCourses]);
+
+            const handleModify = () => {
+                setSelectedCourses(existingCourses); // Pre-fill cart with existing
+                setOriginalSelectedCourses(existingCourses);
+                setIsModalOpen(false);
+                setStep(2); // Go to selection
             };
 
-            const handleDeleteCourse = async (courseIdToDelete) => {
-                if(!confirm("¿Deseas dar de baja este curso?")) return;
-                setDeletingCourseId(courseIdToDelete);
+            const handleDeleteSingle = async (cid) => {
+                setDeletingCourseId(cid);
                 try {
-                    const courseToDelete = existingCourses.find(c => c.id === courseIdToDelete);
-                    if (!courseToDelete) throw new Error("Curso no encontrado");
-                    
-                    await fetch(CONFIG.SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'cancelSingleCourse',
-                            email: formData.email,
-                            fullName: formData.fullName,
-                            courseId: courseToDelete.id,
-                            courseName: courseToDelete.name,
-                            folio: courseToDelete.folio
+                    const c = existingCourses.find(x => x.id === cid);
+                    await fetch(CONFIG.APPS_SCRIPT_URL, {
+                        method: 'POST', body: JSON.stringify({
+                            action: 'cancelSingle', curp: formData.curp, email: formData.email, fullName: formData.fullName,
+                            courseToCancel: { id: c.id, name: c.name }
                         })
                     });
-
-                    const updated = existingCourses.filter(c => c.id !== courseIdToDelete);
-                    setExistingCourses(updated);
-                    alert(`✅ Baja exitosa del curso: ${courseToDelete.name}`);
-                    if (updated.length === 0) setIsModalOpen(false);
-                } catch (error) {
-                    alert("Error al procesar la baja.");
-                } finally {
-                    setDeletingCourseId(null);
-                }
+                    const left = existingCourses.filter(x => x.id !== cid);
+                    setExistingCourses(left);
+                    setOriginalSelectedCourses(left);
+                    if(left.length === 0) setIsModalOpen(false);
+                } catch(e) { alert("Error al cancelar"); }
+                setDeletingCourseId(null);
             };
 
-            const parseSchedule = (scheduleStr) => {
-                if (!scheduleStr) return null;
-                const times = scheduleStr.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
-                if (!times) return null;
-                const toMinutes = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-                return { start: toMinutes(times[1]), end: toMinutes(times[2]) };
+            const handleCancelAll = () => {
+                setSelectedCourses([]); 
+                setOriginalSelectedCourses(existingCourses); 
+                setIsModalOpen(false);
+                setStep(3); // Go to confirm cancellation
             };
 
-            const checkOverlap = (courseToCheck) => {
-                const t1 = parseSchedule(courseToCheck.schedule);
-                if (!t1) return null;
-
-                const allCourses = [
-                    ...existingCourses,
-                    ...availableCourses.filter(c => selectedCourseIds.includes(c.id) && c.id !== courseToCheck.id)
-                ];
-
-                for (let other of allCourses) {
-                    const t2 = parseSchedule(other.schedule);
-                    if (t2 && t1.start < t2.end && t1.end > t2.start) {
-                        return `Se empalma con: ${other.name}`;
-                    }
-                }
-                return null;
-            };
-
-            const toggleCourse = (course) => {
-                if (selectedCourseIds.includes(course.id)) {
-                    setSelectedCourseIds(prev => prev.filter(id => id !== course.id));
-                } else {
-                    const overlap = checkOverlap(course);
-                    if (overlap) { alert(overlap); return; }
-                    if (existingCourses.length + selectedCourseIds.length >= 3) {
-                        alert("Límite de 3 cursos alcanzado.");
-                        return;
-                    }
-                    setSelectedCourseIds(prev => [...prev, course.id]);
-                }
-            };
-
-            const handleSaveRegistration = async (e) => {
-                e.preventDefault();
-                if (!formData.curp || !formData.phone || !formData.department) {
-                    alert("Completa tus datos personales."); return;
-                }
-                if (selectedCourseIds.length === 0) {
-                    alert("Selecciona al menos un curso."); return;
-                }
-
-                setIsSaving(true);
-                const coursesToSave = availableCourses
-                    .filter(c => selectedCourseIds.includes(c.id))
-                    .map(c => ({ id: c.id, name: c.name, schedule: c.schedule, dates: c.dates }));
+            const handleSubmit = async () => {
+                setError(null);
+                
+                // CALCULAR BAJAS (Diferencia entre originales y seleccionados)
+                // Esto nos permite saber qué cursos fueron eliminados
+                const dropped = originalSelectedCourses.filter(
+                    orig => !selectedCourses.some(curr => curr.id === orig.id)
+                );
+                setCancelledCoursesList(dropped);
 
                 try {
-                    const response = await fetch(CONFIG.SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'registerUser',
-                            email: formData.email,
-                            fullName: formData.fullName,
-                            curp: formData.curp,
-                            phone: formData.phone,
-                            department: formData.department,
-                            courses: coursesToSave
-                        })
+                    const payload = {
+                        action: 'enrollStudent',
+                        ...formData,
+                        DepartamentoSeleccionado: formData.department,
+                        selectedCourses: selectedCourses.map(c => ({ 
+                            id: c.id, name: c.name, dates: c.dates, schedule: c.schedule, location: c.location, type: c.type 
+                        })),
+                        previousRegistrationIds: originalSelectedCourses.map(c => c.id)
+                    };
+                    const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+                        method: 'POST', body: JSON.stringify(payload)
                     });
-                    
-                    const result = await response.json();
-                    if (result.success) {
-                        alert("✅ Inscripción Exitosa. Revisa tu correo.");
-                        window.location.href = "historial.html";
-                    } else {
-                        throw new Error(result.message);
-                    }
-                } catch (error) {
-                    alert("Error: " + error.message);
-                } finally {
-                    setIsSaving(false);
-                }
+                    const json = await res.json();
+                    if (json.success) {
+                        // Enriquecer el resultado con nombres de cursos (si el backend no los devuelve completos)
+                        // Para mostrar el nombre correcto en la pantalla final.
+                        const enrichedResults = json.results.map(r => {
+                            const courseInfo = selectedCourses.find(sc => sc.id === r.registrationId);
+                            return { ...r, name: courseInfo ? courseInfo.name : r.registrationId, schedule: courseInfo ? courseInfo.schedule : '' };
+                        });
+                        
+                        setResult(enrichedResults);
+                        setEmailSent(json.emailSent);
+                        setStep(4);
+                    } else { throw new Error(json.message); }
+                } catch (e) { setError(e.message); setStep(3); }
             };
-
-            if (step === 'login') return <LoginScreen onLogin={handleLogin} errorMsg={errorMsg} />;
-            
-            if (step === 'loading') return (
-                <div className="flex flex-col items-center justify-center py-32 animate-fadeIn">
-                    <div className="loader-spinner mb-6"></div>
-                    <h3 className="text-xl font-bold text-blue-900">Cargando...</h3>
-                </div>
-            );
 
             return (
-                <div className="animate-fadeIn">
-                    <ExistingRegistrationModal 
-                        isOpen={isModalOpen}
-                        courses={existingCourses}
-                        onModify={() => setIsModalOpen(false)}
-                        onDeleteCourse={handleDeleteCourse}
-                        deletingCourseId={deletingCourseId}
-                    />
-
-                    <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-                        <div className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
-                            <img src={user?.picture} className="w-20 h-20 rounded-full border-4 border-white/20 shadow-lg" referrerPolicy="no-referrer" />
-                            <div className="text-center sm:text-left">
-                                <h2 className="text-2xl font-bold">{user?.name}</h2>
-                                <p className="text-blue-100 text-sm sm:text-base">{user?.email}</p>
-                            </div>
-                        </div>
-
-                        <form onSubmit={handleSaveRegistration} className="p-6 sm:p-8">
-                            <div className="mb-10">
-                                <h3 className="text-lg font-bold text-gray-800 mb-6 border-b pb-3">1. Datos Personales</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">CURP</label>
-                                        <input type="text" value={formData.curp} onChange={e => setFormData({...formData, curp: e.target.value.toUpperCase()})} className="w-full p-3 border rounded-lg uppercase" required />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono</label>
-                                        <input type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full p-3 border rounded-lg" required />
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Departamento</label>
-                                        <select value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} className="w-full p-3 border rounded-lg" required>
-                                            <option value="">-- Seleccione --</option>
-                                            <option value="Ingeniería Industrial">Ingeniería Industrial</option>
-                                            <option value="Sistemas y Computación">Sistemas y Computación</option>
-                                            <option value="Ciencias Básicas">Ciencias Básicas</option>
-                                            <option value="Química y Bioquímica">Química y Bioquímica</option>
-                                            <option value="Metal Mecánica">Metal Mecánica</option>
-                                            <option value="Ciencias Económico Administrativas">Ciencias Económico Administrativas</option>
-                                            <option value="Eléctrica Electrónica">Eléctrica Electrónica</option>
-                                            <option value="Ingeniería Civil">Ingeniería Civil</option>
-                                            <option value="Ciencias de la Tierra">Ciencias de la Tierra</option>
-                                            <option value="Otro">Otro</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="mb-8">
-                                <div className="flex justify-between items-end border-b pb-3 mb-6">
-                                    <h3 className="text-lg font-bold text-gray-800">2. Selección de Cursos</h3>
-                                    <span className="text-sm font-bold text-blue-600">Total: {existingCourses.length + selectedCourseIds.length} / 3</span>
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-4">
-                                    {availableCourses.map(course => {
-                                        const isSelected = selectedCourseIds.includes(course.id);
-                                        const isAlreadyRegistered = existingCourses.some(ec => ec.id === course.id);
-                                        const overlapMsg = checkOverlap(course);
-                                        const isDisabled = isAlreadyRegistered || (existingCourses.length + selectedCourseIds.length >= 3 && !isSelected);
-
-                                        return (
-                                            <CourseSelectionCard 
-                                                key={course.id} 
-                                                course={course}
-                                                isSelected={isSelected}
-                                                isDisabled={isDisabled}
-                                                onToggle={toggleCourse}
-                                                overlapMessage={!isSelected ? overlapMsg : null}
-                                            />
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            <div className="sticky bottom-0 bg-white/95 backdrop-blur pt-6 pb-2 border-t mt-8 flex justify-end">
-                                <button 
-                                    type="submit" 
-                                    disabled={isSaving || selectedCourseIds.length === 0}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg disabled:opacity-50 flex items-center justify-center gap-3 w-full sm:w-auto"
-                                >
-                                    {isSaving ? 'Procesando...' : 'FINALIZAR INSCRIPCIÓN'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                <div className="container mx-auto px-4 py-8">
+                    <ExistingRegistrationModal isOpen={isModalOpen} courses={existingCourses} onModify={handleModify} onClose={() => setIsModalOpen(false)} onDeleteCourse={handleDeleteSingle} deletingCourseId={deletingCourseId} onCancelAll={handleCancelAll} />
+                    <a href="index.html" className="text-blue-600 hover:underline mb-6 inline-block">← Volver al Portal</a>
+                    <StepIndicator currentStep={step} />
+                    {error && <div className="bg-red-100 text-red-700 p-4 mb-4 rounded font-bold">Error: {error}</div>}
+                    
+                    {step === 1 && <InfoForm formData={formData} setFormData={setFormData} departments={DEPARTMENTS} teachers={teachers} onNext={() => setStep(2)} />}
+                    {step === 2 && <Step2CourseSelection courses={allCourses} selectedCourses={selectedCourses} setSelectedCourses={setSelectedCourses} originalSelectedCourses={originalSelectedCourses} onNext={() => setStep(3)} onBack={() => setStep(1)} />}
+                    {step === 3 && <Confirmation formData={formData} courses={selectedCourses} originalCourses={originalSelectedCourses} onBack={() => setStep(2)} onSubmit={handleSubmit} />}
+                    {step === 4 && <FinalStep result={result} emailSent={emailSent} cancelledCourses={cancelledCoursesList} />}
                 </div>
             );
         };
