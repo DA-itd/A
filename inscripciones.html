@@ -200,7 +200,6 @@
                 let inferredGender = 'Mujer';
                 const curp = teacher.curp || '';
                 
-                // Prioridad: Dato del CSV > Inferencia por CURP > Default Mujer
                 if (teacher.gender) {
                     inferredGender = teacher.gender;
                 } else if (curp.length >= 11) {
@@ -215,7 +214,7 @@
                     curp: (teacher.curp || '').toUpperCase(),
                     email: (teacher.email || '').toLowerCase(),
                     gender: inferredGender,
-                    // Fix departamento: Solo sobrescribir si el CSV trae un valor válido, si no, mantener lo que el usuario haya puesto
+                    // Si el teacher tiene departamento válido, lo usamos. Si no, mantenemos el que el usuario haya seleccionado.
                     department: (teacher.dept && teacher.dept.length > 3) ? teacher.dept.toUpperCase() : prev.department
                 }));
             };
@@ -294,7 +293,6 @@
                     const exDates = existing.dates.trim().toUpperCase();
                     const exSchedule = existing.schedule.trim().toUpperCase();
 
-                    // Criterio estricto: Mismas fechas Y mismo horario
                     if (exDates === newDates && exSchedule === newSchedule) {
                         return { overlap: true, conflict: existing.name };
                     }
@@ -339,7 +337,6 @@
                     {Object.keys(groupedCourses).length === 0 && <p className="text-center">No hay cursos.</p>}
 
                     {Object.entries(groupedCourses).map(([period, data]) => {
-                        // Colores por periodo
                         const isPeriod1 = period.toUpperCase().includes('PERIODO 1') || period.toUpperCase().includes('ENERO') || period.toUpperCase().includes('JUNIO');
                         const headerClass = isPeriod1 ? 'text-teal-800 border-teal-300' : 'text-indigo-800 border-indigo-300';
                         const headerIcon = isPeriod1 ? '☀️' : '🍂';
@@ -561,6 +558,7 @@
                 const check = async () => {
                     setIsCheckingCurp(true);
                     const regIds = await getRegistrationByCurp(formData.curp);
+                    // Volver a verificar la CURP actual por si cambió durante la petición
                     if (formData.curp === lastCheckedCurp.current) {
                         if (regIds.length > 0) {
                             const found = allCourses.filter(c => regIds.includes(c.id));
@@ -578,14 +576,21 @@
                     if (formData.curp === lastCheckedCurp.current) setIsCheckingCurp(false);
                 };
 
-                if (formData.curp.length === 18 && lastCheckedCurp.current !== formData.curp && allCourses.length > 0) {
+                // VALIDACIÓN RIGUROSA: Solo buscar si TODOS los campos obligatorios están llenos
+                const isFormComplete = formData.curp.length === 18 && 
+                                       formData.fullName && formData.fullName.trim() !== '' && 
+                                       formData.email && formData.email.trim() !== '' && 
+                                       formData.department && formData.department.trim() !== '';
+
+                if (isFormComplete && lastCheckedCurp.current !== formData.curp && allCourses.length > 0) {
                     lastCheckedCurp.current = formData.curp;
                     check();
                 } else if (formData.curp.length !== 18) {
+                    // Si borran la CURP, reseteamos el estado
                     lastCheckedCurp.current = '';
                     setIsModalOpen(false);
                 }
-            }, [formData.curp, allCourses]);
+            }, [formData.curp, formData.department, formData.fullName, formData.email, allCourses]);
 
             const handleModify = () => {
                 setSelectedCourses(existingCourses); // Pre-fill cart with existing
