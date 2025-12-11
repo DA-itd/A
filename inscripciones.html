@@ -214,7 +214,6 @@
                     curp: (teacher.curp || '').toUpperCase(),
                     email: (teacher.email || '').toLowerCase(),
                     gender: inferredGender,
-                    // Si el teacher tiene departamento válido, lo usamos. Si no, mantenemos el que el usuario haya seleccionado.
                     department: (teacher.dept && teacher.dept.length > 3) ? teacher.dept.toUpperCase() : prev.department
                 }));
             };
@@ -421,24 +420,73 @@
             );
         };
 
-        const FinalStep = ({ result, emailSent }) => (
-            <div className="animate-fadeIn max-w-2xl mx-auto bg-white p-10 rounded-xl shadow-xl text-center border-t-4 border-green-500">
-                <div className="text-6xl mb-4">🎉</div>
-                <h2 className="text-3xl font-bold text-slate-800 mb-2">¡Inscripción Exitosa!</h2>
-                <p className="text-slate-600 mb-8">Tus cursos han sido registrados correctamente.</p>
-                <div className="bg-slate-50 p-6 rounded text-left mb-6">
-                    <h3 className="font-bold border-b pb-2 mb-2">Folios Generados:</h3>
-                    {result.map((r, i) => (
-                        <div key={i} className="flex justify-between py-1 border-b border-gray-100 last:border-0">
-                            <span className="text-sm">Curso ID: {r.registrationId}</span>
-                            <span className="font-mono font-bold text-blue-700">{r.folio}</span>
+        const FinalStep = ({ result, emailSent, cancelledCourses }) => {
+            const isFullCancellation = result.length === 0 && cancelledCourses.length > 0;
+            const hasActiveCourses = result.length > 0;
+
+            return (
+                <div className="animate-fadeIn max-w-2xl mx-auto bg-white p-10 rounded-xl shadow-xl text-center border-t-4 border-green-500">
+                    <div className="text-6xl mb-4">{isFullCancellation ? '✅' : '🎉'}</div>
+                    <h2 className="text-3xl font-bold text-slate-800 mb-2">
+                        {isFullCancellation ? 'Baja Procesada' : '¡Trámite Exitoso!'}
+                    </h2>
+                    <p className="text-slate-600 mb-8">
+                        {isFullCancellation 
+                            ? 'Los cursos seleccionados han sido dados de baja correctamente.' 
+                            : 'Tu carga académica ha sido actualizada.'}
+                    </p>
+
+                    <div className="text-left mb-6 space-y-6">
+                        {/* SECCIÓN DE CURSOS ACTIVOS (FOLIOS) */}
+                        {hasActiveCourses && (
+                            <div className="bg-blue-50 p-6 rounded border border-blue-100">
+                                <h3 className="font-bold border-b border-blue-200 pb-2 mb-2 text-blue-900 flex items-center gap-2">
+                                    <span>📝</span> Cursos Inscritos / Activos
+                                </h3>
+                                {result.map((r, i) => (
+                                    <div key={i} className="flex justify-between py-2 border-b border-blue-100 last:border-0">
+                                        <div className="pr-4">
+                                            <span className="block text-sm font-bold text-gray-700">{r.name || ('Curso ID: ' + r.registrationId)}</span>
+                                            {r.schedule && <span className="text-xs text-gray-500">{r.schedule}</span>}
+                                        </div>
+                                        <span className="font-mono font-bold text-blue-700 whitespace-nowrap">{r.folio}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* SECCIÓN DE CURSOS DADOS DE BAJA */}
+                        {cancelledCourses && cancelledCourses.length > 0 && (
+                            <div className="bg-red-50 p-6 rounded border border-red-100">
+                                <h3 className="font-bold border-b border-red-200 pb-2 mb-2 text-red-900 flex items-center gap-2">
+                                    <span>🗑️</span> Cursos Dados de Baja
+                                </h3>
+                                {cancelledCourses.map((c, i) => (
+                                    <div key={i} className="py-2 border-b border-red-100 last:border-0">
+                                        <span className="block text-sm font-bold text-gray-700">{c.name}</span>
+                                        <span className="text-xs text-red-500">Estado: BAJA</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* MENSAJES DE CORREO */}
+                    {!emailSent && hasActiveCourses && (
+                        <div className="bg-yellow-100 text-yellow-800 p-4 rounded mb-6 text-sm">
+                            ⚠️ No se pudo enviar el correo de confirmación de inscripción. <strong>Toma captura de esta pantalla.</strong>
                         </div>
-                    ))}
+                    )}
+                    {!emailSent && isFullCancellation && (
+                        <div className="bg-gray-100 text-gray-600 p-4 rounded mb-6 text-xs">
+                            ℹ️ La baja se procesó en el sistema. Es posible que no recibas correo de confirmación para bajas, guarda esta captura.
+                        </div>
+                    )}
+
+                    <a href="index.html" className="bg-blue-800 text-white font-bold py-3 px-8 rounded hover:bg-blue-900 transition-colors">Volver al Inicio</a>
                 </div>
-                {!emailSent && <div className="bg-red-100 text-red-700 p-4 rounded mb-6 text-sm">⚠️ No se pudo enviar el correo. Toma captura de esta pantalla.</div>}
-                <a href="index.html" className="bg-blue-800 text-white font-bold py-3 px-8 rounded hover:bg-blue-900">Volver al Inicio</a>
-            </div>
-        );
+            );
+        };
 
         // =============================================================================
         // == MODAL DE REGISTRO EXISTENTE (Mejorado para permitir agregar)
@@ -507,6 +555,9 @@
             const [emailSent, setEmailSent] = useState(true);
             const [error, setError] = useState(null);
             
+            // --- New State for tracking cancellations ---
+            const [cancelledCoursesList, setCancelledCoursesList] = useState([]);
+
             // --- Step 1 States for Modal ---
             const [isCheckingCurp, setIsCheckingCurp] = useState(false);
             const [isModalOpen, setIsModalOpen] = useState(false);
@@ -626,6 +677,14 @@
 
             const handleSubmit = async () => {
                 setError(null);
+                
+                // CALCULAR BAJAS (Diferencia entre originales y seleccionados)
+                // Esto nos permite saber qué cursos fueron eliminados
+                const dropped = originalSelectedCourses.filter(
+                    orig => !selectedCourses.some(curr => curr.id === orig.id)
+                );
+                setCancelledCoursesList(dropped);
+
                 try {
                     const payload = {
                         action: 'enrollStudent',
@@ -641,7 +700,14 @@
                     });
                     const json = await res.json();
                     if (json.success) {
-                        setResult(json.results);
+                        // Enriquecer el resultado con nombres de cursos (si el backend no los devuelve completos)
+                        // Para mostrar el nombre correcto en la pantalla final.
+                        const enrichedResults = json.results.map(r => {
+                            const courseInfo = selectedCourses.find(sc => sc.id === r.registrationId);
+                            return { ...r, name: courseInfo ? courseInfo.name : r.registrationId, schedule: courseInfo ? courseInfo.schedule : '' };
+                        });
+                        
+                        setResult(enrichedResults);
                         setEmailSent(json.emailSent);
                         setStep(4);
                     } else { throw new Error(json.message); }
@@ -658,7 +724,7 @@
                     {step === 1 && <InfoForm formData={formData} setFormData={setFormData} departments={DEPARTMENTS} teachers={teachers} onNext={() => setStep(2)} />}
                     {step === 2 && <Step2CourseSelection courses={allCourses} selectedCourses={selectedCourses} setSelectedCourses={setSelectedCourses} originalSelectedCourses={originalSelectedCourses} onNext={() => setStep(3)} onBack={() => setStep(1)} />}
                     {step === 3 && <Confirmation formData={formData} courses={selectedCourses} originalCourses={originalSelectedCourses} onBack={() => setStep(2)} onSubmit={handleSubmit} />}
-                    {step === 4 && <FinalStep result={result} emailSent={emailSent} />}
+                    {step === 4 && <FinalStep result={result} emailSent={emailSent} cancelledCourses={cancelledCoursesList} />}
                 </div>
             );
         };
