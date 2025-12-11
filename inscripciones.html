@@ -34,6 +34,12 @@
         .checkbox-wrapper input:checked + div svg {
             display: block;
         }
+        
+        /* Estilos para scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-900">
@@ -72,6 +78,7 @@
         const { useState, useEffect, useRef, useMemo } = React;
 
         // URL del Backend (Google Apps Script)
+        // Asegúrate de que esta URL sea la correcta de tu implementación actual
         const CONFIG = {
             CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
             SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
@@ -81,68 +88,73 @@
         // COMPONENTE: MODAL REGISTRO EXISTENTE
         // ==========================================
         const ExistingRegistrationModal = ({ isOpen, courses, onModify, onClose, onDeleteCourse, deletingCourseId, onCancelAll }) => {
+            // Evitar scroll de fondo cuando el modal está abierto
             useEffect(() => {
-                const handleEsc = (event) => { if (event.key === 'Escape') onClose(); };
-                if (isOpen) window.addEventListener('keydown', handleEsc);
-                return () => window.removeEventListener('keydown', handleEsc);
-            }, [isOpen, onClose]);
+                if (isOpen) document.body.style.overflow = 'hidden';
+                else document.body.style.overflow = 'unset';
+                return () => document.body.style.overflow = 'unset';
+            }, [isOpen]);
 
             if (!isOpen) return null;
 
             return (
-                <div className="fixed inset-0 bg-gray-900 bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
                     <div className="relative mx-auto p-6 sm:p-8 border w-full max-w-lg shadow-2xl rounded-2xl bg-white transform transition-all scale-100 animate-fadeIn">
+                        
+                        <div className="absolute top-4 right-4">
+                            <button onClick={() => window.location.href='index.html'} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
                         <div className="text-center mb-6">
-                            <div className="text-5xl mb-2">📋</div>
+                            <div className="text-5xl mb-3">📋</div>
                             <h3 className="text-xl sm:text-2xl font-bold text-blue-900">Tu Inscripción Actual</h3>
+                            <p className="text-sm text-gray-500 mt-1">Estos son los cursos registrados en tu cuenta</p>
                         </div>
                         
                         <div className="mb-6">
-                            <p className="text-gray-600 mb-4 text-center text-sm">
-                                Hola, estos son los cursos en los que ya estás registrado. <br/>
-                                Puedes dar de baja cursos individualmente o agregar nuevos si tienes cupo.
-                            </p>
-                            
                             <div className="space-y-3 bg-blue-50 p-4 rounded-xl border border-blue-100 max-h-60 overflow-y-auto custom-scrollbar">
                                 {courses.length > 0 ? courses.map(course => (
-                                    <div key={course.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100 shadow-sm">
-                                        <div className="flex items-center gap-3">
-                                            <div className="bg-green-100 text-green-600 rounded-full p-1">
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            <span className="font-semibold text-sm text-blue-900">{course.name}</span>
+                                    <div key={course.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100 shadow-sm hover:shadow-md transition-shadow">
+                                        <div className="flex flex-col gap-1 overflow-hidden">
+                                            <span className="font-bold text-sm text-blue-900 truncate">{course.name}</span>
+                                            <span className="text-xs text-gray-500 font-mono bg-gray-100 px-2 py-0.5 rounded w-fit">Folio: {course.folio}</span>
                                         </div>
                                         <button 
                                             onClick={() => onDeleteCourse(course.id)} 
                                             disabled={!!deletingCourseId} 
-                                            className="text-xs font-bold text-red-500 hover:text-white hover:bg-red-500 border border-red-200 px-3 py-1 rounded transition-colors"
+                                            className="ml-3 text-xs font-bold text-red-500 hover:text-white hover:bg-red-500 border border-red-200 px-3 py-1.5 rounded transition-all flex-shrink-0"
                                             title="Dar de baja este curso"
                                         >
                                             {deletingCourseId === course.id ? '...' : 'BAJA'}
                                         </button>
                                     </div>
-                                )) : <p className="text-gray-500 italic text-sm text-center">No tienes cursos registrados.</p>}
+                                )) : <p className="text-gray-500 italic text-sm text-center py-4">No tienes cursos registrados actualmente.</p>}
                             </div>
                             
-                            <p className="text-xs text-gray-400 text-center mt-3">
-                                Límite máximo: 3 cursos por periodo.
-                            </p>
+                            <div className="flex justify-between items-center mt-3 text-xs text-gray-500 px-1">
+                                <span>Cursos inscritos: <strong>{courses.length}</strong>/3</span>
+                                <span>Cupo sujeto a disponibilidad</span>
+                            </div>
                         </div>
 
                         <div className="flex flex-col gap-3">
-                            <button onClick={onModify} className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-transform hover:scale-[1.02] flex justify-center items-center gap-2">
-                                <span>➕</span> Continuar / Agregar Cursos
+                            <button 
+                                onClick={onModify} 
+                                className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-transform hover:scale-[1.02] flex justify-center items-center gap-2"
+                            >
+                                <span>➕</span> Agregar / Modificar Cursos
                             </button>
                             
-                            <button onClick={onCancelAll} className="w-full bg-white text-red-600 border border-red-200 font-semibold py-2.5 px-6 rounded-xl hover:bg-red-50 text-sm transition-colors">
-                                ⚠️ Cancelar Toda mi Inscripción
+                            <button 
+                                onClick={() => window.location.href='index.html'} 
+                                className="w-full bg-white text-slate-600 border border-slate-300 font-semibold py-3 px-6 rounded-xl hover:bg-slate-50 text-sm flex justify-center items-center gap-2 transition-colors"
+                            >
+                                <span>🚪</span> Salir sin guardar cambios
                             </button>
-
-                            <div className="border-t border-gray-100 mt-2 pt-3">
-                                <button onClick={() => window.location.href='index.html'} className="w-full bg-slate-100 text-slate-600 border border-slate-300 font-semibold py-3 px-6 rounded-xl hover:bg-slate-200 text-sm flex justify-center items-center gap-2 transition-colors">
-                                    <span>🚪</span> Salir / Volver al Portal
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -150,93 +162,133 @@
         };
 
         // ==========================================
-        // COMPONENTE: LOGIN SCREEN
+        // COMPONENTE: LOGIN SCREEN (MEJORADO)
         // ==========================================
-        const LoginScreen = ({ onLogin }) => {
+        const LoginScreen = ({ onLogin, errorMsg }) => {
             const btnRef = useRef(null);
+            const [isGoogleReady, setIsGoogleReady] = useState(false);
+
             useEffect(() => {
-                if(window.google) {
-                    window.google.accounts.id.initialize({ client_id: CONFIG.CLIENT_ID, callback: onLogin });
-                    window.google.accounts.id.renderButton(btnRef.current, { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill" });
-                }
+                // Verificar periódicamente si google.accounts está listo
+                const intervalId = setInterval(() => {
+                    if (window.google && window.google.accounts && btnRef.current) {
+                        clearInterval(intervalId);
+                        setIsGoogleReady(true);
+                        
+                        try {
+                            window.google.accounts.id.initialize({ 
+                                client_id: CONFIG.CLIENT_ID, 
+                                callback: onLogin,
+                                auto_select: false
+                            });
+                            window.google.accounts.id.renderButton(
+                                btnRef.current, 
+                                { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill", width: "300" }
+                            );
+                        } catch (err) {
+                            console.error("Error inicializando Google Auth:", err);
+                        }
+                    }
+                }, 500); // Checar cada medio segundo
+
+                return () => clearInterval(intervalId);
             }, [onLogin]);
 
             return (
-                <div className="flex flex-col items-center justify-center py-20 animate-fadeIn">
-                    <div className="bg-white p-10 rounded-3xl shadow-xl text-center max-w-md w-full border border-slate-100">
-                        <div className="text-6xl mb-4">👋</div>
-                        <h2 className="text-2xl font-bold text-slate-800 mb-2">Bienvenido Docente</h2>
-                        <p className="text-slate-500 mb-8">Inicia sesión con tu cuenta institucional para inscribirte.</p>
-                        <div className="flex justify-center" ref={btnRef}></div>
+                <div className="flex flex-col items-center justify-center py-20 animate-fadeIn px-4">
+                    <div className="bg-white p-8 sm:p-12 rounded-3xl shadow-xl text-center max-w-md w-full border border-slate-100 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+                        
+                        <div className="text-6xl mb-6">👋</div>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-3">Bienvenido Docente</h2>
+                        <p className="text-slate-500 mb-8 text-sm sm:text-base leading-relaxed">
+                            Para inscribirte o gestionar tus cursos, inicia sesión con tu cuenta institucional.
+                        </p>
+                        
+                        {errorMsg && (
+                            <div className="mb-6 bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100 flex items-start gap-2 text-left">
+                                <span className="font-bold">Error:</span> {errorMsg}
+                            </div>
+                        )}
+
+                        <div className="flex justify-center min-h-[50px]" ref={btnRef}>
+                            {!isGoogleReady && (
+                                <div className="flex items-center gap-2 text-slate-400 text-sm">
+                                    <div className="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
+                                    Cargando acceso...
+                                </div>
+                            )}
+                        </div>
+                        
+                        <p className="mt-6 text-xs text-slate-400">
+                            Solo se permiten cuentas @itdurango.edu.mx
+                        </p>
                     </div>
                 </div>
             );
         };
 
         // ==========================================
-        // COMPONENTE: TARJETA DE CURSO (SELECCIÓN)
+        // COMPONENTE: TARJETA DE CURSO
         // ==========================================
         const CourseSelectionCard = ({ course, isSelected, isDisabled, onToggle, overlapMessage }) => {
             return (
                 <div 
-                    className={`relative border rounded-xl p-5 transition-all duration-200 ${
+                    className={`relative border rounded-xl p-5 transition-all duration-200 cursor-pointer group ${
                         isSelected 
-                            ? 'border-blue-500 bg-blue-50 shadow-md transform scale-[1.01]' 
+                            ? 'border-blue-500 bg-blue-50/50 shadow-md ring-1 ring-blue-500' 
                             : isDisabled 
-                                ? 'border-gray-100 bg-gray-50 opacity-60' 
-                                : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'
+                                ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed' 
+                                : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
                     }`}
+                    onClick={() => !isDisabled && onToggle(course)}
                 >
                     <div className="flex items-start justify-between gap-4">
                         <div className="flex-grow">
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
                                 <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
                                     course.type === 'Curso' ? 'bg-indigo-100 text-indigo-700' : 'bg-purple-100 text-purple-700'
                                 }`}>
                                     {course.type || 'Curso'}
                                 </span>
-                                <span className="text-xs text-gray-500 font-mono">ID: {course.id}</span>
+                                <span className="text-xs text-gray-400 font-mono">ID: {course.id}</span>
                             </div>
-                            <h3 className={`font-bold text-lg leading-tight mb-2 ${isSelected ? 'text-blue-900' : 'text-slate-800'}`}>
+                            
+                            <h3 className={`font-bold text-lg leading-tight mb-2 ${isSelected ? 'text-blue-800' : 'text-slate-800'}`}>
                                 {course.name}
                             </h3>
                             
-                            <div className="space-y-1 text-sm text-gray-600">
-                                <p className="flex items-center gap-2">
-                                    <span>📅</span> {course.dates}
-                                </p>
-                                <p className="flex items-center gap-2">
-                                    <span>⏰</span> {course.schedule}
-                                </p>
-                                <p className="flex items-center gap-2">
-                                    <span>📍</span> {course.location || 'Por definir'}
-                                </p>
-                                <p className="flex items-center gap-2">
+                            <div className="space-y-1.5 text-sm text-gray-600">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-base">📅</span> {course.dates}
+                                </div>
+                                <div className="flex items-center gap-2 font-medium text-slate-700">
+                                    <span className="text-base">⏰</span> {course.schedule}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-base">📍</span> {course.location || 'Por definir'}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-100 w-fit px-2 py-0.5 rounded">
                                     <span>⏳</span> {course.hours} horas
-                                </p>
+                                </div>
                             </div>
 
                             {overlapMessage && (
-                                <div className="mt-3 text-xs bg-red-100 text-red-700 px-2 py-1 rounded border border-red-200 inline-block">
-                                    ⚠️ {overlapMessage}
+                                <div className="mt-3 text-xs bg-red-50 text-red-700 px-3 py-2 rounded border border-red-100 flex items-start gap-2">
+                                    <span>⚠️</span> {overlapMessage}
                                 </div>
                             )}
                         </div>
 
-                        <label className="checkbox-wrapper cursor-pointer relative">
-                            <input 
-                                type="checkbox" 
-                                className="sr-only" 
-                                checked={isSelected} 
-                                disabled={isDisabled && !isSelected}
-                                onChange={() => onToggle(course)}
-                            />
-                            <div className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center transition-colors ${
-                                isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'
+                        <div className="flex-shrink-0">
+                            <div className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${
+                                isSelected 
+                                    ? 'bg-blue-600 border-blue-600 text-white' 
+                                    : 'bg-white border-gray-300 text-transparent group-hover:border-blue-400'
                             }`}>
-                                <svg className="w-5 h-5 text-white hidden pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
                             </div>
-                        </label>
+                        </div>
                     </div>
                 </div>
             );
@@ -247,10 +299,13 @@
         // ==========================================
         const App = () => {
             const [user, setUser] = useState(null);
-            const [step, setStep] = useState('login');
+            const [step, setStep] = useState('login'); // login, loading, form
+            const [errorMsg, setErrorMsg] = useState(null);
+            
             const [availableCourses, setAvailableCourses] = useState([]);
-            const [existingCourses, setExistingCourses] = useState([]); // Cursos ya registrados (BD)
-            const [selectedCourseIds, setSelectedCourseIds] = useState([]); // Nuevas selecciones (Local)
+            const [existingCourses, setExistingCourses] = useState([]); 
+            const [selectedCourseIds, setSelectedCourseIds] = useState([]); 
+            
             const [isModalOpen, setIsModalOpen] = useState(false);
             const [deletingCourseId, setDeletingCourseId] = useState(null);
             const [isSaving, setIsSaving] = useState(false);
@@ -260,37 +315,51 @@
                 fullName: '', email: '', curp: '', phone: '', department: ''
             });
 
-            // LOGIN
+            // 1. MANEJO DE LOGIN
             const handleLogin = (response) => {
+                setErrorMsg(null);
                 try {
                     const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                    
+                    // Validación de dominio (Opcional, comentado si no se requiere estricto)
                     if (!payload.email.endsWith('@itdurango.edu.mx')) {
-                        alert("Por favor usa tu correo institucional.");
-                        return;
+                         setErrorMsg("Por favor, utiliza una cuenta institucional (@itdurango.edu.mx).");
+                         return;
                     }
+
                     setUser(payload);
                     setFormData(prev => ({ ...prev, fullName: payload.name, email: payload.email }));
                     checkUserStatus(payload.email);
-                } catch (e) { console.error("Login error", e); }
+                } catch (e) { 
+                    console.error("Login decode error", e); 
+                    setErrorMsg("Error al procesar la cuenta. Intente nuevamente.");
+                }
             };
 
-            // CARGAR DATOS
+            // 2. CARGA DE DATOS INICIALES
             const checkUserStatus = async (email) => {
                 setStep('loading');
                 try {
+                    // Llamadas paralelas para optimizar tiempo
                     const [coursesRes, userRes] = await Promise.all([
                         fetch(`${CONFIG.SCRIPT_URL}?action=getAvailableCourses`),
                         fetch(`${CONFIG.SCRIPT_URL}?action=checkUserRegistration&email=${email}`)
                     ]);
                     
+                    if (!coursesRes.ok || !userRes.ok) throw new Error("Error en la respuesta del servidor");
+
                     const coursesData = await coursesRes.json();
                     const userData = await userRes.json();
 
-                    if(coursesData.success) setAvailableCourses(coursesData.data);
+                    if(coursesData.success) {
+                        setAvailableCourses(coursesData.data);
+                    } else {
+                        throw new Error(coursesData.message || "No se pudieron cargar los cursos");
+                    }
                     
                     if (userData.registered && userData.courses.length > 0) {
                         setExistingCourses(userData.courses);
-                        // Prellenar formulario si hay datos previos
+                        // Prellenar formulario con datos guardados
                         if(userData.teacherInfo) {
                             setFormData(prev => ({ 
                                 ...prev, 
@@ -299,24 +368,25 @@
                                 department: userData.teacherInfo.department || ''
                             }));
                         }
-                        setIsModalOpen(true);
+                        setIsModalOpen(true); // Abrir modal si ya tiene cursos
                     }
                     
                     setStep('form');
                 } catch (e) {
-                    alert("Error de conexión. Intente más tarde.");
+                    console.error("Connection Error:", e);
+                    setErrorMsg("No se pudo conectar con el sistema. Verifique su internet o intente más tarde.");
                     setStep('login');
                 }
             };
 
-            // BAJA DE CURSO (Individual)
+            // 3. BAJA DE CURSO
             const handleDeleteCourse = async (courseIdToDelete) => {
-                if(!confirm("¿Estás seguro de que deseas dar de baja este curso? Se liberará tu lugar.")) return;
+                if(!confirm("¿Confirmas que deseas dar de baja este curso?\nSe liberará tu lugar para otro docente.")) return;
                 
                 setDeletingCourseId(courseIdToDelete);
                 try {
                     const courseToDelete = existingCourses.find(c => c.id === courseIdToDelete);
-                    if (!courseToDelete) throw new Error("Curso no encontrado");
+                    if (!courseToDelete) throw new Error("Curso no encontrado en local");
                     
                     await fetch(CONFIG.SCRIPT_URL, {
                         method: 'POST',
@@ -330,38 +400,34 @@
                         })
                     });
 
-                    // Actualizar estado
+                    // Actualizar estado local sin recargar
                     const updated = existingCourses.filter(c => c.id !== courseIdToDelete);
                     setExistingCourses(updated);
                     
-                    // FEEDBACK MEJORADO (SOLICITUD DE USUARIO)
                     alert(`✅ BAJA EXITOSA\n\nEl curso "${courseToDelete.name}" ha sido eliminado.\nSe ha enviado un comprobante a ${formData.email}.`);
                     
                     if (updated.length === 0) setIsModalOpen(false);
 
                 } catch (error) {
-                    alert("Error al procesar la baja.");
+                    alert("Error al procesar la baja. Por favor intente de nuevo.");
+                    console.error(error);
                 } finally {
                     setDeletingCourseId(null);
                 }
             };
 
-            // CANCELAR TODO
-            const handleCancelAll = async () => {
-                if(!confirm("⚠️ ¿CANCELAR TODA LA INSCRIPCIÓN?\nSe borrarán todos tus registros.")) return;
-                // Lógica simplificada: recargar página o llamar endpoint de borrado masivo
-                // Para este ejemplo, asumimos que el usuario lo hará uno por uno o contactará a admin
-                alert("Por seguridad, por favor da de baja los cursos individualmente o contacta a coordinación.");
-            };
-
-            // VALIDACIÓN DE HORARIOS
+            // 4. VALIDACIÓN DE HORARIOS (Lógica simple)
             const parseSchedule = (scheduleStr) => {
-                // Formato esperado: "Lu-Vi 09:00-11:00" o similar
-                // Esta es una simplificación. En producción se requiere un parser robusto.
                 if (!scheduleStr) return null;
+                // Busca patrón HH:MM - HH:MM
                 const times = scheduleStr.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
                 if (!times) return null;
-                return { start: times[1], end: times[2] };
+                // Convertir a minutos para comparar fácil
+                const toMinutes = (t) => {
+                    const [h, m] = t.split(':').map(Number);
+                    return h * 60 + m;
+                };
+                return { start: toMinutes(times[1]), end: toMinutes(times[2]) };
             };
 
             const isTimeOverlap = (t1, t2) => {
@@ -374,7 +440,7 @@
                 for (let existing of existingCourses) {
                     const t1 = parseSchedule(courseToCheck.schedule);
                     const t2 = parseSchedule(existing.schedule);
-                    if (isTimeOverlap(t1, t2)) return `Horario empalmado con tu curso inscrito: ${existing.name}`;
+                    if (isTimeOverlap(t1, t2)) return `Horario empalmado con: ${existing.name}`;
                 }
                 // Revisar contra cursos seleccionados (Local)
                 for (let id of selectedCourseIds) {
@@ -397,24 +463,29 @@
                         alert(overlap);
                         return;
                     }
+                    // Validar límite total (existentes + nuevos)
                     const totalCourses = existingCourses.length + selectedCourseIds.length;
                     if (totalCourses >= 3) {
-                        alert("Has alcanzado el límite máximo de 3 cursos.");
+                        alert("Has alcanzado el límite máximo de 3 cursos por periodo.");
                         return;
                     }
                     setSelectedCourseIds(prev => [...prev, course.id]);
                 }
             };
 
-            // GUARDAR INSCRIPCIÓN (ALTA)
+            // 5. GUARDAR INSCRIPCIÓN
             const handleSaveRegistration = async (e) => {
                 e.preventDefault();
+                
                 if (!formData.curp || !formData.phone || !formData.department) {
-                    alert("Por favor completa todos los campos personales.");
+                    alert("Por favor completa todos los campos de Datos Personales.");
+                    // Scroll al inicio
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                     return;
                 }
+                
                 if (selectedCourseIds.length === 0) {
-                    alert("Debes seleccionar al menos un curso nuevo para guardar.");
+                    alert("Debes seleccionar al menos un curso nuevo para inscribirte.");
                     return;
                 }
 
@@ -439,21 +510,28 @@
                     
                     const result = await response.json();
                     if (result.success) {
-                        alert("✅ ¡Inscripción Exitosa!\n\nRevisa tu correo para ver tu comprobante.");
-                        window.location.href = "historial.html";
+                        alert("✅ ¡INSCRIPCIÓN EXITOSA!\n\nRevisa tu correo institucional para ver tu comprobante.");
+                        window.location.href = "historial.html"; // Redirigir al historial
                     } else {
                         throw new Error(result.message);
                     }
                 } catch (error) {
-                    alert("Error al guardar: " + error.message);
+                    alert("Ocurrió un error al guardar: " + error.message);
                 } finally {
                     setIsSaving(false);
                 }
             };
 
-            // RENDER
-            if (step === 'login') return <LoginScreen onLogin={handleLogin} />;
-            if (step === 'loading') return <div className="flex justify-center py-20"><div className="loader-spinner"></div></div>;
+            // 6. RENDERIZADO CONDICIONAL
+            if (step === 'login') return <LoginScreen onLogin={handleLogin} errorMsg={errorMsg} />;
+            
+            if (step === 'loading') return (
+                <div className="flex flex-col items-center justify-center py-32 animate-fadeIn">
+                    <div className="loader-spinner mb-6"></div>
+                    <h3 className="text-xl font-bold text-blue-900">Cargando sistema...</h3>
+                    <p className="text-slate-500 text-sm mt-2">Obteniendo oferta académica y estado del usuario.</p>
+                </div>
+            );
 
             return (
                 <div className="animate-fadeIn">
@@ -464,17 +542,17 @@
                         onClose={() => {}} 
                         onDeleteCourse={handleDeleteCourse}
                         deletingCourseId={deletingCourseId}
-                        onCancelAll={handleCancelAll}
+                        onCancelAll={() => alert("Función de cancelar todo no disponible. Por favor, da de baja curso por curso.")}
                     />
 
                     <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
                         {/* Header Usuario */}
-                        <div className="bg-blue-900 text-white p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
-                            <img src={user?.picture} className="w-20 h-20 rounded-full border-4 border-white shadow-md" />
+                        <div className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
+                            <img src={user?.picture} className="w-20 h-20 rounded-full border-4 border-white/20 shadow-lg" referrerPolicy="no-referrer" />
                             <div className="text-center sm:text-left">
                                 <h2 className="text-2xl font-bold">{user?.name}</h2>
-                                <p className="text-blue-200">{user?.email}</p>
-                                <div className="mt-2 inline-flex items-center gap-2 bg-blue-800 px-3 py-1 rounded-full text-xs">
+                                <p className="text-blue-100 text-sm sm:text-base">{user?.email}</p>
+                                <div className="mt-3 inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium border border-white/20">
                                     <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                                     Sesión Activa
                                 </div>
@@ -482,25 +560,45 @@
                         </div>
 
                         <form onSubmit={handleSaveRegistration} className="p-6 sm:p-8">
-                            {/* Sección Datos Personales */}
-                            <div className="mb-8">
-                                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
-                                    <span className="bg-blue-100 text-blue-700 w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>
+                            
+                            {/* Sección 1: Datos Personales */}
+                            <div className="mb-10">
+                                <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-3 border-b pb-3">
+                                    <span className="bg-blue-100 text-blue-700 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm">1</span>
                                     Datos Personales
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">CURP</label>
-                                        <input type="text" value={formData.curp} onChange={e => setFormData({...formData, curp: e.target.value.toUpperCase()})} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none uppercase" required placeholder="CLAVE ÚNICA..." />
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">CURP *</label>
+                                        <input 
+                                            type="text" 
+                                            value={formData.curp} 
+                                            onChange={e => setFormData({...formData, curp: e.target.value.toUpperCase()})} 
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none uppercase transition-all bg-gray-50 focus:bg-white" 
+                                            required 
+                                            placeholder="Ingrese su clave única..." 
+                                        />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono Celular</label>
-                                        <input type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required placeholder="10 dígitos" />
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Teléfono Celular *</label>
+                                        <input 
+                                            type="tel" 
+                                            value={formData.phone} 
+                                            onChange={e => setFormData({...formData, phone: e.target.value})} 
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-gray-50 focus:bg-white" 
+                                            required 
+                                            placeholder="10 dígitos" 
+                                        />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Departamento de Adscripción</label>
-                                        <select value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
-                                            <option value="">-- Seleccione --</option>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Departamento de Adscripción *</label>
+                                        <select 
+                                            value={formData.department} 
+                                            onChange={e => setFormData({...formData, department: e.target.value})} 
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-gray-50 focus:bg-white cursor-pointer" 
+                                            required
+                                        >
+                                            <option value="">-- Seleccione su departamento --</option>
                                             <option value="Ingeniería Industrial">Ingeniería Industrial</option>
                                             <option value="Sistemas y Computación">Sistemas y Computación</option>
                                             <option value="Ciencias Básicas">Ciencias Básicas</option>
@@ -516,21 +614,21 @@
                                 </div>
                             </div>
 
-                            {/* Sección Cursos */}
+                            {/* Sección 2: Selección de Cursos */}
                             <div className="mb-8">
-                                <div className="flex justify-between items-center border-b pb-2 mb-4">
-                                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                                        <span className="bg-blue-100 text-blue-700 w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span>
+                                <div className="flex flex-wrap justify-between items-end border-b pb-3 mb-6 gap-4">
+                                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-3">
+                                        <span className="bg-blue-100 text-blue-700 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm">2</span>
                                         Selección de Cursos
                                     </h3>
-                                    <span className="text-sm font-semibold text-gray-500">
-                                        Seleccionados: <span className="text-blue-600">{existingCourses.length + selectedCourseIds.length} / 3</span>
-                                    </span>
+                                    <div className="bg-slate-100 px-4 py-2 rounded-lg text-sm font-semibold text-slate-600">
+                                        Total seleccionados: <span className="text-blue-600 font-bold text-lg">{existingCourses.length + selectedCourseIds.length}</span> / 3
+                                    </div>
                                 </div>
 
                                 {availableCourses.length === 0 ? (
-                                    <div className="text-center py-10 bg-gray-50 rounded-lg">
-                                        <p className="text-gray-500">Cargando oferta académica...</p>
+                                    <div className="text-center py-16 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                                        <p className="text-slate-400 text-lg font-medium">No hay cursos disponibles para mostrar.</p>
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 gap-4">
@@ -538,10 +636,13 @@
                                             const isSelected = selectedCourseIds.includes(course.id);
                                             const isAlreadyRegistered = existingCourses.some(ec => ec.id === course.id);
                                             const overlapMsg = checkOverlap(course);
+                                            
+                                            // Deshabilitar si ya está inscrito O si llegó al límite Y no está seleccionado este
                                             const isDisabled = isAlreadyRegistered || (existingCourses.length + selectedCourseIds.length >= 3 && !isSelected);
 
-                                            if (isAlreadyRegistered) return null; // Opcional: Ocultar los ya inscritos para limpiar la vista
-
+                                            // Si ya está inscrito, mostramos un indicador visual diferente o lo ocultamos según preferencia.
+                                            // Aquí lo mostraremos "disabled" con un mensaje.
+                                            
                                             return (
                                                 <CourseSelectionCard 
                                                     key={course.id} 
@@ -549,24 +650,26 @@
                                                     isSelected={isSelected}
                                                     isDisabled={isDisabled}
                                                     onToggle={toggleCourse}
-                                                    overlapMessage={!isSelected && overlapMsg}
+                                                    overlapMessage={!isSelected ? overlapMsg : null}
                                                 />
                                             );
                                         })}
-                                        {/* Mostrar los ya inscritos como "disabled" visualmente al final o en otra sección si se desea */}
                                     </div>
                                 )}
                             </div>
 
                             {/* Botón Final */}
-                            <div className="sticky bottom-0 bg-white pt-4 pb-2 border-t mt-4 flex justify-end">
+                            <div className="sticky bottom-0 bg-white/95 backdrop-blur pt-6 pb-2 border-t mt-8 flex flex-col sm:flex-row justify-end gap-4">
+                                <div className="text-xs text-gray-400 sm:w-1/2 mb-2 sm:mb-0">
+                                    * Al dar clic en finalizar, confirmas que los datos son correctos y te comprometes a asistir a los cursos seleccionados.
+                                </div>
                                 <button 
                                     type="submit" 
                                     disabled={isSaving || selectedCourseIds.length === 0}
-                                    className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 px-8 rounded-xl shadow-lg transform transition hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transform transition-all hover:-translate-y-1 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3 sm:w-auto w-full"
                                 >
-                                    {isSaving ? <div className="loader-spinner !w-6 !h-6 !border-2"></div> : <span className="text-xl">💾</span>}
-                                    <span>{isSaving ? 'Procesando...' : 'FINALIZAR INSCRIPCIÓN'}</span>
+                                    {isSaving ? <div className="loader-spinner !w-6 !h-6 !border-2 !border-white/50 !border-t-white"></div> : <span className="text-xl">💾</span>}
+                                    <span>{isSaving ? 'Procesando Inscripción...' : 'FINALIZAR INSCRIPCIÓN'}</span>
                                 </button>
                             </div>
                         </form>
