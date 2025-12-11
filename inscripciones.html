@@ -26,15 +26,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Checkbox personalizado */
-        .checkbox-wrapper input:checked + div {
-            background-color: #1B396A;
-            border-color: #1B396A;
-        }
-        .checkbox-wrapper input:checked + div svg {
-            display: block;
-        }
-        
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -42,7 +33,7 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-900">
 
-    <!-- Manejador de Errores Visual (Por si React falla antes de cargar) -->
+    <!-- Manejador de Errores Visual -->
     <div id="global-error" style="display:none; padding: 20px; background: #fee2e2; color: #991b1b; text-align: center; border-bottom: 2px solid #ef4444;">
         <h3 style="font-weight: bold;">⚠️ Ocurrió un error al cargar la aplicación</h3>
         <p id="global-error-msg">Por favor recarga la página.</p>
@@ -69,7 +60,7 @@
 
     <!-- Contenedor React -->
     <div id="root" class="flex-grow container mx-auto px-4 pb-12 min-h-[400px]">
-        <!-- Loader Inicial HTML (se reemplaza cuando React carga) -->
+        <!-- Loader HTML estático inicial -->
         <div class="flex justify-center items-center py-20">
             <div class="loader-spinner"></div>
         </div>
@@ -84,16 +75,14 @@
     </footer>
 
     <script>
-        // Captura de errores globales
         window.onerror = function(message, source, lineno, colno, error) {
             document.getElementById('global-error').style.display = 'block';
-            document.getElementById('global-error-msg').innerText = message + " (Línea: " + lineno + ")";
+            document.getElementById('global-error-msg').innerText = message;
             console.error("Error global:", error);
         };
     </script>
 
     <script type="text/babel">
-        // Asegurar acceso a React globalmente
         const { useState, useEffect, useRef, useMemo } = window.React;
         const ReactDOM = window.ReactDOM;
 
@@ -104,7 +93,109 @@
 
         // --- COMPONENTES ---
 
-        const ExistingRegistrationModal = ({ isOpen, courses, onModify, onDeleteCourse, deletingCourseId, onCancelAll }) => {
+        const LoginScreen = ({ onLogin, errorMsg }) => {
+            const btnRef = useRef(null);
+            const [isReady, setIsReady] = useState(false);
+            const [hasError, setHasError] = useState(false);
+
+            useEffect(() => {
+                let interval;
+                let mounted = true;
+
+                const renderGoogleButton = () => {
+                    if (window.google && window.google.accounts && btnRef.current) {
+                        try {
+                            window.google.accounts.id.initialize({ 
+                                client_id: CONFIG.CLIENT_ID, 
+                                callback: onLogin,
+                                auto_select: false,
+                                cancel_on_tap_outside: false
+                            });
+                            
+                            // Limpiamos manualmente una vez antes de renderizar
+                            btnRef.current.innerHTML = '';
+                            
+                            window.google.accounts.id.renderButton(
+                                btnRef.current, 
+                                { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill", width: "280" }
+                            );
+                            
+                            if (mounted) setIsReady(true);
+                            return true;
+                        } catch (err) {
+                            console.error("Google Auth Error:", err);
+                            return false;
+                        }
+                    }
+                    return false;
+                };
+
+                // Intentar renderizar inmediatamente, si no, esperar
+                if (!renderGoogleButton()) {
+                    let attempts = 0;
+                    interval = setInterval(() => {
+                        attempts++;
+                        if (renderGoogleButton() || attempts > 20) {
+                            clearInterval(interval);
+                            if (attempts > 20 && mounted) setHasError(true);
+                        }
+                    }, 500);
+                }
+
+                return () => {
+                    mounted = false;
+                    if (interval) clearInterval(interval);
+                };
+            }, [onLogin]);
+
+            return (
+                <div className="flex flex-col items-center justify-center py-20 animate-fadeIn px-4">
+                    <div className="bg-white p-8 sm:p-12 rounded-3xl shadow-xl text-center max-w-md w-full border border-slate-100 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+                        
+                        <div className="text-6xl mb-6">👋</div>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-3">Bienvenido Docente</h2>
+                        <p className="text-slate-500 mb-8 text-sm sm:text-base">
+                            Para inscribirte, inicia sesión con tu cuenta institucional.
+                        </p>
+                        
+                        {errorMsg && (
+                            <div className="mb-6 bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100 text-left">
+                                <span className="font-bold">Error:</span> {errorMsg}
+                            </div>
+                        )}
+
+                        <div className="flex flex-col items-center justify-center min-h-[60px]">
+                            {/* 
+                                IMPORTANTE: Usamos style display:none en lugar de renderizado condicional { !isReady && ... }
+                                Esto evita que React intente eliminar el nodo del DOM mientras Google lo está modificando,
+                                previniendo el error "Failed to execute 'removeChild' on 'Node'".
+                            */}
+                            
+                            {/* Estado de Carga / Error */}
+                            <div style={{ display: isReady ? 'none' : 'flex' }} className="flex-col items-center gap-2">
+                                {hasError ? (
+                                    <div className="text-amber-600 text-sm bg-amber-50 p-3 rounded border border-amber-200">
+                                        <p>No se pudo cargar el botón de Google.</p>
+                                        <button onClick={() => window.location.reload()} className="mt-2 text-blue-600 underline text-xs font-bold">Recargar página</button>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 text-slate-400 text-sm">
+                                        <div className="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
+                                        Cargando acceso...
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Contenedor Botón Google (Siempre presente en el DOM) */}
+                            <div ref={btnRef} style={{ display: isReady ? 'block' : 'none' }}></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ExistingRegistrationModal = ({ isOpen, courses, onModify, onDeleteCourse, deletingCourseId }) => {
             useEffect(() => {
                 if (isOpen) document.body.style.overflow = 'hidden';
                 else document.body.style.overflow = 'unset';
@@ -116,7 +207,6 @@
             return (
                 <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
                     <div className="relative mx-auto p-6 sm:p-8 border w-full max-w-lg shadow-2xl rounded-2xl bg-white transform transition-all scale-100 animate-fadeIn">
-                        
                         <div className="text-center mb-6">
                             <div className="text-5xl mb-3">📋</div>
                             <h3 className="text-xl sm:text-2xl font-bold text-blue-900">Tu Inscripción Actual</h3>
@@ -148,104 +238,12 @@
                         </div>
 
                         <div className="flex flex-col gap-3">
-                            <button 
-                                onClick={onModify} 
-                                className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 shadow-lg"
-                            >
+                            <button onClick={onModify} className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 shadow-lg">
                                 <span>➕</span> Agregar / Modificar Cursos
                             </button>
-                            
-                            <button 
-                                onClick={() => window.location.href='index.html'} 
-                                className="w-full bg-white text-slate-600 border border-slate-300 font-semibold py-3 px-6 rounded-xl hover:bg-slate-50 text-sm"
-                            >
+                            <button onClick={() => window.location.href='index.html'} className="w-full bg-white text-slate-600 border border-slate-300 font-semibold py-3 px-6 rounded-xl hover:bg-slate-50 text-sm">
                                 <span>🚪</span> Salir sin guardar cambios
                             </button>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const LoginScreen = ({ onLogin, errorMsg }) => {
-            const btnRef = useRef(null);
-            const [isGoogleReady, setIsGoogleReady] = useState(false);
-            const [timeoutError, setTimeoutError] = useState(false);
-
-            useEffect(() => {
-                let attempts = 0;
-                // Verificador de carga de librería
-                const intervalId = setInterval(() => {
-                    attempts++;
-                    if (window.google && window.google.accounts && btnRef.current) {
-                        clearInterval(intervalId);
-                        try {
-                            window.google.accounts.id.initialize({ 
-                                client_id: CONFIG.CLIENT_ID, 
-                                callback: onLogin,
-                                auto_select: false,
-                                cancel_on_tap_outside: false
-                            });
-                            
-                            // Aseguramos que el contenedor esté vacío antes de renderizar
-                            if (btnRef.current) {
-                                btnRef.current.innerHTML = '';
-                                window.google.accounts.id.renderButton(
-                                    btnRef.current, 
-                                    { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill", width: "280" }
-                                );
-                                setIsGoogleReady(true);
-                            }
-                        } catch (err) {
-                            console.error("Google Auth Error:", err);
-                        }
-                    }
-                    // Timeout después de 5 segundos
-                    if (attempts > 10) {
-                        clearInterval(intervalId);
-                        if(!isGoogleReady) setTimeoutError(true);
-                    }
-                }, 500);
-
-                return () => clearInterval(intervalId);
-            }, [onLogin]);
-
-            return (
-                <div className="flex flex-col items-center justify-center py-20 animate-fadeIn px-4">
-                    <div className="bg-white p-8 sm:p-12 rounded-3xl shadow-xl text-center max-w-md w-full border border-slate-100 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
-                        
-                        <div className="text-6xl mb-6">👋</div>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-3">Bienvenido Docente</h2>
-                        <p className="text-slate-500 mb-8 text-sm sm:text-base">
-                            Para inscribirte, inicia sesión con tu cuenta institucional.
-                        </p>
-                        
-                        {errorMsg && (
-                            <div className="mb-6 bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100 text-left">
-                                <span className="font-bold">Error:</span> {errorMsg}
-                            </div>
-                        )}
-
-                        <div className="flex flex-col items-center justify-center min-h-[60px]">
-                            {/* 1. Loader Controlado por React */}
-                            {!isGoogleReady && !timeoutError && (
-                                <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
-                                    <div className="w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"></div>
-                                    Cargando botón de acceso...
-                                </div>
-                            )}
-                            
-                            {/* 2. Mensaje de Error Controlado por React */}
-                            {timeoutError && (
-                                <div className="text-amber-600 text-sm bg-amber-50 p-3 rounded border border-amber-200 mb-2">
-                                    <p>El botón de Google tardó demasiado.</p>
-                                    <button onClick={() => window.location.reload()} className="mt-2 text-blue-600 underline text-xs font-bold">Recargar página</button>
-                                </div>
-                            )}
-
-                            {/* 3. Contenedor EXCLUSIVO para Google. React NO debe poner/quitar hijos aquí. */}
-                            <div ref={btnRef} className={!isGoogleReady ? 'hidden' : 'block'}></div>
                         </div>
                     </div>
                 </div>
@@ -306,9 +304,7 @@
             const [deletingCourseId, setDeletingCourseId] = useState(null);
             const [isSaving, setIsSaving] = useState(false);
             
-            const [formData, setFormData] = useState({
-                fullName: '', email: '', curp: '', phone: '', department: ''
-            });
+            const [formData, setFormData] = useState({ fullName: '', email: '', curp: '', phone: '', department: '' });
 
             const handleLogin = (response) => {
                 setErrorMsg(null);
