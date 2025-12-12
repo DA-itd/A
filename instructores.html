@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -532,7 +533,8 @@
             const [evidenceForm, setEvidenceForm] = useState({ 
                 instructorName: '', 
                 instructorEmail: '', 
-                courseName: '' 
+                courseName: '',
+                courseId: ''
             });
             const [evidenceFiles, setEvidenceFiles] = useState([]);
             const [evidenceError, setEvidenceError] = useState(null);
@@ -649,6 +651,7 @@
                         instructorName: evidenceForm.instructorName,
                         instructorEmail: evidenceForm.instructorEmail,
                         courseName: evidenceForm.courseName,
+                        courseId: evidenceForm.courseId,
                         evidenceFiles: evidenceFilesBase64
                     });
 
@@ -914,7 +917,7 @@
                                                                     id={`evidence-course-${course.id}`}
                                                                     name="evidence-course-selection"
                                                                     checked={isSelected}
-                                                                    onChange={() => setEvidenceForm(prev => ({ ...prev, courseName: course.name }))}
+                                                                    onChange={() => setEvidenceForm(prev => ({ ...prev, courseName: course.name, courseId: course.id }))}
                                                                     className="sr-only peer"
                                                                 />
                                                                 <label
