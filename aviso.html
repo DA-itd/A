@@ -22,8 +22,7 @@
         }
     </script>
     <style>
-        body { cursor: default; } /* Cursor normal para lectura */
-        /* Animación suave para el botón flotante */
+        body { cursor: default; }
         .float-enter { animation: floatIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes floatIn { from { transform: scale(0) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
     </style>
@@ -55,7 +54,7 @@
                 <div>
                     <h2 class="text-xl font-bold text-blue-900 dark:text-blue-300 mb-2">Aviso Simplificado</h2>
                     <p class="text-sm text-slate-700 dark:text-slate-300">
-                        Recabamos datos necesarios para gestionar servicios académicos, contacto y estadísticas de uso. Consulte el aviso completo para conocer finalidades, derechos ARCO y transferencias.
+                        Recabamos datos necesarios para gestionar servicios académicos, contacto y estadísticas de uso del portal. Sus datos son tratados de forma segura y confidencial. Consulte el aviso completo para conocer finalidades, derechos ARCO y transferencias.
                     </p>
                 </div>
                 <a href="#aviso-completo" class="whitespace-nowrap px-4 py-2 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold text-sm rounded border border-blue-200 dark:border-slate-700 hover:shadow-md transition-all">
@@ -74,75 +73,195 @@
 
             <section>
                 <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
-                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">1</span> Responsable
+                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">1</span> Responsable del Tratamiento
                 </h2>
                 <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                    El responsable del tratamiento de sus datos personales es la <strong>Coordinación de Actualización Docente</strong> del Instituto Tecnológico de Durango. Para contacto: correo <a href="mailto:coord_actualizaciondocente@itdurango.edu.mx" class="text-blue-600 underline">coord_actualizaciondocente@itdurango.edu.mx</a>.
+                    El responsable del tratamiento de sus datos personales es la <strong>Coordinación de Actualización Docente</strong> del <strong>Instituto Tecnológico de Durango</strong>, dependiente del Tecnológico Nacional de México (TecNM).
                 </p>
+                <div class="mt-3 bg-slate-50 dark:bg-slate-900 p-4 rounded-lg">
+                    <p class="text-sm text-slate-600 dark:text-slate-300"><strong>Domicilio:</strong> Blvd. Felipe Pescador 1830 Ote., Nueva Vizcaya, 34080 Durango, Dgo.</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300"><strong>Correo electrónico:</strong> <a href="mailto:coord_actualizaciondocente@itdurango.edu.mx" class="text-blue-600 underline">coord_actualizaciondocente@itdurango.edu.mx</a></p>
+                </div>
             </section>
 
             <section>
                 <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
-                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">2</span> ¿Qué datos recabamos?
+                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">2</span> Datos Personales que Recabamos
                 </h2>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
+                    <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300 border dark:border-slate-700">
                         <thead class="text-xs text-slate-700 uppercase bg-slate-100 dark:bg-slate-700 dark:text-slate-200">
                             <tr>
-                                <th class="px-4 py-3 rounded-tl-lg">Tipo</th>
-                                <th class="px-4 py-3">Ejemplos</th>
-                                <th class="px-4 py-3 rounded-tr-lg">Observaciones</th>
+                                <th class="px-4 py-3 border-b dark:border-slate-600">Tipo de Dato</th>
+                                <th class="px-4 py-3 border-b dark:border-slate-600">Ejemplos</th>
+                                <th class="px-4 py-3 border-b dark:border-slate-600">Finalidad</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
                             <tr>
-                                <td class="px-4 py-3 font-semibold">Datos de navegación</td>
-                                <td class="px-4 py-3">Dirección IP, tipo de navegador, fecha y hora.</td>
-                                <td class="px-4 py-3">Operación, seguridad y estadísticas.</td>
+                                <td class="px-4 py-3 font-semibold">Datos de identificación</td>
+                                <td class="px-4 py-3">Nombre completo, RFC, número de empleado.</td>
+                                <td class="px-4 py-3">Gestión de inscripciones y constancias.</td>
                             </tr>
                             <tr>
                                 <td class="px-4 py-3 font-semibold">Datos de contacto</td>
-                                <td class="px-4 py-3">Nombre, correo institucional, teléfono.</td>
-                                <td class="px-4 py-3">Trámites académicos y contacto.</td>
+                                <td class="px-4 py-3">Correo electrónico institucional, teléfono.</td>
+                                <td class="px-4 py-3">Comunicación de servicios y trámites.</td>
                             </tr>
                             <tr>
-                                <td class="px-4 py-3 font-semibold">Archivos subidos</td>
-                                <td class="px-4 py-3">Documentos PDF, evidencias.</td>
-                                <td class="px-4 py-3">Procesamiento de solicitudes.</td>
+                                <td class="px-4 py-3 font-semibold">Datos académicos</td>
+                                <td class="px-4 py-3">Historial de cursos, calificaciones, asistencias.</td>
+                                <td class="px-4 py-3">Control académico y expediente docente.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold">Archivos digitales</td>
+                                <td class="px-4 py-3">Documentos PDF, evidencias, formatos firmados.</td>
+                                <td class="px-4 py-3">Procesamiento de solicitudes y trámites.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold">Datos de navegación</td>
+                                <td class="px-4 py-3">Dirección IP, cookies, tipo de navegador, páginas visitadas.</td>
+                                <td class="px-4 py-3">Estadísticas de uso, seguridad y mejora del servicio.</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <p class="mt-3 text-xs text-slate-500 italic">No se solicitarán datos sensibles ni de menores sin consentimiento expreso.</p>
+                <div class="mt-4 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-r-lg">
+                    <p class="text-xs text-slate-600 dark:text-slate-300">
+                        <strong>⚠️ Importante:</strong> No se recaban datos personales sensibles (origen racial, salud, religión, preferencias sexuales) salvo que sea estrictamente necesario y se cuente con su consentimiento expreso. No se solicitan datos de menores de edad.
+                    </p>
+                </div>
             </section>
 
             <section>
                 <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
-                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">3</span> Finalidades
+                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">3</span> Finalidades del Tratamiento
                 </h2>
-                <ul class="list-disc list-inside text-sm space-y-2 text-slate-600 dark:text-slate-300 ml-2">
-                    <li><strong>Necesarias:</strong> Funcionamiento del portal, gestión de constancias y seguridad.</li>
-                    <li><strong>Secundarias:</strong> Comunicaciones informativas, encuestas y estadísticas.</li>
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-semibold text-slate-800 dark:text-slate-200 mb-2">Finalidades Primarias (necesarias para el servicio):</h3>
+                        <ul class="list-disc list-inside text-sm space-y-1 text-slate-600 dark:text-slate-300 ml-4">
+                            <li>Gestión de inscripciones a cursos de actualización docente</li>
+                            <li>Emisión de constancias y reconocimientos</li>
+                            <li>Registro y control del historial académico</li>
+                            <li>Procesamiento de formatos y solicitudes</li>
+                            <li>Operación y seguridad del portal web</li>
+                            <li>Cumplimiento de obligaciones legales y normativas institucionales</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-slate-800 dark:text-slate-200 mb-2">Finalidades Secundarias (requieren consentimiento):</h3>
+                        <ul class="list-disc list-inside text-sm space-y-1 text-slate-600 dark:text-slate-300 ml-4">
+                            <li>Envío de comunicaciones informativas sobre nuevos cursos y servicios</li>
+                            <li>Aplicación de encuestas de satisfacción y evaluación</li>
+                            <li>Elaboración de estadísticas internas y reportes institucionales</li>
+                            <li>Análisis de navegación y uso del portal mediante herramientas como Google Analytics para mejorar la experiencia del usuario</li>
+                        </ul>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 italic">
+                            Si no desea que sus datos sean tratados para estas finalidades secundarias, puede manifestarlo enviando un correo a: coord_actualizaciondocente@itdurango.edu.mx
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
+                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">4</span> Herramientas de Análisis Web
+                </h2>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 mb-3">
+                    Este portal utiliza <strong>Google Analytics</strong> para recopilar información estadística sobre el uso del sitio web. Los datos recabados son:
+                </p>
+                <ul class="list-disc list-inside text-sm space-y-1 text-slate-600 dark:text-slate-300 ml-4 mb-3">
+                    <li>Páginas visitadas y tiempo de permanencia</li>
+                    <li>Tipo de navegador y dispositivo</li>
+                    <li>Ubicación geográfica aproximada (ciudad/región)</li>
+                    <li>Fuente de tráfico (cómo llegó al sitio)</li>
+                </ul>
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                    <p class="text-sm text-slate-600 dark:text-slate-300">
+                        <strong>ℹ️ Información importante:</strong> Google Analytics recopila datos de forma anónima y agregada. No se comparten datos personales identificables con terceros con fines comerciales. Para más información sobre el tratamiento de datos por parte de Google, consulte su <a href="https://policies.google.com/privacy" target="_blank" class="text-blue-600 underline">Política de Privacidad</a>.
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
+                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">5</span> Transferencia de Datos
+                </h2>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    Sus datos personales <strong>no serán transferidos a terceros</strong>, salvo en los siguientes casos permitidos por ley:
+                </p>
+                <ul class="list-disc list-inside text-sm space-y-1 text-slate-600 dark:text-slate-300 ml-4 mt-2">
+                    <li>A dependencias del TecNM para fines académicos y administrativos</li>
+                    <li>Cuando exista una orden de autoridad competente</li>
+                    <li>Para cumplir con obligaciones legales establecidas en normativas educativas</li>
                 </ul>
             </section>
 
             <section>
                 <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
-                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">4</span> Derechos ARCO
+                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">6</span> Derechos ARCO
                 </h2>
-                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                    Usted tiene derecho a Acceder, Rectificar, Cancelar y Oponerse al tratamiento de sus datos. Puede enviar una solicitud a: <strong><a href="mailto:coord_actualizaciondocente@itdurango.edu.mx" class="text-blue-600 underline">coord_actualizaciondocente@itdurango.edu.mx</a></strong> incluyendo su nombre completo y descripción de la solicitud.
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 mb-3">
+                    Usted tiene derecho a:
                 </p>
-                <div class="mt-4 flex gap-4">
-                     <a href="mailto:coord_actualizaciondocente@itdurango.edu.mx?subject=Solicitud%20ARCO" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase rounded shadow transition-colors">
-                        Solicitar Derechos ARCO
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                        <p class="font-semibold text-sm text-slate-800 dark:text-slate-200">✓ Acceder</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300">Conocer qué datos tenemos sobre usted</p>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                        <p class="font-semibold text-sm text-slate-800 dark:text-slate-200">✓ Rectificar</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300">Corregir datos inexactos o incompletos</p>
+                    </div>
+                    <div class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg">
+                        <p class="font-semibold text-sm text-slate-800 dark:text-slate-200">✓ Cancelar</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300">Solicitar la eliminación de sus datos</p>
+                    </div>
+                    <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+                        <p class="font-semibold text-sm text-slate-800 dark:text-slate-200">✓ Oponerse</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300">Negarse al tratamiento para fines específicos</p>
+                    </div>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg border dark:border-slate-700">
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mb-3">
+                        <strong>¿Cómo ejercer sus derechos?</strong> Envíe una solicitud por escrito a:
+                    </p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300">
+                        📧 <a href="mailto:coord_actualizaciondocente@itdurango.edu.mx" class="text-blue-600 underline font-semibold">coord_actualizaciondocente@itdurango.edu.mx</a>
+                    </p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">
+                        Su solicitud debe incluir: nombre completo, descripción clara de su petición, documentos que acrediten su identidad y, en su caso, la representación legal. Le responderemos en un plazo máximo de 20 días hábiles.
+                    </p>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-3">
+                     <a href="mailto:coord_actualizaciondocente@itdurango.edu.mx?subject=Solicitud%20ARCO%20-%20Ejercicio%20de%20Derechos" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase rounded shadow transition-colors">
+                        📝 Solicitar Derechos ARCO
                     </a>
                 </div>
             </section>
 
+            <section>
+                <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
+                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">7</span> Medidas de Seguridad
+                </h2>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    Hemos implementado medidas de seguridad administrativas, técnicas y físicas para proteger sus datos personales contra daño, pérdida, alteración, destrucción o uso no autorizado. El acceso a su información está limitado únicamente al personal autorizado.
+                </p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
+                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">8</span> Cambios al Aviso de Privacidad
+                </h2>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    Nos reservamos el derecho de actualizar este aviso para reflejar cambios en nuestras prácticas de tratamiento de datos. Las modificaciones estarán disponibles en esta página y se indicará la fecha de última actualización. Le recomendamos revisar periódicamente este aviso.
+                </p>
+            </section>
+
             <div class="border-t dark:border-slate-700 pt-6 mt-8">
                 <p class="text-xs text-slate-400 text-center">
-                    Este aviso cumple con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.
+                    Este aviso cumple con la <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares</strong> y su Reglamento.
                 </p>
             </div>
 
@@ -158,7 +277,7 @@
 
     <!-- Footer -->
     <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 mt-8 py-6 text-center">
-        <p class="text-sm text-slate-600 dark:text-slate-400">© Coordinación de Actualización Docente ITD</p>
+        <p class="text-sm text-slate-600 dark:text-slate-400">© Coordinación de Actualización Docente ITD | Todos los derechos reservados</p>
     </footer>
 
     <!-- Botón Flotante de Regreso -->
@@ -172,7 +291,6 @@
     <script>
         let inactivityTime = function () {
             let time;
-            // Reiniciar temporizador en cualquier interacción
             window.onload = resetTimer;
             document.onmousemove = resetTimer;
             document.onkeypress = resetTimer;
@@ -181,13 +299,11 @@
             document.onscroll = resetTimer;
 
             function logout() {
-                // Redirigir al inicio después de inactividad
                 window.location.href = 'index.html';
             }
 
             function resetTimer() {
                 clearTimeout(time);
-                // 60000 milisegundos = 60 segundos
                 time = setTimeout(logout, 60000); 
             }
         };
