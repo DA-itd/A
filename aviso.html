@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth">
+<html lang="es" class="scroll-smooth" style="visibility: hidden; opacity: 0;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,6 +25,23 @@
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         }
+    </script>
+    
+    <!-- SOLUCIÓN: Mostrar página solo cuando esté lista -->
+    <script>
+        function safeReveal() {
+            var body = document.body;
+            var computed = window.getComputedStyle(body);
+            var hasStyles = computed.backgroundColor && computed.backgroundColor !== 'rgba(0, 0, 0, 0)';
+            
+            document.documentElement.style.transition = 'opacity 0.3s ease-in';
+            document.documentElement.style.visibility = 'visible';
+            document.documentElement.style.opacity = '1';
+        }
+
+        window.addEventListener('load', function() {
+            setTimeout(safeReveal, 100);
+        });
     </script>
     <style>
         body { cursor: default; }
