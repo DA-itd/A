@@ -70,8 +70,8 @@
             "CIENCIAS DE LA TIERRA", "CIENCIAS BASICAS", "INGENIERÍA INDUSTRIAL", 
             "CIENCIAS ECONOMICO-ADMINISTRATIVAS", "SISTEMAS Y COMPUTACION", 
             "INGENIERÍA QUÍMICA-BIOQUÍMICA", "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA", 
-            "METAL-MECÁNICA", "POSGRADO E INVESTIGACION", "DESARROLLO ACADÉMICO", 
-            "CENTRO DE INFORMACIÓN", "GESTION TECNOLOGICA", "ADMINISTRATIVO", "EXTERNO"
+            "METAL-MECÁNICA", "POSGRADO E INVESTIGACION",  
+            "ADMINISTRATIVO", "EXTERNO"
         ];
 
         const removeAccents = (text) => text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
@@ -309,7 +309,7 @@
                                         onChange={e => setFormData({...formData, academicLevel: e.target.value})} 
                                         className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                                     />
-                                    <span className="ml-2 text-sm text-gray-700">Posgrado</span>
+                                    <span className="ml-2 text-sm text-gray-700">Doctorado</span>
                                 </label>
                             </div>
                             {errors.academicLevel && <p className="text-red-500 text-xs mt-1">{errors.academicLevel}</p>}
