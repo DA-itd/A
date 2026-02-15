@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth" style="visibility: hidden; opacity: 0;">
 <head>
@@ -169,13 +170,14 @@
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
 
         .quote-container {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-            border-left: 3px solid rgba(99, 102, 241, 0.5);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(243, 244, 246, 0.8) 100%);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         }
         
         .dark .quote-container {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.5) 100%);
-            border-left: 3px solid rgba(129, 140, 248, 0.5);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.6) 100%);
+            border: 1px solid rgba(55, 65, 81, 0.5);
         }
         
         /* Cursor personalizado */
@@ -352,9 +354,9 @@
 
     <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
         
-        <!-- Frase -->
+        <!-- Frase / Estadísticas -->
         <section class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
-            <div id="quote-container" class="quote-container rounded-lg p-6 text-center transition-opacity duration-500 ease-in-out">
+            <div id="quote-container" class="quote-container rounded-lg p-6 sm:p-8 text-center transition-opacity duration-500 ease-in-out">
                 <!-- Quote injected -->
             </div>
         </section>
@@ -729,22 +731,73 @@
             } else { showWeather(durangoLat, durangoLon); }
         }
 
-        // Quotes
-        const inspirationalQuotes = [
-            { quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.", author: "Nelson Mandela" },
-            { quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.", author: "Carl Sagan" },
-            { quote: "La educación no es preparación para la vida; la educación es la vida misma.", author: "John Dewey" },
-            { quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.", author: "Albert Einstein" },
-            { quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.", author: "Platón" }
+        // ESTADÍSTICAS RECIENTES (Carrusel de datos reales)
+        const recentStats = [
+            { 
+                icon: "📊", 
+                title: "Inscripciones Totales", 
+                value: "454", 
+                desc: "Docentes Únicos: 284 | Cobertura: 68.1%",
+                color: "from-blue-500 to-cyan-500"
+            },
+            { 
+                icon: "🔥", 
+                title: "Curso Más Demandado", 
+                value: "Instrumentación Didáctica con IA", 
+                desc: "63 Participantes | Cuidado Emocional (41)",
+                color: "from-rose-500 to-pink-500"
+            },
+            { 
+                icon: "🏆", 
+                title: "Depto. con Mayor Participación", 
+                value: "Ing. Química-Bioquímica", 
+                desc: "74 Docentes inscritos",
+                color: "from-amber-500 to-orange-500"
+            },
+            { 
+                icon: "📚", 
+                title: "Distribución de Carga", 
+                value: "1 Curso por Docente", 
+                desc: "Tendencia principal (150 docentes)",
+                color: "from-emerald-500 to-teal-500"
+            }
         ];
+
+        let statsIndex = 0;
+
         function rotateQuotes() {
             const qc = document.getElementById('quote-container');
             if (!qc) return;
-            const q = inspirationalQuotes[Math.floor(Math.random() * inspirationalQuotes.length)];
+            
             qc.style.opacity = 0;
+            
             setTimeout(() => {
-                qc.innerHTML = `<p class="text-base sm:text-lg italic text-gray-700 dark:text-gray-300 leading-relaxed">"${q.quote}"</p><p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 text-right mt-2">- ${q.author}</p>`;
+                const s = recentStats[statsIndex];
+                qc.innerHTML = `
+                    <div class="w-full">
+                        <h4 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">
+                            CIFRAS Y DATOS CURSOS-TALLER 1ER PERIODO 2026
+                        </h4>
+                        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
+                            <!-- Icon Circle with Gradient -->
+                            <div class="w-16 h-16 rounded-full bg-gradient-to-br ${s.color} flex items-center justify-center text-3xl text-white shadow-lg animate-pulse-slow shrink-0">
+                                ${s.icon}
+                            </div>
+                            <!-- Text Content -->
+                            <div class="text-center sm:text-left">
+                                <h3 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r ${s.color}">
+                                    ${s.value}
+                                </h3>
+                                <p class="text-base font-bold text-gray-700 dark:text-gray-200 leading-tight">${s.title}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 italic">${s.desc}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
                 qc.style.opacity = 1;
+                
+                // Incrementar índice
+                statsIndex = (statsIndex + 1) % recentStats.length;
             }, 500);
         }
 
@@ -809,7 +862,7 @@
 
         window.addEventListener('load', function() {
             startClock(); updateDate(); updateWeather(); updateYears();
-            rotateQuotes(); setInterval(rotateQuotes, 15000);
+            rotateQuotes(); setInterval(rotateQuotes, 12000); // Rotación cada 12 segundos para leer mejor
         });
     </script>
 </body>
