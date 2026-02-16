@@ -230,17 +230,35 @@
         const InfoForm = ({ formData, setFormData, departments, teachers, onNext }) => {
             const [errors, setErrors] = useState({});
             
+            // Lógica robusta para normalizar género
             const normalizeGender = (g) => {
                 if(!g) return '';
-                const u = g.toUpperCase();
-                if(u === 'H' || u === 'MASCULINO') return 'Hombre';
-                if(u === 'M' || u === 'FEMENINO' || u === 'MUJER') return 'Mujer';
-                return u === 'HOMBRE' ? 'Hombre' : (u === 'MUJER' ? 'Mujer' : '');
+                const u = g.toUpperCase().trim();
+                // Prioridad a la H sola, muy común en bases de datos
+                if(u === 'H' || u === 'HOMBRE' || u === 'MASCULINO') return 'Hombre';
+                if(u === 'M' || u === 'MUJER' || u === 'FEMENINO') return 'Mujer';
+                return ''; // Dejar vacío si no coincide para que el usuario elija
+            };
+
+            // Lógica para traducir lo que viene del CSV a códigos de nivel
+            const normalizeLevelFromCSV = (csvValue) => {
+                if (!csvValue) return '';
+                const v = csvValue.toUpperCase().trim();
+                // Mapeo directo de palabras clave a letras
+                if (v.startsWith('LIC')) return 'L';
+                if (v.startsWith('MAE') || v.startsWith('MAS')) return 'M';
+                if (v.startsWith('DOC')) return 'P'; // P = Posgrado/Doctorado
+                if (v.startsWith('ESP')) return 'E';
+                // Si ya viene como letra única
+                if (['L','M','P','E'].includes(v)) return v;
+                return '';
             };
 
             const handleTeacherSelect = (teacher) => {
                 let inferredGender = normalizeGender(teacher.gender);
-                if (!inferredGender && teacher.curp.length >= 11) {
+                
+                // Fallback: Intentar inferir por CURP si el género no vino explícito
+                if (!inferredGender && teacher.curp && teacher.curp.length >= 11) {
                     const genderChar = teacher.curp.charAt(10).toUpperCase();
                     if (genderChar === 'H') inferredGender = 'Hombre';
                     else if (genderChar === 'M') inferredGender = 'Mujer';
@@ -250,11 +268,11 @@
                     ...prev,
                     fullName: (teacher.name || '').toUpperCase(),
                     curp: (teacher.curp || '').toUpperCase(),
-                    // NO SOBREESCRIBIR EMAIL AQUÍ: El email es el identificador de sesión.
-                    // Sin embargo, si el usuario selecciona otro docente, cargamos sus datos para visualización.
-                    gender: inferredGender || 'Mujer',
+                    // Si se encontró género, usarlo. Si no, dejar el previo o default 'Mujer'
+                    gender: inferredGender || prev.gender || 'Mujer', 
                     department: (teacher.dept && teacher.dept.length > 3) ? teacher.dept.toUpperCase() : prev.department,
-                    level: teacher.level || prev.level
+                    // Aplicar normalización al nivel
+                    level: normalizeLevelFromCSV(teacher.level) || prev.level
                 }));
             };
 
@@ -798,38 +816,47 @@
                         curp: cleanStr(r[1]), 
                         email: cleanStr(r[2]), 
                         dept: cleanStr(r[3]), 
-                        gender: cleanStr(r[5]), 
-                        level: cleanStr(r[6])
+                        gender: cleanStr(r[5]), // Column 5 usually
+                        level: cleanStr(r[6])   // Column 6 usually
                     }));
                     setTeachers(parsedTeachers);
                     teachersRef.current = parsedTeachers; // Update ref immediately for auth
                 }).catch(() => setError("Error cargando datos."));
             }, []);
 
-            // --- UTILIDAD DE NORMALIZACIÓN DE GÉNERO ---
+            // --- UTILIDAD DE NORMALIZACIÓN ---
             const normalizeGender = (g) => {
                 if(!g) return '';
-                const u = g.toUpperCase();
-                if(u === 'H' || u === 'MASCULINO') return 'Hombre';
-                if(u === 'M' || u === 'FEMENINO' || u === 'MUJER') return 'Mujer';
-                return u === 'HOMBRE' ? 'Hombre' : (u === 'MUJER' ? 'Mujer' : '');
+                const u = g.toUpperCase().trim();
+                // Aseguramos que la H o MASCULINO se mapee correctamente
+                if(u === 'H' || u === 'HOMBRE' || u === 'MASCULINO') return 'Hombre';
+                if(u === 'M' || u === 'MUJER' || u === 'FEMENINO') return 'Mujer';
+                return '';
+            };
+
+            const normalizeLevelFromCSV = (csvValue) => {
+                if (!csvValue) return '';
+                const v = csvValue.toUpperCase().trim();
+                if (v.startsWith('LIC')) return 'L';
+                if (v.startsWith('MAE') || v.startsWith('MAS')) return 'M';
+                if (v.startsWith('DOC')) return 'P'; // P = Posgrado/Doctorado
+                if (v.startsWith('ESP')) return 'E';
+                // Si ya es letra
+                if (['L','M','P','E'].includes(v)) return v;
+                return '';
             };
 
             // --- AUTHENTICATION LOGIC ---
-            // Memoize handleLogin or ensure it reads from ref to avoid closure issues with Google Button
             const handleLogin = useCallback((response) => {
                 try {
                     const payload = JSON.parse(atob(response.credential.split('.')[1]));
                     const email = payload.email.toLowerCase();
                     const name = payload.name.toUpperCase();
                     
-                    // Buscar en la base de datos local usando la REF para garantizar datos frescos
-                    // Filtramos por email y luego ordenamos para priorizar el registro que tenga CURP (si hay duplicados)
                     const matches = teachersRef.current.filter(t => 
                         (t.email && t.email.toLowerCase().trim() === email)
                     );
                     
-                    // Ordenar: primero los que tienen CURP
                     matches.sort((a, b) => {
                         const hasCurpA = a.curp && a.curp.length > 0 ? 1 : 0;
                         const hasCurpB = b.curp && b.curp.length > 0 ? 1 : 0;
@@ -844,8 +871,9 @@
                             curp: foundTeacher.curp ? foundTeacher.curp.toUpperCase() : '',
                             email: email, 
                             department: foundTeacher.dept ? foundTeacher.dept.toUpperCase() : '',
+                            // Usar lógica normalizada, si no encuentra, dejar Mujer por defecto (UI standard)
                             gender: normalizeGender(foundTeacher.gender) || 'Mujer',
-                            level: foundTeacher.level || '' // Cargar nivel si existe
+                            level: normalizeLevelFromCSV(foundTeacher.level) || '' 
                         });
                     } else {
                         setFormData(prev => ({
@@ -859,11 +887,10 @@
                 } catch (e) {
                     setError('Error al procesar el inicio de sesión.');
                 }
-            }, []); // No dependencies needed as we use ref
+            }, []); 
 
             // --- Logic for Modal Step 1 ---
             useEffect(() => {
-                // Solo ejecutar si ya estamos autenticados y tenemos datos válidos
                 if (!isAuthenticated) return;
 
                 const getRegistrationByCurp = async (curp) => {
@@ -880,7 +907,6 @@
                 const check = async () => {
                     setIsCheckingCurp(true);
                     const regIds = await getRegistrationByCurp(formData.curp);
-                    // Volver a verificar la CURP actual por si cambió durante la petición
                     if (formData.curp === lastCheckedCurp.current) {
                         if (regIds.length > 0) {
                             const found = allCourses.filter(c => regIds.includes(c.id));
@@ -898,7 +924,6 @@
                     if (formData.curp === lastCheckedCurp.current) setIsCheckingCurp(false);
                 };
 
-                // VALIDACIÓN: Solo buscar si CURP y Email están presentes
                 const isDataReady = formData.curp.length === 18 && formData.email;
 
                 if (isDataReady && lastCheckedCurp.current !== formData.curp && allCourses.length > 0) {
@@ -911,10 +936,10 @@
             }, [formData.curp, formData.email, allCourses, isAuthenticated]);
 
             const handleModify = () => {
-                setSelectedCourses(existingCourses); // Pre-fill cart with existing
+                setSelectedCourses(existingCourses); 
                 setOriginalSelectedCourses(existingCourses);
                 setIsModalOpen(false);
-                setStep(2); // Go to selection
+                setStep(2); 
             };
 
             const handleDeleteSingle = async (cid) => {
@@ -932,18 +957,13 @@
                     
                     if (json.success) {
                         let msg = `El curso "${c.name}" ha sido dado de baja exitosamente.`;
-                        
-                        // Check if email was actually sent
                         if (json.emailSent) {
                              msg += `\n\nSe ha enviado un comprobante de cancelación a tu correo (${formData.email}).`;
                         } else {
                              msg += `\n\n⚠️ AVISO: El sistema NO pudo enviar el correo de confirmación. Por favor verifica en tu Historial de Cursos que la baja se haya procesado.`;
                         }
-
                         msg += `\n\nRegresando al portal principal...`;
                         alert(msg);
-                        
-                        // Redirigir al portal principal
                         window.location.href = 'index.html';
                     } else {
                         throw new Error(json.message || "Error al cancelar");
@@ -960,14 +980,11 @@
                 setSelectedCourses([]); 
                 setOriginalSelectedCourses(existingCourses); 
                 setIsModalOpen(false);
-                setStep(3); // Go to confirm cancellation
+                setStep(3); 
             };
 
             const handleSubmit = async () => {
                 setError(null);
-                
-                // CALCULAR BAJAS (Diferencia entre originales y seleccionados)
-                // Esto nos permite saber qué cursos fueron eliminados
                 const dropped = originalSelectedCourses.filter(
                     orig => !selectedCourses.some(curr => curr.id === orig.id)
                 );
