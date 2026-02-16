@@ -254,10 +254,10 @@
                 return '';
             };
 
-            const handleTeacherSelect = (teacher) => {
+                        const handleTeacherSelect = (teacher) => {
                 let inferredGender = normalizeGender(teacher.gender);
                 
-                // Fallback: Intentar inferir por CURP si el género no vino explícito
+                // Fallback: Inferir por CURP si el género no vino explícito en el CSV
                 if (!inferredGender && teacher.curp && teacher.curp.length >= 11) {
                     const genderChar = teacher.curp.charAt(10).toUpperCase();
                     if (genderChar === 'H') inferredGender = 'Hombre';
@@ -268,10 +268,8 @@
                     ...prev,
                     fullName: (teacher.name || '').toUpperCase(),
                     curp: (teacher.curp || '').toUpperCase(),
-                    // Si se encontró género, usarlo. Si no, dejar el previo o default 'Mujer'
                     gender: inferredGender || prev.gender || 'Mujer', 
                     department: (teacher.dept && teacher.dept.length > 3) ? teacher.dept.toUpperCase() : prev.department,
-                    // Aplicar normalización al nivel
                     level: normalizeLevelFromCSV(teacher.level) || prev.level
                 }));
             };
