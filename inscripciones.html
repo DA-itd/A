@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -254,14 +253,18 @@
                 return '';
             };
 
-                        const handleTeacherSelect = (teacher) => {
+            const handleTeacherSelect = (teacher) => {
                 let inferredGender = normalizeGender(teacher.gender);
                 
-                // Fallback: Inferir por CURP si el género no vino explícito en el CSV
-                if (!inferredGender && teacher.curp && teacher.curp.length >= 11) {
+                // Fallback robusto: Inferir por CURP si el género no vino explícito en el CSV
+                // El caracter 11 de la CURP (índice 10) indica el género (H o M)
+                if (teacher.curp && teacher.curp.length >= 11) {
                     const genderChar = teacher.curp.charAt(10).toUpperCase();
-                    if (genderChar === 'H') inferredGender = 'Hombre';
-                    else if (genderChar === 'M') inferredGender = 'Mujer';
+                    // Solo sobrescribir si no había un género explícito válido, o para asegurar corrección
+                    if (!inferredGender || (genderChar === 'H' && inferredGender !== 'Hombre') || (genderChar === 'M' && inferredGender !== 'Mujer')) {
+                         if (genderChar === 'H') inferredGender = 'Hombre';
+                         else if (genderChar === 'M') inferredGender = 'Mujer';
+                    }
                 }
 
                 setFormData(prev => ({
