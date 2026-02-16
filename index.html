@@ -1,28 +1,55 @@
-<script type="importmap">
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Actualización Docente ITD</title>
+    <meta name="description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango.">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fadeInUp': 'fadeInUp 0.5s ease-out forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Import Map para dependencias de React (Versión compatible con React Router v6 usado en App.tsx) -->
+    <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@^19.2.4",
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.23.0",
     "react/": "https://esm.sh/react@^19.2.4/",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.13.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/"
   }
 }
 </script>
 
-            <!-- Opción 1: Inscripción a Cursos -->
-            <a href="inscripciones.html" 
-               class="card-portal bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 text-center border-2 border-rose-400 hover:bg-rose-50 dark:hover:bg-slate-700 animate-fadeInUp delay-300 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 bg-rose-500 text-white text-[10px] px-2 py-1 rounded-bl-lg font-bold">
-                    ¡ABIERTO!
-                </div>
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">📝</div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
-                    Inscripción a Cursos
-                </h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-4 font-bold text-rose-600 dark:text-rose-400">
-                    Registrate y no pierdas tu lugar
-                </p>
-                <div class="inline-block bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
-            </a>
+    <!-- Babel para compilar TSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-gray-900">
+    <!-- Contenedor Raíz de React -->
+    <div id="root"></div>
+
+    <!-- Punto de entrada de la aplicación -->
+    <script type="text/babel" data-type="module" src="./index.tsx"></script>
+</body>
+</html>
