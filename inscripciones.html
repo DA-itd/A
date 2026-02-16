@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -233,38 +234,32 @@
             const normalizeGender = (g) => {
                 if(!g) return '';
                 const u = g.toUpperCase().trim();
-                // Prioridad a la H sola, muy común en bases de datos
                 if(u === 'H' || u === 'HOMBRE' || u === 'MASCULINO') return 'Hombre';
                 if(u === 'M' || u === 'MUJER' || u === 'FEMENINO') return 'Mujer';
-                return ''; // Dejar vacío si no coincide para que el usuario elija
+                return ''; 
             };
 
             // Lógica para traducir lo que viene del CSV a códigos de nivel
             const normalizeLevelFromCSV = (csvValue) => {
                 if (!csvValue) return '';
                 const v = csvValue.toUpperCase().trim();
-                // Mapeo directo de palabras clave a letras
                 if (v.startsWith('LIC')) return 'L';
                 if (v.startsWith('MAE') || v.startsWith('MAS')) return 'M';
-                if (v.startsWith('DOC')) return 'P'; // P = Posgrado/Doctorado
+                if (v.startsWith('DOC')) return 'P';
                 if (v.startsWith('ESP')) return 'E';
-                // Si ya viene como letra única
                 if (['L','M','P','E'].includes(v)) return v;
                 return '';
             };
 
             const handleTeacherSelect = (teacher) => {
+                // AQUÍ ESTÁ EL CAMBIO CLAVE: Leer correctamente el género del CSV
                 let inferredGender = normalizeGender(teacher.gender);
                 
-                // Fallback robusto: Inferir por CURP si el género no vino explícito en el CSV
-                // El caracter 11 de la CURP (índice 10) indica el género (H o M)
-                if (teacher.curp && teacher.curp.length >= 11) {
+                // Fallback: Inferir por CURP si el género no vino explícito en el CSV
+                if ((!inferredGender || inferredGender === '') && teacher.curp && teacher.curp.length >= 11) {
                     const genderChar = teacher.curp.charAt(10).toUpperCase();
-                    // Solo sobrescribir si no había un género explícito válido, o para asegurar corrección
-                    if (!inferredGender || (genderChar === 'H' && inferredGender !== 'Hombre') || (genderChar === 'M' && inferredGender !== 'Mujer')) {
-                         if (genderChar === 'H') inferredGender = 'Hombre';
-                         else if (genderChar === 'M') inferredGender = 'Mujer';
-                    }
+                    if (genderChar === 'H') inferredGender = 'Hombre';
+                    else if (genderChar === 'M') inferredGender = 'Mujer';
                 }
 
                 setFormData(prev => ({
@@ -272,8 +267,10 @@
                     fullName: (teacher.name || '').toUpperCase(),
                     curp: (teacher.curp || '').toUpperCase(),
                     gender: inferredGender || prev.gender || 'Mujer', 
+                    // Si el departamento no viene en el CSV, conservamos el seleccionado o vacío
                     department: (teacher.dept && teacher.dept.length > 3) ? teacher.dept.toUpperCase() : prev.department,
-                    level: normalizeLevelFromCSV(teacher.level) || prev.level
+                    level: normalizeLevelFromCSV(teacher.level) || prev.level,
+                    phone: teacher.phone || prev.phone || ''
                 }));
             };
 
@@ -281,11 +278,9 @@
             const handleLevelChange = (val) => {
                 const current = formData.level ? formData.level.split(',').filter(x => x) : [];
                 if (current.includes(val)) {
-                    // Remover
                     const updated = current.filter(item => item !== val);
                     setFormData({ ...formData, level: updated.join(',') });
                 } else {
-                    // Agregar si no excede límite
                     if (current.length < 2) {
                         const updated = [...current, val];
                         setFormData({ ...formData, level: updated.join(',') });
@@ -321,6 +316,7 @@
                             <AutocompleteInput teachers={teachers} onSelect={handleTeacherSelect} value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value.toUpperCase()})} name="fullName" required />
                             {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
                         </div>
+                        
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 mb-1">CURP *</label>
@@ -339,6 +335,7 @@
                                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                             </div>
                         </div>
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 mb-1">Departamento *</label>
@@ -356,6 +353,19 @@
                                     <option value="Hombre">Hombre</option>
                                 </select>
                             </div>
+                        </div>
+
+                        {/* Campo de Teléfono (NUEVO) */}
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-1">Teléfono (WhatsApp) </label>
+                            <input 
+                                type="tel" 
+                                value={formData.phone || ''} 
+                                onChange={e => setFormData({...formData, phone: e.target.value})} 
+                                className="w-full p-2 border rounded" 
+                                placeholder="Para notificaciones (Opcional)"
+                            />
+                            <p className="text-xs text-gray-400 mt-1">Se usará para enviar avisos de inscripciones o constancias.</p>
                         </div>
                         
                         <div>
@@ -547,7 +557,7 @@
                         <p className="font-bold text-lg">{formData.fullName}</p>
                         <p className="text-sm text-gray-600">{formData.department} | {formData.email}</p>
                         <p className="text-xs text-gray-400 mt-1">CURP: {formData.curp}</p>
-                        <p className="text-xs text-gray-400">Nivel: {formData.level} | Género: {formData.gender}</p>
+                        <p className="text-xs text-gray-400">Nivel: {formData.level} | Género: {formData.gender} | Tel: {formData.phone}</p>
                     </div>
 
                     {/* Lista de Cursos a INSCRIBIR/MANTENER (Solo si hay cursos seleccionados) */}
@@ -773,7 +783,7 @@
         const App = () => {
             const [isAuthenticated, setIsAuthenticated] = useState(false);
             const [step, setStep] = useState(1);
-            const [formData, setFormData] = useState({ fullName: '', curp: '', email: '', gender: 'Mujer', department: '', level: '' });
+            const [formData, setFormData] = useState({ fullName: '', curp: '', email: '', gender: 'Mujer', department: '', level: '', phone: '' });
             const [selectedCourses, setSelectedCourses] = useState([]);
             const [allCourses, setAllCourses] = useState([]);
             const [teachers, setTeachers] = useState([]);
@@ -812,16 +822,21 @@
                     })));
                     
                     const tRows = parseCSV(tText);
+                    // MODIFICADO: Ajuste de índices basado en la imagen del usuario
+                    // Nombre(0), Curp(1), Email(2), Nivel(3), Genero(4), Telefono(5)
                     const parsedTeachers = tRows.map(r => ({ 
                         name: cleanStr(r[0]), 
                         curp: cleanStr(r[1]), 
                         email: cleanStr(r[2]), 
-                        dept: cleanStr(r[3]), 
-                        gender: cleanStr(r[5]), // Column 5 usually
-                        level: cleanStr(r[6])   // Column 6 usually
+                        level: cleanStr(r[3]), // Col D
+                        gender: cleanStr(r[4]), // Col E
+                        phone: cleanStr(r[5]), // Col F
+                        // Nota: El departamento NO aparece en las columnas A-F de la imagen
+                        // Lo dejamos vacío para que el usuario lo seleccione manualmente
+                        dept: '' 
                     }));
                     setTeachers(parsedTeachers);
-                    teachersRef.current = parsedTeachers; // Update ref immediately for auth
+                    teachersRef.current = parsedTeachers; 
                 }).catch(() => setError("Error cargando datos."));
             }, []);
 
@@ -840,9 +855,8 @@
                 const v = csvValue.toUpperCase().trim();
                 if (v.startsWith('LIC')) return 'L';
                 if (v.startsWith('MAE') || v.startsWith('MAS')) return 'M';
-                if (v.startsWith('DOC')) return 'P'; // P = Posgrado/Doctorado
+                if (v.startsWith('DOC')) return 'P'; 
                 if (v.startsWith('ESP')) return 'E';
-                // Si ya es letra
                 if (['L','M','P','E'].includes(v)) return v;
                 return '';
             };
@@ -874,7 +888,8 @@
                             department: foundTeacher.dept ? foundTeacher.dept.toUpperCase() : '',
                             // Usar lógica normalizada, si no encuentra, dejar Mujer por defecto (UI standard)
                             gender: normalizeGender(foundTeacher.gender) || 'Mujer',
-                            level: normalizeLevelFromCSV(foundTeacher.level) || '' 
+                            level: normalizeLevelFromCSV(foundTeacher.level) || '',
+                            phone: foundTeacher.phone || ''
                         });
                     } else {
                         setFormData(prev => ({
