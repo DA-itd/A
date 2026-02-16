@@ -2,8 +2,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-V2V4CT2C69"></script>
-<script src="ga.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscripción a Cursos - ITD</title>
@@ -14,6 +12,8 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- GSI Client Added -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
@@ -61,6 +61,7 @@
 
         // --- CONFIGURACIÓN ---
         const CONFIG = {
+            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
             COURSES_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv',
             TEACHERS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv'
@@ -70,8 +71,8 @@
             "CIENCIAS DE LA TIERRA", "CIENCIAS BASICAS", "INGENIERÍA INDUSTRIAL", 
             "CIENCIAS ECONOMICO-ADMINISTRATIVAS", "SISTEMAS Y COMPUTACION", 
             "INGENIERÍA QUÍMICA-BIOQUÍMICA", "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA", 
-            "METAL-MECÁNICA", "POSGRADO E INVESTIGACION",  
-            "ADMINISTRATIVO", "EXTERNO"
+            "METAL-MECÁNICA", "POSGRADO E INVESTIGACION", "DESARROLLO ACADÉMICO", 
+            "CENTRO DE INFORMACIÓN", "GESTION TECNOLOGICA", "ADMINISTRATIVO", "EXTERNO"
         ];
 
         const removeAccents = (text) => text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
@@ -95,6 +96,37 @@
         const cleanStr = (s) => s ? s.replace(/^"|"$/g, '').trim() : '';
 
         // --- COMPONENTES ---
+        
+        const LoginScreen = ({ onLogin, error }) => {
+            const googleBtnRef = useRef(null);
+            
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    if (window.google && window.google.accounts && googleBtnRef.current) {
+                        clearInterval(interval);
+                        try {
+                            window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
+                            window.google.accounts.id.renderButton(googleBtnRef.current, { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill" });
+                        } catch (e) { console.error("Error rendering Google Button", e); }
+                    }
+                }, 500);
+                return () => clearInterval(interval);
+            }, [onLogin]);
+
+            return (
+                <div className="flex-grow flex items-center justify-center p-4">
+                    <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full border-t-4 border-indigo-600 animate-fadeIn">
+                        <div className="text-5xl mb-4">🔐</div>
+                        <h1 className="text-2xl font-bold text-slate-800 mb-2">Iniciar Inscripción</h1>
+                        <p className="text-slate-500 mb-6">Identifícate con tu cuenta institucional para comenzar.</p>
+                        {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm font-bold border border-red-200">{error}</div>}
+                        <div className="flex justify-center min-h-[50px]" ref={googleBtnRef}></div>
+                        <a href="index.html" className="block mt-6 text-indigo-600 text-sm hover:underline font-semibold">← Volver al Portal</a>
+                    </div>
+                </div>
+            );
+        };
+
         const StepIndicator = ({ currentStep }) => {
             const steps = ["Información", "Cursos", "Confirmar", "Finalizado"];
             return (
@@ -214,7 +246,7 @@
                     ...prev,
                     fullName: (teacher.name || '').toUpperCase(),
                     curp: (teacher.curp || '').toUpperCase(),
-                    email: (teacher.email || '').toLowerCase(),
+                    // NO SOBREESCRIBIR EMAIL AQUÍ, ya que viene de Google
                     gender: inferredGender,
                     department: (teacher.dept && teacher.dept.length > 3) ? teacher.dept.toUpperCase() : prev.department
                 }));
@@ -226,7 +258,6 @@
                 if (!formData.curp || formData.curp.length < 18) newErrors.curp = "CURP inválido (18 caracteres)";
                 if (!formData.email) newErrors.email = "Campo obligatorio";
                 if (!formData.department) newErrors.department = "Seleccione departamento";
-                if (!formData.academicLevel) newErrors.academicLevel = "Seleccione nivel académico";
                 setErrors(newErrors);
                 return Object.keys(newErrors).length === 0;
             };
@@ -239,6 +270,9 @@
             return (
                 <div className="animate-fadeIn max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-slate-200">
                     <h2 className="text-xl font-bold text-slate-800 mb-6 border-b pb-2">Datos Personales</h2>
+                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+                        👋 ¡Hola! Por favor verifica que tu información sea correcta antes de continuar.
+                    </div>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-1">Nombre Completo *</label>
@@ -252,8 +286,14 @@
                                 {errors.curp && <p className="text-red-500 text-xs mt-1">{errors.curp}</p>}
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">Email *</label>
-                                <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value.toLowerCase()})} className="w-full p-2 border rounded" />
+                                <label className="block text-sm font-bold text-slate-700 mb-1">Email (Autenticado) *</label>
+                                <input 
+                                    type="email" 
+                                    value={formData.email} 
+                                    readOnly 
+                                    className="w-full p-2 border rounded bg-gray-100 text-gray-500 cursor-not-allowed" 
+                                    title="El correo no se puede cambiar ya que iniciaste sesión con él."
+                                />
                                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                             </div>
                         </div>
@@ -273,50 +313,8 @@
                                 </select>
                             </div>
                         </div>
-
-                        {/* SECCIÓN NUEVA: NIVEL ACADÉMICO */}
-                        <div className="mt-4 pt-4 border-t border-slate-100">
-                            <label className="block text-sm font-bold text-slate-700 mb-3">Nivel Académico *</label>
-                            <div className="flex flex-wrap gap-4 sm:gap-8">
-                                <label className="inline-flex items-center cursor-pointer">
-                                    <input 
-                                        type="radio" 
-                                        name="academicLevel" 
-                                        value="L" 
-                                        checked={formData.academicLevel === 'L'} 
-                                        onChange={e => setFormData({...formData, academicLevel: e.target.value})} 
-                                        className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                                    />
-                                    <span className="ml-2 text-sm text-gray-700">Licenciatura</span>
-                                </label>
-                                <label className="inline-flex items-center cursor-pointer">
-                                    <input 
-                                        type="radio" 
-                                        name="academicLevel" 
-                                        value="M" 
-                                        checked={formData.academicLevel === 'M'} 
-                                        onChange={e => setFormData({...formData, academicLevel: e.target.value})} 
-                                        className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                                    />
-                                    <span className="ml-2 text-sm text-gray-700">Maestría</span>
-                                </label>
-                                <label className="inline-flex items-center cursor-pointer">
-                                    <input 
-                                        type="radio" 
-                                        name="academicLevel" 
-                                        value="P" 
-                                        checked={formData.academicLevel === 'P'} 
-                                        onChange={e => setFormData({...formData, academicLevel: e.target.value})} 
-                                        className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                                    />
-                                    <span className="ml-2 text-sm text-gray-700">Doctorado</span>
-                                </label>
-                            </div>
-                            {errors.academicLevel && <p className="text-red-500 text-xs mt-1">{errors.academicLevel}</p>}
-                        </div>
-
                         <div className="mt-8 flex justify-end">
-                            <button type="submit" className="bg-blue-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-900 transition-colors">Siguiente ➝</button>
+                            <button type="submit" className="bg-blue-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-900 transition-colors">Confirmar y Continuar ➝</button>
                         </div>
                     </form>
                 </div>
@@ -504,7 +502,7 @@
                                     {coursesToDrop.map(c => (
                                         <li key={c.id} className="flex justify-between items-start border-b border-red-100 last:border-0 pb-2 last:pb-0">
                                             <span className="text-sm font-semibold text-red-800">{c.name}</span>
-                                            <span className="text-[10px] font-bold bg-white text-red-600 px-2 py-0.5 rounded border border-red-200">BAJA</span>
+                                            <span className="text-xs text-red-600 font-bold bg-white px-2 py-0.5 rounded border border-red-200">BAJA</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -614,10 +612,6 @@
             );
         };
 
-        // =============================================================================
-        // == MODAL DE REGISTRO EXISTENTE (Mejorado para permitir agregar)
-        // =============================================================================
-
         const ExistingRegistrationModal = ({ isOpen, courses, onModify, onClose, onDeleteCourse, deletingCourseId, onCancelAll }) => {
             const [confirmingId, setConfirmingId] = useState(null);
 
@@ -698,8 +692,9 @@
         };
 
         const App = () => {
+            const [isAuthenticated, setIsAuthenticated] = useState(false);
             const [step, setStep] = useState(1);
-            const [formData, setFormData] = useState({ fullName: '', curp: '', email: '', gender: 'Mujer', department: '', academicLevel: '' });
+            const [formData, setFormData] = useState({ fullName: '', curp: '', email: '', gender: 'Mujer', department: '' });
             const [selectedCourses, setSelectedCourses] = useState([]);
             const [allCourses, setAllCourses] = useState([]);
             const [teachers, setTeachers] = useState([]);
@@ -745,8 +740,46 @@
                 }).catch(() => setError("Error cargando datos."));
             }, []);
 
+            // --- AUTHENTICATION LOGIC ---
+            const handleLogin = (response) => {
+                try {
+                    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                    const email = payload.email.toLowerCase();
+                    const name = payload.name.toUpperCase();
+                    
+                    // Buscar en la base de datos local (CSV de Teachers)
+                    const foundTeacher = teachers.find(t => 
+                        (t.email && t.email.toLowerCase().trim() === email)
+                    );
+
+                    if (foundTeacher) {
+                        setFormData({
+                            fullName: foundTeacher.name.toUpperCase(),
+                            curp: foundTeacher.curp.toUpperCase(),
+                            email: email, // Usar email verificado de Google
+                            department: foundTeacher.dept ? foundTeacher.dept.toUpperCase() : '',
+                            gender: foundTeacher.gender || 'Mujer' // Default o del CSV
+                        });
+                    } else {
+                        // Si no está en el CSV, prellenar con datos de Google
+                        setFormData(prev => ({
+                            ...prev,
+                            fullName: name,
+                            email: email
+                        }));
+                    }
+                    
+                    setIsAuthenticated(true);
+                } catch (e) {
+                    setError('Error al procesar el inicio de sesión.');
+                }
+            };
+
             // --- Logic for Modal Step 1 ---
             useEffect(() => {
+                // Solo ejecutar si ya estamos autenticados y tenemos datos válidos
+                if (!isAuthenticated) return;
+
                 const getRegistrationByCurp = async (curp) => {
                     try {
                         const url = new URL(CONFIG.APPS_SCRIPT_URL);
@@ -779,22 +812,17 @@
                     if (formData.curp === lastCheckedCurp.current) setIsCheckingCurp(false);
                 };
 
-                // VALIDACIÓN RIGUROSA: Solo buscar si TODOS los campos obligatorios están llenos
-                const isFormComplete = formData.curp.length === 18 && 
-                                       formData.fullName && formData.fullName.trim() !== '' && 
-                                       formData.email && formData.email.trim() !== '' && 
-                                       formData.department && formData.department.trim() !== '' &&
-                                       formData.academicLevel && formData.academicLevel.trim() !== '';
+                // VALIDACIÓN: Solo buscar si CURP y Email están presentes
+                const isDataReady = formData.curp.length === 18 && formData.email;
 
-                if (isFormComplete && lastCheckedCurp.current !== formData.curp && allCourses.length > 0) {
+                if (isDataReady && lastCheckedCurp.current !== formData.curp && allCourses.length > 0) {
                     lastCheckedCurp.current = formData.curp;
                     check();
                 } else if (formData.curp.length !== 18) {
-                    // Si borran la CURP, reseteamos el estado
                     lastCheckedCurp.current = '';
                     setIsModalOpen(false);
                 }
-            }, [formData.curp, formData.department, formData.fullName, formData.email, formData.academicLevel, allCourses]);
+            }, [formData.curp, formData.email, allCourses, isAuthenticated]);
 
             const handleModify = () => {
                 setSelectedCourses(existingCourses); // Pre-fill cart with existing
@@ -874,8 +902,6 @@
                     });
                     const json = await res.json();
                     if (json.success) {
-                        // Enriquecer el resultado con nombres de cursos (si el backend no los devuelve completos)
-                        // Para mostrar el nombre correcto en la pantalla final.
                         const enrichedResults = json.results.map(r => {
                             const courseInfo = selectedCourses.find(sc => sc.id === r.registrationId);
                             return { ...r, name: courseInfo ? courseInfo.name : r.registrationId, schedule: courseInfo ? courseInfo.schedule : '' };
@@ -887,6 +913,14 @@
                     } else { throw new Error(json.message); }
                 } catch (e) { setError(e.message); setStep(3); }
             };
+
+            if (!isAuthenticated) {
+                return (
+                    <div className="container mx-auto px-4 py-8">
+                        <LoginScreen onLogin={handleLogin} error={error} />
+                    </div>
+                );
+            }
 
             return (
                 <div className="container mx-auto px-4 py-8">
@@ -908,4 +942,3 @@
     </script>
 </body>
 </html>
-    
