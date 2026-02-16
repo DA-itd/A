@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -29,27 +28,344 @@
         }
     </script>
 
-    <!-- Import Map para dependencias de React (Versión compatible con React Router v6 usado en App.tsx) -->
-    <script type="importmap">
+    <!-- React y Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "react-router-dom": "https://esm.sh/react-router-dom@6.23.0",
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "react/": "https://esm.sh/react@^19.2.4/",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/"
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.13.0"
   }
 }
 </script>
-
-    <!-- Babel para compilar TSX en el navegador -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-slate-50 min-h-screen font-sans text-gray-900">
-    <!-- Contenedor Raíz de React -->
-    <div id="root"></div>
+<body class="bg-slate-50 min-h-screen font-sans text-gray-900 flex flex-col">
 
-    <!-- Punto de entrada de la aplicación -->
-    <script type="text/babel" data-type="module" src="./index.tsx"></script>
+    <!-- Header -->
+    <header class="bg-white shadow-xl sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
+            <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 object-contain">
+            <div class="text-center flex-1">
+                <h1 class="text-sm sm:text-xl font-bold text-blue-900 leading-tight">PORTAL DE ACTUALIZACIÓN</h1>
+                <p class="text-xs sm:text-sm text-blue-700 font-semibold mt-1">Instituto Tecnológico de Durango</p>
+            </div>
+            <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 object-contain">
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <div id="root" class="flex-grow"></div>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 mt-auto">
+        <div class="container mx-auto px-4">
+            <p class="font-bold text-sm mb-1">© Coordinación de Actualización Docente</p>
+            <p class="text-xs opacity-75">Instituto Tecnológico de Durango</p>
+        </div>
+    </footer>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- DATOS Y CONFIGURACIÓN ---
+        const quotes = [
+            { text: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.", author: "Nelson Mandela" },
+            { text: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.", author: "Carl Sagan" },
+            { text: "La educación no es preparación para la vida; la educación es la vida misma.", author: "John Dewey" },
+            { text: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.", author: "Albert Einstein" },
+            { text: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.", author: "Platón" }
+        ];
+
+        const services = [
+            {
+                id: 'planificador',
+                title: 'Planificador de Clases',
+                description: 'Diseña secuencias didácticas con IA',
+                icon: '✨',
+                link: 'planificador.html', // Enlace directo al archivo HTML
+                badge: '¡NUEVO!',
+                statusText: 'Herramienta IA',
+                statusColor: 'bg-indigo-100 text-indigo-700',
+                borderColorClass: 'border-indigo-500'
+            },
+            {
+                id: 'tutor',
+                title: 'Tutor Pedagógico',
+                description: 'Resuelve dudas pedagógicas con IA',
+                icon: '🤖',
+                link: 'tutor.html', // Enlace directo al archivo HTML
+                badge: '¡NUEVO!',
+                statusText: 'Asistente IA',
+                statusColor: 'bg-blue-100 text-blue-700',
+                borderColorClass: 'border-blue-500'
+            },
+            {
+                id: 'inscripciones',
+                title: 'Inscripción a Cursos',
+                description: 'Registrarse en cursos de actualización',
+                icon: '📝',
+                link: 'inscripciones.html',
+                statusText: '✓ Disponible',
+                statusColor: 'bg-rose-100 text-rose-700',
+                borderColorClass: 'border-rose-400'
+            },
+            {
+                id: 'historial',
+                title: 'Historial de Cursos',
+                description: 'Ver mi historial de actualización',
+                icon: '📚',
+                link: 'historial.html',
+                statusText: '✓ Disponible',
+                statusColor: 'bg-orange-100 text-orange-700',
+                borderColorClass: 'border-orange-400'
+            },
+            {
+                id: 'formatos',
+                title: 'Formatos Oficiales',
+                description: 'Descargar formatos y documentos',
+                icon: '📋',
+                link: 'formatos.html',
+                statusText: '✓ Disponible',
+                statusColor: 'bg-green-100 text-green-700',
+                borderColorClass: 'border-green-400'
+            },
+            {
+                id: 'verificador',
+                title: 'Validación de Constancias',
+                description: 'Verificar la autenticidad de documentos.',
+                icon: '✅',
+                link: 'verificador.html',
+                statusText: '✓ Disponible',
+                statusColor: 'bg-cyan-100 text-cyan-700',
+                borderColorClass: 'border-cyan-400'
+            },
+            {
+                id: 'instructores',
+                title: 'Área para Instructores',
+                description: 'Subir propuestas y evidencias',
+                icon: '👨‍🏫',
+                link: 'instructores.html',
+                statusText: '✓ Disponible',
+                statusColor: 'bg-indigo-100 text-indigo-700',
+                borderColorClass: 'border-indigo-400'
+            },
+            {
+                id: 'encuestas',
+                title: 'Encuestas de Opinión',
+                description: 'Evaluación de cursos y servicios',
+                icon: '📊',
+                link: 'encuestas.html',
+                statusText: '✓ Disponible',
+                statusColor: 'bg-yellow-100 text-yellow-700',
+                borderColorClass: 'border-yellow-400'
+            },
+            {
+                id: 'admin',
+                title: 'Panel Administrativo',
+                description: 'Gestión y reportes (Coordinación)',
+                icon: '⚙️',
+                link: 'admin.html',
+                statusText: 'Restringido',
+                statusColor: 'bg-slate-100 text-slate-700',
+                borderColorClass: 'border-slate-400'
+            }
+        ];
+
+        // --- COMPONENTE TARJETA DE SERVICIO ---
+        const ServiceCard = ({ option, style }) => (
+            <a 
+                href={option.link}
+                className={`
+                    group relative flex flex-col h-full bg-white rounded-xl shadow-sm hover:shadow-xl 
+                    transition-all duration-300 border-2 border-transparent hover:border-opacity-50 overflow-hidden
+                    ${option.borderColorClass} hover:-translate-y-1
+                `}
+                style={style}
+            >
+                {/* Badge */}
+                {option.badge && (
+                    <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg z-10 shadow-sm animate-pulse">
+                        {option.badge}
+                    </div>
+                )}
+
+                <div className="p-5 flex flex-col flex-grow relative z-0">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="text-4xl group-hover:scale-110 transition-transform duration-300 bg-slate-50 p-2 rounded-lg">
+                            {option.icon}
+                        </div>
+                    </div>
+                    
+                    <h3 className="text-lg font-bold text-gray-800 mb-2 leading-tight group-hover:text-blue-700 transition-colors">
+                        {option.title}
+                    </h3>
+                    
+                    <p className="text-sm text-gray-500 mb-4 flex-grow">
+                        {option.description}
+                    </p>
+
+                    <div className="mt-auto pt-3 border-t border-gray-100 flex justify-between items-center">
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide ${option.statusColor}`}>
+                            {option.statusText}
+                        </span>
+                        <span className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0">
+                            →
+                        </span>
+                    </div>
+                </div>
+            </a>
+        );
+
+        // --- COMPONENTE HOME ---
+        const Home = () => {
+            const [currentQuote, setCurrentQuote] = useState(quotes[0]);
+            const [fadeQuote, setFadeQuote] = useState(true);
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setFadeQuote(false);
+                    setTimeout(() => {
+                        setCurrentQuote(prev => {
+                            const idx = quotes.indexOf(prev);
+                            return quotes[(idx + 1) % quotes.length];
+                        });
+                        setFadeQuote(true);
+                    }, 500);
+                }, 10000);
+                return () => clearInterval(interval);
+            }, []);
+
+            return (
+                <div id="inicio" className="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
+                    
+                    {/* Sección de Frase */}
+                    <section className="max-w-4xl mx-auto mb-8 animate-fadeInUp">
+                        <div className={`
+                            rounded-lg p-6 text-center transition-opacity duration-500 ease-in-out
+                            bg-gradient-to-br from-indigo-50/50 to-purple-50/50 border-l-4 border-indigo-400
+                            ${fadeQuote ? 'opacity-100' : 'opacity-0'}
+                        `}>
+                            <p className="text-base sm:text-lg italic text-gray-700 leading-relaxed">
+                                "{currentQuote.text}"
+                            </p>
+                            <p className="text-sm sm:text-base text-gray-600 text-right mt-2">
+                                - {currentQuote.author}
+                            </p>
+                        </div>
+                    </section>
+
+                    {/* Título Principal */}
+                    <div id="servicios" className="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32">
+                        <div className="flex items-baseline justify-center gap-4 sm:gap-6 mb-4">
+                            <div className="inline-block">
+                                <div className="text-6xl sm:text-7xl md:text-8xl animate-bounce">🎓</div>
+                            </div>
+                            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800">
+                                Servicios Disponibles
+                            </h2>
+                        </div>
+                        <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+                            Seleccione la opción que necesite para acceder a los diferentes servicios de actualización.
+                        </p>
+                    </div>
+
+                    {/* Grid de Servicios */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto mb-12">
+                        {services.map((service, index) => (
+                            <div key={service.id} className="animate-fadeInUp" style={{ animationDelay: `${index * 0.1}s` }}>
+                                <ServiceCard option={service} />
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Información Importante */}
+                    <div id="informacion" className="max-w-4xl mx-auto mb-8 scroll-mt-32">
+                        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="text-3xl sm:text-4xl">ℹ️</div>
+                                <h3 className="text-xl sm:text-2xl font-bold text-gray-800">
+                                    Información Importante
+                                </h3>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="flex items-start gap-3 bg-green-50 p-4 rounded-lg">
+                                    <div className="text-2xl flex-shrink-0">📚</div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-gray-800">Límite de cursos</p>
+                                        <p className="text-xs text-gray-600 mt-1">Hasta 3 cursos por periodo sin empalme de horarios.</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-start gap-3 bg-purple-50 p-4 rounded-lg">
+                                    <div className="text-2xl flex-shrink-0">📝</div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-gray-800">Formatos</p>
+                                        <p className="text-xs text-gray-600 mt-1">CVU y Ficha en PDF. Los demás firmados en la oficina.</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-start gap-3 bg-red-50 p-4 rounded-lg">
+                                    <div className="text-2xl flex-shrink-0">🗓️</div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-gray-800">Periodo Actual</p>
+                                        <p className="text-xs text-gray-600 mt-1">Enero - Junio 2026</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Enlaces y Contacto */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                        {/* Enlaces */}
+                        <div id="enlaces" className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
+                            <h3 className="text-xl font-bold mb-4 text-center flex items-center justify-center gap-2">
+                                🔗 Enlaces Institucionales
+                            </h3>
+                            <div className="grid grid-cols-2 gap-3">
+                                {[
+                                    { icon: '🏛️', title: 'ITD', url: 'https://www.itdurango.edu.mx' },
+                                    { icon: '🎓', title: 'TecNM', url: 'https://www.tecnm.mx' },
+                                    { icon: '💻', title: 'MOOC', url: 'https://mooc.tecnm.mx/portal/' },
+                                    { icon: '📂', title: 'SGI', url: 'https://www.itdurango.edu.mx/sgi/' }
+                                ].map((link) => (
+                                    <a key={link.title} href={link.url} target="_blank" rel="noopener noreferrer" 
+                                       className="bg-white/10 hover:bg-white/20 rounded-lg p-3 text-center transition-all flex flex-col items-center">
+                                        <span className="text-2xl mb-1">{link.icon}</span>
+                                        <span className="font-bold text-xs">{link.title}</span>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Contacto */}
+                        <div id="contacto" className="bg-white rounded-2xl shadow-xl p-6 border-l-4 border-indigo-500 flex flex-col justify-center">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="text-4xl bg-indigo-50 p-3 rounded-full">💬</div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-800">¿Necesitas Ayuda?</h3>
+                                    <p className="text-sm text-gray-600">Contacta a la Coordinación</p>
+                                </div>
+                            </div>
+                            <a href="mailto:desarrollo.academico@itdurango.edu.mx" 
+                               className="w-full inline-flex items-center justify-center bg-indigo-600 text-white font-bold px-5 py-3 rounded-lg hover:bg-indigo-700 transition-colors shadow-md">
+                                <span className="mr-2">📧</span> Enviar Correo
+                            </a>
+                            <p className="text-xs text-center text-gray-400 mt-3">desarrollo.academico@itdurango.edu.mx</p>
+                        </div>
+                    </div>
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Home />);
+    </script>
 </body>
 </html>
