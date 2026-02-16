@@ -57,7 +57,7 @@
     </footer>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
         // --- CONFIGURACIÓN ---
         const CONFIG = {
@@ -250,11 +250,28 @@
                     ...prev,
                     fullName: (teacher.name || '').toUpperCase(),
                     curp: (teacher.curp || '').toUpperCase(),
-                    // NO SOBREESCRIBIR EMAIL AQUÍ
+                    // NO SOBREESCRIBIR EMAIL AQUÍ: El email es el identificador de sesión.
+                    // Sin embargo, si el usuario selecciona otro docente, cargamos sus datos para visualización.
                     gender: inferredGender || 'Mujer',
                     department: (teacher.dept && teacher.dept.length > 3) ? teacher.dept.toUpperCase() : prev.department,
                     level: teacher.level || prev.level
                 }));
+            };
+
+            // Manejo de checkboxes para nivel académico (Máx 2)
+            const handleLevelChange = (val) => {
+                const current = formData.level ? formData.level.split(',').filter(x => x) : [];
+                if (current.includes(val)) {
+                    // Remover
+                    const updated = current.filter(item => item !== val);
+                    setFormData({ ...formData, level: updated.join(',') });
+                } else {
+                    // Agregar si no excede límite
+                    if (current.length < 2) {
+                        const updated = [...current, val];
+                        setFormData({ ...formData, level: updated.join(',') });
+                    }
+                }
             };
 
             const validate = () => {
@@ -263,7 +280,7 @@
                 if (!formData.curp || formData.curp.length < 18) newErrors.curp = "CURP inválido (18 caracteres)";
                 if (!formData.email) newErrors.email = "Campo obligatorio";
                 if (!formData.department) newErrors.department = "Seleccione departamento";
-                if (!formData.level) newErrors.level = "Seleccione su nivel académico";
+                if (!formData.level) newErrors.level = "Seleccione al menos un nivel académico";
                 setErrors(newErrors);
                 return Object.keys(newErrors).length === 0;
             };
@@ -323,28 +340,36 @@
                         </div>
                         
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">Nivel Académico *</label>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">Nivel Académico (Máx. 2) *</label>
                             <div className="flex flex-wrap gap-4">
                                 {[
                                     { val: 'L', label: 'Licenciatura' },
                                     { val: 'M', label: 'Maestría' },
                                     { val: 'P', label: 'Doctorado' },
                                     { val: 'E', label: 'Especialidad' }
-                                ].map(opt => (
-                                    <label key={opt.val} className={`flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer transition-colors ${formData.level === opt.val ? 'bg-blue-50 border-blue-500 text-blue-700' : 'hover:bg-gray-50'}`}>
-                                        <input 
-                                            type="radio" 
-                                            name="level" 
-                                            value={opt.val} 
-                                            checked={formData.level === opt.val} 
-                                            onChange={e => setFormData({...formData, level: e.target.value})}
-                                            className="text-blue-600 focus:ring-blue-500"
-                                        />
-                                        <span className="text-sm font-medium">{opt.label}</span>
-                                    </label>
-                                ))}
+                                ].map(opt => {
+                                    const currentLevels = formData.level ? formData.level.split(',') : [];
+                                    const isChecked = currentLevels.includes(opt.val);
+                                    const isDisabled = !isChecked && currentLevels.length >= 2;
+
+                                    return (
+                                        <label key={opt.val} className={`flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer transition-colors ${isChecked ? 'bg-blue-50 border-blue-500 text-blue-700' : (isDisabled ? 'bg-gray-100 opacity-50 cursor-not-allowed' : 'hover:bg-gray-50')}`}>
+                                            <input 
+                                                type="checkbox" 
+                                                name="level" 
+                                                value={opt.val} 
+                                                checked={isChecked} 
+                                                disabled={isDisabled}
+                                                onChange={() => handleLevelChange(opt.val)}
+                                                className="text-blue-600 focus:ring-blue-500 rounded"
+                                            />
+                                            <span className="text-sm font-medium">{opt.label}</span>
+                                        </label>
+                                    );
+                                })}
                             </div>
                             {errors.level && <p className="text-red-500 text-xs mt-1">{errors.level}</p>}
+                            <p className="text-xs text-gray-400 mt-1">Selecciona hasta dos opciones.</p>
                         </div>
 
                         <div className="mt-8 flex justify-end">
@@ -737,6 +762,9 @@
             const [emailSent, setEmailSent] = useState(true);
             const [error, setError] = useState(null);
             
+            // Ref for teachers to access latest state in async callbacks without staleness
+            const teachersRef = useRef([]);
+
             // --- New State for tracking cancellations ---
             const [cancelledCoursesList, setCancelledCoursesList] = useState([]);
 
@@ -765,14 +793,16 @@
                     })));
                     
                     const tRows = parseCSV(tText);
-                    setTeachers(tRows.map(r => ({ 
+                    const parsedTeachers = tRows.map(r => ({ 
                         name: cleanStr(r[0]), 
                         curp: cleanStr(r[1]), 
                         email: cleanStr(r[2]), 
                         dept: cleanStr(r[3]), 
-                        gender: cleanStr(r[5]), // Columna F (Genero)
-                        level: cleanStr(r[6])   // Columna G (Nivel) - ASUMIENDO NUEVA COLUMNA
-                    })));
+                        gender: cleanStr(r[5]), 
+                        level: cleanStr(r[6])
+                    }));
+                    setTeachers(parsedTeachers);
+                    teachersRef.current = parsedTeachers; // Update ref immediately for auth
                 }).catch(() => setError("Error cargando datos."));
             }, []);
 
@@ -786,21 +816,32 @@
             };
 
             // --- AUTHENTICATION LOGIC ---
-            const handleLogin = (response) => {
+            // Memoize handleLogin or ensure it reads from ref to avoid closure issues with Google Button
+            const handleLogin = useCallback((response) => {
                 try {
                     const payload = JSON.parse(atob(response.credential.split('.')[1]));
                     const email = payload.email.toLowerCase();
                     const name = payload.name.toUpperCase();
                     
-                    // Buscar en la base de datos local (CSV de Teachers)
-                    const foundTeacher = teachers.find(t => 
+                    // Buscar en la base de datos local usando la REF para garantizar datos frescos
+                    // Filtramos por email y luego ordenamos para priorizar el registro que tenga CURP (si hay duplicados)
+                    const matches = teachersRef.current.filter(t => 
                         (t.email && t.email.toLowerCase().trim() === email)
                     );
+                    
+                    // Ordenar: primero los que tienen CURP
+                    matches.sort((a, b) => {
+                        const hasCurpA = a.curp && a.curp.length > 0 ? 1 : 0;
+                        const hasCurpB = b.curp && b.curp.length > 0 ? 1 : 0;
+                        return hasCurpB - hasCurpA;
+                    });
+                    
+                    const foundTeacher = matches[0];
 
                     if (foundTeacher) {
                         setFormData({
                             fullName: foundTeacher.name.toUpperCase(),
-                            curp: foundTeacher.curp.toUpperCase(),
+                            curp: foundTeacher.curp ? foundTeacher.curp.toUpperCase() : '',
                             email: email, 
                             department: foundTeacher.dept ? foundTeacher.dept.toUpperCase() : '',
                             gender: normalizeGender(foundTeacher.gender) || 'Mujer',
@@ -818,7 +859,7 @@
                 } catch (e) {
                     setError('Error al procesar el inicio de sesión.');
                 }
-            };
+            }, []); // No dependencies needed as we use ref
 
             // --- Logic for Modal Step 1 ---
             useEffect(() => {
