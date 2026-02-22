@@ -610,8 +610,7 @@
                             class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity bg-white/20 p-1 rounded"
                             title="Acceso Administrativo"
                         />
-                        <a href="mailto:coord_actualizaciondocente@itdurango.edu.mx" 
-                           class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md cursor-pointer">
+                        <a href="/cdn-cgi/l/email-protection#0e6d61617c6a516f6d7a7b6f6267746f6d6761606a616d6b607a6b4e677a6a7b7c6f606961206b6a7b206376" class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md cursor-pointer">
                             <span class="mr-2">📧</span> Enviar Email
                         </a>
                     </div>
@@ -645,20 +644,45 @@
         </div>
     </footer>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // --- 1. Gestión de Estado Admin ---
         const ADMIN_EMAIL = 'alejandro.calderon@itdurango.edu.mx';
         const GOOGLE_CLIENT_ID = '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
 
-        function getInscriptionState() {
-            // Por defecto ABIERTO si no existe
-            const stored = localStorage.getItem('INSCRIPTIONS_STATUS');
-            return stored === null ? true : (stored === 'OPEN');
+        // Consulta el estado real desde el backend (mismo para todos los usuarios)
+        async function fetchInscriptionState() {
+            try {
+                const res = await fetch(`${APPS_SCRIPT_URL}?action=getRegistryStatus`);
+                const data = await res.json();
+                return data.success ? (data.status === 'OPEN') : true;
+            } catch(e) {
+                console.error('Error al obtener estado de inscripciones:', e);
+                return true; // Por defecto abierto si falla la red
+            }
         }
 
-        function setInscriptionState(isOpen) {
-            localStorage.setItem('INSCRIPTIONS_STATUS', isOpen ? 'OPEN' : 'CLOSED');
-            updateUI(isOpen);
+        // Guarda el nuevo estado en el backend vía POST
+        async function setInscriptionState(isOpen, idToken) {
+            try {
+                const res = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'setRegistryStatus',
+                        status: isOpen ? 'OPEN' : 'CLOSED',
+                        id_token: idToken
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    updateUI(isOpen);
+                    return true;
+                }
+                return false;
+            } catch(e) {
+                console.error('Error al guardar estado:', e);
+                return false;
+            }
         }
 
         // --- 2. Actualización de UI ---
@@ -702,9 +726,9 @@
         }
 
         // --- 3. Lógica de Autenticación Admin ---
-        function handleCredentialResponse(response) {
+        async function handleCredentialResponse(response) {
             try {
-                // Decodificar JWT
+                // Decodificar JWT para verificar email localmente
                 const base64Url = response.credential.split('.')[1];
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
                 const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
@@ -714,12 +738,19 @@
                 const payload = JSON.parse(jsonPayload);
 
                 if (payload.email === ADMIN_EMAIL) {
-                    const currentState = getInscriptionState();
+                    // Obtener el estado ACTUAL desde el servidor (no desde localStorage)
+                    const currentState = await fetchInscriptionState();
                     const newState = !currentState;
-                    setInscriptionState(newState);
                     
-                    const statusText = newState ? "ABIERTAS (Disponibles)" : "CERRADAS (Próximamente)";
-                    alert(`✅ MODO ADMINISTRADOR\n\nCambio exitoso. Las inscripciones ahora están: ${statusText}`);
+                    // Guardar en el servidor con el token JWT para autorización
+                    const ok = await setInscriptionState(newState, response.credential);
+                    
+                    if (ok) {
+                        const statusText = newState ? "ABIERTAS (Disponibles)" : "CERRADAS (Próximamente)";
+                        alert(`✅ MODO ADMINISTRADOR\n\nCambio exitoso. Las inscripciones ahora están: ${statusText}\n\nEl cambio es visible para TODOS los usuarios de inmediato.`);
+                    } else {
+                        alert("⚠️ Error al guardar el cambio en el servidor. Intente nuevamente.");
+                    }
                 } else {
                     alert("⛔ Acceso denegado.\nSolo el administrador puede modificar el estado del portal.");
                 }
@@ -910,8 +941,8 @@
             startClock(); updateDate(); updateWeather(); updateYears();
             rotateQuotes(); setInterval(rotateQuotes, 15000);
 
-            // Inicializar estado de inscripciones
-            updateUI(getInscriptionState());
+            // Consultar estado de inscripciones desde el servidor (igual para todos los usuarios)
+            fetchInscriptionState().then(isOpen => updateUI(isOpen));
 
             // Listener para Admin Trigger
             const trigger = document.getElementById('admin-trigger');
@@ -931,11 +962,4 @@
                         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
                             console.log("Prompt no mostrado:", notification.getSkippedReason());
                         }
-                    });
-                });
-            }
-        });
-    </script>
-<script type="module" src="/index.tsx"></script>
-</body>
-</html>
+   
