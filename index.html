@@ -186,15 +186,15 @@
             background-color: rgba(99, 102, 241, 0.5);
             border-radius: 50%; pointer-events: none;
             transform: translate(-50%, -50%); z-index: 9999;
-            transition: width 0.2s, height 0.2s, background-color 0.2s, top 0.1s linear, left 0.1s linear;
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
         }
         #cursor-dot.active {
             width: 40px; height: 40px;
-            background-color: rgba(99, 102, 241, 0.2);
+            background-color: rgba(99, 102, 241, 0.35);
         }
         
         .dark #cursor-dot { background-color: rgba(165, 180, 252, 0.5); }
-        .dark #cursor-dot.active { background-color: rgba(165, 180, 252, 0.2); }
+        .dark #cursor-dot.active { background-color: rgba(165, 180, 252, 0.35); }
         
         #announcement-banner {
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -962,4 +962,3 @@
                         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
                             console.log("Prompt no mostrado:", notification.getSkippedReason());
                         }
-   
