@@ -102,8 +102,13 @@
     </footer>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
+
+        // ─── CONFIGURACIÓN ───────────────────────────────────────────────────────────
         const ADMIN_EMAIL = 'alejandro.calderon@itdurango.edu.mx';
+        // URL del Web App de Google Apps Script (la misma que ya usas en el portal)
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVzqYpXyQ1f8H2Uo6bWJ6RCwGqGt9EjK3mN5pL7dR4sT8vX2A0/exec';
+        // ─────────────────────────────────────────────────────────────────────────────
 
         const FORMATOS_DATA = [
             {
@@ -164,38 +169,82 @@
         ];
 
         const FormatosApp = () => {
-            const [downloadingId, setDownloadingId] = useState(null);
+            const [downloadingId, setDownloadingId]   = useState(null);
             const [isRegistryOpen, setIsRegistryOpen] = useState(true);
+            const [loadingStatus, setLoadingStatus]   = useState(true); // spinner mientras carga estado
+            const [savingStatus, setSavingStatus]     = useState(false); // spinner mientras guarda
 
+            // ── 1. LEER EL ESTADO REAL DEL SERVIDOR AL MONTAR ────────────────────────
             useEffect(() => {
-                // Inicializar estado desde localStorage
-                const stored = localStorage.getItem('PRE_REGISTRY_STATUS');
-                setIsRegistryOpen(stored === null ? true : (stored === 'OPEN'));
+                fetch(`${SCRIPT_URL}?action=getRegistryStatus&t=${Date.now()}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            setIsRegistryOpen(data.status === 'OPEN');
+                        }
+                    })
+                    .catch(err => console.error("Error leyendo estado del registro:", err))
+                    .finally(() => setLoadingStatus(false));
+            }, []);
 
-                // Exponer función global para el callback de Google
+            // ── 2. CALLBACK DE GOOGLE: GUARDAR NUEVO ESTADO EN EL SERVIDOR ───────────
+            useEffect(() => {
                 window.handleCredentialResponse = (response) => {
                     try {
+                        // Decodificar token solo para verificar el email en el cliente
                         const base64Url = response.credential.split('.')[1];
-                        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                        }).join(''));
-                        
+                        const base64    = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                        const jsonPayload = decodeURIComponent(
+                            atob(base64).split('').map(c =>
+                                '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+                            ).join('')
+                        );
                         const payload = JSON.parse(jsonPayload);
 
-                        if (payload.email === ADMIN_EMAIL) {
-                            const newState = !isRegistryOpen; // Toggle state based on current React state (might need ref if closure issue, but simple toggle here)
-                            // Better to use functional update or read from storage to be safe, but let's use the setter
-                            setIsRegistryOpen(prev => {
-                                const next = !prev;
-                                localStorage.setItem('PRE_REGISTRY_STATUS', next ? 'OPEN' : 'CLOSED');
-                                const statusText = next ? "ACTIVADO (Disponible)" : "DESACTIVADO (Cerrado)";
-                                alert(`✅ MODO ADMINISTRADOR\n\nCambio exitoso. El Pre-Registro ahora está: ${statusText}`);
-                                return next;
-                            });
-                        } else {
+                        if (payload.email !== ADMIN_EMAIL) {
                             alert("⛔ Acceso denegado.\nSolo el administrador puede modificar el estado.");
+                            return;
                         }
+
+                        // Calcular nuevo estado (toggle)
+                        setIsRegistryOpen(prev => {
+                            const next       = !prev;
+                            const nextStatus = next ? 'OPEN' : 'CLOSED';
+
+                            // ── GUARDAR EN EL SERVIDOR (no en localStorage) ──────────
+                            setSavingStatus(true);
+                            fetch(SCRIPT_URL, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    action:    'setRegistryStatus',
+                                    id_token:  response.credential, // token original para que el backend extraiga el email
+                                    status:    nextStatus
+                                })
+                            })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const statusText = next ? "ACTIVADO (Disponible)" : "DESACTIVADO (Cerrado)";
+                                    alert(`✅ MODO ADMINISTRADOR\n\nCambio guardado en el servidor.\nEl Pre-Registro ahora está: ${statusText}`);
+                                } else {
+                                    // Si el servidor rechazó, revertir el estado en la UI
+                                    setIsRegistryOpen(prev2 => !prev2);
+                                    alert("⛔ Error al guardar en el servidor:\n" + (data.message || 'Error desconocido'));
+                                }
+                            })
+                            .catch(err => {
+                                // Si hubo error de red, revertir
+                                setIsRegistryOpen(prev2 => !prev2);
+                                console.error("Error de red al guardar estado:", err);
+                                alert("⛔ Error de conexión al guardar el estado.\nVerifica tu conexión e intenta de nuevo.");
+                            })
+                            .finally(() => setSavingStatus(false));
+                            // ─────────────────────────────────────────────────────────
+
+                            return next; // actualizar UI inmediatamente (optimistic update)
+                        });
+
                     } catch (e) {
                         console.error("Error al procesar credencial", e);
                         alert("Error de autenticación.");
@@ -203,10 +252,12 @@
                 };
             }, []);
 
+            // ── 3. DISPARAR EL PROMPT DE GOOGLE ──────────────────────────────────────
             const handleAdminClick = () => {
+                if (savingStatus) return; // evitar doble clic mientras guarda
                 if (window.google) {
                     google.accounts.id.initialize({
-                        client_id: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', // Using same ID as index.html
+                        client_id: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
                         callback: window.handleCredentialResponse
                     });
                     google.accounts.id.prompt();
@@ -215,31 +266,25 @@
                 }
             };
 
+            // ── 4. DESCARGA DE ARCHIVOS ───────────────────────────────────────────────
             const handleDownload = async (event, formato) => {
                 event.preventDefault();
-                if (downloadingId) return; // Prevenir descargas múltiples
-                
+                if (downloadingId) return;
                 setDownloadingId(formato.id);
-                
                 try {
                     const response = await fetch(formato.url);
                     if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-                    
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
+                    const blob     = await response.blob();
+                    const url      = window.URL.createObjectURL(blob);
+                    const a        = document.createElement('a');
                     a.style.display = 'none';
-                    a.href = url;
-                    
-                    const filename = decodeURIComponent(formato.url.split('/').pop());
-                    a.download = filename;
-                    
+                    a.href          = url;
+                    const filename  = decodeURIComponent(formato.url.split('/').pop());
+                    a.download      = filename;
                     document.body.appendChild(a);
                     a.click();
-                    
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
-                    
                 } catch (error) {
                     console.error("Fallo la descarga:", error);
                     alert("No se pudo descargar el archivo. Por favor, verifique su conexión e intente de nuevo.");
@@ -248,6 +293,7 @@
                 }
             };
             
+            // ── 5. RENDER ─────────────────────────────────────────────────────────────
             return (
                 <main className="container mx-auto px-4 py-8 sm:py-12">
                     <div className="max-w-4xl mx-auto">
@@ -266,18 +312,23 @@
                                 </div>
                             </div>
                         </div>
+
+                        {/* Indicador de carga del estado */}
+                        {loadingStatus && (
+                            <div className="text-center py-4 text-blue-600 text-sm animate-pulse mb-4">
+                                ⏳ Verificando disponibilidad del registro...
+                            </div>
+                        )}
                         
                         {FORMATOS_DATA.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                                 {FORMATOS_DATA.map((formato, index) => {
-                                    const isHighlighted = formato.id === 'oficio_registro';
-                                    const isDownloading = downloadingId === formato.id;
-                                    const isDownloadingDoc = downloadingId === (formato.id + '_doc');
-                                    const isExternal = formato.url.includes('script.google.com');
-                                    
-                                    // Si es el registro y está cerrado, deshabilitar
-                                    const isRegistry = formato.id === 'oficio_registro';
-                                    const isDisabled = isRegistry && !isRegistryOpen;
+                                    const isHighlighted     = formato.id === 'oficio_registro';
+                                    const isDownloading     = downloadingId === formato.id;
+                                    const isDownloadingDoc  = downloadingId === (formato.id + '_doc');
+                                    const isExternal        = formato.url.includes('script.google.com');
+                                    const isRegistry        = formato.id === 'oficio_registro';
+                                    const isDisabled        = isRegistry && !isRegistryOpen;
 
                                     const cardClasses = isHighlighted 
                                         ? `format-card bg-amber-50 rounded-xl shadow-xl p-6 border-t-4 border-amber-500 flex flex-col h-full ${isDisabled ? 'opacity-60 grayscale' : ''}`
@@ -335,17 +386,23 @@
                              </div>
                         )}
                         
+                        {/* Botón de administración */}
                         <div className="mt-12 flex justify-center">
                             <button 
                                 onClick={handleAdminClick}
-                                className="opacity-50 hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-gray-100"
+                                disabled={savingStatus}
+                                className="opacity-50 hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-gray-100 disabled:cursor-wait"
                                 title="Administración de Pre-Registro"
                             >
-                                <img 
-                                    src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
-                                    alt="Admin Access" 
-                                    className="h-16 w-auto grayscale hover:grayscale-0 transition-all"
-                                />
+                                {savingStatus ? (
+                                    <div className="h-16 w-16 flex items-center justify-center text-2xl animate-spin">⏳</div>
+                                ) : (
+                                    <img 
+                                        src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
+                                        alt="Admin Access" 
+                                        className="h-16 w-auto grayscale hover:grayscale-0 transition-all"
+                                    />
+                                )}
                             </button>
                         </div>
                     </div>
