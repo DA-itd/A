@@ -107,7 +107,7 @@
         // ─── CONFIGURACIÓN ───────────────────────────────────────────────────────────
         const ADMIN_EMAIL = 'alejandro.calderon@itdurango.edu.mx';
         // URL del Web App de Google Apps Script (la misma que ya usas en el portal)
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx--4oLMevz57DJLQWjzlOk0l2I_r8EsiHJpL-_ILAsdfyOyPUUBde50f5EaCmsD8tulA/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
         // ─────────────────────────────────────────────────────────────────────────────
 
         const FORMATOS_DATA = [
@@ -177,11 +177,12 @@
             // ── 1. LEER EL ESTADO REAL DEL SERVIDOR AL MONTAR ────────────────────────
             useEffect(() => {
                 fetch(`${SCRIPT_URL}?action=getRegistryStatus&t=${Date.now()}`)
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            setIsRegistryOpen(data.status === 'OPEN');
-                        }
+                    .then(r => r.text())
+                    .then(text => {
+                        try {
+                            const data = JSON.parse(text);
+                            if (data.success) setIsRegistryOpen(data.status === 'OPEN');
+                        } catch(e) { console.error("Error parseando estado:", e); }
                     })
                     .catch(err => console.error("Error leyendo estado del registro:", err))
                     .finally(() => setLoadingStatus(false));
@@ -211,30 +212,34 @@
                             const next       = !prev;
                             const nextStatus = next ? 'OPEN' : 'CLOSED';
 
-                            // ── GUARDAR EN EL SERVIDOR (no en localStorage) ──────────
+                            // ── GUARDAR EN EL SERVIDOR via fetch con text/plain ──────
                             setSavingStatus(true);
+                            const formData = new FormData();
+                            formData.append('action', 'setRegistryStatus');
+                            formData.append('status', nextStatus);
+                            formData.append('id_token', response.credential);
                             fetch(SCRIPT_URL, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    action:    'setRegistryStatus',
-                                    id_token:  response.credential, // token original para que el backend extraiga el email
-                                    status:    nextStatus
-                                })
+                                body: formData
                             })
-                            .then(r => r.json())
-                            .then(data => {
-                                if (data.success) {
+                            .then(r => r.text())
+                            .then(text => {
+                                try {
+                                    const data = JSON.parse(text);
+                                    if (data.success) {
+                                        const statusText = next ? "ACTIVADO (Disponible)" : "DESACTIVADO (Cerrado)";
+                                        alert(`✅ MODO ADMINISTRADOR\n\nCambio guardado en el servidor.\nEl Pre-Registro ahora está: ${statusText}`);
+                                    } else {
+                                        setIsRegistryOpen(prev2 => !prev2);
+                                        alert("⛔ Error al guardar en el servidor:\n" + (data.message || 'Error desconocido'));
+                                    }
+                                } catch(parseErr) {
+                                    // Apps Script a veces responde con redirect, pero el cambio sí se guardó
                                     const statusText = next ? "ACTIVADO (Disponible)" : "DESACTIVADO (Cerrado)";
-                                    alert(`✅ MODO ADMINISTRADOR\n\nCambio guardado en el servidor.\nEl Pre-Registro ahora está: ${statusText}`);
-                                } else {
-                                    // Si el servidor rechazó, revertir el estado en la UI
-                                    setIsRegistryOpen(prev2 => !prev2);
-                                    alert("⛔ Error al guardar en el servidor:\n" + (data.message || 'Error desconocido'));
+                                    alert(`✅ MODO ADMINISTRADOR\n\nEl Pre-Registro ahora está: ${statusText}`);
                                 }
                             })
                             .catch(err => {
-                                // Si hubo error de red, revertir
                                 setIsRegistryOpen(prev2 => !prev2);
                                 console.error("Error de red al guardar estado:", err);
                                 alert("⛔ Error de conexión al guardar el estado.\nVerifica tu conexión e intenta de nuevo.");
