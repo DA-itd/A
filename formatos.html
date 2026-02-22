@@ -16,6 +16,8 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Identity Services para la función de Admin -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
@@ -100,9 +102,20 @@
     </footer>
 
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
+        const ADMIN_EMAIL = 'alejandro.calderon@itdurango.edu.mx';
 
         const FORMATOS_DATA = [
+            {
+                id: 'oficio_registro',
+                title: 'Registra aquí tu curso-taller',
+                description: 'Plataforma de registro y descarga del oficio oficial.',
+                category: 'Generales',
+                fileType: 'Plataforma Web',
+                icon: '✉️',
+                url: 'https://script.google.com/macros/s/AKfycbx--4oLMevz57DJLQWjzlOk0l2I_r8EsiHJpL-_ILAsdfyOyPUUBde50f5EaCmsD8tulA/exec',
+                downloadUrl: 'https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-07-Oficio%20de%20registro%20de%20cursos%202025.docx'
+            },
             {
                 id: 'cvu',
                 title: 'CVU - Curriculum del Instructor',
@@ -140,15 +153,6 @@
                 url: 'https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-06%20Formatos%20de%20Criterios%20para%20Seleccionar%20Instructores.docx'
             },
             {
-                id: 'oficio_registro',
-                title: 'Oficio de Registro de Cursos',
-                description: 'Oficio oficial para el registro de los cursos de actualización docente.',
-                category: 'Generales',
-                fileType: 'Word (.docx)',
-                icon: '✉️',
-                url: 'https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-07-Oficio%20de%20registro%20de%20cursos%202025.docx'
-            },
-            {
                 id: 'lista_asistencia',
                 title: 'Lista de Asistencia',
                 description: 'Formato oficial para el registro de asistencia de los participantes a los cursos.',
@@ -161,6 +165,55 @@
 
         const FormatosApp = () => {
             const [downloadingId, setDownloadingId] = useState(null);
+            const [isRegistryOpen, setIsRegistryOpen] = useState(true);
+
+            useEffect(() => {
+                // Inicializar estado desde localStorage
+                const stored = localStorage.getItem('PRE_REGISTRY_STATUS');
+                setIsRegistryOpen(stored === null ? true : (stored === 'OPEN'));
+
+                // Exponer función global para el callback de Google
+                window.handleCredentialResponse = (response) => {
+                    try {
+                        const base64Url = response.credential.split('.')[1];
+                        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                        }).join(''));
+                        
+                        const payload = JSON.parse(jsonPayload);
+
+                        if (payload.email === ADMIN_EMAIL) {
+                            const newState = !isRegistryOpen; // Toggle state based on current React state (might need ref if closure issue, but simple toggle here)
+                            // Better to use functional update or read from storage to be safe, but let's use the setter
+                            setIsRegistryOpen(prev => {
+                                const next = !prev;
+                                localStorage.setItem('PRE_REGISTRY_STATUS', next ? 'OPEN' : 'CLOSED');
+                                const statusText = next ? "ACTIVADO (Disponible)" : "DESACTIVADO (Cerrado)";
+                                alert(`✅ MODO ADMINISTRADOR\n\nCambio exitoso. El Pre-Registro ahora está: ${statusText}`);
+                                return next;
+                            });
+                        } else {
+                            alert("⛔ Acceso denegado.\nSolo el administrador puede modificar el estado.");
+                        }
+                    } catch (e) {
+                        console.error("Error al procesar credencial", e);
+                        alert("Error de autenticación.");
+                    }
+                };
+            }, []);
+
+            const handleAdminClick = () => {
+                if (window.google) {
+                    google.accounts.id.initialize({
+                        client_id: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', // Using same ID as index.html
+                        callback: window.handleCredentialResponse
+                    });
+                    google.accounts.id.prompt();
+                } else {
+                    alert("El servicio de autenticación de Google no está listo. Intente recargar la página.");
+                }
+            };
 
             const handleDownload = async (event, formato) => {
                 event.preventDefault();
@@ -219,8 +272,15 @@
                                 {FORMATOS_DATA.map((formato, index) => {
                                     const isHighlighted = formato.id === 'oficio_registro';
                                     const isDownloading = downloadingId === formato.id;
+                                    const isDownloadingDoc = downloadingId === (formato.id + '_doc');
+                                    const isExternal = formato.url.includes('script.google.com');
+                                    
+                                    // Si es el registro y está cerrado, deshabilitar
+                                    const isRegistry = formato.id === 'oficio_registro';
+                                    const isDisabled = isRegistry && !isRegistryOpen;
+
                                     const cardClasses = isHighlighted 
-                                        ? "format-card bg-amber-50 rounded-xl shadow-xl p-6 border-t-4 border-amber-500 flex flex-col h-full"
+                                        ? `format-card bg-amber-50 rounded-xl shadow-xl p-6 border-t-4 border-amber-500 flex flex-col h-full ${isDisabled ? 'opacity-60 grayscale' : ''}`
                                         : "format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-indigo-500 flex flex-col h-full";
                                     
                                     const animationDelay = { animationDelay: `${index * 100}ms` };
@@ -228,8 +288,8 @@
                                     return (
                                         <div key={formato.id} className="relative animate-fadeIn" style={animationDelay}>
                                             {isHighlighted && (
-                                                <div className="absolute top-0 right-0 mt-3 mr-3 z-10 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
-                                                    MÁS USADO
+                                                <div className={`absolute top-0 right-0 mt-3 mr-3 z-10 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg ${isDisabled ? 'bg-gray-500' : 'bg-amber-500'}`}>
+                                                    {isDisabled ? 'CERRADO' : 'MÁS USADO'}
                                                 </div>
                                             )}
                                             <div className={cardClasses}>
@@ -241,11 +301,29 @@
                                                 <p className="text-xs text-gray-500 mb-4 font-mono bg-gray-100 px-2 py-1 rounded inline-block">
                                                     {formato.fileType}
                                                 </p>
-                                                <a href={formato.url}
-                                                   onClick={(e) => handleDownload(e, formato)}
-                                                   className={`block w-full mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors flex items-center justify-center gap-2 ${isDownloading ? 'opacity-75 cursor-wait' : ''}`}>
-                                                    <span>{isDownloading ? '⏳' : '⬇️'}</span> {isDownloading ? 'Descargando...' : 'Descargar'}
-                                                </a>
+                                                
+                                                {(!isRegistry || isRegistryOpen) ? (
+                                                    <a href={formato.url}
+                                                       target={isExternal ? "_blank" : "_self"}
+                                                       rel={isExternal ? "noopener noreferrer" : ""}
+                                                       onClick={(e) => !isExternal && handleDownload(e, formato)}
+                                                       className={`block w-full mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors flex items-center justify-center gap-2 ${isDownloading ? 'opacity-75 cursor-wait' : ''}`}>
+                                                        <span>{isDownloading ? '⏳' : (isExternal ? '🔗' : '⬇️')}</span> 
+                                                        {isDownloading ? 'Descargando...' : (isExternal ? 'Abrir' : 'Descargar')}
+                                                    </a>
+                                                ) : (
+                                                    <button disabled className="block w-full mt-auto bg-gray-400 text-white font-bold py-3 px-4 rounded-lg text-center cursor-not-allowed flex items-center justify-center gap-2">
+                                                        <span>🔒</span> No Disponible
+                                                    </button>
+                                                )}
+                                                
+                                                {formato.downloadUrl && (
+                                                    <a href={formato.downloadUrl}
+                                                       onClick={(e) => handleDownload(e, { ...formato, url: formato.downloadUrl, id: formato.id + '_doc' })}
+                                                       className={`block w-full mt-2 bg-white border-2 border-indigo-100 hover:border-indigo-200 text-indigo-600 font-bold py-2 px-4 rounded-lg text-center transition-colors text-sm flex items-center justify-center gap-2 ${isDownloadingDoc ? 'opacity-75 cursor-wait' : ''}`}>
+                                                        <span>{isDownloadingDoc ? '⏳' : '📄'}</span> {isDownloadingDoc ? 'Descargando...' : 'Descargar Formato Word'}
+                                                    </a>
+                                                )}
                                             </div>
                                         </div>
                                     );
@@ -256,6 +334,20 @@
                                 <p className="text-gray-600">No hay formatos disponibles en este momento.</p>
                              </div>
                         )}
+                        
+                        <div className="mt-12 flex justify-center">
+                            <button 
+                                onClick={handleAdminClick}
+                                className="opacity-50 hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-gray-100"
+                                title="Administración de Pre-Registro"
+                            >
+                                <img 
+                                    src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
+                                    alt="Admin Access" 
+                                    className="h-16 w-auto grayscale hover:grayscale-0 transition-all"
+                                />
+                            </button>
+                        </div>
                     </div>
                 </main>
             );
