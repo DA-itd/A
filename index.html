@@ -1111,7 +1111,18 @@
     function renderCursos(cursos) {
         const body = document.getElementById('modal-cursos-body');
         if (!cursos.length) {
-            body.innerHTML = '<div class="text-center py-12"><p class="text-4xl mb-3">📭</p><p class="text-gray-500 font-medium">No hay cursos registrados en este periodo.</p></div>';
+            body.innerHTML = `
+                <div style="text-align:center;padding:48px 24px;">
+                    <div style="font-size:56px;margin-bottom:16px;">🗓️</div>
+                    <p style="font-size:17px;font-weight:700;color:#1e293b;margin:0 0 8px;">Sin cursos en este momento</p>
+                    <p style="font-size:13px;color:#64748b;line-height:1.6;max-width:300px;margin:0 auto 20px;">
+                        El periodo actual ha concluido o aún no se han registrado cursos para el próximo periodo.
+                    </p>
+                    <div style="display:inline-flex;align-items:center;gap:8px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:10px 18px;">
+                        <span style="font-size:16px;">✨</span>
+                        <span style="font-size:12px;font-weight:600;color:#15803d;">Pronto se publicarán los cursos del siguiente periodo</span>
+                    </div>
+                </div>`;
             return;
         }
 
