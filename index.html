@@ -713,6 +713,8 @@
                 desc.classList.add('text-rose-600', 'dark:text-rose-400');
                 
                 badge.style.display = "block";
+                badge.style.background = "";
+                badge.textContent = "¡ABIERTO!";
                 
                 status.className = "inline-block bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 text-xs font-semibold px-3 py-1 rounded-full";
                 status.textContent = "✓ Disponible";
@@ -726,10 +728,14 @@
                 desc.classList.remove('text-rose-600', 'dark:text-rose-400');
                 desc.classList.add('text-gray-500');
                 
-                badge.style.display = "none";
+                badge.style.display = "block";
+                badge.style.background = "";
+                badge.textContent = "¡ABIERTO!";
+                badge.style.background = "#6b7280";
+                badge.textContent = "🔒 CERRADO";
                 
-                status.className = "inline-block bg-gray-200 text-gray-500 text-xs font-semibold px-3 py-1 rounded-full";
-                status.textContent = "Próximamente";
+                status.className = "inline-block bg-red-100 text-red-600 text-xs font-semibold px-3 py-1 rounded-full";
+                status.textContent = "✗ No disponible";
             }
         }
 
