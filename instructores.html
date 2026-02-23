@@ -657,12 +657,10 @@
                 }
 
                 try {
-                    const evidenceFilesData = await Promise.all(evidenceFiles.map((file, index) => {
-                        // Extraer extensión real del archivo
-                        const ext = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : 'jpg';
-                        const safeName = evidenceForm.instructorName.replace(/\s+/g, '_').toUpperCase();
-                        const customFileName = `Evidencia_${safeName}_${index + 1}.${ext}`;
-                        return fileToFileObject(file, customFileName);
+                    const evidenceFilesData = await Promise.all(evidenceFiles.map((file) => {
+                        // Solo mandamos el nombre original del archivo
+                        // El code.gs construye el nombre final en Drive
+                        return fileToFileObject(file, file.name);
                     }));
                     
                     await submitEvidence({
@@ -886,7 +884,7 @@
                 return (
                     <form onSubmit={handleEvidenceSubmit} noValidate>
                         <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg mb-6 text-xs sm:text-sm">
-                            <p>Suba hasta 6 archivos (máx 5MB cada uno). Formatos: PDF o imágenes.</p>
+                            <p>Suba hasta 6 archivos (máx 1MB cada uno). Formatos: PDF o imágenes.</p>
                         </div>
                         
                         {evidenceStatus.error && (
