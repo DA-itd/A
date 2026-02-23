@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -144,6 +143,20 @@
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        };
+
+        // Returns {base64, mimeType, fileName} object preserving the real file type
+        const fileToFileObject = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve({
+                    base64:   reader.result,           // full data URL (Apps Script extracts raw bytes)
+                    mimeType: file.type || 'application/octet-stream',
+                    fileName: file.name
+                });
                 reader.onerror = error => reject(error);
             });
         };
@@ -318,7 +331,7 @@
                             }
                         }}
                         placeholder={placeholder || "Escriba su nombre"}
-                        className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base"
+                        className="mt-1 block w-full px-4 py-2.5 bg-white border-2 border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 text-sm transition-all"
                         required={required}
                         autoComplete="off"
                     />
@@ -331,7 +344,7 @@
                                         e.preventDefault();
                                         handleSelect(teacher);
                                     }}
-                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm sm:text-base"
+                                    className="px-4 py-2.5 hover:bg-indigo-50 cursor-pointer text-sm font-medium text-slate-700 transition-colors border-b border-slate-50 last:border-0"
                                 >
                                     {teacher.nombreCompleto}
                                 </li>
@@ -517,7 +530,6 @@
             // Proposal Form State
             const [proposalForm, setProposalForm] = useState({ 
                 instructorName: '', 
-                instructorEmail: '', 
                 courseName: '', 
                 courseId: '' 
             });
@@ -535,7 +547,6 @@
             // Evidence Form State
             const [evidenceForm, setEvidenceForm] = useState({ 
                 instructorName: '', 
-                instructorEmail: '', 
                 courseName: '',
                 courseId: ''
             });
@@ -582,16 +593,14 @@
             const handleProposalTeacherSelect = (teacher) => {
                 setProposalForm({
                     ...proposalForm,
-                    instructorName: teacher.nombreCompleto.toUpperCase(),
-                    instructorEmail: (teacher.email || '').toLowerCase()
+                    instructorName: teacher.nombreCompleto.toUpperCase()
                 });
             };
             
             const handleEvidenceTeacherSelect = (teacher) => {
                 setEvidenceForm({
                     ...evidenceForm,
-                    instructorName: teacher.nombreCompleto.toUpperCase(),
-                    instructorEmail: (teacher.email || '').toLowerCase()
+                    instructorName: teacher.nombreCompleto.toUpperCase()
                 });
             };
 
@@ -604,7 +613,7 @@
                     return;
                 }
 
-                if (!proposalForm.instructorName || !proposalForm.instructorEmail || !proposalForm.courseName || !cvuFile || !fichaFile) {
+                if (!proposalForm.instructorName || !proposalForm.courseName || !cvuFile || !fichaFile) {
                     setProposalStatus({ isSubmitting: false, error: 'Todos los campos son obligatorios', success: null, progress: null });
                     return;
                 }
@@ -642,20 +651,20 @@
                     return;
                 }
 
-                if (!evidenceForm.instructorName || !evidenceForm.instructorEmail || !evidenceForm.courseName) {
+                if (!evidenceForm.instructorName || !evidenceForm.courseName) {
                     setEvidenceStatus({ isSubmitting: false, error: 'Todos los campos son obligatorios', success: null });
                     return;
                 }
 
                 try {
-                    const evidenceFilesBase64 = await Promise.all(evidenceFiles.map(file => fileToBase64(file)));
+                    const evidenceFilesData = await Promise.all(evidenceFiles.map(file => fileToFileObject(file)));
                     
                     await submitEvidence({
                         instructorName: evidenceForm.instructorName,
-                        instructorEmail: evidenceForm.instructorEmail,
+                        instructorEmail: evidenceForm.instructorEmail || '',
                         courseName: evidenceForm.courseName,
                         courseId: evidenceForm.courseId,
-                        evidenceFiles: evidenceFilesBase64
+                        evidenceFiles: evidenceFilesData
                     });
 
                     setEvidenceStatus({ isSubmitting: false, error: null, success: '¡Evidencias enviadas con éxito! ✅' });
@@ -729,67 +738,79 @@
                         
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Nombre Completo *</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                    👤 Nombre del Instructor *
+                                </label>
                                 <AutocompleteInput
                                     teachers={teachers}
                                     onSelect={handleProposalTeacherSelect}
                                     value={proposalForm.instructorName}
                                     onChange={(e) => setProposalForm(prev => ({ ...prev, instructorName: e.target.value.toUpperCase() }))}
                                     name="proposalInstructorName"
+                                    placeholder="Escriba su nombre completo"
                                     required
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Email *</label>
-                                <input
-                                    type="email"
-                                    value={proposalForm.instructorEmail}
-                                    onChange={(e) => setProposalForm(prev => ({ ...prev, instructorEmail: e.target.value.toLowerCase() }))}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-sm sm:text-base"
-                                    required
-                                    placeholder="email@itdurango.edu.mx"
                                 />
                             </div>
                             
                             <div>
                                 <fieldset>
-                                    <legend className="block text-sm font-medium text-gray-700 mb-4">Curso a Ofrecer *</legend>
+                                    <legend className="block text-sm font-semibold text-slate-700 mb-3">
+                                        📚 Selecciona el Curso a Ofrecer *
+                                    </legend>
                                     {courses.length === 0 ? (
-                                        <p className="text-red-500 text-sm">No hay cursos disponibles.</p>
+                                        <div className="text-center py-8 bg-slate-50 rounded-xl border border-slate-200">
+                                            <p className="text-slate-400 text-sm">No hay cursos disponibles en este momento.</p>
+                                        </div>
                                     ) : (
-                                        Object.entries(groupedCourses).map(([period, data]) => (
-                                            <div key={period} className="mb-6">
-                                                <h4 className="text-sm sm:text-md font-semibold text-gray-600 border-b pb-2 mb-4">
-                                                    {data.dates ? `${period.replace(/_/g, ' ')} | ${data.dates}` : period.replace(/_/g, ' ')}
-                                                </h4>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                                    {data.courses.map(course => {
-                                                        const isSelected = proposalForm.courseName === course.name;
-                                                        return (
-                                                            <div key={course.id} className="relative">
-                                                                <input
-                                                                    type="radio"
-                                                                    id={`proposal-course-${course.id}`}
-                                                                    name="course-selection"
-                                                                    checked={isSelected}
-                                                                    onChange={() => setProposalForm(prev => ({ ...prev, courseName: course.name, courseId: course.id }))}
-                                                                    className="sr-only peer"
-                                                                />
-                                                                <label
-                                                                    htmlFor={`proposal-course-${course.id}`}
-                                                                    className={`block p-3 rounded-lg border transition-all hover:shadow-md cursor-pointer ${
-                                                                        course.period === 'PERIODO_1' ? 'border-teal-400 bg-teal-50' : 'border-indigo-400 bg-indigo-50'
-                                                                    } peer-checked:ring-2 peer-checked:ring-indigo-500`}
-                                                                >
-                                                                    <h3 className="font-bold text-xs sm:text-sm">{course.name}</h3>
-                                                                </label>
-                                                            </div>
-                                                        );
-                                                    })}
+                                        Object.entries(groupedCourses).map(([period, data], pIdx) => {
+                                            const periodColors = [
+                                                { header: 'from-violet-600 to-indigo-600', dot: 'bg-violet-400', ring: 'ring-violet-500', checked: 'border-violet-500 bg-violet-50 shadow-violet-100', hover: 'hover:border-violet-300 hover:bg-violet-50/50', normal: 'border-slate-200 bg-white' },
+                                                { header: 'from-emerald-600 to-teal-600', dot: 'bg-emerald-400', ring: 'ring-emerald-500', checked: 'border-emerald-500 bg-emerald-50 shadow-emerald-100', hover: 'hover:border-emerald-300 hover:bg-emerald-50/50', normal: 'border-slate-200 bg-white' },
+                                                { header: 'from-amber-500 to-orange-500', dot: 'bg-amber-400', ring: 'ring-amber-500', checked: 'border-amber-500 bg-amber-50 shadow-amber-100', hover: 'hover:border-amber-300 hover:bg-amber-50/50', normal: 'border-slate-200 bg-white' },
+                                                { header: 'from-rose-600 to-pink-600', dot: 'bg-rose-400', ring: 'ring-rose-500', checked: 'border-rose-500 bg-rose-50 shadow-rose-100', hover: 'hover:border-rose-300 hover:bg-rose-50/50', normal: 'border-slate-200 bg-white' },
+                                            ];
+                                            const col = periodColors[pIdx % periodColors.length];
+                                            return (
+                                                <div key={period} className="mb-6">
+                                                    <div className={`inline-flex items-center gap-2 bg-gradient-to-r ${col.header} text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-sm`}>
+                                                        <span className={`w-2 h-2 rounded-full ${col.dot} opacity-80`}></span>
+                                                        {data.dates ? `${period.replace(/_/g, ' ')} · ${data.dates}` : period.replace(/_/g, ' ')}
+                                                    </div>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                                        {data.courses.map(course => {
+                                                            const isSelected = proposalForm.courseName === course.name;
+                                                            return (
+                                                                <div key={course.id} className="relative">
+                                                                    <input
+                                                                        type="radio"
+                                                                        id={`proposal-course-${course.id}`}
+                                                                        name="course-selection"
+                                                                        checked={isSelected}
+                                                                        onChange={() => setProposalForm(prev => ({ ...prev, courseName: course.name, courseId: course.id }))}
+                                                                        className="sr-only peer"
+                                                                    />
+                                                                    <label
+                                                                        htmlFor={`proposal-course-${course.id}`}
+                                                                        className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer shadow-sm hover:shadow-md ${
+                                                                            isSelected
+                                                                                ? `${col.checked} shadow-md ring-2 ${col.ring} ring-offset-1`
+                                                                                : `${col.normal} ${col.hover}`
+                                                                        }`}
+                                                                    >
+                                                                        <span className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                                                            isSelected ? `border-current bg-current` : 'border-slate-300'
+                                                                        }`}>
+                                                                            {isSelected && <span className="w-2 h-2 rounded-full bg-white block"></span>}
+                                                                        </span>
+                                                                        <span className="font-semibold text-sm text-slate-800 leading-snug">{course.name}</span>
+                                                                    </label>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))
+                                            );
+                                        })
                                     )}
                                 </fieldset>
                             </div>
@@ -876,67 +897,79 @@
                         
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Nombre *</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                    👤 Nombre del Instructor *
+                                </label>
                                 <AutocompleteInput
                                     teachers={teachers}
                                     onSelect={handleEvidenceTeacherSelect}
                                     value={evidenceForm.instructorName}
                                     onChange={(e) => setEvidenceForm(prev => ({ ...prev, instructorName: e.target.value.toUpperCase() }))}
                                     name="evidenceInstructorName"
+                                    placeholder="Escriba su nombre completo"
                                     required
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Email *</label>
-                                <input
-                                    type="email"
-                                    value={evidenceForm.instructorEmail}
-                                    onChange={(e) => setEvidenceForm(prev => ({ ...prev, instructorEmail: e.target.value.toLowerCase() }))}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-sm sm:text-base"
-                                    required
-                                    placeholder="email@itdurango.edu.mx"
                                 />
                             </div>
                             
                             <div>
                                 <fieldset>
-                                    <legend className="block text-sm font-medium text-gray-700 mb-4">Curso Impartido *</legend>
+                                    <legend className="block text-sm font-semibold text-slate-700 mb-3">
+                                        🎓 Selecciona el Curso Impartido *
+                                    </legend>
                                     {courses.length === 0 ? (
-                                        <p className="text-red-500 text-sm">No hay cursos disponibles.</p>
+                                        <div className="text-center py-8 bg-slate-50 rounded-xl border border-slate-200">
+                                            <p className="text-slate-400 text-sm">No hay cursos disponibles en este momento.</p>
+                                        </div>
                                     ) : (
-                                        Object.entries(groupedCourses).map(([period, data]) => (
-                                            <div key={period} className="mb-6">
-                                                <h4 className="text-sm sm:text-md font-semibold text-gray-600 border-b pb-2 mb-4">
-                                                    {data.dates ? `${period.replace(/_/g, ' ')} | ${data.dates}` : period.replace(/_/g, ' ')}
-                                                </h4>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                                    {data.courses.map(course => {
-                                                        const isSelected = evidenceForm.courseName === course.name;
-                                                        return (
-                                                            <div key={course.id} className="relative">
-                                                                <input
-                                                                    type="radio"
-                                                                    id={`evidence-course-${course.id}`}
-                                                                    name="evidence-course-selection"
-                                                                    checked={isSelected}
-                                                                    onChange={() => setEvidenceForm(prev => ({ ...prev, courseName: course.name, courseId: course.id }))}
-                                                                    className="sr-only peer"
-                                                                />
-                                                                <label
-                                                                    htmlFor={`evidence-course-${course.id}`}
-                                                                    className={`block p-3 rounded-lg border transition-all hover:shadow-md cursor-pointer ${
-                                                                        course.period === 'PERIODO_1' ? 'border-teal-400 bg-teal-50' : 'border-indigo-400 bg-indigo-50'
-                                                                    } peer-checked:ring-2 peer-checked:ring-indigo-500`}
-                                                                >
-                                                                    <h3 className="font-bold text-xs sm:text-sm">{course.name}</h3>
-                                                                </label>
-                                                            </div>
-                                                        );
-                                                    })}
+                                        Object.entries(groupedCourses).map(([period, data], pIdx) => {
+                                            const periodColors = [
+                                                { header: 'from-violet-600 to-indigo-600', dot: 'bg-violet-400', ring: 'ring-violet-500', checked: 'border-violet-500 bg-violet-50 shadow-violet-100', hover: 'hover:border-violet-300 hover:bg-violet-50/50', normal: 'border-slate-200 bg-white' },
+                                                { header: 'from-emerald-600 to-teal-600', dot: 'bg-emerald-400', ring: 'ring-emerald-500', checked: 'border-emerald-500 bg-emerald-50 shadow-emerald-100', hover: 'hover:border-emerald-300 hover:bg-emerald-50/50', normal: 'border-slate-200 bg-white' },
+                                                { header: 'from-amber-500 to-orange-500', dot: 'bg-amber-400', ring: 'ring-amber-500', checked: 'border-amber-500 bg-amber-50 shadow-amber-100', hover: 'hover:border-amber-300 hover:bg-amber-50/50', normal: 'border-slate-200 bg-white' },
+                                                { header: 'from-rose-600 to-pink-600', dot: 'bg-rose-400', ring: 'ring-rose-500', checked: 'border-rose-500 bg-rose-50 shadow-rose-100', hover: 'hover:border-rose-300 hover:bg-rose-50/50', normal: 'border-slate-200 bg-white' },
+                                            ];
+                                            const col = periodColors[pIdx % periodColors.length];
+                                            return (
+                                                <div key={period} className="mb-6">
+                                                    <div className={`inline-flex items-center gap-2 bg-gradient-to-r ${col.header} text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-sm`}>
+                                                        <span className={`w-2 h-2 rounded-full ${col.dot} opacity-80`}></span>
+                                                        {data.dates ? `${period.replace(/_/g, ' ')} · ${data.dates}` : period.replace(/_/g, ' ')}
+                                                    </div>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                                        {data.courses.map(course => {
+                                                            const isSelected = evidenceForm.courseName === course.name;
+                                                            return (
+                                                                <div key={course.id} className="relative">
+                                                                    <input
+                                                                        type="radio"
+                                                                        id={`evidence-course-${course.id}`}
+                                                                        name="evidence-course-selection"
+                                                                        checked={isSelected}
+                                                                        onChange={() => setEvidenceForm(prev => ({ ...prev, courseName: course.name, courseId: course.id }))}
+                                                                        className="sr-only peer"
+                                                                    />
+                                                                    <label
+                                                                        htmlFor={`evidence-course-${course.id}`}
+                                                                        className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer shadow-sm hover:shadow-md ${
+                                                                            isSelected
+                                                                                ? `${col.checked} shadow-md ring-2 ${col.ring} ring-offset-1`
+                                                                                : `${col.normal} ${col.hover}`
+                                                                        }`}
+                                                                    >
+                                                                        <span className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                                                            isSelected ? `border-current bg-current` : 'border-slate-300'
+                                                                        }`}>
+                                                                            {isSelected && <span className="w-2 h-2 rounded-full bg-white block"></span>}
+                                                                        </span>
+                                                                        <span className="font-semibold text-sm text-slate-800 leading-snug">{course.name}</span>
+                                                                    </label>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))
+                                            );
+                                        })
                                     )}
                                 </fieldset>
                             </div>
@@ -967,16 +1000,23 @@
                                                         setEvidenceError('No puede seleccionar más de 6 archivos');
                                                         setEvidenceFiles([]);
                                                         e.target.value = '';
-                                                    } else {
-                                                        setEvidenceError(null);
-                                                        setEvidenceFiles(filesArray);
+                                                        return;
                                                     }
+                                                    const oversized = filesArray.filter(f => f.size > 1 * 1024 * 1024);
+                                                    if (oversized.length > 0) {
+                                                        setEvidenceError(`Los siguientes archivos superan 1MB: ${oversized.map(f => f.name).join(', ')}`);
+                                                        setEvidenceFiles([]);
+                                                        e.target.value = '';
+                                                        return;
+                                                    }
+                                                    setEvidenceError(null);
+                                                    setEvidenceFiles(filesArray);
                                                 }
                                             }}
                                             className="hidden"
                                         />
                                         <p className="text-xs text-gray-600 mt-3">
-                                            PDF o imágenes (JPG, PNG) • Máximo 5MB por archivo
+                                            PDF o imágenes (JPG, PNG) • Máximo 1MB por archivo
                                         </p>
                                     </div>
                                 </div>
