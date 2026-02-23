@@ -1084,17 +1084,28 @@
         }).filter(r => r.curso && r.curso !== '');
     }
 
-    function getDeptColor(dept) {
-        const d = dept.toLowerCase();
-        if (d.includes('eléctric') || d.includes('electr')) return { bg: '#eff6ff', border: '#3b82f6', text: '#1d4ed8', dot: '#3b82f6' };
-        if (d.includes('básic') || d.includes('basic'))      return { bg: '#f0fdf4', border: '#22c55e', text: '#15803d', dot: '#22c55e' };
-        if (d.includes('industrial'))                         return { bg: '#fff7ed', border: '#f97316', text: '#c2410c', dot: '#f97316' };
-        if (d.includes('sistem') || d.includes('comput'))    return { bg: '#faf5ff', border: '#a855f7', text: '#7e22ce', dot: '#a855f7' };
-        if (d.includes('quím') || d.includes('bioquím'))     return { bg: '#fefce8', border: '#eab308', text: '#854d0e', dot: '#eab308' };
-        if (d.includes('económ') || d.includes('admin'))     return { bg: '#f0fdfa', border: '#14b8a6', text: '#0f766e', dot: '#14b8a6' };
-        if (d.includes('metal') || d.includes('mecán'))      return { bg: '#fdf4ff', border: '#e879f9', text: '#86198f', dot: '#e879f9' };
-        if (d.includes('posgrado') || d.includes('investig')) return { bg: '#fff1f2', border: '#f43f5e', text: '#be123c', dot: '#f43f5e' };
-        return { bg: '#f8fafc', border: '#94a3b8', text: '#475569', dot: '#94a3b8' };
+    // Paleta de colores por fecha única — se asigna un color distinto a cada fecha diferente
+    const DATE_PALETTE = [
+        { bg: '#eff6ff', border: '#3b82f6', text: '#1d4ed8', label: '#dbeafe' },
+        { bg: '#f0fdf4', border: '#16a34a', text: '#15803d', label: '#dcfce7' },
+        { bg: '#fff7ed', border: '#ea580c', text: '#c2410c', label: '#ffedd5' },
+        { bg: '#faf5ff', border: '#9333ea', text: '#7e22ce', label: '#f3e8ff' },
+        { bg: '#fefce8', border: '#ca8a04', text: '#854d0e', label: '#fef9c3' },
+        { bg: '#f0fdfa', border: '#0d9488', text: '#0f766e', label: '#ccfbf1' },
+        { bg: '#fff1f2', border: '#e11d48', text: '#be123c', label: '#ffe4e6' },
+        { bg: '#fdf4ff', border: '#c026d3', text: '#86198f', label: '#fae8ff' },
+    ];
+
+    function buildDateColorMap(cursos) {
+        const map = {};
+        let idx = 0;
+        cursos.forEach(c => {
+            if (c.fecha && !map[c.fecha]) {
+                map[c.fecha] = DATE_PALETTE[idx % DATE_PALETTE.length];
+                idx++;
+            }
+        });
+        return map;
     }
 
     function renderCursos(cursos) {
@@ -1104,30 +1115,42 @@
             return;
         }
 
-        const countBadge = `<div class="flex items-center gap-2 mb-4"><span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">${cursos.length} curso${cursos.length !== 1 ? 's' : ''} disponible${cursos.length !== 1 ? 's' : ''}</span></div>`;
+        const dateColorMap = buildDateColorMap(cursos);
 
-        const cards = cursos.map(c => {
-            const col = getDeptColor(c.departamento);
-            const modalidadIcon = c.modalidad.toLowerCase().includes('línea') || c.modalidad.toLowerCase().includes('linea') ? '💻' : '🏫';
-            return `
-            <div style="background:${col.bg};border:1.5px solid ${col.border};border-radius:14px;padding:16px;margin-bottom:10px;">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
-                    <h3 style="font-size:15px;font-weight:700;color:#1e293b;margin:0 0 8px;flex:1;">${c.curso}</h3>
-                    <span style="background:${col.border};color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;">${modalidadIcon} ${c.modalidad || 'Presencial'}</span>
-                </div>
-                <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#475569;">
-                    <span style="display:flex;align-items:center;gap:4px;">📅 <strong>${c.fecha}</strong></span>
-                    <span style="display:flex;align-items:center;gap:4px;">
-                        <span style="width:8px;height:8px;border-radius:50%;background:${col.dot};display:inline-block;flex-shrink:0;"></span>
-                        <span style="color:${col.text};font-weight:600;">${c.departamento || 'General'}</span>
+        // Leyenda de fechas
+        const leyenda = Object.entries(dateColorMap).map(([fecha, col]) =>
+            `<span style="display:inline-flex;align-items:center;gap:5px;background:${col.label};border:1px solid ${col.border};color:${col.text};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
+                <span style="width:8px;height:8px;border-radius:50%;background:${col.border};display:inline-block;"></span>${fecha}
+            </span>`
+        ).join('');
+
+        const header = `
+            <div style="margin-bottom:14px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                    <span style="background:#dbeafe;color:#1d4ed8;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;">
+                        ${cursos.length} curso${cursos.length !== 1 ? 's' : ''}
                     </span>
-                    ${c.lugar ? `<span style="display:flex;align-items:center;gap:4px;">📍 ${c.lugar}</span>` : ''}
-                    ${c.duracion ? `<span style="display:flex;align-items:center;gap:4px;">⏱️ ${c.duracion}h</span>` : ''}
+                    <span style="font-size:11px;color:#94a3b8;">● color por periodo de fechas</span>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">${leyenda}</div>
+            </div>`;
+
+        const cards = cursos.map((c, i) => {
+            const col = dateColorMap[c.fecha] || DATE_PALETTE[0];
+            return `
+            <div style="background:${col.bg};border-left:4px solid ${col.border};border-top:1px solid ${col.border}33;border-right:1px solid ${col.border}33;border-bottom:1px solid ${col.border}33;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+                <div style="font-size:22px;flex-shrink:0;">📖</div>
+                <div style="flex:1;min-width:0;">
+                    <p style="font-size:14px;font-weight:700;color:#1e293b;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.curso}</p>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#64748b;">
+                        <span style="display:flex;align-items:center;gap:3px;font-weight:600;color:${col.text};">📅 ${c.fecha}</span>
+                        <span style="display:flex;align-items:center;gap:3px;">👤 ${c.instructor}</span>
+                    </div>
                 </div>
             </div>`;
         }).join('');
 
-        body.innerHTML = countBadge + cards;
+        body.innerHTML = header + cards;
     }
 
     async function abrirModalCursos() {
