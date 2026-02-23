@@ -17,7 +17,6 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -44,7 +43,6 @@
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
 
-    <!-- Header -->
     <header class="bg-white shadow-xl sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-6">
             <div class="flex items-center justify-between gap-4">
@@ -73,7 +71,6 @@
 
     <div id="root"></div>
 
-    <!-- Footer -->
     <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
         <div class="container mx-auto px-4">
             <p class="font-semibold text-sm sm:text-base mb-2">
@@ -91,15 +88,9 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // =============================================================================
-        // CONFIGURACIÓN
-        // =============================================================================
         const COURSES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv';
         const TEACHERS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv';
 
-        // =============================================================================
-        // FUNCIONES DE UTILIDAD
-        // =============================================================================
         const removeAccents = (text) => {
             if (!text) return '';
             return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -147,7 +138,6 @@
             });
         };
 
-        // Returns {base64, mimeType, fileName} object preserving the real file type
         const fileToFileObject = (file, customFileName) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -161,9 +151,6 @@
             });
         };
 
-        // =============================================================================
-        // API SERVICES
-        // =============================================================================
         const getTeachers = async () => {
             try {
                 const response = await fetch(`${TEACHERS_CSV_URL}&_=${Date.now()}`);
@@ -272,9 +259,6 @@
             }
         };
 
-        // =============================================================================
-        // COMPONENTE AUTOCOMPLETE
-        // =============================================================================
         const AutocompleteInput = ({ teachers, onSelect, value, onChange, name, placeholder, required = false }) => {
             const [suggestions, setSuggestions] = useState([]);
             const [showSuggestions, setShowSuggestions] = useState(false);
@@ -355,9 +339,6 @@
             );
         };
 
-        // =============================================================================
-        // COMPONENTE FILE INPUT
-        // =============================================================================
         const FileInput = ({ id, label, onFileSelect, onError, acceptedFile, acceptedTypes, maxSizeMB }) => {
             const [isDragging, setIsDragging] = useState(false);
             const inputRef = React.useRef(null);
@@ -439,9 +420,6 @@
             );
         };
 
-        // =============================================================================
-        // COMPONENTE DESCARGA DE FORMATOS
-        // =============================================================================
         const DownloadFormatsSection = () => {
             return (
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-lg p-4 sm:p-6 mb-6">
@@ -475,9 +453,6 @@
         };
 
 
-        // =============================================================================
-        // COMPONENTE PANTALLA FINAL
-        // =============================================================================
         const FinalScreen = ({ onClose }) => {
             return (
                 <div className="fixed inset-0 bg-gradient-to-br from-blue-900 to-indigo-900 z-50 flex items-center justify-center p-4">
@@ -517,9 +492,6 @@
             );
         };
 
-        // =============================================================================
-        // COMPONENTE PRINCIPAL - INSTRUCTOR FORM
-        // =============================================================================
         const InstructorApp = () => {
             const [activeTab, setActiveTab] = useState('proposal');
             const [showFinalScreen, setShowFinalScreen] = useState(false);
@@ -527,7 +499,6 @@
             const [courses, setCourses] = useState([]);
             const [isLoading, setIsLoading] = useState(true);
 
-            // Proposal Form State
             const [proposalForm, setProposalForm] = useState({ 
                 instructorName: '', 
                 courseName: '', 
@@ -544,7 +515,6 @@
             const [cvuError, setCvuError] = useState(null);
             const [fichaError, setFichaError] = useState(null);
             
-            // Evidence Form State
             const [evidenceForm, setEvidenceForm] = useState({ 
                 instructorName: '', 
                 courseName: '',
@@ -658,8 +628,6 @@
 
                 try {
                     const evidenceFilesData = await Promise.all(evidenceFiles.map((file) => {
-                        // Solo mandamos el nombre original del archivo
-                        // El code.gs construye el nombre final en Drive
                         return fileToFileObject(file, file.name);
                     }));
                     
@@ -780,8 +748,8 @@
                                                         <span className={`w-2 h-2 rounded-full ${col.dot} opacity-80`}></span>
                                                         {data.dates ? `${period.replace(/_/g, ' ')} · ${data.dates}` : period.replace(/_/g, ' ')}
                                                     </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                                        {data.courses.map(course => {
+                                                    <div className="flex flex-col gap-1.5">
+                                                        {data.courses.map((course, cIdx) => {
                                                             const isSelected = proposalForm.courseName === course.name;
                                                             return (
                                                                 <div key={course.id} className="relative">
@@ -795,18 +763,25 @@
                                                                     />
                                                                     <label
                                                                         htmlFor={`proposal-course-${course.id}`}
-                                                                        className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer shadow-sm hover:shadow-md ${
+                                                                        className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all cursor-pointer ${
                                                                             isSelected
-                                                                                ? `${col.checked} shadow-md ring-2 ${col.ring} ring-offset-1`
-                                                                                : `${col.normal} ${col.hover}`
+                                                                                ? `border-l-4 ${col.checked} ring-1 ${col.ring}`
+                                                                                : `border ${col.normal} ${col.hover}`
                                                                         }`}
                                                                     >
-                                                                        <span className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                                                                            isSelected ? `border-current bg-current` : 'border-slate-300'
+                                                                        <span className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                                                            isSelected ? 'border-current bg-current' : 'border-slate-300'
                                                                         }`}>
                                                                             {isSelected && <span className="w-2 h-2 rounded-full bg-white block"></span>}
                                                                         </span>
-                                                                        <span className="font-semibold text-sm text-slate-800 leading-snug">{course.name}</span>
+                                                                        <span className={`text-sm leading-snug ${isSelected ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                                                                            {course.name}
+                                                                        </span>
+                                                                        {isSelected && (
+                                                                            <span className="ml-auto flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-full bg-white/70 text-current border border-current/20">
+                                                                                ✓ Seleccionado
+                                                                            </span>
+                                                                        )}
                                                                     </label>
                                                                 </div>
                                                             );
@@ -939,8 +914,8 @@
                                                         <span className={`w-2 h-2 rounded-full ${col.dot} opacity-80`}></span>
                                                         {data.dates ? `${period.replace(/_/g, ' ')} · ${data.dates}` : period.replace(/_/g, ' ')}
                                                     </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                                        {data.courses.map(course => {
+                                                    <div className="flex flex-col gap-1.5">
+                                                        {data.courses.map((course, cIdx) => {
                                                             const isSelected = evidenceForm.courseName === course.name;
                                                             return (
                                                                 <div key={course.id} className="relative">
@@ -954,18 +929,25 @@
                                                                     />
                                                                     <label
                                                                         htmlFor={`evidence-course-${course.id}`}
-                                                                        className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer shadow-sm hover:shadow-md ${
+                                                                        className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all cursor-pointer ${
                                                                             isSelected
-                                                                                ? `${col.checked} shadow-md ring-2 ${col.ring} ring-offset-1`
-                                                                                : `${col.normal} ${col.hover}`
+                                                                                ? `border-l-4 ${col.checked} ring-1 ${col.ring}`
+                                                                                : `border ${col.normal} ${col.hover}`
                                                                         }`}
                                                                     >
-                                                                        <span className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                                                                            isSelected ? `border-current bg-current` : 'border-slate-300'
+                                                                        <span className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                                                            isSelected ? 'border-current bg-current' : 'border-slate-300'
                                                                         }`}>
                                                                             {isSelected && <span className="w-2 h-2 rounded-full bg-white block"></span>}
                                                                         </span>
-                                                                        <span className="font-semibold text-sm text-slate-800 leading-snug">{course.name}</span>
+                                                                        <span className={`text-sm leading-snug ${isSelected ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                                                                            {course.name}
+                                                                        </span>
+                                                                        {isSelected && (
+                                                                            <span className="ml-auto flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-full bg-white/70 text-current border border-current/20">
+                                                                                ✓ Seleccionado
+                                                                            </span>
+                                                                        )}
                                                                     </label>
                                                                 </div>
                                                             );
@@ -1116,9 +1098,6 @@
             );
         };
 
-        // =============================================================================
-        // RENDER
-        // =============================================================================
         window.addEventListener('load', () => {
             const rootElement = document.getElementById('root');
             if (rootElement) {
@@ -1134,19 +1113,11 @@
         });
     </script>
 
-    <!-- ========================================================================== -->
-    <!-- CONFIGURACIÓN: Coloque aquí la URL de su Google Apps Script              -->
-    <!-- ========================================================================== -->
     <script>
         window.CONFIG = {
-            // 👇 REEMPLACE ESTA URL CON LA URL DE SU GOOGLE APPS SCRIPT
-            // IMPORTANTE: Después de actualizar el código en Google Apps Script,
-            // debe ir a "Implementar" > "Nueva implementación" para que los
-            // cambios se apliquen. Copie la nueva URL que se genera y péguela aquí.
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
         };
     </script>
-    <!-- ========================================================================== -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const yearSpan = document.getElementById('copyright-year');
