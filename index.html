@@ -182,19 +182,31 @@
         
         /* Cursor personalizado */
         #cursor-dot {
-            position: fixed; width: 12px; height: 12px;
-            background-color: rgba(99, 102, 241, 0.5);
+            position: fixed; width: 14px; height: 14px;
+            background-color: rgba(99, 102, 241, 0.8);
+            border: 2px solid rgba(79, 70, 229, 1);
             border-radius: 50%; pointer-events: none;
             transform: translate(-50%, -50%); z-index: 9999;
-            transition: width 0.2s, height 0.2s, background-color 0.2s;
+            transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
         }
         #cursor-dot.active {
-            width: 40px; height: 40px;
-            background-color: rgba(99, 102, 241, 0.35);
+            width: 38px; height: 38px;
+            background-color: rgba(99, 102, 241, 0.18);
+            border: 2px solid rgba(99, 102, 241, 0.9);
+            box-shadow: 0 0 14px rgba(99, 102, 241, 0.5);
         }
         
-        .dark #cursor-dot { background-color: rgba(165, 180, 252, 0.5); }
-        .dark #cursor-dot.active { background-color: rgba(165, 180, 252, 0.35); }
+        .dark #cursor-dot { 
+            background-color: rgba(165, 180, 252, 0.8);
+            border: 2px solid rgba(165, 180, 252, 1);
+            box-shadow: 0 0 8px rgba(165, 180, 252, 0.6);
+        }
+        .dark #cursor-dot.active { 
+            background-color: rgba(165, 180, 252, 0.18);
+            border: 2px solid rgba(165, 180, 252, 0.9);
+            box-shadow: 0 0 14px rgba(165, 180, 252, 0.5);
+        }
         
         #announcement-banner {
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -610,7 +622,7 @@
                             class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity bg-white/20 p-1 rounded"
                             title="Acceso Administrativo"
                         />
-                        <a href="/cdn-cgi/l/email-protection#0e6d61617c6a516f6d7a7b6f6267746f6d6761606a616d6b607a6b4e677a6a7b7c6f606961206b6a7b206376" class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md cursor-pointer">
+                        <a href="/cdn-cgi/l/email-protection#5c3f33332e38033d3f28293d3035263d3f35333238333f393228391c352838292e3d323b3372393829723124" class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md cursor-pointer">
                             <span class="mr-2">📧</span> Enviar Email
                         </a>
                     </div>
@@ -650,10 +662,10 @@
         const GOOGLE_CLIENT_ID = '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com';
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
 
-        // Consulta el estado real desde el backend (mismo para todos los usuarios)
+        // Consulta el estado real desde el backend (igual para todos los usuarios/dispositivos)
         async function fetchInscriptionState() {
             try {
-                const res = await fetch(`${APPS_SCRIPT_URL}?action=getRegistryStatus`);
+                const res = await fetch(APPS_SCRIPT_URL + '?action=getRegistryStatus');
                 const data = await res.json();
                 return data.success ? (data.status === 'OPEN') : true;
             } catch(e) {
@@ -662,8 +674,8 @@
             }
         }
 
-        // Guarda el nuevo estado en el backend vía POST
-        async function setInscriptionState(isOpen, idToken) {
+        // Guarda el nuevo estado en el backend vía POST con token JWT para autorización
+        async function saveInscriptionState(isOpen, idToken) {
             try {
                 const res = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
@@ -674,11 +686,7 @@
                     })
                 });
                 const data = await res.json();
-                if (data.success) {
-                    updateUI(isOpen);
-                    return true;
-                }
-                return false;
+                return data.success === true;
             } catch(e) {
                 console.error('Error al guardar estado:', e);
                 return false;
@@ -728,7 +736,6 @@
         // --- 3. Lógica de Autenticación Admin ---
         async function handleCredentialResponse(response) {
             try {
-                // Decodificar JWT para verificar email localmente
                 const base64Url = response.credential.split('.')[1];
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
                 const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
@@ -738,18 +745,17 @@
                 const payload = JSON.parse(jsonPayload);
 
                 if (payload.email === ADMIN_EMAIL) {
-                    // Obtener el estado ACTUAL desde el servidor (no desde localStorage)
+                    // Obtener estado REAL del servidor antes de toglear
                     const currentState = await fetchInscriptionState();
                     const newState = !currentState;
-                    
-                    // Guardar en el servidor con el token JWT para autorización
-                    const ok = await setInscriptionState(newState, response.credential);
+                    const ok = await saveInscriptionState(newState, response.credential);
                     
                     if (ok) {
-                        const statusText = newState ? "ABIERTAS (Disponibles)" : "CERRADAS (Próximamente)";
-                        alert(`✅ MODO ADMINISTRADOR\n\nCambio exitoso. Las inscripciones ahora están: ${statusText}\n\nEl cambio es visible para TODOS los usuarios de inmediato.`);
+                        updateUI(newState);
+                        const statusText = newState ? "ABIERTAS ✅" : "CERRADAS 🔒";
+                        alert(`✅ MODO ADMINISTRADOR\n\nCambio exitoso. Inscripciones ahora: ${statusText}\n\nEl cambio es visible para TODOS los usuarios de inmediato.`);
                     } else {
-                        alert("⚠️ Error al guardar el cambio en el servidor. Intente nuevamente.");
+                        alert("⚠️ Error al guardar en el servidor. Intente nuevamente.");
                     }
                 } else {
                     alert("⛔ Acceso denegado.\nSolo el administrador puede modificar el estado del portal.");
@@ -941,7 +947,7 @@
             startClock(); updateDate(); updateWeather(); updateYears();
             rotateQuotes(); setInterval(rotateQuotes, 15000);
 
-            // Consultar estado de inscripciones desde el servidor (igual para todos los usuarios)
+            // Consultar estado desde el servidor (visible igual para todos)
             fetchInscriptionState().then(isOpen => updateUI(isOpen));
 
             // Listener para Admin Trigger
@@ -952,13 +958,51 @@
                         alert("El servicio de Google no ha cargado. Intente recargar la página.");
                         return;
                     }
-                    
+
+                    // Si ya existe el modal, cerrarlo (toggle)
+                    const existing = document.getElementById('admin-google-modal');
+                    if (existing) { existing.remove(); return; }
+
+                    // Crear modal con botón oficial de Google
+                    const modal = document.createElement('div');
+                    modal.id = 'admin-google-modal';
+                    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);';
+
+                    const box = document.createElement('div');
+                    box.style.cssText = 'background:#fff;border-radius:20px;padding:36px 32px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.4);max-width:340px;width:90%;';
+                    box.innerHTML = '<p style="font-size:28px;margin-bottom:8px;">🔐</p><p style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:4px;">Acceso Administrativo</p><p style="font-size:12px;color:#64748b;margin-bottom:24px;">Identifícate para cambiar el estado del portal</p>';
+
+                    const btnContainer = document.createElement('div');
+                    btnContainer.id = 'admin-google-btn';
+                    btnContainer.style.cssText = 'display:flex;justify-content:center;margin-bottom:16px;min-height:44px;';
+
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.textContent = 'Cancelar';
+                    cancelBtn.style.cssText = 'font-size:13px;color:#94a3b8;background:none;border:none;cursor:pointer;margin-top:4px;padding:4px 12px;border-radius:8px;transition:color 0.2s;';
+                    cancelBtn.onmouseover = () => cancelBtn.style.color = '#475569';
+                    cancelBtn.onmouseout = () => cancelBtn.style.color = '#94a3b8';
+                    cancelBtn.onclick = () => modal.remove();
+
+                    box.appendChild(btnContainer);
+                    box.appendChild(cancelBtn);
+                    modal.appendChild(box);
+                    modal.addEventListener('click', (ev) => { if (ev.target === modal) modal.remove(); });
+                    document.body.appendChild(modal);
+
                     google.accounts.id.initialize({
                         client_id: GOOGLE_CLIENT_ID,
-                        callback: handleCredentialResponse
-                    });
-                    
-                    google.accounts.id.prompt((notification) => {
-                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                            console.log("Prompt no mostrado:", notification.getSkippedReason());
+                        callback: (response) => {
+                            modal.remove();
+                            handleCredentialResponse(response);
                         }
+                    });
+                    google.accounts.id.renderButton(btnContainer, {
+                        theme: 'filled_blue', size: 'large', shape: 'pill', text: 'continue_with'
+                    });
+                });
+            }
+        });
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
