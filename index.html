@@ -1126,6 +1126,20 @@
             return;
         }
 
+        // Ordenar por fecha antes de renderizar
+        // Las fechas vienen como "DEL 10 AL 14 DE AGO" — extraemos el día inicial para ordenar
+        const MESES = { ENE:1, FEB:2, MAR:3, ABR:4, MAY:5, JUN:6, JUL:7, AGO:8, SEP:9, OCT:10, NOV:11, DIC:12 };
+        function parseFechaOrden(fecha) {
+            if (!fecha) return 9999;
+            const upper = fecha.toUpperCase();
+            const mesMatch = upper.match(/(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)/);
+            const diaMatch = upper.match(/(\d{1,2})/);
+            const mes = mesMatch ? (MESES[mesMatch[1]] || 99) : 99;
+            const dia = diaMatch ? parseInt(diaMatch[1]) : 99;
+            return mes * 100 + dia;
+        }
+        cursos.sort((a, b) => parseFechaOrden(a.fecha) - parseFechaOrden(b.fecha));
+
         const dateColorMap = buildDateColorMap(cursos);
 
         // Leyenda de fechas
