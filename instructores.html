@@ -148,14 +148,14 @@
         };
 
         // Returns {base64, mimeType, fileName} object preserving the real file type
-        const fileToFileObject = (file) => {
+        const fileToFileObject = (file, customFileName) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = () => resolve({
-                    base64:   reader.result,           // full data URL (Apps Script extracts raw bytes)
+                    base64:   reader.result,
                     mimeType: file.type || 'application/octet-stream',
-                    fileName: file.name
+                    fileName: customFileName || file.name
                 });
                 reader.onerror = error => reject(error);
             });
@@ -657,7 +657,13 @@
                 }
 
                 try {
-                    const evidenceFilesData = await Promise.all(evidenceFiles.map(file => fileToFileObject(file)));
+                    const evidenceFilesData = await Promise.all(evidenceFiles.map((file, index) => {
+                        // Extraer extensión real del archivo
+                        const ext = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : 'jpg';
+                        const safeName = evidenceForm.instructorName.replace(/\s+/g, '_').toUpperCase();
+                        const customFileName = `Evidencia_${safeName}_${index + 1}.${ext}`;
+                        return fileToFileObject(file, customFileName);
+                    }));
                     
                     await submitEvidence({
                         instructorName: evidenceForm.instructorName,
