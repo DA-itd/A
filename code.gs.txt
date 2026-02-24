@@ -1,661 +1,1120 @@
-
-// =============================================================================
-// GOOGLE APPS SCRIPT - SISTEMA COMPLETO ITD
-// Versión: 85.0.0 - FIX ENCUESTAS (Carga de Cursos)
-// =============================================================================
-
 const SPREADSHEET_ID = '1KLPdMw1AzDdNSqYRRUZnvkyHLQnL2TWQ0Sk0282CN-A';
 const SURVEY_SPREADSHEET_ID = '1ibpKCmMnhxlGmy0gPTejtBj-9kZbZquGhRtyMT2k2Cg';
+const TEACHER_SURVEY_SPREADSHEET_ID = '1uk-I0DoMX4qMDnrLRc4jwVO6w0yL4pQSrEzDYNtSaGc';
 const FOLDER_ID_PROPOSALS = '1nwzLS81ct3ZoimPqJsikznQxhzg3_86T';
 const FOLDER_ID_EVIDENCES = '1h6PVRfk8I3ORwf32F2zqa81N3LBXTNWJ';
 const GEMINI_API_KEY = 'AIzaSyD_iCCo2H0VUo1U6NYO8mNjygvC4QddPl8';
 
-function AUTHORIZE_PERMISSIONS() { return "Autorizado"; }
+function AUTHORIZE_PERMISSIONS() {
+  return "Autorizado";
+}
 
-// =============================================================================
-// HANDLERS HTTP
-// =============================================================================
 function doPost(e) {
-  if (!e || !e.postData) return ContentService.createTextOutput(JSON.stringify({success:false})).setMimeType(ContentService.MimeType.JSON);
+  if (!e) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
   let data;
-  try { data = JSON.parse(e.postData.contents); } catch(err) { return ContentService.createTextOutput(JSON.stringify({success:false, message: "Invalid JSON"})).setMimeType(ContentService.MimeType.JSON); }
-  
+  try {
+    if (e.postData && e.postData.contents) {
+      data = JSON.parse(e.postData.contents);
+    } else {
+      data = {
+        action:   e.parameter.action,
+        status:   e.parameter.status,
+        id_token: e.parameter.id_token
+      };
+    }
+  } catch (err) {
+    data = {
+      action:   e.parameter ? e.parameter.action : null,
+      status:   e.parameter ? e.parameter.status : null,
+      id_token: e.parameter ? e.parameter.id_token : null
+    };
+  }
+
   let result;
   try {
     switch (data.action) {
-      case 'enrollStudent': result = processEnrollment_v12(data); break;
-      case 'cancelSingle': result = cancelSingleCourse(data); break;
-      case 'cancelSelectedCourses': result = cancelSelectedCourses(data); break;
-      case 'submitInstructorProposal': result = submitInstructorProposal(data); break;
-      case 'submitInstructorEvidence': result = submitInstructorEvidence(data); break;
-      case 'generateAnalysis': result = generateGeminiInsight(data); break;
-      case 'submitSurveyRecord': result = submitSurveyRecord(data); break;
-      default: result = { success: true };
+      case 'enrollStudent':
+        result = processEnrollment_v12(data);
+        break;
+      case 'cancelSingle':
+        result = cancelSingleCourse(data);
+        break;
+      case 'submitInstructorProposal':
+        result = submitInstructorProposal(data);
+        break;
+      case 'submitInstructorEvidence':
+        result = submitInstructorEvidence(data);
+        break;
+      case 'generateAnalysis':
+        result = generateGeminiInsight(data);
+        break;
+      case 'submitSurveyRecord':
+        result = submitSurveyRecord(data);
+        break;
+      case 'setRegistryStatus':
+        const adminEmail = getEmailFromToken(data.id_token);
+        result = setRegistryStatus(data.status, adminEmail);
+        break;
+      default:
+        result = { success: true };
     }
-  } catch (err) { result = { success: false, message: err.toString() }; console.error(err); }
-  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    result = { success: false, message: err.toString() };
+    console.error(err);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
+
 function doGet(e) {
-  if (!e || !e.parameter) return ContentService.createTextOutput(JSON.stringify({success:false})).setMimeType(ContentService.MimeType.JSON);
+  if (!e || !e.parameter) return ContentService.createTextOutput(JSON.stringify({ success: false })).setMimeType(ContentService.MimeType.JSON);
+
   const action = e.parameter.action;
   let result;
+
   try {
     if (action === 'getStatisticsData') result = getStatisticsData(e.parameter);
     else if (action === 'getTeacherHistory') result = getTeacherHistory(getEmailFromToken(e.parameter.id_token), e.parameter.target_email);
     else if (action === 'getReportData') result = getReportData(e.parameter);
     else if (action === 'lookupByCurp') result = lookupByCurp(e.parameter.curp, e.parameter.fullName);
     else if (action === 'getCoursesForSurveyByEmail') result = getCoursesForSurveyByEmail(e.parameter.email);
-    else if (action === 'getSurveyStats') result = getSurveyStats(); 
+    else if (action === 'getSurveyStats') result = getSurveyStats();
+    else if (action === 'getTeacherSurveyStats') result = getTeacherSurveyStats();
+    else if (action === 'getRegistryStatus') result = getRegistryStatus();
+    else if (action === 'setRegistryStatus') result = setRegistryStatus(e.parameter.status, getEmailFromToken(e.parameter.id_token));  // ← NUEVA
     else result = { success: false, message: 'Invalid action' };
-  } catch (err) { result = { success: false, message: err.toString() }; console.error(err); }
+  } catch (err) {
+    result = { success: false, message: err.toString() };
+    console.error(err);
+  }
+
   return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
 }
 
-// ======================================================
+// ==========================================
 // UTILIDADES
-// ======================================================
-function normalizeString(str) {
+// ==========================================
+
+function removeAccents(str) {
   if (!str) return "";
-  return String(str).trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function isValidData(val) {
+  if (!val) return false;
+  const s = String(val).trim().toUpperCase();
+  return s !== "" && s !== "-" && s !== "." && s !== "N/A" && s !== "NA" && s !== "NO APLICA";
+}
+
+function base64ToBlob(base64Data, contentType, fileName) {
+  const splitData = base64Data.split(',');
+  const rawData = splitData.length > 1 ? splitData[1] : splitData[0];
+  const decoded = Utilities.base64Decode(rawData);
+  return Utilities.newBlob(decoded, contentType, fileName);
 }
 
 function getSheetFlexible(ss, name) {
-    const target = name.toUpperCase().trim();
-    return ss.getSheets().find(s => s.getName().toUpperCase().trim() === target);
+  if (!ss) return null;
+  return ss.getSheets().find(s => s.getName().toUpperCase().trim() === name.toUpperCase().trim());
 }
 
 function getEmailFromToken(token) {
-    if (!token) return null;
-    try { return JSON.parse(Utilities.newBlob(Utilities.base64Decode(token.split('.')[1])).getDataAsString()).email; } catch (e) { return null; }
-}
-
-function isAdmin(email) { 
-    return ['alejandro.calderon@itdurango.edu.mx', 'desarrollo.academico@itdurango.edu.mx'].includes((email||'').toLowerCase()); 
-}
-
-// ======================================================
-// LOOKUP
-// ======================================================
-function lookupByCurp(curp, fullName) {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = getSheetFlexible(ss, 'Inscripciones');
-  if (!sheet) return { success: true, data: { registeredCourses: [], courseDetails: [], userData: null } };
-  
-  const data = sheet.getDataRange().getValues();
-  const curpNorm = normalizeString(curp);
-  const nameNorm = normalizeString(fullName);
-  const registeredCourses = [];
-  const courseDetails = [];
-  let userData = null;
-  
-  if (curpNorm.length < 5 && nameNorm.length < 5) return { success: true, data: { registeredCourses: [] } };
-
-  for (let i = 1; i < data.length; i++) {
-    const rowStatus = String(data[i][14]).toUpperCase().trim();
-    if (rowStatus === 'ACTIVO') {
-        const rowName = normalizeString(data[i][2]);
-        const rowCurp = normalizeString(data[i][3]);
-        const match = (curpNorm.length > 10 && rowCurp === curpNorm) || (nameNorm.length > 5 && rowName === nameNorm);
-        
-        if (match) {
-            const courseId = String(data[i][7]).trim();
-            registeredCourses.push(courseId);
-            courseDetails.push({
-              folio: String(data[i][0]),
-              courseId: courseId,
-              courseName: String(data[i][8]).trim(),
-              dates: String(data[i][9]).trim(),
-              location: String(data[i][10]).trim(),
-              schedule: String(data[i][11]).trim(),
-              hours: data[i][12],
-              type: String(data[i][13]).trim(),
-              rowIndex: i
-            });
-            if (!userData) {
-              userData = {
-                fullName: String(data[i][2]).trim(),
-                email: String(data[i][4]).trim(),
-                gender: String(data[i][5]).trim(),
-                department: String(data[i][6]).trim()
-              };
-            }
-        }
-    }
+  if (!token) return null;
+  try {
+    return JSON.parse(Utilities.newBlob(Utilities.base64Decode(token.split('.')[1])).getDataAsString()).email;
+  } catch (e) {
+    return null;
   }
-  return { success: true, data: { registeredCourses: [...new Set(registeredCourses)], courseDetails: courseDetails, userData: userData, hasActiveEnrollments: courseDetails.length > 0 } };
 }
 
-// ======================================================
-// HISTORIAL Y ADMIN
-// ======================================================
-function getTeacherHistory(requesterEmail, targetQuery) {
-  const requester = requesterEmail ? requesterEmail.toLowerCase() : '';
-  const isAdministrator = isAdmin(requester);
-  if (!requester) return { success: false, message: "No autenticado" };
-  
-  const query = (isAdministrator && targetQuery) ? normalizeString(targetQuery) : normalizeString(requester);
-  const isEmailSearch = targetQuery && targetQuery.includes('@');
-  const isSelfView = !targetQuery; 
-
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const history = [];
-  const sheets = ss.getSheets().filter(s => { 
-      const n = s.getName().toUpperCase(); 
-      return n === 'INSCRIPCIONES' || n.startsWith('BD-'); 
-  });
-
-  let teacherName = '';
-  let teacherDept = '';
-  let teacherEmailFound = '';
-
-  sheets.forEach(s => {
-      const n = s.getName().toUpperCase().trim();
-      const year = n.startsWith('BD-') ? n.replace('BD-', '') : '2026';
-      const d = s.getDataRange().getValues();
-      for(let i=1; i<d.length; i++) {
-          const rowName = normalizeString(String(d[i][2]||''));
-          const rowEmail = String(d[i][4]||'').toLowerCase().trim();
-          const rowStatus = String(d[i][14]||'').toUpperCase().trim();
-          
-          let match = false;
-          if (isSelfView) match = (rowEmail === requester);
-          else if (isEmailSearch) match = (rowEmail === targetQuery.toLowerCase().trim());
-          else match = rowName.includes(query);
-
-          if (!isAdministrator) match = (rowEmail === requester);
-
-          if (match) {
-              const isValid = (n === 'INSCRIPCIONES') ? (rowStatus === 'ACTIVO') : (rowStatus === 'ACTIVO' || rowStatus === '');
-              if (isValid) {
-                  if (!teacherName) {
-                      teacherName = d[i][2]; teacherDept = d[i][6]; teacherEmailFound = d[i][4];
-                  }
-                  let dt = d[i][9];
-                  if(dt instanceof Date) dt = dt.toLocaleDateString();
-                  history.push({ year, folio: d[i][0], courseName: d[i][8], datesText: String(dt), hours: d[i][12], type: d[i][13]||'Docente', deptOrigin: d[i][6] });
-              }
-          }
-      }
-  });
-  
-  history.sort((a, b) => { if (a.year === '2026') return -1; if (b.year === '2026') return 1; return parseInt(b.year) - parseInt(a.year); });
-  return { success: true, data: { teacher: { name: teacherName || (isSelfView ? requester : targetQuery), email: teacherEmailFound || requester, dept: teacherDept }, courses: history } };
+function isAdmin(email) {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  return ['alejandro.calderon@itdurango.edu.mx', 'desarrollo.academico@itdurango.edu.mx'].includes(clean);
 }
 
-function getReportData(params) {
-    const requester = getEmailFromToken(params.id_token);
-    if (!isAdmin(requester)) return { success: false, message: "Acceso denegado" };
+// ==========================================
+// CONTROL DE REGISTRO (ADMIN)
+// ==========================================
 
+/**
+ * Devuelve el estado actual del registro de inscripciones.
+ * Valores posibles: 'OPEN' (por defecto) o 'CLOSED'.
+ * Acceso: GET ?action=getRegistryStatus
+ */
+function getRegistryStatus() {
+  const props = PropertiesService.getScriptProperties();
+  const status = props.getProperty('REGISTRY_STATUS') || 'OPEN';
+  return { success: true, status: status };
+}
+
+/**
+ * Cambia el estado del registro de inscripciones. Solo admins.
+ * Acceso: POST { action: 'setRegistryStatus', id_token: '...', status: 'OPEN'|'CLOSED' }
+ */
+function setRegistryStatus(status, email) {
+  if (!isAdmin(email)) return { success: false, message: "No autorizado" };
+  const props = PropertiesService.getScriptProperties();
+  props.setProperty('REGISTRY_STATUS', status); // 'OPEN' o 'CLOSED'
+  return { success: true, status: status };
+}
+
+// ==========================================
+// LÓGICA DE NEGOCIO
+// ==========================================
+
+function getStatisticsData(params) {
+  try {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const courseMap = {};
-    
-    const loadCatalog = (sheetName) => {
-        const s = getSheetFlexible(ss, sheetName);
-        if(!s) return;
-        const d = s.getDataRange().getValues();
-        if(d.length < 2) return;
-        
-        const h = d[0].map(x => String(x).toLowerCase().trim());
-        let idxId = h.indexOf('id'); if(idxId === -1) idxId = h.indexOf('folio'); if(idxId === -1) idxId = 0; 
-        let idxDept = h.findIndex(x => x.includes('department') || x.includes('departamento') || x.includes('oferente'));
-        if(idxDept === -1) idxDept = 8; 
+    const currentYearStr = "2026";
+    const selectedPeriod = params.period || 'ACTUAL';
+    const sheets = ss.getSheets();
+    const availableYears = [];
+    const historicalTrend = {};
+    const periodTrend = {}; 
+    const TOTAL_DOCENTES_BASE = 417;
+    const idx = { status: 14, dept: 6, gender: 5, courseId: 7, courseName: 8, type: 13, email: 4, name: 2, date: 9 };
+    const detailData = {
+      totalInscripciones: 0,
+      distribucionGenero: { 'Hombre': 0, 'Mujer': 0 },
+      distribucionTipo: { 'Docente': 0, 'Profesional': 0 },
+      frecuenciaParticipacion: {},
+      topDepartamentos: [],
+      topCursos: [],
+      coberturaDocente: { actualizados: 0, recurrentes: 0, porcentaje: 0 },
+      historicalTrend: {}
+    };
+    const deptMap = {}, courseMap = {}, teacherFrequencyMap = {};
 
-        for(let i=1; i<d.length; i++) {
-            const cid = normalizeString(String(d[i][idxId]));
-            const cdept = String(d[i][idxDept] || '').trim();
-            if(cid) courseMap[cid] = cdept;
+    sheets.forEach(sheet => {
+      const sheetName = sheet.getName().toUpperCase().trim();
+      let yearLabel = null, isCurrentPeriodSource = false;
+
+      if (sheetName === 'INSCRIPCIONES') {
+        yearLabel = currentYearStr;
+        if (selectedPeriod === 'ACTUAL' || selectedPeriod === currentYearStr) isCurrentPeriodSource = true;
+      } else if (sheetName.includes('20') && sheetName !== 'BD-CURSOS') {
+        const yearMatch = sheetName.match(/(20\d{2})/);
+        if (yearMatch) {
+          yearLabel = yearMatch[1];
+          if (selectedPeriod === yearLabel) isCurrentPeriodSource = true;
         }
+      }
+
+      if (yearLabel) {
+        if (!availableYears.includes(yearLabel)) availableYears.push(yearLabel);
+        if (!historicalTrend[yearLabel]) historicalTrend[yearLabel] = { registros: 0, cursos: 0 };
+
+        const data = sheet.getDataRange().getValues();
+        let countParticipantsInSheet = 0;
+
+        for (let i = 1; i < data.length; i++) {
+          const row = data[i];
+          const status = String(row[idx.status] || '').toUpperCase().trim();
+          let isActive = false;
+          if (sheetName === 'INSCRIPCIONES') isActive = status.includes('ACTIVO');
+          else isActive = !status.includes('CANCEL') && !status.includes('BAJA') && !status.includes('INACTIVO');
+
+          if (isActive) {
+            countParticipantsInSheet++;
+            if (isCurrentPeriodSource) {
+              detailData.totalInscripciones++;
+              const dept = String(row[idx.dept] || 'DESCONOCIDO').toUpperCase().trim();
+              if (dept && dept.length > 2) deptMap[dept] = (deptMap[dept] || 0) + 1;
+              const cName = String(row[idx.courseName] || '').trim();
+              if (cName) courseMap[cName] = (courseMap[cName] || 0) + 1;
+              const gen = String(row[idx.gender] || '').toUpperCase();
+              if (gen.includes('H') || gen.includes('MASC')) detailData.distribucionGenero['Hombre']++;
+              else if (gen.includes('M') || gen.includes('FEM')) detailData.distribucionGenero['Mujer']++;
+              const type = String(row[idx.type] || 'Docente');
+              if (type.toUpperCase().includes('PROFESIONAL')) detailData.distribucionTipo['Profesional']++;
+              else detailData.distribucionTipo['Docente']++;
+              const tEmail = String(row[idx.email] || '').trim().toLowerCase();
+              const tName = String(row[idx.name] || '').trim().toUpperCase();
+              const tKey = (tEmail.length > 3 && tEmail.includes('@')) ? tEmail : tName;
+              if (tKey.length > 2) teacherFrequencyMap[tKey] = (teacherFrequencyMap[tKey] || 0) + 1;
+            }
+
+            // --- LÓGICA DE PERIODOS ---
+            const cellDate = row[idx.date];
+            let pKey = '';
+
+            if (cellDate instanceof Date) {
+              const m = cellDate.getMonth();
+              if (m === 0) pKey = 'Enero';
+              else if (m === 5 || m === 6) pKey = 'Junio';
+              else if (m === 7 || m === 8) pKey = 'Agosto';
+            } else {
+              const s = String(cellDate).toUpperCase();
+              const dmy = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+              if (dmy) {
+                const m = parseInt(dmy[2], 10);
+                if (m === 1) pKey = 'Enero';
+                else if (m === 6 || m === 7) pKey = 'Junio';
+                else if (m === 8 || m === 9) pKey = 'Agosto';
+              } else {
+                if (s.includes('ENE') || s.includes('JAN')) pKey = 'Enero';
+                else if (s.includes('JUN') || s.includes('JUL') || s.includes('VER')) pKey = 'Junio';
+                else if (s.includes('AGO') || s.includes('SEP') || s.includes('OCT') || s.includes('NOV') || s.includes('DIC')) pKey = 'Agosto';
+              }
+            }
+
+            if (pKey) {
+              const fullPKey = `${yearLabel}-${pKey}`;
+              if (!periodTrend[fullPKey]) periodTrend[fullPKey] = { registros: 0, coursesSet: {} };
+              periodTrend[fullPKey].registros++;
+              const cName = String(row[idx.courseName] || '').trim();
+              if (cName) periodTrend[fullPKey].coursesSet[cName] = 1;
+            }
+          }
+        }
+        historicalTrend[yearLabel].registros = (historicalTrend[yearLabel].registros || 0) + countParticipantsInSheet;
+      }
+    });
+
+    const uniqueTeachersList = Object.keys(teacherFrequencyMap);
+    const uniqueCount = uniqueTeachersList.length;
+    const frequencyDist = { '1 Curso': 0, '2 Cursos': 0, '3 Cursos': 0, '4 Cursos': 0, '5 Cursos': 0, '6+ Cursos': 0 };
+    Object.values(teacherFrequencyMap).forEach(count => {
+      if (count === 1) frequencyDist['1 Curso']++;
+      else if (count === 2) frequencyDist['2 Cursos']++;
+      else if (count === 3) frequencyDist['3 Cursos']++;
+      else if (count === 4) frequencyDist['4 Cursos']++;
+      else if (count === 5) frequencyDist['5 Cursos']++;
+      else if (count >= 6) frequencyDist['6+ Cursos']++;
+    });
+    detailData.frecuenciaParticipacion = frequencyDist;
+    detailData.coberturaDocente = {
+      actualizados: uniqueCount,
+      recurrentes: Object.values(teacherFrequencyMap).filter(val => val > 1).length,
+      porcentaje: uniqueCount > 0 ? parseFloat(((uniqueCount / TOTAL_DOCENTES_BASE) * 100).toFixed(1)) : 0
     };
 
-    loadCatalog('Cursos');
-    loadCatalog('BD-Cursos');
-
-    const period = params.period || 'ACTUAL';
-    let sheetName = (period === 'ACTUAL') ? 'Inscripciones' : `BD-${period}`;
-    const s = getSheetFlexible(ss, sheetName);
-    if (!s) return { success: false, message: "Hoja no encontrada" };
-    
-    const d = s.getDataRange().getValues();
-    const res = [];
-    for(let i=1; i<d.length; i++) {
-        const status = String(d[i][14]||'').toUpperCase().trim();
-        if(status === 'ACTIVO' || (period !== 'ACTUAL' && status === '')) {
-            let fecha = d[i][9];
-            if (fecha instanceof Date) fecha = fecha.toLocaleDateString();
-            const cursoId = normalizeString(String(d[i][7]));
-            res.push({
-                nombre: d[i][2], curso: d[i][8], fechas: fecha, folio: d[i][0],
-                departamento: String(d[i][6]||'').trim(),
-                depto_oferente: courseMap[cursoId] || "SIN ASIGNAR"
-            });
-        }
-    }
-    res.sort((a, b) => a.nombre.localeCompare(b.nombre));
-    return { success: true, data: res };
-}
-
-function getSurveyStats() {
-    try {
-        const ss = SpreadsheetApp.openById(SURVEY_SPREADSHEET_ID);
-        const sheet = ss.getSheets()[0];
-        const data = sheet.getDataRange().getValues();
-        if (data.length < 2) return { success: true, data: { total: 0, participacion: {} } };
-        const headers = data[0];
-        const colIndex = headers.findIndex(h => String(h).toLowerCase().includes("jefe") || String(h).toLowerCase().includes("departamento"));
-        if (colIndex === -1) return { success: false, message: "Columna no encontrada" };
-        const counts = {};
-        let total = 0;
+    const coursesSheet = getSheetFlexible(ss, 'BD-Cursos');
+    if (coursesSheet) {
+      const data = coursesSheet.getDataRange().getValues();
+      if (data.length > 1) {
+        const countsByYear = {};
         for (let i = 1; i < data.length; i++) {
-            const dept = String(data[i][colIndex]).trim().toUpperCase();
-            if (dept) { counts[dept] = (counts[dept] || 0) + 1; total++; }
+          const row = data[i];
+          const id = String(row[0] || '').trim().toUpperCase();
+          const match = id.match(/20\d{2}/);
+          const rowString = row.join(' ').toUpperCase();
+          const isCancelled = rowString.includes('CANCELADO') || rowString.includes('BAJA') || rowString.includes('INACTIVO');
+          if (match && !isCancelled) {
+            const y = match[0];
+            if (y !== currentYearStr) countsByYear[y] = (countsByYear[y] || 0) + 1;
+          }
         }
-        return { success: true, data: { total: total, participacion: counts } };
-    } catch (e) { return { success: false, message: e.toString() }; }
-}
-
-// ======================================================
-// ESTADÍSTICAS E HISTORIAL
-// ======================================================
-function getStatisticsData(params) {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  
-  const coursesByYear = {};
-  ['Cursos', 'BD-Cursos'].forEach(sheetName => {
-      const sheet = getSheetFlexible(ss, sheetName);
-      if (sheet) {
-          const d = sheet.getDataRange().getValues();
-          for(let i=1; i<d.length; i++) {
-              const id = String(d[i][0]||'').trim(); 
-              const parts = id.split('-');
-              let year = null;
-              parts.forEach(p => { if(p.length===4 && !isNaN(p) && parseInt(p)>2000) year = p; });
-              if(year) {
-                  if(!coursesByYear[year]) coursesByYear[year] = new Set();
-                  coursesByYear[year].add(id);
-              }
+        for (const y in countsByYear) {
+          if (!historicalTrend[y]) {
+            historicalTrend[y] = { registros: 0, cursos: 0 };
+            if (!availableYears.includes(y)) availableYears.push(y);
           }
+          historicalTrend[y].cursos = countsByYear[y];
+        }
       }
-  });
+    }
+    const currentCoursesSheet = getSheetFlexible(ss, 'cursos');
+    if (currentCoursesSheet) {
+      const data = currentCoursesSheet.getDataRange().getValues();
+      let count2026 = 0;
+      for (let i = 1; i < data.length; i++) if (String(data[i][0]).trim()) count2026++;
+      if (!historicalTrend[currentYearStr]) historicalTrend[currentYearStr] = { registros: 0, cursos: 0 };
+      historicalTrend[currentYearStr].cursos = count2026;
+    }
 
-  const historicalTrend = {};
-  const yearsToGraph = ['2022', '2023', '2024', '2025', '2026'];
-
-  yearsToGraph.forEach(y => {
-      let count = 0;
-      const sheetName = (y === '2026') ? 'Inscripciones' : `BD-${y}`;
-      const sheet = getSheetFlexible(ss, sheetName);
-      
-      if (sheet) {
-          const d = sheet.getDataRange().getValues();
-          const h = d[0].map(x => String(x).toUpperCase());
-          let idxSt = h.findIndex(x => x.includes('ESTATUS') || x.includes('STATUS'));
-          if (idxSt === -1) idxSt = 14;
-
-          for(let i=1; i<d.length; i++) {
-              const st = String(d[i][idxSt]||'').toUpperCase().trim();
-              if (y === '2026') {
-                  if (st === 'ACTIVO') count++;
-              } else {
-                  if (!st.includes('BAJA') && !st.includes('CANCEL') && !st.includes('INACTIVO')) count++;
-              }
-          }
-      }
-      
-      historicalTrend[y] = { 
-          registros: count, 
-          cursos: coursesByYear[y] ? coursesByYear[y].size : 0 
+    const formattedPeriodTrend = {};
+    for (const key in periodTrend) {
+      formattedPeriodTrend[key] = {
+        registros: periodTrend[key].registros,
+        cursos: Object.keys(periodTrend[key].coursesSet).length
       };
-  });
+    }
 
-  const selectedPeriod = params.period || 'ACTUAL';
-  let targetSheet = (selectedPeriod === 'ACTUAL') ? getSheetFlexible(ss, 'Inscripciones') : getSheetFlexible(ss, 'BD-' + selectedPeriod);
-  
-  const detailData = { totalInscripciones: 0, topDepartamentos: [], distribucionGenero: {'Hombre':0,'Mujer':0}, topCursos: [], distribucionTipo: {'Docente':0,'Profesional':0}, coberturaDocente: {actualizados:0, recurrentes:0, porcentaje:0} };
+    const filteredDepts = Object.entries(deptMap).sort((a, b) => b[1] - a[1]).filter(d => d[1] >= 6);
+    const filteredCourses = Object.entries(courseMap).sort((a, b) => b[1] - a[1]).filter(c => c[1] >= 15);
 
-  if (targetSheet) {
-      const d = targetSheet.getDataRange().getValues();
-      const deptMap = {}, courseMap = {}, teacherMap = {};
-      const h = d[0];
-      let idx = { status: 14, dept: 6, gender: 5, course: 8, type: 13, email: 4, name: 2 };
-      h.forEach((head, i) => {
-          const t = String(head).toLowerCase();
-          if(t.includes('departamento') || t.includes('deparment') || t.includes('depto')) idx.dept = i;
-          if(t.includes('género')||t.includes('genero')) idx.gender = i;
-          if(t.includes('curso') && !t.includes('fecha')) idx.course = i;
-      });
-      // Fallback status index if dynamic failed
-      if (idx.status === undefined) idx.status = 14;
+    detailData.topDepartamentos = filteredDepts;
+    detailData.topCursos = filteredCourses;
+    detailData.historicalTrend = historicalTrend;
+    detailData.periodTrend = formattedPeriodTrend;
 
-      for(let i=1; i<d.length; i++) {
-          const st = String(d[i][idx.status]||'').toUpperCase().trim();
-          let isActive = (selectedPeriod === 'ACTUAL') ? (st === 'ACTIVO') : (st === 'ACTIVO' || !st.includes('BAJA'));
-          
-          if(isActive) {
-              detailData.totalInscripciones++;
-              const dept = String(d[i][idx.dept]||'DESCONOCIDO').toUpperCase().trim();
-              deptMap[dept] = (deptMap[dept]||0)+1;
-              const gen = String(d[i][idx.gender]||'').toUpperCase();
-              if(gen.includes('HOMBRE')) detailData.distribucionGenero['Hombre']++; else if(gen.includes('MUJER')) detailData.distribucionGenero['Mujer']++;
-              const cur = String(d[i][idx.course]||'Sin Nombre').trim().toUpperCase();
-              courseMap[cur] = (courseMap[cur]||0)+1;
-              const type = String(d[i][idx.type]||'Docente').trim();
-              if(type.toUpperCase().includes('PROFESIONAL')) detailData.distribucionTipo['Profesional']++; else detailData.distribucionTipo['Docente']++;
-              const tKey = String(d[i][idx.email]||d[i][idx.name]).trim();
-              if(tKey) teacherMap[tKey] = (teacherMap[tKey]||0)+1;
-          }
-      }
-      detailData.topDepartamentos = Object.entries(deptMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
-      detailData.topCursos = Object.entries(courseMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
-      const u = Object.keys(teacherMap).length;
-      detailData.coberturaDocente = { actualizados: u, recurrentes: Object.values(teacherMap).filter(v=>v>1).length, porcentaje: ((u/416)*100).toFixed(1) };
+    const historicalYears = [...new Set(availableYears)].filter(y => y !== currentYearStr).sort().reverse();
+
+    return { success: true, data: detailData, availableYears: historicalYears };
+  } catch (error) {
+    return { success: false, message: error.toString() };
   }
-
-  return { success: true, availableYears: ['ACTUAL', '2025', '2024', '2023', '2022'], data: { ...detailData, historicalTrend: historicalTrend } };
 }
 
-// ======================================================
-// INSCRIPCIÓN Y CANCELACIÓN
-// ======================================================
+
 function processEnrollment_v12(data) {
   const lock = LockService.getScriptLock();
-  if (!lock.tryLock(30000)) return { success: false, message: "Busy" };
+  if (!lock.tryLock(30000)) return { success: false, message: "El servidor está ocupado." };
+  
   try {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     let sheet = getSheetFlexible(ss, 'Inscripciones');
-    if (!sheet) { sheet = ss.insertSheet('Inscripciones'); }
+    
+    // Encabezados definidos (19 columnas ahora, incluyendo Telefono al final)
+    const HEADERS = [
+      'Folio personal', 'Timestamp', 'NombreCompleto', 'Curp', 'Email', 
+      'Genero', 'Departamento', 'Id_Curso', 'Curso', 'FechaCurso', 
+      'Lugar', 'Horario', 'Horas', 'tipo', 'Estado', 'Encuesta', 'Asistencia Aprobada', 'Nivel', 'Telefono'
+    ];
+
+    if (!sheet) {
+      sheet = ss.insertSheet('Inscripciones');
+      sheet.appendRow(HEADERS);
+    }
+    
     const sheetData = sheet.getDataRange().getValues();
-    const curpToUpdate = normalizeString(data.curp);
-    const nameToUpdate = normalizeString(data.fullName);
-    const year = new Date().getFullYear();
-    const activeRows = [];
+    const curpToUpdate = String(data.curp).toUpperCase().trim();
+    const currentYear = new Date().getFullYear();
+
+    // 1. MAPEO DE CURSOS ACTIVOS ACTUALES DEL USUARIO
+    const userActiveCoursesMap = new Map();
+    
     for (let i = 1; i < sheetData.length; i++) {
-      const rowName = normalizeString(sheetData[i][2]);
-      const rowCurp = normalizeString(sheetData[i][3]);
-      const match = (rowCurp === curpToUpdate) || (nameToUpdate.length > 5 && rowName === nameToUpdate);
-      if (match && String(sheetData[i][14]).toUpperCase().trim() === 'ACTIVO') {
-        activeRows.push({ idx: i, id: normalizeString(String(sheetData[i][7])), name: String(sheetData[i][8]), folio: String(sheetData[i][0]) });
-      }
-    }
-    const newIds = data.selectedCourses.map(c => normalizeString(String(c.id)));
-    const cancelled = [];
-    if (data.previousRegistrationIds?.length > 0) {
-      activeRows.forEach(r => {
-        if (!newIds.includes(r.id)) {
-           sheet.getRange(r.idx + 1, 15).setValue('Inactivo');
-           cancelled.push({ name: r.name, folio: r.folio });
+        const row = sheetData[i];
+        const rowCurp = String(row[3]).toUpperCase().trim(); 
+        const rowStatus = String(row[14]).toUpperCase().trim(); 
+        
+        if (rowCurp === curpToUpdate && rowStatus === 'ACTIVO') {
+            const cId = String(row[7]).trim(); 
+            const cFolio = String(row[0]).trim(); 
+            userActiveCoursesMap.set(cId, cFolio);
         }
-      });
     }
-    const activeIds = activeRows.map(r => r.id);
-    const toEnroll = data.selectedCourses.filter(c => !activeIds.includes(normalizeString(String(c.id))));
-    const results = [], rowsToAdd = [], enrolled = [];
-    const slots = {};
-    for (let i = 1; i < sheetData.length; i++) {
-      if (String(sheetData[i][14]).toUpperCase().trim() === 'ACTIVO') {
-        const cid = normalizeString(String(sheetData[i][7]));
-        if(!slots[cid]) slots[cid] = new Set();
-        const parts = String(sheetData[i][0]).split('-');
-        if(parts.length>0) { const n = parseInt(parts[parts.length-1]); if(!isNaN(n)) slots[cid].add(n); }
+
+    // 2. LÓGICA DE CANCELACIÓN (BAJAS)
+    if (data.previousRegistrationIds && data.previousRegistrationIds.length > 0) {
+      for (let i = 1; i < sheetData.length; i++) {
+        const row = sheetData[i];
+        const rowCurp = String(row[3]).toUpperCase().trim();
+        const rowStatus = String(row[14]).toUpperCase();
+        
+        if (rowCurp === curpToUpdate && rowStatus === 'ACTIVO') {
+           const rowCourseIdFull = String(row[7]).trim();
+           
+           let wasKnownPrevious = false;
+           data.previousRegistrationIds.forEach(prevId => {
+               if (rowCourseIdFull === String(prevId) || rowCourseIdFull.includes(String(prevId))) {
+                   wasKnownPrevious = true;
+               }
+           });
+
+           let isKept = false;
+           data.selectedCourses.forEach(newC => {
+               let newIdRaw = String(newC.id).trim();
+               let newIdFull = newIdRaw;
+               if (!newIdRaw.startsWith("TNM-")) {
+                   if (/\d{4}$/.test(newIdRaw)) {
+                       newIdFull = `TNM-054-${newIdRaw}`;
+                   } else {
+                       newIdFull = `TNM-054-${newIdRaw}-${currentYear}`;
+                   }
+               }
+               if (rowCourseIdFull === newIdFull) {
+                   isKept = true;
+               }
+           });
+
+           if (wasKnownPrevious && !isKept) {
+               sheet.getRange(i + 1, 15).setValue('BAJA');
+               userActiveCoursesMap.delete(rowCourseIdFull);
+           }
+        }
       }
     }
-    for (const c of toEnroll) {
-      const cid = String(c.id).trim();
-      const cidNorm = normalizeString(cid);
-      const used = slots[cidNorm] || new Set();
-      let next = 1; while(used.has(next)) next++;
-      if(!slots[cidNorm]) slots[cidNorm]=new Set(); slots[cidNorm].add(next);
-      const seq = next.toString().padStart(2, '0');
-      const folio = cid.startsWith("TNM-") ? `${cid}-${seq}` : `TNM-054-${cid}-${year}-${seq}`;
-      
-      rowsToAdd.push([
-        folio, new Date(), data.fullName.toUpperCase(), data.curp.toUpperCase(), data.email.toLowerCase(),
-        data.gender, data.department, cid, c.name, c.dates,
-        c.location||'', c.schedule||'', c.hours||30, c.type||'Docente', 'ACTIVO'
-      ]);
-      results.push({ registrationId: cid, folio: folio, status: 'Inscrito', name: c.name });
-      enrolled.push({ ...c, folio: folio });
+
+    if (data.selectedCourses.length === 0) return { success: true, results: [] };
+
+    // 3. INSCRIPCIÓN DE CURSOS
+    const results = [];
+    const rowsToAdd = [];
+
+    for (const course of data.selectedCourses) {
+        let rawId = String(course.id).trim();
+        let formattedCourseId = rawId;
+
+        if (!rawId.startsWith("TNM-")) {
+             if (/\d{4}$/.test(rawId)) {
+                 formattedCourseId = `TNM-054-${rawId}`;
+             } else {
+                 formattedCourseId = `TNM-054-${rawId}-${currentYear}`;
+             }
+        }
+        
+        if (userActiveCoursesMap.has(formattedCourseId)) {
+            results.push({ 
+                registrationId: course.id, 
+                folio: userActiveCoursesMap.get(formattedCourseId), 
+                status: 'Inscrito (Previo)',
+                name: course.name,
+                schedule: course.schedule
+            });
+            continue;
+        }
+
+        let sequence = "01"; 
+        let folio = `${formattedCourseId}-${sequence}`; 
+
+        rowsToAdd.push([
+            folio,                          // 1. Folio personal
+            new Date(),                     // 2. Timestamp
+            data.fullName.toUpperCase(),    // 3. NombreCompleto
+            curpToUpdate,                   // 4. Curp
+            data.email.toLowerCase(),       // 5. Email
+            data.gender,                    // 6. Genero
+            data.DepartamentoSeleccionado,  // 7. Departamento
+            formattedCourseId,              // 8. Id_Curso
+            course.name,                    // 9. Curso
+            course.dates,                   // 10. FechaCurso
+            course.location || '',          // 11. Lugar
+            course.schedule || '',          // 12. Horario
+            course.hours || 30,             // 13. Horas
+            course.type || 'Docente',       // 14. tipo
+            'ACTIVO',                       // 15. Estado
+            '',                             // 16. Encuesta
+            '',                             // 17. Asistencia Aprobada
+            data.level || '',               // 18. Nivel
+            data.phone || ''                // 19. Telefono (NUEVO)
+        ]);
+        
+        results.push({ registrationId: course.id, folio: folio, status: 'Inscrito (Nuevo)', name: course.name });
     }
-    if (rowsToAdd.length > 0) sheet.getRange(sheet.getLastRow()+1, 1, rowsToAdd.length, rowsToAdd[0].length).setValues(rowsToAdd);
-    if (cancelled.length > 0) try { sendCancellationEmailHTML(data.email, data.fullName, cancelled); } catch(e){}
-    if (enrolled.length > 0) try { sendConfirmationEmailHTML(data.email, data.fullName, enrolled); } catch(e){}
-    return { success: true, results: results, emailSent: enrolled.length > 0 };
-  } catch (e) { return { success: false, message: e.toString() }; } 
-  finally { lock.releaseLock(); }
+
+    if (rowsToAdd.length > 0) {
+        sheet.getRange(sheet.getLastRow() + 1, 1, rowsToAdd.length, rowsToAdd[0].length).setValues(rowsToAdd);
+    }
+    
+    return { success: true, results: results, emailSent: true };
+  } catch (e) {
+    return { success: false, message: e.toString() };
+  } finally {
+    lock.releaseLock();
+  }
 }
+
+
 
 function cancelSingleCourse(data) {
   const lock = LockService.getScriptLock();
-  if (!lock.tryLock(30000)) return { success: false, message: "Busy" };
+  if (!lock.tryLock(10000)) return { success: false, message: "El servidor está ocupado." };
   try {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = getSheetFlexible(ss, 'Inscripciones');
-    const sheetData = sheet.getDataRange().getValues();
-    const curpToUpdate = normalizeString(data.curp);
-    const nameToUpdate = normalizeString(data.fullName);
-    const idToCancel = normalizeString(String(data.courseToCancel.id));
-    let found = false, cName = data.courseToCancel.name || "", cFolio = "";
-    for (let i = 1; i < sheetData.length; i++) {
-      const match = (normalizeString(sheetData[i][3]) === curpToUpdate) || (nameToUpdate.length > 5 && normalizeString(sheetData[i][2]) === nameToUpdate);
-      if (match && normalizeString(String(sheetData[i][7])) === idToCancel && String(sheetData[i][14]).toUpperCase().trim() === 'ACTIVO') {
-        sheet.getRange(i + 1, 15).setValue('Inactivo');
-        found = true;
-        if (!cName) cName = String(sheetData[i][8]);
-        cFolio = String(sheetData[i][0]);
-        break;
+    const range = sheet.getDataRange();
+    const values = range.getValues();
+    const curp = String(data.curp).toUpperCase().trim();
+    const courseId = String(data.courseToCancel.id).trim();
+
+    // Buscar el registro ACTIVO para cancelarlo
+    for (let i = 1; i < values.length; i++) {
+      // Col 3: CURP, Col 7: ID Curso, Col 14: Estado (índices base 0)
+      if (String(values[i][3]).toUpperCase().trim() === curp &&
+          String(values[i][7]).trim() === courseId &&
+          String(values[i][14]).toUpperCase().trim() === 'ACTIVO') {
+        
+        // Cambiar estado a 'Inactivo' en lugar de 'BAJA' (Columna 15 es índice 15 en getRange)
+        sheet.getRange(i + 1, 15).setValue('Inactivo'); 
+        
+        // Enviar correo de confirmación de baja
+        const folio = values[i][0];
+        const courseName = values[i][8];
+        try {
+            sendSingleCancellationEmail(data.email, data.fullName, courseName, folio);
+        } catch(e) {
+            console.error("Error sending single cancellation email", e);
+        }
+
+        return { success: true, emailSent: true };
       }
     }
-    if (found) {
-      try { sendCancellationEmailHTML(data.email, data.fullName, [{name: cName, folio: cFolio}]); } catch(e){}
-      return { success: true };
-    }
-    return { success: false, message: "Curso no encontrado." };
+    return { success: false, message: "Inscripción no encontrada para cancelar o ya estaba inactiva." };
   } catch (e) { return { success: false, message: e.toString() }; }
   finally { lock.releaseLock(); }
 }
 
-function cancelSelectedCourses(data) {
-  const lock = LockService.getScriptLock();
-  if (!lock.tryLock(30000)) return { success: false };
+function submitInstructorProposal(data) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    
+    // CAMBIO IMPORTANTE: Buscar la hoja 'Instructores' en lugar de 'Propuestas'
+    let sheet = getSheetFlexible(ss, 'Instructores');
+    
+    // Si no existe, intentar buscar 'Propuestas' por compatibilidad
+    if (!sheet) {
+        sheet = getSheetFlexible(ss, 'Propuestas');
+    }
+
+    // Si ninguna existe, crear 'Instructores'
+    if (!sheet) { 
+      sheet = ss.insertSheet('Instructores'); 
+      sheet.appendRow(['Timestamp', 'Instructor', 'Email', 'Curso', 'Folio', 'CVU_Link', 'Ficha_Link']); 
+    } else {
+      // Verificar si existe la columna Folio (simulación simple, chequeo la fila 1)
+      const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      // Si la hoja ya existía pero no tiene la columna folio, no rompemos nada, solo agregamos datos extra al final
+    }
+
+    const folder = DriveApp.getFolderById(FOLDER_ID_PROPOSALS);
+    const cvuBlob = base64ToBlob(data.cvuFile, 'application/pdf', `CVU_${data.instructorName}.pdf`);
+    const fichaBlob = base64ToBlob(data.fichaFile, 'application/pdf', `Ficha_${data.courseName}.pdf`);
+
+    const cvuFile = folder.createFile(cvuBlob);
+    const fichaFile = folder.createFile(fichaBlob);
+
+    // Agregamos data.courseId (Folio) después del nombre del curso
+    sheet.appendRow([new Date(), data.instructorName, data.instructorEmail, data.courseName, data.courseId || '', cvuFile.getUrl(), fichaFile.getUrl()]);
+    return { success: true };
+  } catch(e) { return { success: false, message: e.toString() }; }
+}
+
+function submitInstructorEvidence(data) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let sheet = getSheetFlexible(ss, 'Evidencias');
+    if (!sheet) { 
+      sheet = ss.insertSheet('Evidencias'); 
+      sheet.appendRow(['Timestamp', 'Instructor', 'Email', 'Curso', 'Folio', 'Links_Evidencia']); 
+    }
+
+    const folder = DriveApp.getFolderById(FOLDER_ID_EVIDENCES);
+    const links = [];
+
+    if (data.evidenceFiles && data.evidenceFiles.length > 0) {
+      data.evidenceFiles.forEach((fileData, index) => {
+        let base64, mimeType, originalFileName;
+        if (typeof fileData === 'object' && fileData.base64) {
+          base64           = fileData.base64;
+          mimeType         = fileData.mimeType  || 'application/pdf';
+          originalFileName = fileData.fileName  || `archivo_${index+1}`;
+        } else {
+          base64           = fileData;
+          mimeType         = 'application/pdf';
+          originalFileName = `archivo_${index+1}.pdf`;
+        }
+
+        // Extraer extensión del nombre original
+        const extMatch = originalFileName.match(/\.([^.]+)$/);
+        const ext = extMatch ? extMatch[1].toLowerCase() : 'jpg';
+
+        // Nombre final: "Evidencia - NOMBRE INSTRUCTOR - nombre_original.ext"
+        const instructorClean = (data.instructorName || 'INSTRUCTOR').trim().toUpperCase();
+        const finalName = `Evidencia - ${instructorClean} - ${originalFileName}`;
+
+        const blob = base64ToBlob(base64, mimeType, finalName);
+        const driveFile = folder.createFile(blob);
+        driveFile.setName(finalName); // forzar nombre en Drive explícitamente
+        links.push(driveFile.getUrl());
+      });
+    }
+
+    sheet.appendRow([new Date(), data.instructorName, data.instructorEmail || '', data.courseName, data.courseId || '', links.join(', ')]);
+    return { success: true };
+  } catch(e) { return { success: false, message: e.toString() }; }
+}
+
+function submitSurveyRecord(data) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let sheet = getSheetFlexible(ss, 'RegistroEncuestas');
+    if (!sheet) {
+      sheet = ss.insertSheet('RegistroEncuestas');
+      sheet.appendRow(['Timestamp', 'Tipo', 'Docente', 'Email', 'CursoID', 'CursoNombre']);
+    }
+    sheet.appendRow([new Date(), data.surveyType, data.teacherName, data.teacherEmail, data.courseId, data.courseName]);
+    return { success: true };
+  } catch(e) { return { success: false, message: e.toString() }; }
+}
+
+function lookupByCurp(curp) {
   try {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = getSheetFlexible(ss, 'Inscripciones');
-    const sheetData = sheet.getDataRange().getValues();
-    const curp = normalizeString(data.curp);
-    const ids = data.courseIds.map(id => normalizeString(String(id)));
-    const cancelled = [];
-    for (let i = 1; i < sheetData.length; i++) {
-      const rCurp = normalizeString(sheetData[i][3]);
-      const rId = normalizeString(String(sheetData[i][7]));
-      const rSt = String(sheetData[i][14]).toUpperCase().trim();
-      if (rCurp === curp && rSt === 'ACTIVO' && ids.includes(rId)) {
-        sheet.getRange(i+1, 15).setValue('Inactivo');
-        cancelled.push({ name: String(sheetData[i][8]), folio: String(sheetData[i][0]) });
+    const data = sheet.getDataRange().getValues();
+    const found = [];
+    const c = String(curp).toUpperCase().trim();
+    
+    // Indices based on processEnrollment_v12: Curp=3, Id_Curso=7, Status=14
+    for(let i=1; i<data.length; i++) {
+      if(String(data[i][3]).toUpperCase().trim() === c && String(data[i][14]).toUpperCase().trim() === 'ACTIVO') {
+        found.push(String(data[i][7])); 
       }
     }
-    if (cancelled.length > 0) try { sendCancellationEmailHTML(data.email, data.fullName, cancelled); } catch(e){}
-    return { success: true, cancelledCount: cancelled.length };
+    return { success: true, data: { registeredCourses: found } };
   } catch(e) { return { success: false, message: e.toString() }; }
-  finally { lock.releaseLock(); }
 }
 
-// ======================================================
-// EMAILS
-// ======================================================
-function sendConfirmationEmailHTML(email, name, added) {
-  if(!email) return;
-  const subject = "Confirmación de Inscripción - ITD";
-  let cards = "";
-  added.forEach(c => {
-      cards += `
-      <div style="background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-          <h3 style="color: #14532d; margin: 0 0 12px 0; font-size: 16px; font-weight: bold; text-transform: uppercase; line-height: 1.4;">
-              ${c.name}
-          </h3>
-          <div style="font-size: 14px; color: #166534; margin-bottom: 8px;">
-              <strong>Folio de Registro:</strong> 
-              <span style="background-color: #bbf7d0; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-weight: bold; color: #14532d; margin-left: 5px;">
-                  ${c.folio}
-              </span>
-          </div>
-          <div style="font-size: 13px; color: #374151; line-height: 1.5;">
-              <div>📅 ${c.dates}</div>
-              <div>⏰ ${c.schedule || 'Horario por definir'}</div>
-              <div>📍 ${c.location || 'Sede por definir'}</div>
-          </div>
-      </div>`;
-  });
-
-  const htmlBody = `
-  <!DOCTYPE html>
-  <html>
-  <head><style>body {font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;}</style></head>
-  <body style="margin: 0; padding: 0; background-color: #f1f5f9;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 30px 10px;">
-          <tr>
-              <td>
-                  <table width="600" align="center" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                      <tr>
-                          <td align="center" style="background-color: #1e3a8a; padding: 30px 20px;">
-                              <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD Logo" style="height: 80px; margin-bottom: 15px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));">
-                              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 0.5px;">Confirmación de Inscripción</h1>
-                          </td>
-                      </tr>
-                      <tr>
-                          <td style="padding: 40px 30px;">
-                              <p style="font-size: 16px; color: #334155; margin-top: 0; margin-bottom: 20px;">Hola <strong>${name}</strong>,</p>
-                              <p style="font-size: 15px; color: #475569; margin-bottom: 25px; line-height: 1.6;">Hemos recibido y procesado exitosamente tu solicitud de inscripción. A continuación, encontrarás los detalles y folios de registro:</p>
-                              ${cards}
-                              <div style="background-color: #fff1f2; border-left: 5px solid #f43f5e; padding: 15px; margin-top: 30px; border-radius: 0 8px 8px 0;">
-                                  <p style="margin: 0; font-size: 14px; color: #881337;"><strong>📌 Importante:</strong> Guarda este correo como comprobante de tu inscripción.</p>
-                              </div>
-                              <p style="font-size: 16px; color: #1e3a8a; font-weight: bold; margin-top: 30px; text-align: center;">¡Te esperamos en los cursos!</p>
-                          </td>
-                      </tr>
-                      <tr>
-                          <td align="center" style="background-color: #f8fafc; padding: 25px; border-top: 1px solid #e2e8f0;">
-                              <p style="margin: 0; font-size: 13px; font-weight: bold; color: #1e3a8a;">Coordinación de Actualización Docente</p>
-                              <p style="margin: 5px 0 0; font-size: 12px; color: #64748b;">Instituto Tecnológico de Durango</p>
-                              <p style="margin: 15px 0 0; font-size: 11px; color: #94a3b8; font-style: italic;">Este es un correo electrónico generado automáticamente, por favor no respondas a este mensaje.</p>
-                          </td>
-                      </tr>
-                  </table>
-              </td>
-          </tr>
-      </table>
-  </body>
-  </html>`;
-  
-  MailApp.sendEmail({to: email, subject: subject, htmlBody: htmlBody});
-}
-
-function sendCancellationEmailHTML(email, name, courses) {
-  if(!email) return;
-  const subject = "Confirmación de Cancelación - ITD";
-  let cards = "";
-  courses.forEach(c => {
-      cards += `
-      <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-          <h3 style="color: #991b1b; margin: 0 0 10px 0; font-size: 16px; font-weight: bold; text-transform: uppercase;">${c.name}</h3>
-          <div style="font-size: 14px; color: #7f1d1d; margin-bottom: 8px;">
-              <strong>Folio Cancelado:</strong> 
-              <span style="text-decoration: line-through; background-color: #fee2e2; padding: 2px 6px; border-radius: 4px; font-family: monospace;">${c.folio}</span>
-          </div>
-          <div style="margin-top: 5px; font-size: 12px; font-weight: bold; color: #ef4444; display: flex; align-items: center;">⛔ BAJA PROCESADA</div>
-      </div>`;
-  });
-
-  const htmlBody = `
-  <!DOCTYPE html>
-  <html>
-  <head><style>body {font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;}</style></head>
-  <body style="margin: 0; padding: 0; background-color: #f1f5f9;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 30px 10px;">
-          <tr>
-              <td>
-                  <table width="600" align="center" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                      <tr>
-                          <td align="center" style="background-color: #991b1b; padding: 30px 20px;">
-                              <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD Logo" style="height: 80px; margin-bottom: 15px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));">
-                              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">Confirmación de Cancelación</h1>
-                          </td>
-                      </tr>
-                      <tr>
-                          <td style="padding: 40px 30px;">
-                              <p style="font-size: 16px; color: #333333; margin-top: 0; margin-bottom: 20px;">Hola <strong>${name}</strong>,</p>
-                              <p style="font-size: 15px; color: #555555; margin-bottom: 25px; line-height: 1.6;">Hemos procesado tu solicitud de baja para los siguientes cursos. A partir de este momento, tu lugar ha sido liberado.</p>
-                              ${cards}
-                              <p style="font-size: 13px; color: #666; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">Si deseas inscribirte nuevamente, deberás realizar el proceso sujeto a cupo disponible.</p>
-                          </td>
-                      </tr>
-                      <tr>
-                          <td align="center" style="background-color: #f8fafc; padding: 25px; border-top: 1px solid #e2e8f0;">
-                              <p style="margin: 0; font-size: 13px; font-weight: bold; color: #1e293b;">Coordinación de Actualización Docente</p>
-                              <p style="margin: 5px 0 0; font-size: 12px; color: #64748b;">Instituto Tecnológico de Durango</p>
-                              <p style="margin: 15px 0 0; font-size: 11px; color: #94a3b8; font-style: italic;">Este es un correo electrónico generado automáticamente.</p>
-                          </td>
-                      </tr>
-                  </table>
-              </td>
-          </tr>
-      </table>
-  </body>
-  </html>`;
-  
-  MailApp.sendEmail({to: email, subject: subject, htmlBody: htmlBody});
-}
-
-// ======================================================
-// ENCUESTAS (SOLUCIÓN DE ERROR)
-// ======================================================
 function getCoursesForSurveyByEmail(email) {
-    if (!email) return { success: false, message: "Email requerido" };
-    
+  try {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = getSheetFlexible(ss, 'Inscripciones');
-    
-    if (!sheet) return { success: false, message: "No se encontró la hoja de Inscripciones" };
-    
+    if (!sheet) return { success: false, message: 'Hoja Inscripciones no encontrada.' };
+
     const data = sheet.getDataRange().getValues();
-    const targetEmail = normalizeString(email);
-    
     const courses = [];
+    const completedSurveys = [];
+    const e = String(email).toLowerCase().trim();
     let teacherData = null;
+
+    const SURVEY_VALID_STATUSES = ['ACTIVO', 'TERMINADO', 'ACREDITADO'];
+
+    for(let i=1; i<data.length; i++) {
+      const rowEmail = String(data[i][4]).toLowerCase().trim();
+      const rowStatus = String(data[i][14]).toUpperCase().trim();
+      const isValidStatus = SURVEY_VALID_STATUSES.some(s => rowStatus.includes(s));
+
+      if(rowEmail === e && isValidStatus) {
+        courses.push({
+          id: String(data[i][7]),
+          name: String(data[i][8])
+        });
+        if(!teacherData) {
+          teacherData = {
+            fullName: String(data[i][2]),
+            department: String(data[i][6])
+          };
+        }
+      }
+    }
+
+    // Buscar encuestas ya realizadas
+    const surveySheet = getSheetFlexible(ss, 'RegistroEncuestas');
+    if(surveySheet) {
+      const sData = surveySheet.getDataRange().getValues();
+      for(let i=1; i<sData.length; i++) {
+        if(String(sData[i][3]).toLowerCase().trim() === e) {
+          const type = String(sData[i][1]).toLowerCase(); // 'opinion' or 'eficacia'
+          const cid = String(sData[i][4]);
+          completedSurveys.push(`${type}-${cid}`);
+        }
+      }
+    }
+
+    return { success: true, data: { teacherData, courses, completedSurveys } };
+  } catch(e) { return { success: false, message: e.toString() }; }
+}
+
+function getTeacherHistory(id_token, target_email) {
+  const requestorEmail = getEmailFromToken(id_token);
+  if (!requestorEmail) return { success: false, message: "Token inválido o expirado" };
+
+  let searchTarget = "";
+
+  if (target_email && target_email.trim() !== "") {
+    if (target_email.toLowerCase().trim() !== requestorEmail.toLowerCase().trim()) {
+       if (!isAdmin(requestorEmail)) {
+          return { success: false, message: "No autorizado para consultar el historial de otros usuarios." };
+       }
+       searchTarget = target_email.toLowerCase().trim();
+    } else {
+       searchTarget = requestorEmail.toLowerCase().trim();
+    }
+  } else {
+    searchTarget = requestorEmail.toLowerCase().trim();
+  }
+
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheets = ss.getSheets();
     
-    // Indices: 2:Nombre, 4:Email, 6:Depto, 7:IdCurso, 8:NombreCurso, 14:Estatus
-    for (let i = 1; i < data.length; i++) {
-        const rowEmail = normalizeString(String(data[i][4]));
-        const rowStatus = String(data[i][14]).toUpperCase().trim();
-        
-        if (rowEmail === targetEmail && rowStatus === 'ACTIVO') {
-            if (!teacherData) {
-                teacherData = {
-                    fullName: String(data[i][2]).trim().toUpperCase(),
-                    department: String(data[i][6]).trim().toUpperCase(),
-                    email: String(data[i][4]).trim().toLowerCase()
-                };
-            }
+    let knownTokensSets = []; 
+
+    // 1. FASE DE DESCUBRIMIENTO
+    if (searchTarget.includes('@')) {
+       sheets.forEach(sheet => {
+          const data = sheet.getDataRange().getValues();
+          for(let i=1; i<data.length; i++) {
+             if (data[i].length > 4) {
+                 const rowEmail = String(data[i][4]||'').toLowerCase().trim();
+                 if (rowEmail === searchTarget) {
+                     const rawName = String(data[i][2]||'').toUpperCase().trim();
+                     if (rawName.length > 2) {
+                         const cleanName = removeAccents(rawName);
+                         const tokens = cleanName.split(/\s+/).filter(t => t.length > 2);
+                         if(tokens.length >= 2) {
+                             knownTokensSets.push(tokens);
+                         }
+                     }
+                 }
+             }
+          }
+       });
+    } else {
+       const cleanSearch = removeAccents(searchTarget).toUpperCase().trim();
+       const tokens = cleanSearch.split(/\s+/).filter(t => t.length > 2);
+       if(tokens.length >= 1) knownTokensSets.push(tokens);
+    }
+
+    const foundCourses = [];
+    let teacherInfo = { name: '', email: searchTarget, dept: '' };
+
+    // 2. FASE DE BÚSQUEDA PROFUNDA
+    sheets.forEach(sheet => {
+      const name = sheet.getName().toUpperCase();
+      let year = 'Unknown';
+      if(name === 'INSCRIPCIONES') year = '2026';
+      else {
+        const m = name.match(/20\d{2}/);
+        if(m) year = m[0];
+      }
+
+      if(year !== 'Unknown') {
+        const data = sheet.getDataRange().getValues();
+        for(let i=1; i<data.length; i++) {
+            if(data[i].length < 2) continue;
+
+            const rowEmail = (data[i].length > 4) ? String(data[i][4]||'').toLowerCase().trim() : "";
+            const rowNameRaw = String(data[i][2]||'').toUpperCase().trim();
             
-            courses.push({
-                id: String(data[i][7]).trim(),
-                name: String(data[i][8]).trim()
+            let isMatch = false;
+            
+            // A. Coincidencia directa por Email (La más fuerte)
+            if (rowEmail !== "" && searchTarget.includes('@') && rowEmail === searchTarget) {
+               isMatch = true;
+            } 
+            // B. Coincidencia por Tokens de Nombre (Si no hay email o falló)
+            else if (rowNameRaw.length > 5 && knownTokensSets.length > 0) {
+               const rowNameClean = removeAccents(rowNameRaw);
+               
+               for (let tokens of knownTokensSets) {
+                   const allTokensPresent = tokens.every(token => rowNameClean.includes(token));
+                   if (allTokensPresent) {
+                       isMatch = true;
+                       break; 
+                   }
+               }
+            }
+
+            if(isMatch) {
+                const status = (data[i].length > 14) ? String(data[i][14]||'').toUpperCase() : "";
+                if(status.includes('ACTIVO') || status.includes('ACREDITADO') || status === '' || status === 'TERMINADO') {
+                   foundCourses.push({
+                     year: year,
+                     folio: data[i][0],
+                     courseName: data[i][8],
+                     datesText: String(data[i][9]),
+                     hours: data[i][12],
+                     type: data[i][13],
+                     deptOrigin: data[i][6]
+                   });
+                   
+                   if(!teacherInfo.name && rowNameRaw) {
+                       teacherInfo.name = rowNameRaw;
+                       teacherInfo.dept = data[i][6];
+                   }
+                }
+            }
+        }
+      }
+    });
+    
+    // Ordenar cronológicamente inverso
+    foundCourses.sort((a, b) => b.year - a.year);
+
+    if(!teacherInfo.name) teacherInfo.name = searchTarget.toUpperCase();
+
+    return { success: true, data: { teacher: teacherInfo, courses: foundCourses } };
+  } catch(e) { return { success: false, message: e.toString() }; }
+}
+
+function getReportData(params) {
+  // Validate admin
+  const adminEmail = getEmailFromToken(params.id_token);
+  if(!isAdmin(adminEmail)) return { success: false, message: "No autorizado" };
+  
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const period = params.period || 'ACTUAL';
+    let sheetName = 'Inscripciones'; // Default current
+    if(period !== 'ACTUAL') {
+        const sheets = ss.getSheets();
+        const found = sheets.find(s => s.getName().includes(period));
+        if(found) sheetName = found.getName();
+        else return { success: true, data: [] };
+    }
+    
+    const sheet = ss.getSheetByName(sheetName);
+    if(!sheet) return { success: true, data: [] };
+
+    const data = sheet.getDataRange().getValues();
+    const result = [];
+    for(let i=1; i<data.length; i++) {
+        const status = String(data[i][14]).toUpperCase();
+        if(status.includes('ACTIVO')) {
+            result.push({
+                nombre: data[i][2],
+                curso: data[i][8],
+                folio: data[i][0],
+                fechas: String(data[i][9]),
+                departamento: data[i][6]
             });
         }
     }
-    
-    // Si no hay cursos, devolver éxito pero con lista vacía
-    return { 
-        success: true, 
-        data: { 
-            teacherData: teacherData,
-            courses: courses,
-            completedSurveys: [] // Se podría implementar chequeo si hubiera una hoja de respuestas
-        }
-    };
+    return { success: true, data: result };
+  } catch(e) { return { success: false, message: e.toString() }; }
 }
 
-function generateGeminiInsight(d) { return {success:true, analysis:"-"}; }
-function submitInstructorProposal(d) { return {success:true}; }
-function submitInstructorEvidence(d) { return {success:true}; }
-function submitSurveyRecord(d) { return {success:true}; }
+function getSurveyStats() {
+  try {
+    const ss = SpreadsheetApp.openById(SURVEY_SPREADSHEET_ID);
+    const sheet = ss.getSheets()[0];
+    const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return { success: true, data: { total: 0, participacion: {} } };
 
+    const headers = data[0].map(String);
+    let deptColIdx = -1;
+    for (let i = 0; i < headers.length; i++) {
+      const h = headers[i].toUpperCase().trim();
+      if (h.includes("DEPARTAMENTO") || h.includes("ADSCRIPCIÓN")) {
+        deptColIdx = i;
+        break;
+      }
+    }
+    if (deptColIdx === -1) deptColIdx = 2; 
+
+    const counts = {};
+    let total = 0;
+    for (let i = 1; i < data.length; i++) {
+      const dept = String(data[i][deptColIdx]).toUpperCase().trim();
+      if (dept) {
+        counts[dept] = (counts[dept] || 0) + 1;
+        total++;
+      }
+    }
+    return { success: true, data: { total: total, participacion: counts } };
+  } catch (e) {
+    return { success: false, message: e.toString() };
+  }
+}
+
+function getTeacherSurveyStats() {
+  try {
+    const ss = SpreadsheetApp.openById(TEACHER_SURVEY_SPREADSHEET_ID);
+    const sheet = ss.getSheets()[0];
+    const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return { success: true, data: { total: 0, participacion: {} } };
+
+    const headers = data[0].map(String);
+    let deptColIdx = -1;
+    for (let i = 0; i < headers.length; i++) {
+      const h = headers[i].toUpperCase().trim();
+      if (h.includes("DEPARTAMENTO") || h.includes("ADSCRIPCIÓN") || h.includes("ÁREA")) {
+        deptColIdx = i;
+        break;
+      }
+    }
+    if (deptColIdx === -1) deptColIdx = 1; 
+
+    const counts = {};
+    let total = 0;
+    for (let i = 1; i < data.length; i++) {
+      const dept = String(data[i][deptColIdx]).toUpperCase().trim();
+      if (dept) {
+        counts[dept] = (counts[dept] || 0) + 1;
+        total++;
+      }
+    }
+    return { success: true, data: { total: total, participacion: counts } };
+  } catch (e) {
+    return { success: false, message: e.toString() };
+  }
+}
+
+
+function sendConfirmationEmailHTML(email, name, courses) {
+  try {
+    const subject = "Confirmación de Inscripción - Actualización Docente ITD";
+    
+    let courseListHtml = "";
+    courses.forEach(c => {
+        courseListHtml += `
+        <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 16px; margin-bottom: 12px; font-family: 'Segoe UI', sans-serif;">
+            <h3 style="color: #0369a1; margin-top: 0; margin-bottom: 8px; font-size: 16px; text-transform: uppercase;">${c.name}</h3>
+            <div style="margin-bottom: 8px;">
+                <span style="font-weight: bold; color: #0c4a6e;">Folio de Registro:</span> 
+                <span style="background-color: #e0f2fe; color: #0284c7; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-weight: bold; font-size: 14px; border: 1px solid #7dd3fc;">${c.folio}</span>
+            </div>
+            <div style="font-size: 13px; color: #4b5563;">
+                <p style="margin: 2px 0;">📅 <strong>Fechas:</strong> ${c.dates}</p>
+                <p style="margin: 2px 0;">⏰ <strong>Horario:</strong> ${c.schedule || 'Por definir'}</p>
+                ${c.location ? `<p style="margin: 2px 0;">📍 <strong>Lugar:</strong> ${c.location}</p>` : ''}
+            </div>
+        </div>`;
+    });
+    
+    const body = `
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="utf-8"></head>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td align="center" style="padding: 20px;">
+                    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                        
+                        <!-- Header Azul -->
+                        <div style="background-color: #1B396A; padding: 30px 20px; text-align: center;">
+                            <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD Logo" style="height: 80px; margin-bottom: 15px; background-color: white; border-radius: 50%; padding: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">Confirmación de Inscripción</h1>
+                            <p style="color: #bfdbfe; margin: 5px 0 0; font-size: 14px; font-weight: 500;">Coordinación de Actualización Docente</p>
+                        </div>
+
+                        <!-- Contenido -->
+                        <div style="padding: 40px 30px;">
+                            <p style="font-size: 16px; color: #1f2937; margin-bottom: 20px;">Hola <strong>${name}</strong>,</p>
+                            <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin-bottom: 25px;">
+                                Hemos recibido y procesado exitosamente tu solicitud de inscripción. A continuación, encontrarás los detalles y folios de registro:
+                            </p>
+
+                            ${courseListHtml}
+
+                            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                                <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                                    <p style="font-size: 13px; color: #92400e; margin: 0;">
+                                        📌 <strong>Importante:</strong> Guarda este correo como comprobante de tu inscripción.
+                                    </p>
+                                </div>
+                                <p style="font-size: 14px; color: #6b7280; text-align: center;">
+                                    Si tienes alguna duda, por favor contacta a la Coordinación de Actualización Docente.
+                                </p>
+                                <p style="font-size: 16px; font-weight: bold; color: #1B396A; margin-top: 20px; text-align: center;">
+                                    ¡Te esperamos en los cursos!
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
+                            <p style="font-size: 12px; font-weight: bold; color: #64748b; margin: 0;">Coordinación de Actualización Docente</p>
+                            <p style="font-size: 12px; color: #94a3b8; margin: 5px 0;">Instituto Tecnológico de Durango</p>
+                            <p style="font-size: 10px; color: #cbd5e1; margin-top: 15px;">
+                                Este es un correo electrónico generado automáticamente, por favor no respondas a este mensaje.
+                            </p>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+      </body>
+      </html>
+    `;
+    
+    MailApp.sendEmail({
+      to: email,
+      subject: subject,
+      htmlBody: body
+    });
+    
+    return true;
+  } catch(e) {
+    console.error("Error enviando correo confirmación", e);
+    return false;
+  }
+}
+
+function sendCancellationEmailHTML(email, name, courses) {
+   try {
+    const subject = "Confirmación de Cancelación - Actualización Docente ITD";
+    
+    let courseListHtml = "";
+    courses.forEach(c => {
+        courseListHtml += `
+        <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 12px; font-family: 'Segoe UI', sans-serif;">
+            <h3 style="color: #991b1b; margin-top: 0; margin-bottom: 8px; font-size: 16px; text-transform: uppercase;">${c.name}</h3>
+            <div style="margin-bottom: 8px;">
+                <span style="font-weight: bold; color: #7f1d1d;">Folio Cancelado:</span> 
+                <span style="background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-family: monospace; text-decoration: line-through; border: 1px solid #fca5a5;">${c.folio}</span>
+            </div>
+            <div style="font-size: 12px; font-weight: bold; color: #dc2626; display: flex; align-items: center; background-color: white; display: inline-block; padding: 4px 8px; border-radius: 12px; border: 1px solid #fecaca;">
+                ⛔ BAJA PROCESADA
+            </div>
+        </div>`;
+    });
+    
+    const body = `
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="utf-8"></head>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td align="center" style="padding: 20px;">
+                    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                        
+                        <!-- Header Rojo (Guinda) -->
+                        <div style="background-color: #9D2449; padding: 30px 20px; text-align: center;">
+                            <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD Logo" style="height: 80px; margin-bottom: 15px; background-color: white; border-radius: 50%; padding: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">Confirmación de Cancelación</h1>
+                            <p style="color: #fecaca; margin: 5px 0 0; font-size: 14px; font-weight: 500;">Coordinación de Actualización Docente</p>
+                        </div>
+
+                        <!-- Contenido -->
+                        <div style="padding: 40px 30px;">
+                            <p style="font-size: 16px; color: #1f2937; margin-bottom: 20px;">Hola <strong>${name}</strong>,</p>
+                            <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin-bottom: 25px;">
+                                Hemos procesado tu solicitud de <strong>baja</strong> para los siguientes cursos. A partir de este momento, tu lugar ha sido liberado.
+                            </p>
+
+                            ${courseListHtml}
+
+                            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                                <p style="font-size: 14px; color: #6b7280; text-align: center;">
+                                    Si deseas inscribirte nuevamente, deberás realizar el proceso sujeto a cupo disponible.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
+                            <p style="font-size: 12px; font-weight: bold; color: #64748b; margin: 0;">Coordinación de Actualización Docente</p>
+                            <p style="font-size: 12px; color: #94a3b8; margin: 5px 0;">Instituto Tecnológico de Durango</p>
+                            <p style="font-size: 10px; color: #cbd5e1; margin-top: 15px;">
+                                Este es un correo electrónico generado automáticamente.
+                            </p>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+      </body>
+      </html>
+    `;
+    
+    MailApp.sendEmail({
+      to: email,
+      subject: subject,
+      htmlBody: body
+    });
+    
+    return true;
+  } catch(e) { 
+    console.error("Error enviando correo cancelación", e);
+    return false;
+  }
+}
+
+/**
+ * Función auxiliar para enviar cancelación de UN SOLO curso.
+ */
+function sendSingleCancellationEmail(email, name, courseName, folio) {
+  const courseData = [{
+    name: courseName,
+    folio: folio || 'CANCELADO'
+  }];
+  return sendCancellationEmailHTML(email, name, courseData);
+}
+
+function generateGeminiInsight(data) {
+  return { success: true };
+}

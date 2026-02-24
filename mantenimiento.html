@@ -4,49 +4,277 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sitio en Mantenimiento - ITD</title>
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Playfair Display', 'Georgia', 'serif'],
+                        body: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        guinda: {
+                            50:  '#fdf2f4', 100: '#fce7eb', 200: '#f9d0d8',
+                            300: '#f4a8b8', 400: '#ec7590', 500: '#e04d6d',
+                            600: '#c73153', 700: '#a72344', 800: '#8c1f3b',
+                            900: '#6b1e2e', 950: '#3d0a18',
+                        },
+                        crema: {
+                            50: '#fefcf8', 100: '#fdf8f0', 200: '#faf0e0',
+                            300: '#f5e4c8', 400: '#edd4a8', 500: '#e2be82',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        h1, h2 { font-family: 'Playfair Display', Georgia, serif; }
+
+        /* Fondo con textura sutil */
+        .bg-texture {
+            background-color: #fdf8f0;
+            background-image:
+                radial-gradient(ellipse at 15% 20%, rgba(107,30,46,0.07) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 80%, rgba(226,190,130,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(107,30,46,0.03) 0%, transparent 70%);
         }
-        .animate-pulse-slow {
-            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+        /* Tarjeta principal */
+        .main-card {
+            background: #fff;
+            border-radius: 24px;
+            border: 1px solid rgba(107,30,46,0.1);
+            box-shadow:
+                0 4px 24px rgba(107,30,46,0.1),
+                0 1px 4px rgba(0,0,0,0.04),
+                inset 0 1px 0 rgba(255,255,255,0.9);
+            position: relative;
+            overflow: hidden;
         }
+
+        /* Barra superior degradado */
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, #6b1e2e, #a72344, #e2be82, #a72344, #6b1e2e);
+            background-size: 200% 100%;
+            animation: shimmer 4s linear infinite;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        /* Fondo radial interno */
+        .main-card::after {
+            content: '';
+            position: absolute;
+            top: -40%; right: -20%;
+            width: 55%; height: 80%;
+            background: radial-gradient(ellipse, rgba(226,190,130,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Ícono engrane girando */
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        @keyframes spin-reverse {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(-360deg); }
+        }
+        .spin-slow    { animation: spin-slow    8s linear infinite; }
+        .spin-reverse { animation: spin-reverse 6s linear infinite; }
+
+        /* Logo pulse */
+        @keyframes pulse-logo {
+            0%, 100% { transform: scale(1);    opacity: 1; }
+            50%       { transform: scale(1.04); opacity: 0.9; }
+        }
+        .pulse-logo { animation: pulse-logo 3s ease-in-out infinite; }
+
+        /* Puntos de carga */
+        @keyframes bounce-dot {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+            40%           { transform: translateY(-8px); opacity: 1; }
+        }
+        .dot-1 { animation: bounce-dot 1.4s ease-in-out infinite; }
+        .dot-2 { animation: bounce-dot 1.4s ease-in-out 0.2s infinite; }
+        .dot-3 { animation: bounce-dot 1.4s ease-in-out 0.4s infinite; }
+
+        /* Íconos de herramientas flotando */
+        @keyframes float-1 {
+            0%, 100% { transform: translateY(0) rotate(-5deg);  }
+            50%       { transform: translateY(-10px) rotate(5deg); }
+        }
+        @keyframes float-2 {
+            0%, 100% { transform: translateY(0) rotate(8deg);   }
+            50%       { transform: translateY(-14px) rotate(-4deg); }
+        }
+        @keyframes float-3 {
+            0%, 100% { transform: translateY(0) rotate(0deg);   }
+            50%       { transform: translateY(-8px) rotate(-8deg); }
+        }
+        .float-1 { animation: float-1 4s ease-in-out infinite; }
+        .float-2 { animation: float-2 5s ease-in-out 0.5s infinite; }
+        .float-3 { animation: float-3 3.5s ease-in-out 1s infinite; }
+
+        /* Línea separadora */
+        .divider-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #6b1e2e, #e2be82, #6b1e2e, transparent);
+            border-radius: 2px;
+        }
+
+        /* Chip de estado */
+        .status-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, rgba(107,30,46,0.08), rgba(226,190,130,0.12));
+            border: 1px solid rgba(107,30,46,0.15);
+            border-radius: 999px;
+            padding: 8px 20px;
+            font-size: 13px; font-weight: 600;
+            color: #6b1e2e;
+        }
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #a72344;
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50%       { transform: scale(1.5); opacity: 0.6; }
+        }
+
+        /* Link email */
+        .email-link {
+            color: #a72344; font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(167,35,68,0.4);
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .email-link:hover { color: #6b1e2e; border-bottom-color: #6b1e2e; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center min-h-screen p-4">
 
-    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full text-center border-t-4 border-blue-800">
-        <div class="flex flex-col items-center">
-            <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="Logo ITD" class="h-24 mb-6 animate-pulse-slow">
-            
-            <h1 class="text-2xl sm:text-4xl font-bold text-blue-900 mb-4">
-                Sitio en Mantenimiento
-            </h1>
-            
-            <p class="text-gray-700 text-base sm:text-lg mb-6 leading-relaxed">
-                ¡Disculpen las molestias! Estamos realizando algunas mejoras importantes en el portal para ofrecerles un mejor servicio. 
-                El sistema volverá a estar disponible en breve.
-            </p>
+<body class="bg-texture flex items-center justify-center min-h-screen p-4 sm:p-6">
 
-            <p class="text-gray-600 text-sm">
-                Agradecemos su paciencia y comprensión.
-            </p>
+    <div class="main-card w-full max-w-2xl p-8 sm:p-12 text-center relative z-10">
 
-            <div class="mt-8 border-t pt-6 w-full">
-                <p class="text-sm text-gray-800 font-semibold mb-2">
-                    Coordinación de Actualización Docente
-                </p>
-                <p class="text-xs text-gray-500">
-                    Instituto Tecnológico de Durango
-                </p>
-                 <p class="text-xs text-blue-700 mt-4">
-                    Si tiene alguna urgencia, puede contactarnos en: 
-                    <a href="mailto:desarrollo.academico@itdurango.edu.mx" class="font-bold hover:underline">desarrollo.academico@itdurango.edu.mx</a>
-                </p>
+        <!-- Íconos flotantes decorativos -->
+        <div class="absolute top-8 left-6 text-2xl opacity-20 float-1 select-none">⚙️</div>
+        <div class="absolute top-12 right-8 text-xl opacity-15 float-2 select-none">🔧</div>
+        <div class="absolute bottom-16 left-8 text-xl opacity-15 float-3 select-none">🛠️</div>
+        <div class="absolute bottom-20 right-6 text-2xl opacity-20 float-1 select-none" style="animation-delay:1.5s">⚙️</div>
+
+        <!-- Logo -->
+        <div class="flex justify-center mb-6">
+            <div class="relative">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png"
+                     alt="Logo ITD"
+                     class="h-20 sm:h-24 object-contain pulse-logo drop-shadow-md">
             </div>
         </div>
+
+        <!-- Engranajes animados -->
+        <div class="flex items-center justify-center gap-1 mb-6">
+            <span class="text-4xl spin-slow select-none" style="color:#6b1e2e; opacity:0.7;">⚙️</span>
+            <span class="text-2xl spin-reverse select-none" style="color:#a72344; opacity:0.55; margin-top:10px;">⚙️</span>
+            <span class="text-3xl spin-slow select-none" style="color:#e2be82; opacity:0.65; animation-delay:1s;">⚙️</span>
+        </div>
+
+        <!-- Chip estado -->
+        <div class="flex justify-center mb-6">
+            <div class="status-chip">
+                <span class="status-dot"></span>
+                Trabajando en mejoras
+            </div>
+        </div>
+
+        <!-- Título -->
+        <h1 class="text-3xl sm:text-4xl font-display font-bold text-guinda-900 mb-2 leading-tight">
+            Sitio en Mantenimiento
+        </h1>
+        <p class="text-xs sm:text-sm font-semibold tracking-widest uppercase text-guinda-500 mb-6">
+            Portal de Actualización Docente · ITD
+        </p>
+
+        <!-- Divider -->
+        <div class="divider-line w-24 mx-auto mb-6"></div>
+
+        <!-- Mensaje principal -->
+        <p class="text-gray-600 text-base sm:text-lg leading-relaxed mb-4 max-w-lg mx-auto">
+            ¡Disculpen las molestias! Estamos realizando mejoras importantes en el portal
+            para ofrecerles un mejor servicio.
+        </p>
+        <p class="text-gray-500 text-sm leading-relaxed mb-8 max-w-md mx-auto">
+            El sistema estará disponible nuevamente en breve. Agradecemos su paciencia y comprensión.
+        </p>
+
+        <!-- Puntos de carga -->
+        <div class="flex justify-center items-center gap-2 mb-8">
+            <span class="w-2.5 h-2.5 rounded-full bg-guinda-700 dot-1"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-guinda-500 dot-2"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-crema-400 dot-3"></span>
+        </div>
+
+        <!-- Mini íconos de servicios -->
+        <div class="flex justify-center gap-3 mb-8 flex-wrap">
+            <div class="flex flex-col items-center gap-1 opacity-40">
+                <span class="text-xl">📝</span>
+                <span class="text-[10px] text-guinda-800 font-medium">Inscripciones</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 opacity-40">
+                <span class="text-xl">📚</span>
+                <span class="text-[10px] text-guinda-800 font-medium">Historial</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 opacity-40">
+                <span class="text-xl">📋</span>
+                <span class="text-[10px] text-guinda-800 font-medium">Formatos</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 opacity-40">
+                <span class="text-xl">✅</span>
+                <span class="text-[10px] text-guinda-800 font-medium">Constancias</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 opacity-40">
+                <span class="text-xl">📊</span>
+                <span class="text-[10px] text-guinda-800 font-medium">Encuestas</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 opacity-40">
+                <span class="text-xl">📈</span>
+                <span class="text-[10px] text-guinda-800 font-medium">Estadísticas</span>
+            </div>
+        </div>
+
+        <!-- Divider footer -->
+        <div class="divider-line w-full mb-6"></div>
+
+        <!-- Footer info -->
+        <div class="space-y-1 mb-4">
+            <p class="text-sm font-semibold text-guinda-900">
+                Coordinación de Actualización Docente
+            </p>
+            <p class="text-xs text-gray-500 tracking-wide">
+                TecNM · Instituto Tecnológico de Durango
+            </p>
+        </div>
+
+        <p class="text-xs text-gray-500 leading-relaxed">
+            ¿Tienes una urgencia? Contáctanos en:<br>
+            <a href="mailto:desarrollo.academico@itdurango.edu.mx" class="email-link">
+                desarrollo.academico@itdurango.edu.mx
+            </a>
+        </p>
+
     </div>
 
 </body>
