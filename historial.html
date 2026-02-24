@@ -94,13 +94,8 @@
                 if (window.google && window.google.accounts && googleBtnRef.current) {
                     clearInterval(interval);
                     try {
-                        window.google.accounts.id.initialize({ 
-                            client_id: CONFIG.GOOGLE_CLIENT_ID, 
-                            callback: onLogin,
-                            use_fedcm_for_prompt: false
-                        });
+                        window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin, use_fedcm_for_prompt: false });
                         window.google.accounts.id.renderButton(googleBtnRef.current, { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill" });
-                        window.google.accounts.id.prompt();
                     } catch (e) { console.error("Error rendering Google Button", e); }
                 }
             }, 500);
@@ -258,13 +253,7 @@
             setLoading(true);
             try {
                 const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                fetch(CONFIG.APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'cors',
-                        redirect: 'follow',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action: 'getTeacherHistory', id_token: response.credential, email: payload.email })
-                    })
+                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${response.credential}`)
                     .then(r => r.json())
                     .then(res => {
                         if(res.success) {
