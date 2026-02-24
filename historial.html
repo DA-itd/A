@@ -6,7 +6,6 @@
     
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
 <title>Historial Académico - Portal ITD</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -94,7 +93,7 @@
                 if (window.google && window.google.accounts && googleBtnRef.current) {
                     clearInterval(interval);
                     try {
-                        window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin, use_fedcm_for_prompt: false });
+                        window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
                         window.google.accounts.id.renderButton(googleBtnRef.current, { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill" });
                     } catch (e) { console.error("Error rendering Google Button", e); }
                 }
@@ -245,37 +244,66 @@
     };
 
     const App = () => {
-        const [user, setUser] = useState(null);
-        const [data, setData] = useState(null);
+        const [user, setUser]       = useState(null);
+        const [data, setData]       = useState(null);
         const [loading, setLoading] = useState(false);
+        const [error, setError]     = useState(null);
 
+        // PASO 1: Login local igual que inscripciones — solo decodifica con atob, sin fetch
         const handleLogin = (response) => {
-            setLoading(true);
             try {
                 const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${response.credential}`)
-                    .then(r => r.json())
-                    .then(res => {
-                        if(res.success) {
-                            setUser({ name: payload.name, email: payload.email, picture: payload.picture, token: response.credential });
-                            setData(res.data);
-                        } else { alert("Error: " + res.message); }
-                    })
-                    .finally(() => setLoading(false));
-            } catch(e) { setLoading(false); }
+                setUser({
+                    name:       payload.name,
+                    email:      payload.email,
+                    picture:    payload.picture,
+                    token:      response.credential
+                });
+                setError(null);
+            } catch(e) {
+                setError('Error al procesar el inicio de sesión. Intenta de nuevo.');
+            }
         };
 
-        const handleLogout = () => { setUser(null); setData(null); };
+        // PASO 2: Una vez autenticado, fetch al historial en useEffect (igual que inscripciones)
+        useEffect(() => {
+            if (!user) return;
+            setLoading(true);
+            setError(null);
+            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${encodeURIComponent(user.token)}`)
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        setData(res.data);
+                    } else {
+                        setError(res.message || 'Error al cargar el historial.');
+                        setUser(null); // regresar al login
+                    }
+                })
+                .catch(() => setError('Error de conexión. Intenta de nuevo.'))
+                .finally(() => setLoading(false));
+        }, [user]);
 
-        if(loading) return (
+        const handleLogout = () => { setUser(null); setData(null); setError(null); };
+
+        if (loading) return (
             <div className="flex flex-col justify-center items-center h-screen bg-slate-50">
                 <div className="animate-spin h-12 w-12 border-4 border-orange-500 rounded-full border-t-transparent mb-4"></div>
                 <p className="text-slate-500 font-bold animate-pulse">Cargando tu historial...</p>
             </div>
         );
-        
-        if(!user || !data) return <div className="container mx-auto px-4 pt-10"><LoginScreen onLogin={handleLogin} /></div>;
-        
+
+        if (!user || !data) return (
+            <div className="container mx-auto px-4 pt-10">
+                {error && (
+                    <div className="max-w-md mx-auto mb-4 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm text-center">
+                        ⚠️ {error}
+                    </div>
+                )}
+                <LoginScreen onLogin={handleLogin} />
+            </div>
+        );
+
         return <Dashboard user={user} data={data} onLogout={handleLogout} />;
     };
 
