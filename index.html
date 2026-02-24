@@ -165,33 +165,98 @@
 
         /* ── TARJETAS ── */
         .card-portal {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
             background: #ffffff;
-            border-top: 3px solid #6b1e2e;
-            border-radius: 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(107,30,46,0.10);
+            box-shadow: 0 2px 12px rgba(107,30,46,0.07), 0 1px 3px rgba(0,0,0,0.04);
         }
+        /* franja decorativa inferior */
+        .card-portal::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #6b1e2e, #a72344, #e2be82, #a72344, #6b1e2e);
+            background-size: 200% 100%;
+            opacity: 0;
+            transition: opacity 0.35s;
+        }
+        .card-portal:hover::after { opacity: 1; animation: shimmer-bar 2s linear infinite; }
+        @keyframes shimmer-bar {
+            0%   { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+        /* barrido de luz */
         .card-portal::before {
             content: '';
             position: absolute;
-            top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(107,30,46,0.04), transparent);
-            transition: left 0.5s;
+            top: -60%; left: -60%; width: 60%; height: 220%;
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.55) 50%, transparent 60%);
+            transition: left 0.55s ease;
+            pointer-events: none;
         }
-        .card-portal:hover::before { left: 100%; }
+        .card-portal:hover::before { left: 140%; }
         .card-portal:hover {
-            transform: translateY(-6px) scale(1.015);
-            box-shadow: 0 16px 36px rgba(107,30,46,0.14);
-            border-top-color: #a72344;
+            transform: translateY(-7px) scale(1.02);
+            box-shadow: 0 20px 44px rgba(107,30,46,0.16), 0 4px 12px rgba(107,30,46,0.08);
+            border-color: rgba(167,35,68,0.25);
         }
+        /* fondo degradado sutil */
+        .card-portal .card-bg {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 80% 0%, rgba(226,190,130,0.13) 0%, transparent 65%);
+            pointer-events: none;
+        }
+        /* contenedor del ícono */
+        .card-icon-wrap {
+            width: 64px; height: 64px;
+            margin: 0 auto 14px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(107,30,46,0.08) 0%, rgba(226,190,130,0.15) 100%);
+            border: 1px solid rgba(107,30,46,0.12);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.35s;
+            box-shadow: 0 2px 8px rgba(107,30,46,0.08);
+        }
+        .card-portal:hover .card-icon-wrap {
+            background: linear-gradient(135deg, rgba(107,30,46,0.14) 0%, rgba(226,190,130,0.25) 100%);
+            transform: scale(1.1) rotate(-3deg);
+            box-shadow: 0 6px 18px rgba(107,30,46,0.15);
+        }
+        /* línea separadora decorativa */
+        .card-divider {
+            width: 32px; height: 2px;
+            background: linear-gradient(90deg, #6b1e2e, #e2be82);
+            border-radius: 2px;
+            margin: 10px auto;
+            transition: width 0.35s;
+        }
+        .card-portal:hover .card-divider { width: 52px; }
+
+        /* DARK MODE */
         .dark .card-portal {
-            background: #2d1a1e;
-            border-top-color: #f4a8b8;
+            background: linear-gradient(145deg, #2d1a1e 0%, #241318 100%);
+            border-color: rgba(244,168,184,0.12);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
         }
         .dark .card-portal:hover {
-            box-shadow: 0 16px 36px rgba(244,168,184,0.15);
-            border-top-color: #f9d0d8;
+            box-shadow: 0 20px 44px rgba(0,0,0,0.4), 0 4px 12px rgba(244,168,184,0.1);
+            border-color: rgba(244,168,184,0.25);
+        }
+        .dark .card-portal .card-bg {
+            background: radial-gradient(ellipse at 80% 0%, rgba(107,30,46,0.2) 0%, transparent 65%);
+        }
+        .dark .card-icon-wrap {
+            background: linear-gradient(135deg, rgba(107,30,46,0.25) 0%, rgba(61,10,24,0.4) 100%);
+            border-color: rgba(244,168,184,0.15);
+        }
+        .dark .card-portal:hover .card-icon-wrap {
+            background: linear-gradient(135deg, rgba(167,35,68,0.35) 0%, rgba(107,30,46,0.5) 100%);
+        }
+        .dark .card-divider {
+            background: linear-gradient(90deg, #f4a8b8, #e2be82);
         }
 
         /* ── ANIMACIONES ── */
@@ -434,130 +499,117 @@
         <!-- Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
             
-            <!-- Opción 1: Inscripción a Cursos -->
             <a id="card-inscripciones" href="inscripciones.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-300 relative overflow-hidden group dark:hover:bg-guinda-950/60">
-                <div id="badge-inscripciones" class="absolute top-0 right-0 bg-guinda-700 text-white text-[10px] px-2 py-1 rounded-bl-lg font-bold tracking-wide">
-                    ¡ABIERTO!
+               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-300 relative group">
+                <div class="card-bg"></div>
+                <div id="badge-inscripciones" class="absolute top-3 right-3 bg-guinda-700 text-white text-[10px] px-2.5 py-1 rounded-full font-bold tracking-widest shadow-md">¡ABIERTO!</div>
+                <div class="card-icon-wrap">
+                    <span class="text-3xl">📝</span>
                 </div>
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">📝</div>
-                <h3 class="text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-2">
+                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
                     Inscripción a Cursos
                 </h3>
-                <p id="desc-inscripciones" class="text-xs sm:text-sm text-guinda-700 dark:text-guinda-300 mb-4 font-semibold">
-                    Registrate y no pierdas tu lugar
-                </p>
-                <div id="status-inscripciones" class="inline-block bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <div class="card-divider"></div>
+                <p id="desc-inscripciones" class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Regístrate y no pierdas tu lugar</p>
+                <div id="status-inscripciones" class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
             </a>
-
-            <!-- Opción 2: Historial de Cursos -->
             <a href="historial.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-400 dark:hover:bg-guinda-950/60">
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📚</div>
-                <h3 class="text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-2">
+               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-400 group">
+                <div class="card-bg"></div>
+                
+                <div class="card-icon-wrap">
+                    <span class="text-3xl">📚</span>
+                </div>
+                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
                     Historial de Cursos
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-4">
-                    Ver mi historial de actualización
-                </p>
-                <div class="inline-block bg-crema-200 dark:bg-guinda-900/40 text-guinda-800 dark:text-crema-300 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Consulta tu historial de actualización docente</p>
+                <div class="inline-flex items-center gap-1.5 bg-crema-200 dark:bg-guinda-900/40 text-guinda-800 dark:text-crema-300 text-xs font-semibold px-3 py-1 rounded-full border border-crema-300 dark:border-guinda-800">✓ Disponible</div>
             </a>
-
-            <!-- Opción 3: Formatos Oficiales -->
             <a href="formatos.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-500 relative overflow-hidden group dark:hover:bg-guinda-950/60">
-                <div class="absolute top-0 right-0 bg-guinda-600 text-white text-[10px] px-2 py-1 rounded-bl-lg font-bold shadow-md animate-pulse tracking-wide">
-                    ¡PRE-REGISTRO!
+               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-500 relative group">
+                <div class="card-bg"></div>
+                <div class="absolute top-3 right-3 bg-guinda-600 text-white text-[10px] px-2.5 py-1 rounded-full font-bold shadow-md animate-pulse tracking-widest">PRE-REGISTRO</div>
+                <div class="card-icon-wrap">
+                    <span class="text-3xl">📋</span>
                 </div>
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform group-hover:scale-110">📋</div>
-                <h3 class="text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-2">
+                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
                     Formatos Oficiales
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-4">
-                    Descarga de formatos y <span class="text-guinda-700 dark:text-guinda-300 font-bold">Pre-Registro de Cursos</span>
-                </p>
-                <div class="inline-block bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Descarga de formatos y <span class="text-guinda-700 dark:text-guinda-300 font-semibold">Pre-Registro de Cursos</span></p>
+                <div class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
             </a>
-
-            <!-- Opción 4: Validación de Constancias -->
             <a href="verificador.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-600 dark:hover:bg-guinda-950/60">
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">✅</div>
-                <h3 class="text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-2">
+               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-600 group">
+                <div class="card-bg"></div>
+                
+                <div class="card-icon-wrap">
+                    <span class="text-3xl">✅</span>
+                </div>
+                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
                     Validación de Constancias
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-4">
-                    Verificar la autenticidad de documentos.
-                </p>
-                <div class="inline-block bg-gray-100 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Verifica la autenticidad de documentos oficiales</p>
+                <div class="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 text-xs font-semibold px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700">✓ Disponible</div>
             </a>
-
-            <!-- Opción 5: Área para Instructores -->
             <a href="instructores.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-700 dark:hover:bg-guinda-950/60">
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">👨‍🏫</div>
-                <h3 class="text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-2">
+               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-700 group">
+                <div class="card-bg"></div>
+                
+                <div class="card-icon-wrap">
+                    <span class="text-3xl">👨‍🏫</span>
+                </div>
+                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
                     Área para Instructores
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-4">
-                    Carga aquí tu <strong class="text-guinda-700 dark:text-guinda-300">CV</strong> y <strong class="text-guinda-700 dark:text-guinda-300">Evidencias</strong><br class="hidden sm:block"> de tus cursos
-                </p>
-                <div class="inline-block bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Carga tu <strong class="text-guinda-700 dark:text-guinda-300">CV</strong> y <strong class="text-guinda-700 dark:text-guinda-300">Evidencias</strong> de tus cursos</p>
+                <div class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
             </a>
-
-            <!-- Opción 6: Encuestas -->
             <a href="encuestas.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-800 dark:hover:bg-guinda-950/60">
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📊</div>
-                <h3 class="text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-2">
+               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-800 group">
+                <div class="card-bg"></div>
+                
+                <div class="card-icon-wrap">
+                    <span class="text-3xl">📊</span>
+                </div>
+                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
                     Encuestas de Opinión y Eficacia
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-4">
-                    Evaluación de cursos y servicios
-                </p>
-                <div class="inline-block bg-crema-200 dark:bg-guinda-900/40 text-guinda-800 dark:text-crema-300 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Evaluación de cursos y servicios docentes</p>
+                <div class="inline-flex items-center gap-1.5 bg-crema-200 dark:bg-guinda-900/40 text-guinda-800 dark:text-crema-300 text-xs font-semibold px-3 py-1 rounded-full border border-crema-300 dark:border-guinda-800">✓ Disponible</div>
             </a>
-            
-             <!-- Opción 7: Estadísticas -->
             <a href="estadisticas.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-900 dark:hover:bg-guinda-950/60">
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">📈</div>
-                <h3 class="text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-2">
+               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-900 group">
+                <div class="card-bg"></div>
+                
+                <div class="card-icon-wrap">
+                    <span class="text-3xl">📈</span>
+                </div>
+                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
                     Estadísticas
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-4">
-                    Análisis y resultados
-                </p>
-                <div class="inline-block bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Análisis y resultados de actualización docente</p>
+                <div class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
             </a>
-
-            <!-- Opción 8: Descarga de Constancias -->
             <a href="https://da-itd.github.io/B/" target="_blank" rel="noopener noreferrer"
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-900 dark:hover:bg-guinda-950/60">
-                <div class="text-4xl sm:text-5xl mb-4 transform transition-transform hover:scale-110">🏅</div>
-                <h3 class="text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-2">
+               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-900 relative group">
+                <div class="card-bg"></div>
+                
+                <div class="card-icon-wrap">
+                    <span class="text-3xl">🏅</span>
+                </div>
+                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
                     Descarga de Constancias
                 </h3>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-4">
-                    y Reconocimiento
-                </p>
-                <div class="inline-block bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 text-xs font-semibold px-3 py-1 rounded-full">
-                    ✓ Disponible
-                </div>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Descarga constancias y reconocimientos oficiales</p>
+                <div class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
             </a>
 
         </div>
