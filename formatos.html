@@ -212,15 +212,17 @@
                             const next       = !prev;
                             const nextStatus = next ? 'OPEN' : 'CLOSED';
 
-                            // ── GUARDAR EN EL SERVIDOR via fetch con text/plain ──────
+                            // ── GUARDAR EN EL SERVIDOR via fetch con JSON ──────
                             setSavingStatus(true);
-                            const formData = new FormData();
-                            formData.append('action', 'setRegistryStatus');
-                            formData.append('status', nextStatus);
-                            formData.append('id_token', response.credential);
                             fetch(SCRIPT_URL, {
                                 method: 'POST',
-                                body: formData
+                                redirect: 'follow',
+                                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                                body: JSON.stringify({
+                                    action:   'setRegistryStatus',
+                                    status:   nextStatus,
+                                    id_token: response.credential
+                                })
                             })
                             .then(r => r.text())
                             .then(text => {
