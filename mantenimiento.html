@@ -10,161 +10,184 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing:border-box; margin:0; padding:0; }
         body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background-color: #fdf8f0;
+            font-family:'Inter',system-ui,sans-serif;
+            background-color:#fdf8f0;
             background-image:
-                radial-gradient(ellipse at 15% 20%, rgba(107,30,46,0.07) 0%, transparent 50%),
-                radial-gradient(ellipse at 85% 80%, rgba(226,190,130,0.12) 0%, transparent 50%);
-            min-height: 100vh;
+                radial-gradient(ellipse at 15% 20%,rgba(107,30,46,.07) 0%,transparent 50%),
+                radial-gradient(ellipse at 85% 80%,rgba(226,190,130,.12) 0%,transparent 50%);
+            min-height:100vh; overflow-x:hidden;
         }
-        h1, h2, .font-display { font-family: 'Playfair Display', Georgia, serif; }
+        h1,.font-display{ font-family:'Playfair Display',Georgia,serif; }
 
-        .page-wrap {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 24px 16px;
-            gap: 24px;
-        }
-        @media (min-width: 1024px) {
-            .page-wrap { flex-direction: row; align-items: flex-start; justify-content: center; padding-top: 48px; gap: 32px; }
-        }
+        /* ── VIEWS ── */
+        #view-info   { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:24px 16px; }
+        #view-tetris { display:none; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:16px; }
 
-        /* ── CARDS ── */
-        .info-card, .tetris-card {
-            background: #fff;
-            border-radius: 24px;
-            border: 1px solid rgba(107,30,46,0.1);
-            box-shadow: 0 4px 24px rgba(107,30,46,0.1), 0 1px 4px rgba(0,0,0,0.04);
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-        }
-        .info-card   { max-width: 460px; padding: 36px 32px 28px; text-align: center; }
-        .tetris-card { max-width: 340px; padding: 22px 20px 20px; }
+        @keyframes fadeIn  { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+        @keyframes fadeOut { from{opacity:1;transform:none} to{opacity:0;transform:translateY(-16px)} }
+        .fade-in  { animation:fadeIn  .35s ease-out forwards; }
+        .fade-out { animation:fadeOut .3s ease-in  forwards; }
 
-        .info-card::before, .tetris-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; height: 4px;
-            background: linear-gradient(90deg, #6b1e2e, #a72344, #e2be82, #a72344, #6b1e2e);
-            background-size: 200% 100%;
-            animation: shimmer 4s linear infinite;
+        /* ── INFO CARD ── */
+        .info-card {
+            background:#fff; border-radius:24px;
+            border:1px solid rgba(107,30,46,.1);
+            box-shadow:0 4px 24px rgba(107,30,46,.1),0 1px 4px rgba(0,0,0,.04);
+            position:relative; overflow:hidden;
+            max-width:480px; width:100%;
+            padding:36px 32px 32px; text-align:center;
+        }
+        .info-card::before {
+            content:''; position:absolute; top:0;left:0;right:0;height:4px;
+            background:linear-gradient(90deg,#6b1e2e,#a72344,#e2be82,#a72344,#6b1e2e);
+            background-size:200% 100%; animation:shimmer 4s linear infinite;
         }
         .info-card::after {
-            content: '';
-            position: absolute; top: -40%; right: -20%;
-            width: 55%; height: 80%;
-            background: radial-gradient(ellipse, rgba(226,190,130,0.1) 0%, transparent 70%);
-            pointer-events: none;
+            content:''; position:absolute; top:-40%;right:-20%;
+            width:55%;height:80%;pointer-events:none;
+            background:radial-gradient(ellipse,rgba(226,190,130,.1) 0%,transparent 70%);
         }
 
-        /* ── ANIMATIONS ── */
-        @keyframes shimmer      { 0%   { background-position: 0%   0%; } 100% { background-position: 200% 0%; } }
-        @keyframes spin-slow    { from { transform: rotate(0deg);   } to { transform: rotate(360deg);  } }
-        @keyframes spin-reverse { from { transform: rotate(0deg);   } to { transform: rotate(-360deg); } }
-        @keyframes pulse-logo   { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.04); opacity:.9; } }
-        @keyframes bounce-dot   { 0%,80%,100% { transform:translateY(0); opacity:.4; } 40% { transform:translateY(-7px); opacity:1; } }
-        @keyframes float-1      { 0%,100% { transform:translateY(0) rotate(-5deg); } 50% { transform:translateY(-10px) rotate(5deg); } }
-        @keyframes float-2      { 0%,100% { transform:translateY(0) rotate(8deg);  } 50% { transform:translateY(-13px) rotate(-4deg); } }
-        @keyframes pulse-dot    { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.5); opacity:.6; } }
-
-        .spin-slow    { animation: spin-slow    8s linear infinite; }
-        .spin-reverse { animation: spin-reverse 6s linear infinite; }
-        .pulse-logo   { animation: pulse-logo   3s ease-in-out infinite; }
-        .dot-1 { animation: bounce-dot 1.4s ease-in-out 0s infinite; }
-        .dot-2 { animation: bounce-dot 1.4s ease-in-out .2s infinite; }
-        .dot-3 { animation: bounce-dot 1.4s ease-in-out .4s infinite; }
-        .float-1 { animation: float-1 4s ease-in-out infinite; }
-        .float-2 { animation: float-2 5s ease-in-out .5s infinite; }
-
-        /* ── UI ELEMENTS ── */
-        .status-chip {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: linear-gradient(135deg, rgba(107,30,46,0.08), rgba(226,190,130,0.12));
-            border: 1px solid rgba(107,30,46,0.15);
-            border-radius: 999px; padding: 6px 18px;
-            font-size: 12px; font-weight: 600; color: #6b1e2e;
+        /* ── PLAY BUTTON ── */
+        .play-btn {
+            display:inline-flex; align-items:center; gap:10px;
+            background:linear-gradient(135deg,#6b1e2e,#a72344);
+            color:#fff; border:none; border-radius:16px;
+            padding:14px 28px; font-size:15px; font-weight:700;
+            cursor:pointer; margin-top:8px;
+            box-shadow:0 4px 18px rgba(107,30,46,.35);
+            transition:transform .15s,box-shadow .15s;
+            font-family:'Inter',sans-serif;
         }
-        .status-dot { width:7px; height:7px; border-radius:50%; background:#a72344; animation: pulse-dot 1.5s ease-in-out infinite; }
-        .divider-line { height:2px; background:linear-gradient(90deg,transparent,#6b1e2e,#e2be82,#6b1e2e,transparent); border-radius:2px; }
-        .email-link { color:#a72344; font-weight:600; text-decoration:none; border-bottom:1px dashed rgba(167,35,68,0.4); transition:.2s; }
-        .email-link:hover { color:#6b1e2e; }
-
-        /* ── TETRIS ── */
-        .score-row { display:flex; justify-content:space-between; margin-bottom:12px; gap:6px; }
-        .score-box {
-            flex:1; background:linear-gradient(135deg,rgba(107,30,46,0.08),rgba(226,190,130,0.1));
-            border:1px solid rgba(107,30,46,0.12); border-radius:10px;
-            padding:5px 8px; text-align:center;
+        .play-btn:hover { transform:scale(1.05); box-shadow:0 6px 24px rgba(107,30,46,.45); }
+        .play-btn:active { transform:scale(.97); }
+        .play-btn .tetris-icon {
+            display:grid; grid-template-columns:repeat(3,8px); gap:2px;
         }
-        .score-box span { display:block; font-size:9px; color:#a72344; opacity:.7; font-weight:500; text-transform:uppercase; letter-spacing:.04em; }
-        .score-box strong { font-size:15px; color:#6b1e2e; font-weight:700; }
+        .play-btn .tetris-icon span {
+            width:8px; height:8px; border-radius:2px; background:rgba(255,255,255,.85);
+        }
+        .play-btn .tetris-icon span.empty { background:transparent; }
+
+        /* ── TETRIS CARD ── */
+        .tetris-wrap {
+            background:#fff; border-radius:24px;
+            border:1px solid rgba(107,30,46,.1);
+            box-shadow:0 4px 24px rgba(107,30,46,.1);
+            position:relative; overflow:hidden;
+            max-width:360px; width:100%;
+            padding:20px 18px 18px;
+        }
+        .tetris-wrap::before {
+            content:''; position:absolute; top:0;left:0;right:0;height:4px;
+            background:linear-gradient(90deg,#6b1e2e,#e2be82,#6b1e2e);
+            background-size:200% 100%; animation:shimmer 4s linear infinite;
+        }
+
+        /* back button */
+        .back-btn {
+            display:inline-flex; align-items:center; gap:6px;
+            background:rgba(107,30,46,.08); border:1px solid rgba(107,30,46,.15);
+            color:#6b1e2e; border-radius:10px; padding:6px 14px;
+            font-size:12px; font-weight:600; cursor:pointer;
+            transition:background .2s; margin-bottom:12px;
+            font-family:'Inter',sans-serif;
+        }
+        .back-btn:hover { background:rgba(107,30,46,.14); }
+
+        /* idle bar */
+        #idle-bar-wrap { width:100%; background:rgba(107,30,46,.08); border-radius:4px; overflow:hidden; height:4px; margin-top:10px; display:none; }
+        #idle-bar      { height:100%; background:linear-gradient(90deg,#6b1e2e,#e2be82); width:100%; transition:none; }
+
+        /* ── SCORE ── */
+        .score-row { display:flex; gap:6px; margin-bottom:10px; }
+        .score-box { flex:1; background:linear-gradient(135deg,rgba(107,30,46,.08),rgba(226,190,130,.1)); border:1px solid rgba(107,30,46,.12); border-radius:10px; padding:5px 6px; text-align:center; }
+        .score-box span   { display:block; font-size:9px; color:#a72344; opacity:.7; font-weight:500; text-transform:uppercase; letter-spacing:.04em; }
+        .score-box strong { font-size:14px; color:#6b1e2e; font-weight:700; }
 
         .game-area { display:flex; gap:10px; justify-content:center; align-items:flex-start; }
-        #tetris { border:2px solid rgba(107,30,46,0.25); border-radius:10px; background:#1a0e10; display:block; }
-        .side-panel { display:flex; flex-direction:column; gap:10px; }
-        .side-label { font-size:9px; font-weight:600; color:#6b1e2e; opacity:.6; text-transform:uppercase; letter-spacing:.06em; margin-bottom:3px; }
-        #next-piece { border:1px solid rgba(107,30,46,0.15); border-radius:8px; background:#1a0e10; display:block; }
+        #tetris    { border:2px solid rgba(107,30,46,.25); border-radius:10px; background:#1a0e10; display:block; }
+        .side-panel{ display:flex; flex-direction:column; gap:8px; }
+        .side-label{ font-size:9px; font-weight:600; color:#6b1e2e; opacity:.6; text-transform:uppercase; letter-spacing:.06em; margin-bottom:2px; }
+        #next-piece{ border:1px solid rgba(107,30,46,.15); border-radius:8px; background:#1a0e10; display:block; }
+        .hint-keys { font-size:10px; color:#6b1e2e; opacity:.5; line-height:1.9; }
 
-        .hint-keys { font-size:10px; color:#6b1e2e; opacity:.55; line-height:1.9; }
-
-        /* touch controls */
-        .ctrl-grid { margin-top:12px; }
-        .btn-row { display:flex; gap:8px; justify-content:center; margin-bottom:8px; }
-        .ctrl-btn {
-            background:linear-gradient(135deg,#6b1e2e,#a72344);
-            color:#fff; border:none; border-radius:10px;
-            width:46px; height:46px; font-size:17px;
+        /* ctrl buttons */
+        .ctrl-grid { margin-top:10px; }
+        .btn-row   { display:flex; gap:8px; justify-content:center; margin-bottom:7px; }
+        .ctrl-btn  {
+            background:linear-gradient(135deg,#6b1e2e,#a72344); color:#fff;
+            border:none; border-radius:10px; width:46px; height:46px; font-size:17px;
             cursor:pointer; display:flex; align-items:center; justify-content:center;
-            box-shadow:0 2px 8px rgba(107,30,46,0.3);
+            box-shadow:0 2px 8px rgba(107,30,46,.3);
             transition:transform .1s; user-select:none; -webkit-tap-highlight-color:transparent;
         }
         .ctrl-btn:active { transform:scale(.9); }
         .ctrl-btn.wide   { width:108px; font-size:13px; font-weight:600; }
         .ctrl-btn.golden { background:linear-gradient(135deg,#a72344,#e2be82); color:#3d0a18; }
-        .hint-touch { font-size:10px; color:#6b1e2e; opacity:.45; text-align:center; margin-top:4px; }
+        .hint-touch { font-size:10px; color:#6b1e2e; opacity:.4; text-align:center; margin-top:3px; }
 
         /* game overlay */
         #game-overlay {
             position:absolute; inset:0; border-radius:10px;
-            background:rgba(26,14,16,0.85); backdrop-filter:blur(4px);
+            background:rgba(26,14,16,.85); backdrop-filter:blur(4px);
             display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:#fdf8f0;
         }
-        #game-overlay h3 { font-family:'Playfair Display',serif; font-size:22px; color:#e2be82; }
+        #game-overlay h3 { font-family:'Playfair Display',serif; font-size:20px; color:#e2be82; }
         #game-overlay p  { font-size:12px; opacity:.65; }
         .start-btn {
             background:linear-gradient(135deg,#a72344,#e2be82); color:#3d0a18;
             font-weight:700; font-size:13px; padding:10px 26px;
             border-radius:999px; border:none; cursor:pointer;
-            box-shadow:0 4px 14px rgba(107,30,46,0.4);
-            transition:transform .15s; margin-top:4px;
+            box-shadow:0 4px 14px rgba(107,30,46,.4); transition:transform .15s; margin-top:4px;
         }
         .start-btn:hover { transform:scale(1.06); }
+
+        /* ── MISC ANIMATIONS ── */
+        @keyframes shimmer      { 0%{background-position:0% 0%}  100%{background-position:200% 0%} }
+        @keyframes spin-slow    { from{transform:rotate(0)}       to{transform:rotate(360deg)} }
+        @keyframes spin-reverse { from{transform:rotate(0)}       to{transform:rotate(-360deg)} }
+        @keyframes pulse-logo   { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.04);opacity:.9} }
+        @keyframes bounce-dot   { 0%,80%,100%{transform:translateY(0);opacity:.4} 40%{transform:translateY(-7px);opacity:1} }
+        @keyframes float-1      { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-10px) rotate(5deg)} }
+        @keyframes float-2      { 0%,100%{transform:translateY(0) rotate(8deg)}  50%{transform:translateY(-13px) rotate(-4deg)} }
+        @keyframes pulse-dot    { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:.6} }
+
+        .spin-slow    { animation:spin-slow    8s linear infinite; }
+        .spin-reverse { animation:spin-reverse 6s linear infinite; }
+        .pulse-logo   { animation:pulse-logo   3s ease-in-out infinite; }
+        .dot-1{animation:bounce-dot 1.4s ease-in-out 0s    infinite;}
+        .dot-2{animation:bounce-dot 1.4s ease-in-out .2s   infinite;}
+        .dot-3{animation:bounce-dot 1.4s ease-in-out .4s   infinite;}
+        .float-1{animation:float-1 4s ease-in-out infinite;}
+        .float-2{animation:float-2 5s ease-in-out .5s infinite;}
+
+        .status-chip { display:inline-flex;align-items:center;gap:8px; background:linear-gradient(135deg,rgba(107,30,46,.08),rgba(226,190,130,.12)); border:1px solid rgba(107,30,46,.15); border-radius:999px;padding:6px 18px;font-size:12px;font-weight:600;color:#6b1e2e; }
+        .status-dot  { width:7px;height:7px;border-radius:50%;background:#a72344;animation:pulse-dot 1.5s ease-in-out infinite; }
+        .divider-line{ height:2px;background:linear-gradient(90deg,transparent,#6b1e2e,#e2be82,#6b1e2e,transparent);border-radius:2px; }
+        .email-link  { color:#a72344;font-weight:600;text-decoration:none;border-bottom:1px dashed rgba(167,35,68,.4);transition:.2s; }
+        .email-link:hover{ color:#6b1e2e; }
     </style>
 </head>
-
 <body>
-<div class="page-wrap">
 
-    <!-- ══════════ INFO ══════════ -->
+<!-- ════════════════ VIEW: INFO ════════════════ -->
+<div id="view-info">
     <div class="info-card relative">
-        <div class="absolute top-8 left-5 text-xl opacity-15 float-1 select-none">🔧</div>
-        <div class="absolute top-10 right-6 text-lg opacity-15 float-2 select-none">🛠️</div>
+        <div class="absolute top-8 left-5 text-xl float-1 select-none" style="opacity:.15">🔧</div>
+        <div class="absolute top-10 right-6 text-lg float-2 select-none" style="opacity:.15">🛠️</div>
 
         <div class="flex justify-center mb-5">
             <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="Logo ITD"
-                 class="h-20 object-contain pulse-logo" style="filter:drop-shadow(0 2px 8px rgba(107,30,46,0.2));">
+                 class="h-20 object-contain pulse-logo" style="filter:drop-shadow(0 2px 8px rgba(107,30,46,.2))">
         </div>
 
         <div class="flex items-center justify-center gap-1 mb-5">
-            <span class="text-3xl spin-slow select-none"    style="color:#6b1e2e;opacity:.7">⚙️</span>
-            <span class="text-xl spin-reverse select-none"  style="color:#a72344;opacity:.55;margin-top:8px">⚙️</span>
-            <span class="text-2xl spin-slow select-none"    style="color:#e2be82;opacity:.65;animation-delay:1s">⚙️</span>
+            <span class="text-3xl spin-slow select-none"   style="color:#6b1e2e;opacity:.7">⚙️</span>
+            <span class="text-xl spin-reverse select-none" style="color:#a72344;opacity:.55;margin-top:8px">⚙️</span>
+            <span class="text-2xl spin-slow select-none"   style="color:#e2be82;opacity:.65;animation-delay:1s">⚙️</span>
         </div>
 
         <div class="flex justify-center mb-5">
@@ -179,50 +202,58 @@
         <div class="divider-line w-20 mx-auto mb-5"></div>
 
         <p class="text-gray-600 text-sm leading-relaxed mb-3 max-w-sm mx-auto">
-            ¡Disculpen las molestias! Estamos realizando mejoras importantes en el portal para ofrecerles un mejor servicio.
+            ¡Disculpen las molestias! Estamos realizando mejoras importantes para ofrecerles un mejor servicio.
         </p>
         <p class="text-gray-400 text-xs leading-relaxed mb-6 max-w-xs mx-auto">
-            El sistema estará disponible nuevamente en breve. Agradecemos su paciencia.
+            El sistema estará disponible en breve. Agradecemos su paciencia.
         </p>
 
         <div class="flex justify-center gap-2 mb-6">
-            <span class="w-2.5 h-2.5 rounded-full dot-1" style="background:#6b1e2e;display:inline-block;"></span>
-            <span class="w-2.5 h-2.5 rounded-full dot-2" style="background:#a72344;display:inline-block;"></span>
-            <span class="w-2.5 h-2.5 rounded-full dot-3" style="background:#e2be82;display:inline-block;"></span>
+            <span class="dot-1 w-2.5 h-2.5 rounded-full inline-block" style="background:#6b1e2e"></span>
+            <span class="dot-2 w-2.5 h-2.5 rounded-full inline-block" style="background:#a72344"></span>
+            <span class="dot-3 w-2.5 h-2.5 rounded-full inline-block" style="background:#e2be82"></span>
         </div>
 
-        <div class="flex justify-center gap-4 mb-6 flex-wrap" style="opacity:.35;">
-            <div class="flex flex-col items-center gap-0.5"><span class="text-lg">📝</span><span class="text-[9px] font-medium" style="color:#6b1e2e;">Inscripciones</span></div>
-            <div class="flex flex-col items-center gap-0.5"><span class="text-lg">📚</span><span class="text-[9px] font-medium" style="color:#6b1e2e;">Historial</span></div>
-            <div class="flex flex-col items-center gap-0.5"><span class="text-lg">📋</span><span class="text-[9px] font-medium" style="color:#6b1e2e;">Formatos</span></div>
-            <div class="flex flex-col items-center gap-0.5"><span class="text-lg">📊</span><span class="text-[9px] font-medium" style="color:#6b1e2e;">Encuestas</span></div>
-            <div class="flex flex-col items-center gap-0.5"><span class="text-lg">🏅</span><span class="text-[9px] font-medium" style="color:#6b1e2e;">Constancias</span></div>
-        </div>
+        <!-- BOTÓN JUGAR TETRIS -->
+        <button class="play-btn" id="btn-open-tetris">
+            <span class="tetris-icon" aria-hidden="true">
+                <span></span><span></span><span class="empty"></span>
+                <span></span><span></span><span></span>
+                <span class="empty"></span><span></span><span class="empty"></span>
+            </span>
+            🎮 Jugar Tetris
+        </button>
 
-        <div class="divider-line w-full mb-5"></div>
-        <p class="text-sm font-semibold mb-1" style="color:#6b1e2e;">Coordinación de Actualización Docente</p>
-        <p class="text-xs text-gray-400 mb-3">TecNM · Instituto Tecnológico de Durango</p>
-        <p class="text-xs text-gray-400">
-            ¿Urgencia? Contáctanos:<br>
-            <a href="mailto:desarrollo.academico@itdurango.edu.mx" class="email-link">desarrollo.academico@itdurango.edu.mx</a>
-        </p>
+        <div class="mt-8">
+            <div class="divider-line w-full mb-5"></div>
+            <p class="text-sm font-semibold mb-1" style="color:#6b1e2e;">Coordinación de Actualización Docente</p>
+            <p class="text-xs text-gray-400 mb-3">TecNM · Instituto Tecnológico de Durango</p>
+            <p class="text-xs text-gray-400">
+                ¿Urgencia? Contáctanos:<br>
+                <a href="mailto:desarrollo.academico@itdurango.edu.mx" class="email-link">desarrollo.academico@itdurango.edu.mx</a>
+            </p>
+        </div>
     </div>
+</div>
 
-    <!-- ══════════ TETRIS ══════════ -->
-    <div class="tetris-card">
-        <div style="text-align:center;margin-bottom:14px;">
-            <p class="font-display font-bold" style="color:#6b1e2e;font-size:17px;">🎮 Mientras esperas…</p>
-            <p style="font-size:11px;color:#a72344;opacity:.65;margin-top:2px;">¡Juega una partida de Tetris!</p>
+<!-- ════════════════ VIEW: TETRIS ════════════════ -->
+<div id="view-tetris">
+    <div class="tetris-wrap">
+
+        <!-- Back + idle bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <button class="back-btn" id="btn-back">← Volver</button>
+            <span style="font-size:11px;color:#a72344;opacity:.6;font-weight:600;">🎮 Tetris ITD</span>
         </div>
 
         <!-- Scores -->
         <div class="score-row">
             <div class="score-box"><span>Puntaje</span><strong id="score">0</strong></div>
-            <div class="score-box"><span>Nivel</span><strong id="level">1</strong></div>
-            <div class="score-box"><span>Líneas</span><strong id="lines">0</strong></div>
+            <div class="score-box"><span>Nivel</span>  <strong id="level">1</strong></div>
+            <div class="score-box"><span>Líneas</span> <strong id="lines">0</strong></div>
         </div>
 
-        <!-- Canvas + side -->
+        <!-- Canvas -->
         <div class="game-area">
             <div style="position:relative;">
                 <canvas id="tetris" width="200" height="400"></canvas>
@@ -241,6 +272,11 @@
                     <div class="side-label">Teclado</div>
                     <div class="hint-keys">← → Mover<br>↑ Rotar<br>↓ Bajar<br>Esp. Caer</div>
                 </div>
+                <!-- sound toggle -->
+                <div style="margin-top:6px;">
+                    <div class="side-label">Sonido</div>
+                    <button id="btn-sound" title="Sonido" style="background:none;border:none;cursor:pointer;font-size:20px;padding:0;">🔊</button>
+                </div>
             </div>
         </div>
 
@@ -257,23 +293,156 @@
             </div>
             <p class="hint-touch">Toca los botones o usa el teclado</p>
         </div>
-    </div>
 
+        <!-- Idle countdown bar -->
+        <div id="idle-bar-wrap">
+            <div id="idle-bar"></div>
+        </div>
+        <p id="idle-msg" style="font-size:10px;color:#a72344;text-align:center;margin-top:4px;display:none;opacity:.7;">
+            Regresando al inicio en <span id="idle-countdown">15</span>s…
+        </p>
+    </div>
 </div>
 
-<!-- ══════════ TETRIS ENGINE ══════════ -->
+<!-- ════════════════ SCRIPT ════════════════ -->
 <script>
-const COLS = 10, ROWS = 20, SZ = 20;
-const cv  = document.getElementById('tetris');
-const cx  = cv.getContext('2d');
-const ncv = document.getElementById('next-piece');
-const ncx = ncv.getContext('2d');
+// ── VIEWS ──────────────────────────────────────────────
+const viewInfo   = document.getElementById('view-info');
+const viewTetris = document.getElementById('view-tetris');
 
-// Paleta institucional
-const C = [null,'#6b1e2e','#a72344','#c73153','#e2be82','#edd4a8','#8c1f3b','#f4a8b8'];
-const GHOST = 'rgba(167,35,68,0.15)';
+function showTetris(){
+    viewInfo.classList.add('fade-out');
+    setTimeout(()=>{
+        viewInfo.style.display='none';
+        viewInfo.classList.remove('fade-out');
+        viewTetris.style.display='flex';
+        viewTetris.classList.add('fade-in');
+        setTimeout(()=>viewTetris.classList.remove('fade-in'),400);
+    },300);
+    resetIdle();
+}
+function showInfo(){
+    if(running) pauseGame();
+    viewTetris.classList.add('fade-out');
+    setTimeout(()=>{
+        viewTetris.style.display='none';
+        viewTetris.classList.remove('fade-out');
+        viewInfo.style.display='flex';
+        viewInfo.classList.add('fade-in');
+        setTimeout(()=>viewInfo.classList.remove('fade-in'),400);
+        clearIdleTimer();
+    },300);
+}
 
-const SHAPES = [
+document.getElementById('btn-open-tetris').addEventListener('click', showTetris);
+document.getElementById('btn-back').addEventListener('click', showInfo);
+
+// ── SOUND (Web Audio API) ──────────────────────────────
+let audioCtx = null;
+let soundOn  = true;
+
+function getAudio(){
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    return audioCtx;
+}
+function beep(freq, dur, type='square', vol=0.08){
+    if(!soundOn) return;
+    try{
+        const ac = getAudio();
+        const o  = ac.createOscillator();
+        const g  = ac.createGain();
+        o.connect(g); g.connect(ac.destination);
+        o.type=type; o.frequency.setValueAtTime(freq,ac.currentTime);
+        g.gain.setValueAtTime(vol,ac.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
+        o.start(); o.stop(ac.currentTime+dur);
+    }catch(e){}
+}
+function soundMove()  { beep(220,.05,'square',.05); }
+function soundRotate(){ beep(330,.06,'sine',.07); }
+function soundDrop()  { beep(110,.12,'sawtooth',.09); }
+function soundLine(n) {
+    // melodia corta por número de líneas
+    const notes=[[262,.08],[330,.08],[392,.08],[523,.12]];
+    const plays=Math.min(n,4);
+    let delay=0;
+    for(let i=0;i<plays;i++){
+        const [f,d]=notes[i];
+        setTimeout(()=>beep(f,d,'sine',.1),delay);
+        delay+=80;
+    }
+}
+function soundGameOver(){
+    [220,196,174,156,130].forEach((f,i)=>setTimeout(()=>beep(f,.18,'sawtooth',.1),i*120));
+}
+function soundStart(){
+    [330,392,523].forEach((f,i)=>setTimeout(()=>beep(f,.1,'sine',.08),i*100));
+}
+
+const btnSound = document.getElementById('btn-sound');
+btnSound.addEventListener('click',()=>{
+    soundOn=!soundOn;
+    btnSound.textContent=soundOn?'🔊':'🔇';
+});
+
+// ── IDLE TIMER ─────────────────────────────────────────
+const IDLE_SECS = 20;
+let idleTimer=null, idleTick=null, idleLeft=IDLE_SECS;
+
+function resetIdle(){
+    clearIdleTimer();
+    if(!running) return; // only track idle while game is going
+    idleLeft=IDLE_SECS;
+    document.getElementById('idle-bar').style.width='100%';
+    document.getElementById('idle-bar-wrap').style.display='none';
+    document.getElementById('idle-msg').style.display='none';
+}
+
+function startIdleCountdown(){
+    document.getElementById('idle-bar-wrap').style.display='block';
+    document.getElementById('idle-msg').style.display='block';
+    idleLeft=IDLE_SECS;
+    document.getElementById('idle-countdown').textContent=idleLeft;
+    document.getElementById('idle-bar').style.transition='none';
+    document.getElementById('idle-bar').style.width='100%';
+    requestAnimationFrame(()=>{
+        document.getElementById('idle-bar').style.transition=`width ${IDLE_SECS}s linear`;
+        document.getElementById('idle-bar').style.width='0%';
+    });
+    idleTick=setInterval(()=>{
+        idleLeft--;
+        document.getElementById('idle-countdown').textContent=idleLeft;
+        if(idleLeft<=0){ clearInterval(idleTick); showInfo(); }
+    },1000);
+}
+
+function clearIdleTimer(){
+    clearTimeout(idleTimer); clearInterval(idleTick);
+    document.getElementById('idle-bar-wrap').style.display='none';
+    document.getElementById('idle-msg').style.display='none';
+}
+
+// User activity resets idle
+['keydown','touchstart','mousedown'].forEach(ev=>{
+    document.addEventListener(ev,()=>{
+        if(viewTetris.style.display!=='none' && running){
+            clearIdleTimer();
+            clearTimeout(idleTimer);
+            idleTimer=setTimeout(startIdleCountdown, 8000); // 8s inactivity → show bar
+        }
+    },{passive:true});
+});
+
+// ── TETRIS ENGINE ──────────────────────────────────────
+const COLS=10,ROWS=20,SZ=20;
+const cv =document.getElementById('tetris');
+const cx =cv.getContext('2d');
+const ncv=document.getElementById('next-piece');
+const ncx=ncv.getContext('2d');
+
+const C=['','#6b1e2e','#a72344','#c73153','#e2be82','#edd4a8','#8c1f3b','#f4a8b8'];
+const GHOST='rgba(167,35,68,.15)';
+const SHAPES=[
     null,
     [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
     [[2,2],[2,2]],
@@ -284,35 +453,27 @@ const SHAPES = [
     [[0,0,7],[7,7,7],[0,0,0]],
 ];
 
-let board, piece, px, py, nextT;
-let sc=0, lv=1, ln=0;
-let running=false, animId, lastT=0;
+let board,piece,px,py,nextT;
+let sc=0,lv=1,ln=0;
+let running=false,paused=false,animId,lastT=0;
 
-const mkBoard = ()=> Array.from({length:ROWS},()=>new Array(COLS).fill(0));
-const randT   = ()=> Math.floor(Math.random()*7)+1;
+const mkBoard=()=>Array.from({length:ROWS},()=>new Array(COLS).fill(0));
+const randT  =()=>Math.floor(Math.random()*7)+1;
 
 function hits(b,p,ox,oy){
     for(let r=0;r<p.length;r++)
         for(let c=0;c<p[r].length;c++)
-            if(p[r][c]){
-                const x=ox+c,y=oy+r;
-                if(x<0||x>=COLS||y>=ROWS) return true;
-                if(y>=0&&b[y][x]) return true;
-            }
+            if(p[r][c]){const x=ox+c,y=oy+r; if(x<0||x>=COLS||y>=ROWS)return true; if(y>=0&&b[y][x])return true;}
     return false;
 }
-
 function spawn(){
-    const t=nextT||randT();
-    nextT=randT();
+    const t=nextT||randT(); nextT=randT();
     piece=SHAPES[t].map(r=>[...r]);
-    px=Math.floor(COLS/2)-Math.floor(piece[0].length/2);
-    py=0;
+    px=Math.floor(COLS/2)-Math.floor(piece[0].length/2); py=0;
     drawNext();
     if(hits(board,piece,px,py)) endGame();
 }
-
-function merge(){ piece.forEach((r,ri)=>r.forEach((v,ci)=>{ if(v&&py+ri>=0) board[py+ri][px+ci]=v; })); }
+function merge(){ piece.forEach((r,ri)=>r.forEach((v,ci)=>{ if(v&&py+ri>=0)board[py+ri][px+ci]=v; })); }
 
 function rotateMx(p){
     const R=p.length,C2=p[0].length;
@@ -320,93 +481,86 @@ function rotateMx(p){
 }
 function tryRot(){
     const rot=rotateMx(piece);
-    const tries=[0,-1,1,-2,2];
-    for(const dx of tries){ if(!hits(board,rot,px+dx,py)){piece=rot;px+=dx;return;} }
+    for(const dx of[0,-1,1,-2,2])
+        if(!hits(board,rot,px+dx,py)){piece=rot;px+=dx;soundRotate();return;}
 }
-
 function clearLines(){
-    let cleared=0;
-    for(let r=ROWS-1;r>=0;r--){
-        if(board[r].every(v=>v)){board.splice(r,1);board.unshift(new Array(COLS).fill(0));cleared++;r++;}
-    }
-    if(cleared){
-        sc+=([0,100,300,500,800][cleared]||800)*lv;
-        ln+=cleared; lv=Math.floor(ln/10)+1;
+    let cl=0;
+    for(let r=ROWS-1;r>=0;r--)
+        if(board[r].every(v=>v)){board.splice(r,1);board.unshift(new Array(COLS).fill(0));cl++;r++;}
+    if(cl){
+        soundLine(cl);
+        sc+=([0,100,300,500,800][cl]||800)*lv;
+        ln+=cl; lv=Math.floor(ln/10)+1;
         document.getElementById('score').textContent=sc;
         document.getElementById('level').textContent=lv;
         document.getElementById('lines').textContent=ln;
     }
 }
-
 function drop(){
-    if(!running)return;
+    if(!running||paused)return;
     py++;
     if(hits(board,piece,px,py)){py--;merge();clearLines();spawn();}
 }
-
-function hardDrop(){ while(!hits(board,piece,px,py+1))py++; drop(); }
-
+function hardDrop(){ while(!hits(board,piece,px,py+1))py++; soundDrop(); drop(); }
 function ghostPY(){ let g=py; while(!hits(board,piece,px,g+1))g++; return g; }
 
 function drawBlock(ctx2,x,y,col,sz){
     ctx2.fillStyle=col;
     ctx2.fillRect(x*sz+1,y*sz+1,sz-2,sz-2);
-    ctx2.fillStyle='rgba(255,255,255,0.16)';
+    ctx2.fillStyle='rgba(255,255,255,.16)';
     ctx2.fillRect(x*sz+2,y*sz+2,sz-4,4);
-    ctx2.fillStyle='rgba(0,0,0,0.2)';
+    ctx2.fillStyle='rgba(0,0,0,.2)';
     ctx2.fillRect(x*sz+1,y*sz+sz-4,sz-2,3);
 }
-
 function render(){
-    cx.fillStyle='#1a0e10';
-    cx.fillRect(0,0,cv.width,cv.height);
-    // grid
-    cx.strokeStyle='rgba(107,30,46,0.1)';
-    cx.lineWidth=0.5;
+    cx.fillStyle='#1a0e10'; cx.fillRect(0,0,cv.width,cv.height);
+    cx.strokeStyle='rgba(107,30,46,.1)'; cx.lineWidth=.5;
     for(let r=0;r<ROWS;r++){cx.beginPath();cx.moveTo(0,r*SZ);cx.lineTo(cv.width,r*SZ);cx.stroke();}
     for(let c=0;c<COLS;c++){cx.beginPath();cx.moveTo(c*SZ,0);cx.lineTo(c*SZ,cv.height);cx.stroke();}
-    // board
-    board.forEach((row,r)=>row.forEach((v,c)=>{ if(v)drawBlock(cx,c,r,C[v],SZ); }));
+    board.forEach((row,r)=>row.forEach((v,c)=>{if(v)drawBlock(cx,c,r,C[v],SZ);}));
     if(running&&piece){
-        // ghost
         const gy=ghostPY();
-        piece.forEach((row,r)=>row.forEach((v,c)=>{ if(v&&gy+r>=0){cx.fillStyle=GHOST;cx.fillRect((px+c)*SZ+1,(gy+r)*SZ+1,SZ-2,SZ-2);} }));
-        // piece
-        piece.forEach((row,r)=>row.forEach((v,c)=>{ if(v&&py+r>=0)drawBlock(cx,px+c,py+r,C[v],SZ); }));
+        piece.forEach((row,r)=>row.forEach((v,c)=>{if(v&&gy+r>=0){cx.fillStyle=GHOST;cx.fillRect((px+c)*SZ+1,(gy+r)*SZ+1,SZ-2,SZ-2);}}));
+        piece.forEach((row,r)=>row.forEach((v,c)=>{if(v&&py+r>=0)drawBlock(cx,px+c,py+r,C[v],SZ);}));
     }
 }
-
 function drawNext(){
     ncx.fillStyle='#1a0e10'; ncx.fillRect(0,0,ncv.width,ncv.height);
     if(!nextT)return;
-    const p=SHAPES[nextT]; const s=14;
-    const ox=Math.floor((ncv.width -p[0].length*s)/2);
-    const oy=Math.floor((ncv.height-p.length*s)/2);
+    const p=SHAPES[nextT],s=14;
+    const ox=Math.floor((ncv.width-p[0].length*s)/2), oy=Math.floor((ncv.height-p.length*s)/2);
     p.forEach((row,r)=>row.forEach((v,c)=>{
-        if(v){ncx.fillStyle=C[v];ncx.fillRect(ox+c*s+1,oy+r*s+1,s-2,s-2);ncx.fillStyle='rgba(255,255,255,0.16)';ncx.fillRect(ox+c*s+2,oy+r*s+2,s-4,3);}
+        if(v){ncx.fillStyle=C[v];ncx.fillRect(ox+c*s+1,oy+r*s+1,s-2,s-2);ncx.fillStyle='rgba(255,255,255,.16)';ncx.fillRect(ox+c*s+2,oy+r*s+2,s-4,3);}
     }));
 }
-
 function loop(ts){
-    if(!running)return;
+    if(!running||paused)return;
     const speed=Math.max(80,500-(lv-1)*45);
     if(ts-lastT>=speed){drop();lastT=ts;}
     render();
     animId=requestAnimationFrame(loop);
 }
-
 function startGame(){
-    board=mkBoard(); sc=0;lv=1;ln=0;
+    board=mkBoard();sc=0;lv=1;ln=0;
     document.getElementById('score').textContent=0;
     document.getElementById('level').textContent=1;
     document.getElementById('lines').textContent=0;
-    nextT=randT(); spawn(); running=true; lastT=0;
+    nextT=randT(); spawn(); running=true; paused=false; lastT=0;
     document.getElementById('game-overlay').style.display='none';
+    soundStart();
     animId=requestAnimationFrame(loop);
+    // start idle watcher
+    clearIdleTimer();
+    idleTimer=setTimeout(startIdleCountdown, 8000);
 }
-
+function pauseGame(){
+    paused=true; running=false; cancelAnimationFrame(animId);
+}
 function endGame(){
-    running=false; cancelAnimationFrame(animId); render();
+    running=false; paused=false; cancelAnimationFrame(animId); render();
+    soundGameOver();
+    clearIdleTimer();
     document.getElementById('overlay-msg').textContent='Puntaje final: '+sc;
     document.getElementById('start-btn').textContent='↺ Reiniciar';
     document.getElementById('game-overlay').style.display='flex';
@@ -414,33 +568,35 @@ function endGame(){
 
 // Keyboard
 document.addEventListener('keydown',e=>{
-    if(!running)return;
-    if(e.key==='ArrowLeft' &&!hits(board,piece,px-1,py)){px--;render();}
-    else if(e.key==='ArrowRight'&&!hits(board,piece,px+1,py)){px++;render();}
-    else if(e.key==='ArrowDown'){drop();render();}
-    else if(e.key==='ArrowUp'){tryRot();render();}
-    else if(e.key===' '){e.preventDefault();hardDrop();render();}
+    if(!running||paused)return;
+    let acted=false;
+    if(e.key==='ArrowLeft' &&!hits(board,piece,px-1,py)){px--;soundMove();acted=true;}
+    else if(e.key==='ArrowRight'&&!hits(board,piece,px+1,py)){px++;soundMove();acted=true;}
+    else if(e.key==='ArrowDown'){drop();acted=true;}
+    else if(e.key==='ArrowUp'){tryRot();acted=true;}
+    else if(e.key===' '){e.preventDefault();hardDrop();acted=true;}
+    if(acted){ render(); resetIdle(); clearTimeout(idleTimer); idleTimer=setTimeout(startIdleCountdown,8000); }
 });
 
-// Touch / mouse buttons
+// Touch buttons
 function addBtn(id,fn){
     const b=document.getElementById(id); if(!b)return;
     let iv;
-    const go=()=>{if(running){fn();render();}};
+    const go=()=>{if(running&&!paused){fn();render();resetIdle();clearTimeout(idleTimer);idleTimer=setTimeout(startIdleCountdown,8000);}};
     b.addEventListener('touchstart',e=>{e.preventDefault();go();iv=setInterval(go,110);},{passive:false});
     b.addEventListener('touchend',  e=>{e.preventDefault();clearInterval(iv);},{passive:false});
     b.addEventListener('mousedown', e=>{e.preventDefault();go();iv=setInterval(go,110);});
     b.addEventListener('mouseup',   ()=>clearInterval(iv));
     b.addEventListener('mouseleave',()=>clearInterval(iv));
 }
-addBtn('btn-left', ()=>{if(!hits(board,piece,px-1,py))px--;});
-addBtn('btn-right',()=>{if(!hits(board,piece,px+1,py))px++;});
+addBtn('btn-left', ()=>{if(!hits(board,piece,px-1,py)){px--;soundMove();}});
+addBtn('btn-right',()=>{if(!hits(board,piece,px+1,py)){px++;soundMove();}});
 addBtn('btn-down', drop);
-document.getElementById('btn-rotate').addEventListener('click',()=>{if(running){tryRot();render();}});
-document.getElementById('btn-drop').addEventListener('click',  ()=>{if(running){hardDrop();render();}});
+document.getElementById('btn-rotate').addEventListener('click',()=>{if(running&&!paused){tryRot();render();}});
+document.getElementById('btn-drop').addEventListener('click',  ()=>{if(running&&!paused){hardDrop();render();}});
 document.getElementById('start-btn').addEventListener('click', startGame);
 
-// Init
+// Init canvas
 board=mkBoard(); render(); drawNext();
 </script>
 </body>
