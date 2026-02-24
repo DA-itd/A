@@ -9,58 +9,45 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        display: ['Playfair Display', 'Georgia', 'serif'],
-                        body: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                    colors: {
-                        guinda: {
-                            50:  '#fdf2f4', 100: '#fce7eb', 200: '#f9d0d8',
-                            300: '#f4a8b8', 400: '#ec7590', 500: '#e04d6d',
-                            600: '#c73153', 700: '#a72344', 800: '#8c1f3b',
-                            900: '#6b1e2e', 950: '#3d0a18',
-                        },
-                        crema: {
-                            50: '#fefcf8', 100: '#fdf8f0', 200: '#faf0e0',
-                            300: '#f5e4c8', 400: '#edd4a8', 500: '#e2be82',
-                        },
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        body { font-family: 'Inter', system-ui, sans-serif; }
-        h1, h2 { font-family: 'Playfair Display', Georgia, serif; }
-
-        /* Fondo con textura sutil */
-        .bg-texture {
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
             background-color: #fdf8f0;
             background-image:
                 radial-gradient(ellipse at 15% 20%, rgba(107,30,46,0.07) 0%, transparent 50%),
-                radial-gradient(ellipse at 85% 80%, rgba(226,190,130,0.12) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(107,30,46,0.03) 0%, transparent 70%);
+                radial-gradient(ellipse at 85% 80%, rgba(226,190,130,0.12) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+        h1, h2, .font-display { font-family: 'Playfair Display', Georgia, serif; }
+
+        .page-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px 16px;
+            gap: 24px;
+        }
+        @media (min-width: 1024px) {
+            .page-wrap { flex-direction: row; align-items: flex-start; justify-content: center; padding-top: 48px; gap: 32px; }
         }
 
-        /* Tarjeta principal */
-        .main-card {
+        /* ── CARDS ── */
+        .info-card, .tetris-card {
             background: #fff;
             border-radius: 24px;
             border: 1px solid rgba(107,30,46,0.1);
-            box-shadow:
-                0 4px 24px rgba(107,30,46,0.1),
-                0 1px 4px rgba(0,0,0,0.04),
-                inset 0 1px 0 rgba(255,255,255,0.9);
+            box-shadow: 0 4px 24px rgba(107,30,46,0.1), 0 1px 4px rgba(0,0,0,0.04);
             position: relative;
             overflow: hidden;
+            width: 100%;
         }
+        .info-card   { max-width: 460px; padding: 36px 32px 28px; text-align: center; }
+        .tetris-card { max-width: 340px; padding: 22px 20px 20px; }
 
-        /* Barra superior degradado */
-        .main-card::before {
+        .info-card::before, .tetris-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; height: 4px;
@@ -68,214 +55,393 @@
             background-size: 200% 100%;
             animation: shimmer 4s linear infinite;
         }
-        @keyframes shimmer {
-            0%   { background-position: 0% 0%; }
-            100% { background-position: 200% 0%; }
-        }
-
-        /* Fondo radial interno */
-        .main-card::after {
+        .info-card::after {
             content: '';
-            position: absolute;
-            top: -40%; right: -20%;
+            position: absolute; top: -40%; right: -20%;
             width: 55%; height: 80%;
             background: radial-gradient(ellipse, rgba(226,190,130,0.1) 0%, transparent 70%);
             pointer-events: none;
         }
 
-        /* Ícono engrane girando */
-        @keyframes spin-slow {
-            from { transform: rotate(0deg); }
-            to   { transform: rotate(360deg); }
-        }
-        @keyframes spin-reverse {
-            from { transform: rotate(0deg); }
-            to   { transform: rotate(-360deg); }
-        }
+        /* ── ANIMATIONS ── */
+        @keyframes shimmer      { 0%   { background-position: 0%   0%; } 100% { background-position: 200% 0%; } }
+        @keyframes spin-slow    { from { transform: rotate(0deg);   } to { transform: rotate(360deg);  } }
+        @keyframes spin-reverse { from { transform: rotate(0deg);   } to { transform: rotate(-360deg); } }
+        @keyframes pulse-logo   { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.04); opacity:.9; } }
+        @keyframes bounce-dot   { 0%,80%,100% { transform:translateY(0); opacity:.4; } 40% { transform:translateY(-7px); opacity:1; } }
+        @keyframes float-1      { 0%,100% { transform:translateY(0) rotate(-5deg); } 50% { transform:translateY(-10px) rotate(5deg); } }
+        @keyframes float-2      { 0%,100% { transform:translateY(0) rotate(8deg);  } 50% { transform:translateY(-13px) rotate(-4deg); } }
+        @keyframes pulse-dot    { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.5); opacity:.6; } }
+
         .spin-slow    { animation: spin-slow    8s linear infinite; }
         .spin-reverse { animation: spin-reverse 6s linear infinite; }
-
-        /* Logo pulse */
-        @keyframes pulse-logo {
-            0%, 100% { transform: scale(1);    opacity: 1; }
-            50%       { transform: scale(1.04); opacity: 0.9; }
-        }
-        .pulse-logo { animation: pulse-logo 3s ease-in-out infinite; }
-
-        /* Puntos de carga */
-        @keyframes bounce-dot {
-            0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-            40%           { transform: translateY(-8px); opacity: 1; }
-        }
-        .dot-1 { animation: bounce-dot 1.4s ease-in-out infinite; }
-        .dot-2 { animation: bounce-dot 1.4s ease-in-out 0.2s infinite; }
-        .dot-3 { animation: bounce-dot 1.4s ease-in-out 0.4s infinite; }
-
-        /* Íconos de herramientas flotando */
-        @keyframes float-1 {
-            0%, 100% { transform: translateY(0) rotate(-5deg);  }
-            50%       { transform: translateY(-10px) rotate(5deg); }
-        }
-        @keyframes float-2 {
-            0%, 100% { transform: translateY(0) rotate(8deg);   }
-            50%       { transform: translateY(-14px) rotate(-4deg); }
-        }
-        @keyframes float-3 {
-            0%, 100% { transform: translateY(0) rotate(0deg);   }
-            50%       { transform: translateY(-8px) rotate(-8deg); }
-        }
+        .pulse-logo   { animation: pulse-logo   3s ease-in-out infinite; }
+        .dot-1 { animation: bounce-dot 1.4s ease-in-out 0s infinite; }
+        .dot-2 { animation: bounce-dot 1.4s ease-in-out .2s infinite; }
+        .dot-3 { animation: bounce-dot 1.4s ease-in-out .4s infinite; }
         .float-1 { animation: float-1 4s ease-in-out infinite; }
-        .float-2 { animation: float-2 5s ease-in-out 0.5s infinite; }
-        .float-3 { animation: float-3 3.5s ease-in-out 1s infinite; }
+        .float-2 { animation: float-2 5s ease-in-out .5s infinite; }
 
-        /* Línea separadora */
-        .divider-line {
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #6b1e2e, #e2be82, #6b1e2e, transparent);
-            border-radius: 2px;
-        }
-
-        /* Chip de estado */
+        /* ── UI ELEMENTS ── */
         .status-chip {
             display: inline-flex; align-items: center; gap: 8px;
             background: linear-gradient(135deg, rgba(107,30,46,0.08), rgba(226,190,130,0.12));
             border: 1px solid rgba(107,30,46,0.15);
-            border-radius: 999px;
-            padding: 8px 20px;
-            font-size: 13px; font-weight: 600;
-            color: #6b1e2e;
+            border-radius: 999px; padding: 6px 18px;
+            font-size: 12px; font-weight: 600; color: #6b1e2e;
         }
-        .status-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: #a72344;
-            animation: pulse-dot 1.5s ease-in-out infinite;
-        }
-        @keyframes pulse-dot {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50%       { transform: scale(1.5); opacity: 0.6; }
-        }
+        .status-dot { width:7px; height:7px; border-radius:50%; background:#a72344; animation: pulse-dot 1.5s ease-in-out infinite; }
+        .divider-line { height:2px; background:linear-gradient(90deg,transparent,#6b1e2e,#e2be82,#6b1e2e,transparent); border-radius:2px; }
+        .email-link { color:#a72344; font-weight:600; text-decoration:none; border-bottom:1px dashed rgba(167,35,68,0.4); transition:.2s; }
+        .email-link:hover { color:#6b1e2e; }
 
-        /* Link email */
-        .email-link {
-            color: #a72344; font-weight: 600;
-            text-decoration: none;
-            border-bottom: 1px dashed rgba(167,35,68,0.4);
-            transition: border-color 0.2s, color 0.2s;
+        /* ── TETRIS ── */
+        .score-row { display:flex; justify-content:space-between; margin-bottom:12px; gap:6px; }
+        .score-box {
+            flex:1; background:linear-gradient(135deg,rgba(107,30,46,0.08),rgba(226,190,130,0.1));
+            border:1px solid rgba(107,30,46,0.12); border-radius:10px;
+            padding:5px 8px; text-align:center;
         }
-        .email-link:hover { color: #6b1e2e; border-bottom-color: #6b1e2e; }
+        .score-box span { display:block; font-size:9px; color:#a72344; opacity:.7; font-weight:500; text-transform:uppercase; letter-spacing:.04em; }
+        .score-box strong { font-size:15px; color:#6b1e2e; font-weight:700; }
+
+        .game-area { display:flex; gap:10px; justify-content:center; align-items:flex-start; }
+        #tetris { border:2px solid rgba(107,30,46,0.25); border-radius:10px; background:#1a0e10; display:block; }
+        .side-panel { display:flex; flex-direction:column; gap:10px; }
+        .side-label { font-size:9px; font-weight:600; color:#6b1e2e; opacity:.6; text-transform:uppercase; letter-spacing:.06em; margin-bottom:3px; }
+        #next-piece { border:1px solid rgba(107,30,46,0.15); border-radius:8px; background:#1a0e10; display:block; }
+
+        .hint-keys { font-size:10px; color:#6b1e2e; opacity:.55; line-height:1.9; }
+
+        /* touch controls */
+        .ctrl-grid { margin-top:12px; }
+        .btn-row { display:flex; gap:8px; justify-content:center; margin-bottom:8px; }
+        .ctrl-btn {
+            background:linear-gradient(135deg,#6b1e2e,#a72344);
+            color:#fff; border:none; border-radius:10px;
+            width:46px; height:46px; font-size:17px;
+            cursor:pointer; display:flex; align-items:center; justify-content:center;
+            box-shadow:0 2px 8px rgba(107,30,46,0.3);
+            transition:transform .1s; user-select:none; -webkit-tap-highlight-color:transparent;
+        }
+        .ctrl-btn:active { transform:scale(.9); }
+        .ctrl-btn.wide   { width:108px; font-size:13px; font-weight:600; }
+        .ctrl-btn.golden { background:linear-gradient(135deg,#a72344,#e2be82); color:#3d0a18; }
+        .hint-touch { font-size:10px; color:#6b1e2e; opacity:.45; text-align:center; margin-top:4px; }
+
+        /* game overlay */
+        #game-overlay {
+            position:absolute; inset:0; border-radius:10px;
+            background:rgba(26,14,16,0.85); backdrop-filter:blur(4px);
+            display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:#fdf8f0;
+        }
+        #game-overlay h3 { font-family:'Playfair Display',serif; font-size:22px; color:#e2be82; }
+        #game-overlay p  { font-size:12px; opacity:.65; }
+        .start-btn {
+            background:linear-gradient(135deg,#a72344,#e2be82); color:#3d0a18;
+            font-weight:700; font-size:13px; padding:10px 26px;
+            border-radius:999px; border:none; cursor:pointer;
+            box-shadow:0 4px 14px rgba(107,30,46,0.4);
+            transition:transform .15s; margin-top:4px;
+        }
+        .start-btn:hover { transform:scale(1.06); }
     </style>
 </head>
 
-<body class="bg-texture flex items-center justify-center min-h-screen p-4 sm:p-6">
+<body>
+<div class="page-wrap">
 
-    <div class="main-card w-full max-w-2xl p-8 sm:p-12 text-center relative z-10">
+    <!-- ══════════ INFO ══════════ -->
+    <div class="info-card relative">
+        <div class="absolute top-8 left-5 text-xl opacity-15 float-1 select-none">🔧</div>
+        <div class="absolute top-10 right-6 text-lg opacity-15 float-2 select-none">🛠️</div>
 
-        <!-- Íconos flotantes decorativos -->
-        <div class="absolute top-8 left-6 text-2xl opacity-20 float-1 select-none">⚙️</div>
-        <div class="absolute top-12 right-8 text-xl opacity-15 float-2 select-none">🔧</div>
-        <div class="absolute bottom-16 left-8 text-xl opacity-15 float-3 select-none">🛠️</div>
-        <div class="absolute bottom-20 right-6 text-2xl opacity-20 float-1 select-none" style="animation-delay:1.5s">⚙️</div>
-
-        <!-- Logo -->
-        <div class="flex justify-center mb-6">
-            <div class="relative">
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png"
-                     alt="Logo ITD"
-                     class="h-20 sm:h-24 object-contain pulse-logo drop-shadow-md">
-            </div>
+        <div class="flex justify-center mb-5">
+            <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="Logo ITD"
+                 class="h-20 object-contain pulse-logo" style="filter:drop-shadow(0 2px 8px rgba(107,30,46,0.2));">
         </div>
 
-        <!-- Engranajes animados -->
-        <div class="flex items-center justify-center gap-1 mb-6">
-            <span class="text-4xl spin-slow select-none" style="color:#6b1e2e; opacity:0.7;">⚙️</span>
-            <span class="text-2xl spin-reverse select-none" style="color:#a72344; opacity:0.55; margin-top:10px;">⚙️</span>
-            <span class="text-3xl spin-slow select-none" style="color:#e2be82; opacity:0.65; animation-delay:1s;">⚙️</span>
+        <div class="flex items-center justify-center gap-1 mb-5">
+            <span class="text-3xl spin-slow select-none"    style="color:#6b1e2e;opacity:.7">⚙️</span>
+            <span class="text-xl spin-reverse select-none"  style="color:#a72344;opacity:.55;margin-top:8px">⚙️</span>
+            <span class="text-2xl spin-slow select-none"    style="color:#e2be82;opacity:.65;animation-delay:1s">⚙️</span>
         </div>
 
-        <!-- Chip estado -->
-        <div class="flex justify-center mb-6">
-            <div class="status-chip">
-                <span class="status-dot"></span>
-                Trabajando en mejoras
-            </div>
+        <div class="flex justify-center mb-5">
+            <div class="status-chip"><span class="status-dot"></span>Trabajando en mejoras</div>
         </div>
 
-        <!-- Título -->
-        <h1 class="text-3xl sm:text-4xl font-display font-bold text-guinda-900 mb-2 leading-tight">
-            Sitio en Mantenimiento
-        </h1>
-        <p class="text-xs sm:text-sm font-semibold tracking-widest uppercase text-guinda-500 mb-6">
+        <h1 class="font-display font-bold text-3xl mb-1" style="color:#6b1e2e;">Sitio en Mantenimiento</h1>
+        <p class="text-xs font-semibold tracking-widest uppercase mb-5" style="color:#a72344;opacity:.6;">
             Portal de Actualización Docente · ITD
         </p>
 
-        <!-- Divider -->
-        <div class="divider-line w-24 mx-auto mb-6"></div>
+        <div class="divider-line w-20 mx-auto mb-5"></div>
 
-        <!-- Mensaje principal -->
-        <p class="text-gray-600 text-base sm:text-lg leading-relaxed mb-4 max-w-lg mx-auto">
-            ¡Disculpen las molestias! Estamos realizando mejoras importantes en el portal
-            para ofrecerles un mejor servicio.
+        <p class="text-gray-600 text-sm leading-relaxed mb-3 max-w-sm mx-auto">
+            ¡Disculpen las molestias! Estamos realizando mejoras importantes en el portal para ofrecerles un mejor servicio.
         </p>
-        <p class="text-gray-500 text-sm leading-relaxed mb-8 max-w-md mx-auto">
-            El sistema estará disponible nuevamente en breve. Agradecemos su paciencia y comprensión.
+        <p class="text-gray-400 text-xs leading-relaxed mb-6 max-w-xs mx-auto">
+            El sistema estará disponible nuevamente en breve. Agradecemos su paciencia.
         </p>
 
-        <!-- Puntos de carga -->
-        <div class="flex justify-center items-center gap-2 mb-8">
-            <span class="w-2.5 h-2.5 rounded-full bg-guinda-700 dot-1"></span>
-            <span class="w-2.5 h-2.5 rounded-full bg-guinda-500 dot-2"></span>
-            <span class="w-2.5 h-2.5 rounded-full bg-crema-400 dot-3"></span>
+        <div class="flex justify-center gap-2 mb-6">
+            <span class="w-2.5 h-2.5 rounded-full dot-1" style="background:#6b1e2e;display:inline-block;"></span>
+            <span class="w-2.5 h-2.5 rounded-full dot-2" style="background:#a72344;display:inline-block;"></span>
+            <span class="w-2.5 h-2.5 rounded-full dot-3" style="background:#e2be82;display:inline-block;"></span>
         </div>
 
-        <!-- Mini íconos de servicios -->
-        <div class="flex justify-center gap-3 mb-8 flex-wrap">
-            <div class="flex flex-col items-center gap-1 opacity-40">
-                <span class="text-xl">📝</span>
-                <span class="text-[10px] text-guinda-800 font-medium">Inscripciones</span>
-            </div>
-            <div class="flex flex-col items-center gap-1 opacity-40">
-                <span class="text-xl">📚</span>
-                <span class="text-[10px] text-guinda-800 font-medium">Historial</span>
-            </div>
-            <div class="flex flex-col items-center gap-1 opacity-40">
-                <span class="text-xl">📋</span>
-                <span class="text-[10px] text-guinda-800 font-medium">Formatos</span>
-            </div>
-            <div class="flex flex-col items-center gap-1 opacity-40">
-                <span class="text-xl">✅</span>
-                <span class="text-[10px] text-guinda-800 font-medium">Constancias</span>
-            </div>
-            <div class="flex flex-col items-center gap-1 opacity-40">
-                <span class="text-xl">📊</span>
-                <span class="text-[10px] text-guinda-800 font-medium">Encuestas</span>
-            </div>
-            <div class="flex flex-col items-center gap-1 opacity-40">
-                <span class="text-xl">📈</span>
-                <span class="text-[10px] text-guinda-800 font-medium">Estadísticas</span>
-            </div>
+        <div class="flex justify-center gap-4 mb-6 flex-wrap" style="opacity:.35;">
+            <div class="flex flex-col items-center gap-0.5"><span class="text-lg">📝</span><span class="text-[9px] font-medium" style="color:#6b1e2e;">Inscripciones</span></div>
+            <div class="flex flex-col items-center gap-0.5"><span class="text-lg">📚</span><span class="text-[9px] font-medium" style="color:#6b1e2e;">Historial</span></div>
+            <div class="flex flex-col items-center gap-0.5"><span class="text-lg">📋</span><span class="text-[9px] font-medium" style="color:#6b1e2e;">Formatos</span></div>
+            <div class="flex flex-col items-center gap-0.5"><span class="text-lg">📊</span><span class="text-[9px] font-medium" style="color:#6b1e2e;">Encuestas</span></div>
+            <div class="flex flex-col items-center gap-0.5"><span class="text-lg">🏅</span><span class="text-[9px] font-medium" style="color:#6b1e2e;">Constancias</span></div>
         </div>
 
-        <!-- Divider footer -->
-        <div class="divider-line w-full mb-6"></div>
-
-        <!-- Footer info -->
-        <div class="space-y-1 mb-4">
-            <p class="text-sm font-semibold text-guinda-900">
-                Coordinación de Actualización Docente
-            </p>
-            <p class="text-xs text-gray-500 tracking-wide">
-                TecNM · Instituto Tecnológico de Durango
-            </p>
-        </div>
-
-        <p class="text-xs text-gray-500 leading-relaxed">
-            ¿Tienes una urgencia? Contáctanos en:<br>
-            <a href="mailto:desarrollo.academico@itdurango.edu.mx" class="email-link">
-                desarrollo.academico@itdurango.edu.mx
-            </a>
+        <div class="divider-line w-full mb-5"></div>
+        <p class="text-sm font-semibold mb-1" style="color:#6b1e2e;">Coordinación de Actualización Docente</p>
+        <p class="text-xs text-gray-400 mb-3">TecNM · Instituto Tecnológico de Durango</p>
+        <p class="text-xs text-gray-400">
+            ¿Urgencia? Contáctanos:<br>
+            <a href="mailto:desarrollo.academico@itdurango.edu.mx" class="email-link">desarrollo.academico@itdurango.edu.mx</a>
         </p>
-
     </div>
 
+    <!-- ══════════ TETRIS ══════════ -->
+    <div class="tetris-card">
+        <div style="text-align:center;margin-bottom:14px;">
+            <p class="font-display font-bold" style="color:#6b1e2e;font-size:17px;">🎮 Mientras esperas…</p>
+            <p style="font-size:11px;color:#a72344;opacity:.65;margin-top:2px;">¡Juega una partida de Tetris!</p>
+        </div>
+
+        <!-- Scores -->
+        <div class="score-row">
+            <div class="score-box"><span>Puntaje</span><strong id="score">0</strong></div>
+            <div class="score-box"><span>Nivel</span><strong id="level">1</strong></div>
+            <div class="score-box"><span>Líneas</span><strong id="lines">0</strong></div>
+        </div>
+
+        <!-- Canvas + side -->
+        <div class="game-area">
+            <div style="position:relative;">
+                <canvas id="tetris" width="200" height="400"></canvas>
+                <div id="game-overlay">
+                    <h3>TETRIS ITD</h3>
+                    <p id="overlay-msg">¿Listo para jugar?</p>
+                    <button class="start-btn" id="start-btn">▶ Iniciar</button>
+                </div>
+            </div>
+            <div class="side-panel">
+                <div>
+                    <div class="side-label">Siguiente</div>
+                    <canvas id="next-piece" width="64" height="64"></canvas>
+                </div>
+                <div style="margin-top:6px;">
+                    <div class="side-label">Teclado</div>
+                    <div class="hint-keys">← → Mover<br>↑ Rotar<br>↓ Bajar<br>Esp. Caer</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Touch controls -->
+        <div class="ctrl-grid">
+            <div class="btn-row">
+                <button class="ctrl-btn" id="btn-left">◀</button>
+                <button class="ctrl-btn" id="btn-rotate">🔄</button>
+                <button class="ctrl-btn" id="btn-right">▶</button>
+            </div>
+            <div class="btn-row">
+                <button class="ctrl-btn" id="btn-down">▼</button>
+                <button class="ctrl-btn golden wide" id="btn-drop">⬇ Caer</button>
+            </div>
+            <p class="hint-touch">Toca los botones o usa el teclado</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- ══════════ TETRIS ENGINE ══════════ -->
+<script>
+const COLS = 10, ROWS = 20, SZ = 20;
+const cv  = document.getElementById('tetris');
+const cx  = cv.getContext('2d');
+const ncv = document.getElementById('next-piece');
+const ncx = ncv.getContext('2d');
+
+// Paleta institucional
+const C = [null,'#6b1e2e','#a72344','#c73153','#e2be82','#edd4a8','#8c1f3b','#f4a8b8'];
+const GHOST = 'rgba(167,35,68,0.15)';
+
+const SHAPES = [
+    null,
+    [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+    [[2,2],[2,2]],
+    [[0,3,0],[3,3,3],[0,0,0]],
+    [[0,4,4],[4,4,0],[0,0,0]],
+    [[5,5,0],[0,5,5],[0,0,0]],
+    [[6,0,0],[6,6,6],[0,0,0]],
+    [[0,0,7],[7,7,7],[0,0,0]],
+];
+
+let board, piece, px, py, nextT;
+let sc=0, lv=1, ln=0;
+let running=false, animId, lastT=0;
+
+const mkBoard = ()=> Array.from({length:ROWS},()=>new Array(COLS).fill(0));
+const randT   = ()=> Math.floor(Math.random()*7)+1;
+
+function hits(b,p,ox,oy){
+    for(let r=0;r<p.length;r++)
+        for(let c=0;c<p[r].length;c++)
+            if(p[r][c]){
+                const x=ox+c,y=oy+r;
+                if(x<0||x>=COLS||y>=ROWS) return true;
+                if(y>=0&&b[y][x]) return true;
+            }
+    return false;
+}
+
+function spawn(){
+    const t=nextT||randT();
+    nextT=randT();
+    piece=SHAPES[t].map(r=>[...r]);
+    px=Math.floor(COLS/2)-Math.floor(piece[0].length/2);
+    py=0;
+    drawNext();
+    if(hits(board,piece,px,py)) endGame();
+}
+
+function merge(){ piece.forEach((r,ri)=>r.forEach((v,ci)=>{ if(v&&py+ri>=0) board[py+ri][px+ci]=v; })); }
+
+function rotateMx(p){
+    const R=p.length,C2=p[0].length;
+    return Array.from({length:C2},(_,r)=>Array.from({length:R},(_,c)=>p[R-1-c][r]));
+}
+function tryRot(){
+    const rot=rotateMx(piece);
+    const tries=[0,-1,1,-2,2];
+    for(const dx of tries){ if(!hits(board,rot,px+dx,py)){piece=rot;px+=dx;return;} }
+}
+
+function clearLines(){
+    let cleared=0;
+    for(let r=ROWS-1;r>=0;r--){
+        if(board[r].every(v=>v)){board.splice(r,1);board.unshift(new Array(COLS).fill(0));cleared++;r++;}
+    }
+    if(cleared){
+        sc+=([0,100,300,500,800][cleared]||800)*lv;
+        ln+=cleared; lv=Math.floor(ln/10)+1;
+        document.getElementById('score').textContent=sc;
+        document.getElementById('level').textContent=lv;
+        document.getElementById('lines').textContent=ln;
+    }
+}
+
+function drop(){
+    if(!running)return;
+    py++;
+    if(hits(board,piece,px,py)){py--;merge();clearLines();spawn();}
+}
+
+function hardDrop(){ while(!hits(board,piece,px,py+1))py++; drop(); }
+
+function ghostPY(){ let g=py; while(!hits(board,piece,px,g+1))g++; return g; }
+
+function drawBlock(ctx2,x,y,col,sz){
+    ctx2.fillStyle=col;
+    ctx2.fillRect(x*sz+1,y*sz+1,sz-2,sz-2);
+    ctx2.fillStyle='rgba(255,255,255,0.16)';
+    ctx2.fillRect(x*sz+2,y*sz+2,sz-4,4);
+    ctx2.fillStyle='rgba(0,0,0,0.2)';
+    ctx2.fillRect(x*sz+1,y*sz+sz-4,sz-2,3);
+}
+
+function render(){
+    cx.fillStyle='#1a0e10';
+    cx.fillRect(0,0,cv.width,cv.height);
+    // grid
+    cx.strokeStyle='rgba(107,30,46,0.1)';
+    cx.lineWidth=0.5;
+    for(let r=0;r<ROWS;r++){cx.beginPath();cx.moveTo(0,r*SZ);cx.lineTo(cv.width,r*SZ);cx.stroke();}
+    for(let c=0;c<COLS;c++){cx.beginPath();cx.moveTo(c*SZ,0);cx.lineTo(c*SZ,cv.height);cx.stroke();}
+    // board
+    board.forEach((row,r)=>row.forEach((v,c)=>{ if(v)drawBlock(cx,c,r,C[v],SZ); }));
+    if(running&&piece){
+        // ghost
+        const gy=ghostPY();
+        piece.forEach((row,r)=>row.forEach((v,c)=>{ if(v&&gy+r>=0){cx.fillStyle=GHOST;cx.fillRect((px+c)*SZ+1,(gy+r)*SZ+1,SZ-2,SZ-2);} }));
+        // piece
+        piece.forEach((row,r)=>row.forEach((v,c)=>{ if(v&&py+r>=0)drawBlock(cx,px+c,py+r,C[v],SZ); }));
+    }
+}
+
+function drawNext(){
+    ncx.fillStyle='#1a0e10'; ncx.fillRect(0,0,ncv.width,ncv.height);
+    if(!nextT)return;
+    const p=SHAPES[nextT]; const s=14;
+    const ox=Math.floor((ncv.width -p[0].length*s)/2);
+    const oy=Math.floor((ncv.height-p.length*s)/2);
+    p.forEach((row,r)=>row.forEach((v,c)=>{
+        if(v){ncx.fillStyle=C[v];ncx.fillRect(ox+c*s+1,oy+r*s+1,s-2,s-2);ncx.fillStyle='rgba(255,255,255,0.16)';ncx.fillRect(ox+c*s+2,oy+r*s+2,s-4,3);}
+    }));
+}
+
+function loop(ts){
+    if(!running)return;
+    const speed=Math.max(80,500-(lv-1)*45);
+    if(ts-lastT>=speed){drop();lastT=ts;}
+    render();
+    animId=requestAnimationFrame(loop);
+}
+
+function startGame(){
+    board=mkBoard(); sc=0;lv=1;ln=0;
+    document.getElementById('score').textContent=0;
+    document.getElementById('level').textContent=1;
+    document.getElementById('lines').textContent=0;
+    nextT=randT(); spawn(); running=true; lastT=0;
+    document.getElementById('game-overlay').style.display='none';
+    animId=requestAnimationFrame(loop);
+}
+
+function endGame(){
+    running=false; cancelAnimationFrame(animId); render();
+    document.getElementById('overlay-msg').textContent='Puntaje final: '+sc;
+    document.getElementById('start-btn').textContent='↺ Reiniciar';
+    document.getElementById('game-overlay').style.display='flex';
+}
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+    if(!running)return;
+    if(e.key==='ArrowLeft' &&!hits(board,piece,px-1,py)){px--;render();}
+    else if(e.key==='ArrowRight'&&!hits(board,piece,px+1,py)){px++;render();}
+    else if(e.key==='ArrowDown'){drop();render();}
+    else if(e.key==='ArrowUp'){tryRot();render();}
+    else if(e.key===' '){e.preventDefault();hardDrop();render();}
+});
+
+// Touch / mouse buttons
+function addBtn(id,fn){
+    const b=document.getElementById(id); if(!b)return;
+    let iv;
+    const go=()=>{if(running){fn();render();}};
+    b.addEventListener('touchstart',e=>{e.preventDefault();go();iv=setInterval(go,110);},{passive:false});
+    b.addEventListener('touchend',  e=>{e.preventDefault();clearInterval(iv);},{passive:false});
+    b.addEventListener('mousedown', e=>{e.preventDefault();go();iv=setInterval(go,110);});
+    b.addEventListener('mouseup',   ()=>clearInterval(iv));
+    b.addEventListener('mouseleave',()=>clearInterval(iv));
+}
+addBtn('btn-left', ()=>{if(!hits(board,piece,px-1,py))px--;});
+addBtn('btn-right',()=>{if(!hits(board,piece,px+1,py))px++;});
+addBtn('btn-down', drop);
+document.getElementById('btn-rotate').addEventListener('click',()=>{if(running){tryRot();render();}});
+document.getElementById('btn-drop').addEventListener('click',  ()=>{if(running){hardDrop();render();}});
+document.getElementById('start-btn').addEventListener('click', startGame);
+
+// Init
+board=mkBoard(); render(); drawNext();
+</script>
 </body>
 </html>
