@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V2V4CT2C69"></script>
-<script src="ga.js"></script>
-    
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Historial Académico - Portal ITD</title>
@@ -244,66 +241,37 @@
     };
 
     const App = () => {
-        const [user, setUser]       = useState(null);
-        const [data, setData]       = useState(null);
+        const [user, setUser] = useState(null);
+        const [data, setData] = useState(null);
         const [loading, setLoading] = useState(false);
-        const [error, setError]     = useState(null);
 
-        // PASO 1: Login local igual que inscripciones — solo decodifica con atob, sin fetch
         const handleLogin = (response) => {
+            setLoading(true);
             try {
                 const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                setUser({
-                    name:       payload.name,
-                    email:      payload.email,
-                    picture:    payload.picture,
-                    token:      response.credential
-                });
-                setError(null);
-            } catch(e) {
-                setError('Error al procesar el inicio de sesión. Intenta de nuevo.');
-            }
+                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${response.credential}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if(res.success) {
+                            setUser({ name: payload.name, email: payload.email, picture: payload.picture, token: response.credential });
+                            setData(res.data);
+                        } else { alert("Error: " + res.message); }
+                    })
+                    .finally(() => setLoading(false));
+            } catch(e) { setLoading(false); }
         };
 
-        // PASO 2: Una vez autenticado, fetch al historial en useEffect (igual que inscripciones)
-        useEffect(() => {
-            if (!user) return;
-            setLoading(true);
-            setError(null);
-            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${encodeURIComponent(user.token)}`)
-                .then(r => r.json())
-                .then(res => {
-                    if (res.success) {
-                        setData(res.data);
-                    } else {
-                        setError(res.message || 'Error al cargar el historial.');
-                        setUser(null); // regresar al login
-                    }
-                })
-                .catch(() => setError('Error de conexión. Intenta de nuevo.'))
-                .finally(() => setLoading(false));
-        }, [user]);
+        const handleLogout = () => { setUser(null); setData(null); };
 
-        const handleLogout = () => { setUser(null); setData(null); setError(null); };
-
-        if (loading) return (
+        if(loading) return (
             <div className="flex flex-col justify-center items-center h-screen bg-slate-50">
                 <div className="animate-spin h-12 w-12 border-4 border-orange-500 rounded-full border-t-transparent mb-4"></div>
                 <p className="text-slate-500 font-bold animate-pulse">Cargando tu historial...</p>
             </div>
         );
-
-        if (!user || !data) return (
-            <div className="container mx-auto px-4 pt-10">
-                {error && (
-                    <div className="max-w-md mx-auto mb-4 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm text-center">
-                        ⚠️ {error}
-                    </div>
-                )}
-                <LoginScreen onLogin={handleLogin} />
-            </div>
-        );
-
+        
+        if(!user || !data) return <div className="container mx-auto px-4 pt-10"><LoginScreen onLogin={handleLogin} /></div>;
+        
         return <Dashboard user={user} data={data} onLogout={handleLogout} />;
     };
 
