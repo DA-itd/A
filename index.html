@@ -1,1315 +1,281 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth" style="visibility: hidden; opacity: 0;">
+<html lang="es">
 <head>
-    <meta name="google-site-verification" content="no3sRtXHiydJtG7sAE69l-JoUZRF4z6EPipOGbJ1jkE" />
-    <script src="ga.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Actualización Docente - ITD</title>
-    <meta name="description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango.">
-    
+    <title>Sitio en Mantenimiento - ITD</title>
     <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Identity Services para la función de Admin -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
-                        'display': ['Playfair Display', 'Georgia', 'serif'],
-                        'body': ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Playfair Display', 'Georgia', 'serif'],
+                        body: ['Inter', 'system-ui', 'sans-serif'],
                     },
                     colors: {
                         guinda: {
-                            50:  '#fdf2f4',
-                            100: '#fce7eb',
-                            200: '#f9d0d8',
-                            300: '#f4a8b8',
-                            400: '#ec7590',
-                            500: '#e04d6d',
-                            600: '#c73153',
-                            700: '#a72344',
-                            800: '#8c1f3b',
-                            900: '#6b1e2e',
-                            950: '#3d0a18',
+                            50:  '#fdf2f4', 100: '#fce7eb', 200: '#f9d0d8',
+                            300: '#f4a8b8', 400: '#ec7590', 500: '#e04d6d',
+                            600: '#c73153', 700: '#a72344', 800: '#8c1f3b',
+                            900: '#6b1e2e', 950: '#3d0a18',
                         },
                         crema: {
-                            50:  '#fefcf8',
-                            100: '#fdf8f0',
-                            200: '#faf0e0',
-                            300: '#f5e4c8',
-                            400: '#edd4a8',
-                            500: '#e2be82',
+                            50: '#fefcf8', 100: '#fdf8f0', 200: '#faf0e0',
+                            300: '#f5e4c8', 400: '#edd4a8', 500: '#e2be82',
                         },
-                        dark: {
-                            bg: '#1a0e10',
-                            card: '#2d1a1e',
-                            nav: '#3d0a18',
-                            text: '#f5e8ec'
-                        }
-                    },
-                    animation: {
-                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'border-dance': 'border-dance 4s linear infinite',
-                        'slide-down': 'slideDown 0.3s ease-out forwards',
-                    },
-                    keyframes: {
-                        'border-dance': {
-                            '0%, 100%': { 'background-position': '0% 50%' },
-                            '50%': { 'background-position': '100% 50%' },
-                        },
-                        slideDown: {
-                            '0%': { opacity: '0', transform: 'translateY(-10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
                     }
                 }
             }
         }
     </script>
-
-    <!-- SOLUCIÓN SAFARI, ESTILOS & MODO OSCURO -->
-    <script>
-        // 0. Aplicar tema oscuro inmediatamente antes de pintar
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-
-        // 1. Hack para desactivar bfcache en Safari
-        window.onunload = function() {};
-
-        // 2. Función para mostrar la página solo cuando esté lista
-        function safeReveal() {
-            var body = document.body;
-            var computed = window.getComputedStyle(body);
-            var hasStyles = computed.backgroundImage && computed.backgroundImage.includes('gradient');
-            var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
-            if (isSafari && !hasStyles) {
-                console.log('Recargando por estilos faltantes...');
-                window.location.reload();
-                return;
-            }
-
-            document.documentElement.style.transition = 'opacity 0.3s ease-in';
-            document.documentElement.style.visibility = 'visible';
-            document.documentElement.style.opacity = '1';
-        }
-
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                window.location.reload();
-            } else {
-                setTimeout(safeReveal, 150);
-            }
-        });
-        
-        window.addEventListener('load', function() {
-            setTimeout(safeReveal, 150);
-        });
-    </script>
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-JH1X2720VL');
-    </script>
-    
     <style>
-        /* ── FUENTES Y BASE ── */
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            cursor: none;
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        h1, h2 { font-family: 'Playfair Display', Georgia, serif; }
+
+        /* Fondo con textura sutil */
+        .bg-texture {
             background-color: #fdf8f0;
-        }
-        h1, h2, h3, .font-display {
-            font-family: 'Playfair Display', Georgia, serif;
-        }
-        a, button, .cursor-pointer { cursor: none; }
-
-        /* ── CURSOR INSTITUCIONAL (guinda) ── */
-        #cursor-dot {
-            position: fixed; width: 13px; height: 13px;
-            background-color: rgba(107, 30, 46, 0.85);
-            border: 2px solid rgba(167, 35, 68, 1);
-            border-radius: 50%; pointer-events: none;
-            transform: translate(-50%, -50%); z-index: 9999;
-            transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
-            box-shadow: 0 0 8px rgba(107, 30, 46, 0.5);
-        }
-        #cursor-dot.active {
-            width: 36px; height: 36px;
-            background-color: rgba(107, 30, 46, 0.12);
-            border: 2px solid rgba(167, 35, 68, 0.9);
-            box-shadow: 0 0 14px rgba(107, 30, 46, 0.4);
-        }
-        .dark #cursor-dot {
-            background-color: rgba(244, 168, 184, 0.85);
-            border: 2px solid rgba(244, 168, 184, 1);
-            box-shadow: 0 0 8px rgba(244, 168, 184, 0.5);
-        }
-        .dark #cursor-dot.active {
-            background-color: rgba(244, 168, 184, 0.15);
-            border: 2px solid rgba(244, 168, 184, 0.9);
-            box-shadow: 0 0 14px rgba(244, 168, 184, 0.4);
+            background-image:
+                radial-gradient(ellipse at 15% 20%, rgba(107,30,46,0.07) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 80%, rgba(226,190,130,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(107,30,46,0.03) 0%, transparent 70%);
         }
 
-        /* ── TARJETAS ── */
-        .card-portal {
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Tarjeta principal */
+        .main-card {
+            background: #fff;
+            border-radius: 24px;
+            border: 1px solid rgba(107,30,46,0.1);
+            box-shadow:
+                0 4px 24px rgba(107,30,46,0.1),
+                0 1px 4px rgba(0,0,0,0.04),
+                inset 0 1px 0 rgba(255,255,255,0.9);
             position: relative;
             overflow: hidden;
-            background: #ffffff;
-            border-radius: 20px;
-            border: 1px solid rgba(107,30,46,0.10);
-            box-shadow: 0 2px 12px rgba(107,30,46,0.07), 0 1px 3px rgba(0,0,0,0.04);
         }
-        /* franja decorativa inferior */
-        .card-portal::after {
+
+        /* Barra superior degradado */
+        .main-card::before {
             content: '';
             position: absolute;
-            bottom: 0; left: 0; right: 0; height: 3px;
+            top: 0; left: 0; right: 0; height: 4px;
             background: linear-gradient(90deg, #6b1e2e, #a72344, #e2be82, #a72344, #6b1e2e);
             background-size: 200% 100%;
-            opacity: 0;
-            transition: opacity 0.35s;
+            animation: shimmer 4s linear infinite;
         }
-        .card-portal:hover::after { opacity: 1; animation: shimmer-bar 2s linear infinite; }
-        @keyframes shimmer-bar {
+        @keyframes shimmer {
             0%   { background-position: 0% 0%; }
             100% { background-position: 200% 0%; }
         }
-        /* barrido de luz */
-        .card-portal::before {
+
+        /* Fondo radial interno */
+        .main-card::after {
             content: '';
             position: absolute;
-            top: -60%; left: -60%; width: 60%; height: 220%;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.55) 50%, transparent 60%);
-            transition: left 0.55s ease;
+            top: -40%; right: -20%;
+            width: 55%; height: 80%;
+            background: radial-gradient(ellipse, rgba(226,190,130,0.1) 0%, transparent 70%);
             pointer-events: none;
         }
-        .card-portal:hover::before { left: 140%; }
-        .card-portal:hover {
-            transform: translateY(-7px) scale(1.02);
-            box-shadow: 0 20px 44px rgba(107,30,46,0.16), 0 4px 12px rgba(107,30,46,0.08);
-            border-color: rgba(167,35,68,0.25);
+
+        /* Ícono engrane girando */
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
         }
-        /* fondo degradado sutil */
-        .card-portal .card-bg {
-            position: absolute; inset: 0;
-            background: radial-gradient(ellipse at 80% 0%, rgba(226,190,130,0.13) 0%, transparent 65%);
-            pointer-events: none;
+        @keyframes spin-reverse {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(-360deg); }
         }
-        /* contenedor del ícono */
-        .card-icon-wrap {
-            width: 64px; height: 64px;
-            margin: 0 auto 14px;
-            border-radius: 18px;
-            background: linear-gradient(135deg, rgba(107,30,46,0.08) 0%, rgba(226,190,130,0.15) 100%);
-            border: 1px solid rgba(107,30,46,0.12);
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.35s;
-            box-shadow: 0 2px 8px rgba(107,30,46,0.08);
+        .spin-slow    { animation: spin-slow    8s linear infinite; }
+        .spin-reverse { animation: spin-reverse 6s linear infinite; }
+
+        /* Logo pulse */
+        @keyframes pulse-logo {
+            0%, 100% { transform: scale(1);    opacity: 1; }
+            50%       { transform: scale(1.04); opacity: 0.9; }
         }
-        .card-portal:hover .card-icon-wrap {
-            background: linear-gradient(135deg, rgba(107,30,46,0.14) 0%, rgba(226,190,130,0.25) 100%);
-            transform: scale(1.1) rotate(-3deg);
-            box-shadow: 0 6px 18px rgba(107,30,46,0.15);
+        .pulse-logo { animation: pulse-logo 3s ease-in-out infinite; }
+
+        /* Puntos de carga */
+        @keyframes bounce-dot {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+            40%           { transform: translateY(-8px); opacity: 1; }
         }
-        /* línea separadora decorativa */
-        .card-divider {
-            width: 32px; height: 2px;
-            background: linear-gradient(90deg, #6b1e2e, #e2be82);
+        .dot-1 { animation: bounce-dot 1.4s ease-in-out infinite; }
+        .dot-2 { animation: bounce-dot 1.4s ease-in-out 0.2s infinite; }
+        .dot-3 { animation: bounce-dot 1.4s ease-in-out 0.4s infinite; }
+
+        /* Íconos de herramientas flotando */
+        @keyframes float-1 {
+            0%, 100% { transform: translateY(0) rotate(-5deg);  }
+            50%       { transform: translateY(-10px) rotate(5deg); }
+        }
+        @keyframes float-2 {
+            0%, 100% { transform: translateY(0) rotate(8deg);   }
+            50%       { transform: translateY(-14px) rotate(-4deg); }
+        }
+        @keyframes float-3 {
+            0%, 100% { transform: translateY(0) rotate(0deg);   }
+            50%       { transform: translateY(-8px) rotate(-8deg); }
+        }
+        .float-1 { animation: float-1 4s ease-in-out infinite; }
+        .float-2 { animation: float-2 5s ease-in-out 0.5s infinite; }
+        .float-3 { animation: float-3 3.5s ease-in-out 1s infinite; }
+
+        /* Línea separadora */
+        .divider-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #6b1e2e, #e2be82, #6b1e2e, transparent);
             border-radius: 2px;
-            margin: 10px auto;
-            transition: width 0.35s;
-        }
-        .card-portal:hover .card-divider { width: 52px; }
-
-        /* DARK MODE */
-        .dark .card-portal {
-            background: linear-gradient(145deg, #2d1a1e 0%, #241318 100%);
-            border-color: rgba(244,168,184,0.12);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-        }
-        .dark .card-portal:hover {
-            box-shadow: 0 20px 44px rgba(0,0,0,0.4), 0 4px 12px rgba(244,168,184,0.1);
-            border-color: rgba(244,168,184,0.25);
-        }
-        .dark .card-portal .card-bg {
-            background: radial-gradient(ellipse at 80% 0%, rgba(107,30,46,0.2) 0%, transparent 65%);
-        }
-        .dark .card-icon-wrap {
-            background: linear-gradient(135deg, rgba(107,30,46,0.25) 0%, rgba(61,10,24,0.4) 100%);
-            border-color: rgba(244,168,184,0.15);
-        }
-        .dark .card-portal:hover .card-icon-wrap {
-            background: linear-gradient(135deg, rgba(167,35,68,0.35) 0%, rgba(107,30,46,0.5) 100%);
-        }
-        .dark .card-divider {
-            background: linear-gradient(90deg, #f4a8b8, #e2be82);
         }
 
-        /* ── ANIMACIONES ── */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(28px); }
-            to   { opacity: 1; transform: translateY(0); }
+        /* Chip de estado */
+        .status-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, rgba(107,30,46,0.08), rgba(226,190,130,0.12));
+            border: 1px solid rgba(107,30,46,0.15);
+            border-radius: 999px;
+            padding: 8px 20px;
+            font-size: 13px; font-weight: 600;
+            color: #6b1e2e;
         }
-        .animate-fadeInUp { animation: fadeInUp 0.55s ease-out forwards; }
-        .delay-100 { animation-delay: 0.1s; opacity: 0; }
-        .delay-200 { animation-delay: 0.2s; opacity: 0; }
-        .delay-300 { animation-delay: 0.3s; opacity: 0; }
-        .delay-400 { animation-delay: 0.4s; opacity: 0; }
-        .delay-500 { animation-delay: 0.5s; opacity: 0; }
-        .delay-600 { animation-delay: 0.6s; opacity: 0; }
-        .delay-700 { animation-delay: 0.7s; opacity: 0; }
-        .delay-800 { animation-delay: 0.8s; opacity: 0; }
-        .delay-900 { animation-delay: 0.9s; opacity: 0; }
-
-        @keyframes pulse-slow {
-            0%, 100% { transform: scale(1); }
-            50%       { transform: scale(1.05); }
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #a72344;
+            animation: pulse-dot 1.5s ease-in-out infinite;
         }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-
-        .badge-new {
-            position: absolute; top: 10px; right: 10px;
-            background: linear-gradient(135deg, #6b1e2e, #a72344);
-            color: white; font-size: 10px; padding: 4px 8px;
-            border-radius: 12px; font-weight: bold;
-            box-shadow: 0 2px 8px rgba(107,30,46,0.35);
-            animation: pulse-slow 2s infinite;
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50%       { transform: scale(1.5); opacity: 0.6; }
         }
 
-        /* ── CLIMA / FLOAT ── */
-        .weather-icon { animation: float 3s ease-in-out infinite; }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50%       { transform: translateY(-8px); }
+        /* Link email */
+        .email-link {
+            color: #a72344; font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(167,35,68,0.4);
+            transition: border-color 0.2s, color 0.2s;
         }
-
-        /* ── FRASE MOTIVACIONAL ── */
-        .quote-container {
-            background: linear-gradient(135deg, rgba(107,30,46,0.06) 0%, rgba(226,190,130,0.12) 100%);
-            border-left: 3px solid rgba(107,30,46,0.45);
-        }
-        .dark .quote-container {
-            background: linear-gradient(135deg, rgba(61,10,24,0.5) 0%, rgba(45,26,30,0.6) 100%);
-            border-left: 3px solid rgba(244,168,184,0.4);
-        }
-
-        /* ── BANNER ── */
-        #announcement-banner {
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
-        }
-        #announcement-banner.hidden-banner {
-            opacity: 0; height: 0 !important; padding: 0 !important; margin: 0 !important;
-        }
-
-        /* ── MODAL ── */
-        .modal-overlay {
-            background-color: rgba(26,14,16,0.75);
-            backdrop-filter: blur(5px);
-        }
-
-        /* ── DROPDOWN ── */
-        .dropdown-menu {
-            transform-origin: top right;
-            transition: transform 0.2s ease-out, opacity 0.2s ease-out;
-        }
+        .email-link:hover { color: #6b1e2e; border-bottom-color: #6b1e2e; }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
 </head>
 
-<body class="bg-crema-100 dark:bg-dark-bg min-h-screen transition-colors duration-500">
-    
-    <div id="cursor-dot"></div>
+<body class="bg-texture flex items-center justify-center min-h-screen p-4 sm:p-6">
 
-    <!-- Header -->
-    <header class="bg-white dark:bg-dark-card shadow-xl sticky top-0 z-40 transition-colors duration-500 border-b-4 border-guinda-900 dark:border-guinda-400">
-        <div class="container mx-auto px-4 py-4 sm:py-6">
-            <div class="flex items-center justify-between gap-4">
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain bg-white rounded-lg p-1">
-                <div class="text-center flex-1 px-2 sm:px-4">
-                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-display font-bold text-guinda-900 dark:text-guinda-200 leading-tight tracking-wide transition-colors">ACTUALIZACIÓN DOCENTE</h1>
-                    <p class="text-xs sm:text-sm md:text-base text-guinda-700 dark:text-guinda-300 mt-1 font-semibold tracking-widest uppercase transition-colors">Desarrollo Académico</p>
-                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 transition-colors">TecNM - Instituto Tecnológico de Durango</p>
-                </div>
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
+    <div class="main-card w-full max-w-2xl p-8 sm:p-12 text-center relative z-10">
+
+        <!-- Íconos flotantes decorativos -->
+        <div class="absolute top-8 left-6 text-2xl opacity-20 float-1 select-none">⚙️</div>
+        <div class="absolute top-12 right-8 text-xl opacity-15 float-2 select-none">🔧</div>
+        <div class="absolute bottom-16 left-8 text-xl opacity-15 float-3 select-none">🛠️</div>
+        <div class="absolute bottom-20 right-6 text-2xl opacity-20 float-1 select-none" style="animation-delay:1.5s">⚙️</div>
+
+        <!-- Logo -->
+        <div class="flex justify-center mb-6">
+            <div class="relative">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png"
+                     alt="Logo ITD"
+                     class="h-20 sm:h-24 object-contain pulse-logo drop-shadow-md">
             </div>
         </div>
-        
-        <!-- Navbar con Menú Hamburguesa -->
-        <nav class="bg-guinda-900 dark:bg-dark-nav text-white shadow-md transition-colors duration-500 relative">
-            <div class="container mx-auto px-4">
-                <div class="flex justify-between items-center h-14">
-                    
-                    <!-- Enlace Inicio -->
-                    <a href="#inicio" class="flex items-center gap-2 font-bold text-lg hover:text-crema-300 transition-colors px-2 py-1 rounded">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
-                        <span class="hidden sm:inline">Inicio</span>
-                    </a>
 
-                    <!-- Botón Cursos Actuales -->
-                    <button id="btn-cursos-actuales" onclick="abrirModalCursos()" class="flex items-center gap-2 bg-crema-200/20 hover:bg-crema-200/35 text-white font-bold text-sm px-4 py-2 rounded-lg transition-all duration-200 border border-crema-300/30 hover:border-crema-300/60 shadow-sm">
-                        <span class="text-base">📋</span>
-                        <span class="hidden sm:inline">Cursos Actuales</span>
-                        <span class="sm:hidden">Cursos</span>
-                    </button>
+        <!-- Engranajes animados -->
+        <div class="flex items-center justify-center gap-1 mb-6">
+            <span class="text-4xl spin-slow select-none" style="color:#6b1e2e; opacity:0.7;">⚙️</span>
+            <span class="text-2xl spin-reverse select-none" style="color:#a72344; opacity:0.55; margin-top:10px;">⚙️</span>
+            <span class="text-3xl spin-slow select-none" style="color:#e2be82; opacity:0.65; animation-delay:1s;">⚙️</span>
+        </div>
 
-                    <!-- Grupo Derecha: Tema + Menú -->
-                    <div class="flex items-center gap-3">
-                        
-                        <!-- Botón Tema (Unificado) -->
-                        <button id="theme-toggle-btn" class="p-2 rounded-lg hover:bg-guinda-800 dark:hover:bg-guinda-950 transition-colors focus:outline-none" title="Cambiar tema">
-                            <!-- Icono Sol (Light Mode) -->
-                            <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
-                            </svg>
-                            <!-- Icono Luna (Dark Mode) -->
-                            <svg id="theme-toggle-dark-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586 1 1 0 01-5.293-5.293zM16.707 16.707a6 6 0 11-5.236-8.236 8.003 8.003 0 008.165 4.928.75.75 0 01.378 1.054 7.999 7.999 0 01-3.307 2.254z" fill-rule="evenodd" clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
-
-                        <!-- Botón Hamburguesa -->
-                        <button id="main-menu-btn" class="p-2 rounded-lg bg-guinda-800 dark:bg-guinda-950 hover:bg-guinda-700 dark:hover:bg-guinda-900 focus:outline-none transition-colors shadow-sm border border-guinda-700 dark:border-guinda-800 group" aria-label="Menú Principal">
-                            <svg class="w-6 h-6 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dropdown Menu (Hidden by default) -->
-            <div id="main-menu-dropdown" class="hidden absolute right-0 top-full w-64 bg-white dark:bg-dark-card shadow-2xl rounded-b-xl border-t border-guinda-100 dark:border-guinda-900 z-50 overflow-hidden transform origin-top-right animate-slide-down">
-                <div class="flex flex-col py-2">
-                    <a href="inscripciones.html" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-500 group">
-                        <span class="text-guinda-600 text-xl group-hover:scale-110 transition-transform">📝</span> 
-                        <span class="font-medium">Inscripciones</span>
-                    </a>
-                    <a href="historial.html" class="px-6 py-3 hover:bg-crema-100 dark:hover:bg-guinda-900/20 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-crema-400 group">
-                        <span class="text-crema-500 text-xl group-hover:scale-110 transition-transform">📚</span> 
-                        <span class="font-medium">Historial</span>
-                    </a>
-                    <a href="formatos.html" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-400 group">
-                        <span class="text-guinda-700 text-xl group-hover:scale-110 transition-transform">📋</span> 
-                        <span class="font-medium">Formatos</span>
-                    </a>
-                    <a href="instructores.html" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-600 group">
-                        <span class="text-guinda-600 text-xl group-hover:scale-110 transition-transform">👨‍🏫</span> 
-                        <span class="font-medium">Instructores</span>
-                    </a>
-                    <a href="encuestas.html" class="px-6 py-3 hover:bg-crema-100 dark:hover:bg-guinda-900/20 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-crema-400 group">
-                        <span class="text-crema-500 text-xl group-hover:scale-110 transition-transform">📊</span> 
-                        <span class="font-medium">Encuestas</span>
-                    </a>
-                    <a href="verificador.html" class="px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/30 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-gray-400 group">
-                        <span class="text-gray-500 text-xl group-hover:scale-110 transition-transform">✅</span> 
-                        <span class="font-medium">Validación</span>
-                    </a>
-                    <a href="https://da-itd.github.io/B/" target="_blank" rel="noopener noreferrer" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-400 group">
-                        <span class="text-guinda-500 text-xl group-hover:scale-110 transition-transform">🏅</span> 
-                        <span class="font-medium">Constancias</span>
-                    </a>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <!-- Barra Clima -->
-    <div class="bg-guinda-800 dark:bg-dark-nav text-white shadow-lg transition-colors duration-500">
-        <div class="container mx-auto px-4 py-3">
-            <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 text-sm">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">📅</span>
-                    <span id="currentDate" class="font-semibold">Cargando...</span>
-                </div>
-                <div id="weatherInfo" class="flex items-center gap-2">
-                    <span class="text-2xl weather-icon">🌤️</span>
-                    <span class="font-semibold">Durango, Dgo.</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🕒</span>
-                    <span id="clock" class="font-mono font-bold text-lg">--:--:--</span>
-                </div>
+        <!-- Chip estado -->
+        <div class="flex justify-center mb-6">
+            <div class="status-chip">
+                <span class="status-dot"></span>
+                Trabajando en mejoras
             </div>
         </div>
-    </div>
-    
-    <!-- Banner -->
-    <div id="announcement-banner" class="bg-gradient-to-r from-guinda-800 via-guinda-700 to-guinda-800 text-white p-4 text-center font-bold shadow-lg relative cursor-pointer">
-        <div class="container mx-auto flex items-center justify-center gap-4">
-            <span class="text-2xl animate-pulse">✨</span>
-            <div>
-                <strong class="block sm:inline text-lg">¡GRACIAS!</strong>
-                <span class="block sm:inline ml-2">Por su participación, los esperamos para el próximo periodo.</span>
+
+        <!-- Título -->
+        <h1 class="text-3xl sm:text-4xl font-display font-bold text-guinda-900 mb-2 leading-tight">
+            Sitio en Mantenimiento
+        </h1>
+        <p class="text-xs sm:text-sm font-semibold tracking-widest uppercase text-guinda-500 mb-6">
+            Portal de Actualización Docente · ITD
+        </p>
+
+        <!-- Divider -->
+        <div class="divider-line w-24 mx-auto mb-6"></div>
+
+        <!-- Mensaje principal -->
+        <p class="text-gray-600 text-base sm:text-lg leading-relaxed mb-4 max-w-lg mx-auto">
+            ¡Disculpen las molestias! Estamos realizando mejoras importantes en el portal
+            para ofrecerles un mejor servicio.
+        </p>
+        <p class="text-gray-500 text-sm leading-relaxed mb-8 max-w-md mx-auto">
+            El sistema estará disponible nuevamente en breve. Agradecemos su paciencia y comprensión.
+        </p>
+
+        <!-- Puntos de carga -->
+        <div class="flex justify-center items-center gap-2 mb-8">
+            <span class="w-2.5 h-2.5 rounded-full bg-guinda-700 dot-1"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-guinda-500 dot-2"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-crema-400 dot-3"></span>
+        </div>
+
+        <!-- Mini íconos de servicios -->
+        <div class="flex justify-center gap-3 mb-8 flex-wrap">
+            <div class="flex flex-col items-center gap-1 opacity-40">
+                <span class="text-xl">📝</span>
+                <span class="text-[10px] text-guinda-800 font-medium">Inscripciones</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 opacity-40">
+                <span class="text-xl">📚</span>
+                <span class="text-[10px] text-guinda-800 font-medium">Historial</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 opacity-40">
+                <span class="text-xl">📋</span>
+                <span class="text-[10px] text-guinda-800 font-medium">Formatos</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 opacity-40">
+                <span class="text-xl">✅</span>
+                <span class="text-[10px] text-guinda-800 font-medium">Constancias</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 opacity-40">
+                <span class="text-xl">📊</span>
+                <span class="text-[10px] text-guinda-800 font-medium">Encuestas</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 opacity-40">
+                <span class="text-xl">📈</span>
+                <span class="text-[10px] text-guinda-800 font-medium">Estadísticas</span>
             </div>
         </div>
+
+        <!-- Divider footer -->
+        <div class="divider-line w-full mb-6"></div>
+
+        <!-- Footer info -->
+        <div class="space-y-1 mb-4">
+            <p class="text-sm font-semibold text-guinda-900">
+                Coordinación de Actualización Docente
+            </p>
+            <p class="text-xs text-gray-500 tracking-wide">
+                TecNM · Instituto Tecnológico de Durango
+            </p>
+        </div>
+
+        <p class="text-xs text-gray-500 leading-relaxed">
+            ¿Tienes una urgencia? Contáctanos en:<br>
+            <a href="mailto:desarrollo.academico@itdurango.edu.mx" class="email-link">
+                desarrollo.academico@itdurango.edu.mx
+            </a>
+        </p>
+
     </div>
 
-    <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
-        
-        <!-- Frase -->
-        <section class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
-            <div id="quote-container" class="quote-container rounded-lg p-6 text-center transition-opacity duration-500 ease-in-out">
-                <!-- Quote injected -->
-            </div>
-        </section>
-        
-        <!-- Servicios -->
-        <div id="servicios" class="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32">
-            <div class="flex items-baseline justify-center gap-4 sm:gap-6 mb-4">
-                <div class="inline-block animate-pulse-slow">
-                    <img src="https://raw.githubusercontent.com/DA-itd/A/main/pola.png" alt="Servicios" class="h-16 sm:h-20 md:h-24 object-contain">
-                </div>
-                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold text-guinda-900 dark:text-guinda-100 transition-colors">
-                    Servicios Disponibles
-                </h2>
-            </div>
-            <p class="text-base sm:text-lg md:text-xl text-gray-500 dark:text-guinda-200/70 max-w-3xl mx-auto px-4 transition-colors">
-                Seleccione la opción que necesite para acceder a los diferentes servicios
-            </p>
-        </div>
-
-        <!-- Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
-            
-            <a id="card-inscripciones" href="inscripciones.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-300 relative group">
-                <div class="card-bg"></div>
-                <div id="badge-inscripciones" class="absolute top-3 right-3 bg-guinda-700 text-white text-[10px] px-2.5 py-1 rounded-full font-bold tracking-widest shadow-md">¡ABIERTO!</div>
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">📝</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Inscripción a Cursos
-                </h3>
-                <div class="card-divider"></div>
-                <p id="desc-inscripciones" class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Regístrate y no pierdas tu lugar</p>
-                <div id="status-inscripciones" class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
-            </a>
-            <a href="historial.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-400 group">
-                <div class="card-bg"></div>
-                
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">📚</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Historial de Cursos
-                </h3>
-                <div class="card-divider"></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Consulta tu historial de actualización docente</p>
-                <div class="inline-flex items-center gap-1.5 bg-crema-200 dark:bg-guinda-900/40 text-guinda-800 dark:text-crema-300 text-xs font-semibold px-3 py-1 rounded-full border border-crema-300 dark:border-guinda-800">✓ Disponible</div>
-            </a>
-            <a href="formatos.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-500 relative group">
-                <div class="card-bg"></div>
-                <div class="absolute top-3 right-3 bg-guinda-600 text-white text-[10px] px-2.5 py-1 rounded-full font-bold shadow-md animate-pulse tracking-widest">PRE-REGISTRO</div>
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">📋</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Formatos Oficiales
-                </h3>
-                <div class="card-divider"></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Descarga de formatos y <span class="text-guinda-700 dark:text-guinda-300 font-semibold">Pre-Registro de Cursos</span></p>
-                <div class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
-            </a>
-            <a href="verificador.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-600 group">
-                <div class="card-bg"></div>
-                
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">✅</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Validación de Constancias
-                </h3>
-                <div class="card-divider"></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Verifica la autenticidad de documentos oficiales</p>
-                <div class="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 text-xs font-semibold px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700">✓ Disponible</div>
-            </a>
-            <a href="instructores.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-700 group">
-                <div class="card-bg"></div>
-                
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">👨‍🏫</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Área para Instructores
-                </h3>
-                <div class="card-divider"></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Carga tu <strong class="text-guinda-700 dark:text-guinda-300">CV</strong> y <strong class="text-guinda-700 dark:text-guinda-300">Evidencias</strong> de tus cursos</p>
-                <div class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
-            </a>
-            <a href="encuestas.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-800 group">
-                <div class="card-bg"></div>
-                
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">📊</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Encuestas de Opinión y Eficacia
-                </h3>
-                <div class="card-divider"></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Evaluación de cursos y servicios docentes</p>
-                <div class="inline-flex items-center gap-1.5 bg-crema-200 dark:bg-guinda-900/40 text-guinda-800 dark:text-crema-300 text-xs font-semibold px-3 py-1 rounded-full border border-crema-300 dark:border-guinda-800">✓ Disponible</div>
-            </a>
-            <a href="estadisticas.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-900 group">
-                <div class="card-bg"></div>
-                
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">📈</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Estadísticas
-                </h3>
-                <div class="card-divider"></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Análisis y resultados de actualización docente</p>
-                <div class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
-            </a>
-            <a href="https://da-itd.github.io/B/" target="_blank" rel="noopener noreferrer"
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-900 relative group">
-                <div class="card-bg"></div>
-                
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">🏅</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Descarga de Constancias
-                </h3>
-                <div class="card-divider"></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Descarga constancias y reconocimientos oficiales</p>
-                <div class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
-            </a>
-
-        </div>
-
-        <!-- Información -->
-        <div id="informacion" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
-            <div class="rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600 dark:border-blue-500 transition-colors">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="text-3xl sm:text-4xl">ℹ️</div>
-                    <h3 class="text-xl sm:text-2xl font-display font-bold text-guinda-900 dark:text-guinda-100">
-                        Información Importante
-                    </h3>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="flex items-start gap-3 bg-guinda-50 dark:bg-guinda-950/50 p-4 rounded-xl border border-guinda-100 dark:border-guinda-900">
-                        <div class="text-2xl flex-shrink-0">📚</div>
-                        <div>
-                            <p class="text-sm font-semibold text-guinda-900 dark:text-guinda-100">Límite de cursos</p>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Puedes tomar hasta <strong>dos cursos</strong> sin empalme de horarios y fechas.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3 bg-crema-100 dark:bg-guinda-950/50 p-4 rounded-xl border border-crema-300 dark:border-guinda-900">
-                        <div class="text-2xl flex-shrink-0">📝</div>
-                        <div>
-                            <p class="text-sm font-semibold text-guinda-900 dark:text-guinda-100">Formatos</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Los formatos (CVU y Ficha técnica) serán en PDF, los demás firmados en Coordinación.</p>
-                        </div>
-                    </div>
-                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-guinda-50 dark:bg-guinda-950/50 p-4 rounded-xl border border-guinda-100 dark:border-guinda-900 hover:bg-guinda-100 dark:hover:bg-guinda-900/40 transition-colors cursor-pointer">
-                        <div class="text-2xl flex-shrink-0">🗓️</div>
-                        <div>
-                            <p id="calendar-year-text" class="text-sm font-semibold text-gray-800 dark:text-gray-200">Calendario Institucional</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Consulte las fechas importantes del ciclo escolar.</p>
-                        </div>
-                    </a>
-                </div>
-                <div class="mt-4 flex items-start gap-3 bg-crema-100 dark:bg-guinda-950/60 p-4 rounded-xl border-l-4 border-guinda-700 dark:border-guinda-400">
-                    <div class="text-2xl flex-shrink-0">🧑‍💼</div>
-                    <div>
-                        <p class="text-sm font-semibold text-guinda-900 dark:text-guinda-100">Nota Importante</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Estos cursos están dirigidos al personal docente con plaza.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Enlaces -->
-        <div id="enlaces" class="max-w-4xl mx-auto scroll-mt-32">
-            <div class="bg-gradient-to-r from-guinda-900 to-guinda-800 dark:from-dark-nav dark:to-dark-card rounded-2xl shadow-xl p-6 text-white transition-colors">
-                <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                    <a href="https://www.itdurango.edu.mx" target="_blank" rel="noopener noreferrer" class="bg-sky-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">🏛️</div>
-                        <p class="font-semibold text-sm">ITD</p>
-                        <p class="text-xs opacity-90">Portal Principal</p>
-                    </a>
-                    <a href="https://www.tecnm.mx" target="_blank" rel="noopener noreferrer" class="bg-emerald-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">🎓</div>
-                        <p class="font-semibold text-sm">TecNM</p>
-                        <p class="text-xs opacity-90">Sitio Nacional</p>
-                    </a>
-                    <a href="https://mooc.tecnm.mx/portal/" target="_blank" rel="noopener noreferrer" class="bg-purple-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">💻</div>
-                        <p class="font-semibold text-sm">MOOC</p>
-                        <p class="text-xs opacity-90">Cursos en Línea</p>
-                    </a>
-                    <a href="https://www.itdurango.edu.mx/sgi/" target="_blank" rel="noopener noreferrer" class="bg-rose-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">📂</div>
-                        <p class="font-semibold text-sm">SGI</p>
-                        <p class="text-xs opacity-90">Gestión Integrado</p>
-                    </a>
-                     <a href="https://www.labmexia.gob.mx" target="_blank" rel="noopener noreferrer" class="bg-fuchsia-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">🧪</div>
-                        <p class="font-semibold text-sm">LabMexIA</p>
-                        <p class="text-xs opacity-90">Laboratorio IA</p>
-                    </a>
-                    <a href="https://saberes.gob.mx/cms/index.php" target="_blank" rel="noopener noreferrer" class="bg-teal-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">🧠</div>
-                        <p class="font-semibold text-sm">Saberes</p>
-                        <p class="text-xs opacity-90">Plataforma</p>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Contacto -->
-        <div id="contacto" class="max-w-4xl mx-auto mt-8 scroll-mt-32">
-            <div class="bg-gradient-to-r from-guinda-900 to-guinda-800 dark:from-dark-nav dark:to-dark-card rounded-2xl shadow-xl p-6 text-white transition-colors">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
-                    <div class="flex items-center gap-4">
-                        <div class="text-4xl hidden sm:block">💬</div>
-                        <div>
-                            <h3 class="text-lg font-bold">¿Necesitas Ayuda?</h3>
-                            <p class="text-sm opacity-90">Contacta a la Coordinación de Actualización Docente.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <!-- ADMIN TRIGGER: Click on Logo -->
-                        <img 
-                            id="admin-trigger"
-                            src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
-                            alt="ITD Admin Access" 
-                            class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity bg-white/20 p-1 rounded"
-                            title="Acceso Administrativo"
-                        />
-                        <a href="/cdn-cgi/l/email-protection#5c3f33332e38033d3f28293d3035263d3f35333238333f393228391c352838292e3d323b3372393829723124" class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md cursor-pointer">
-                            <span class="mr-2">📧</span> Enviar Email
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-gradient-to-r from-guinda-950 to-guinda-900 dark:from-slate-900 dark:to-slate-950 text-white text-center py-6 sm:py-8 mt-8 transition-colors">
-        <div class="container mx-auto px-4">
-            <p class="font-semibold text-sm sm:text-base mb-2">
-                © Coordinación de Actualización Docente
-            </p>
-            <p class="text-xs sm:text-sm opacity-90">
-                M.C. Alejandro Calderón Rentería
-            </p>
-            <p class="text-xs sm:text-sm opacity-75 mt-1">
-                Todos los derechos reservados <span id="copyright-year"></span>
-            </p>
-            <!-- Enlace al Aviso de Privacidad -->
-            <div class="mt-4 pt-4 border-t border-white/10 flex flex-col sm:flex-row justify-center items-center gap-4">
-                <a href="aviso.html" class="text-xs text-white/60 hover:text-white transition-colors underline">
-                    Aviso de Privacidad
-                </a>
-                <a href="admin.html" class="text-xs text-white/40 hover:text-white/80 transition-colors flex items-center gap-1">
-                    <span>🔒</span> Acceso Administrativo
-                </a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Modal Cursos Actuales -->
-    <div id="modal-cursos" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(15,23,42,0.75);backdrop-filter:blur(6px);">
-        <div class="rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-fadeInUp">
-            <!-- Header modal -->
-            <div class="bg-gradient-to-r from-guinda-900 to-guinda-700 px-6 py-4 flex items-center justify-between flex-shrink-0">
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl">📋</span>
-                    <div>
-                        <h2 class="text-white font-bold text-lg leading-tight">Cursos del Periodo Actual</h2>
-                        <p class="text-blue-200 text-xs">Coordinación de Actualización Docente · ITD</p>
-                    </div>
-                </div>
-                <button onclick="cerrarModalCursos()" class="text-white/70 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <!-- Body -->
-            <div id="modal-cursos-body" class="overflow-y-auto flex-1 p-5">
-                <div class="flex items-center justify-center py-12 text-gray-400">
-                    <svg class="animate-spin w-8 h-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                    </svg>
-                    <span class="text-sm font-medium">Cargando cursos...</span>
-                </div>
-            </div>
-            <!-- Footer -->
-            <div class="border-t border-gray-100 dark:border-slate-700 px-6 py-3 flex-shrink-0 text-center">
-                <p class="text-xs text-gray-400 dark:text-gray-500">Los datos se actualizan en tiempo real desde el registro oficial</p>
-            </div>
-        </div>
-    </div>
-
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-        // --- 1. Gestión de Estado Admin ---
-        const ADMIN_EMAIL = 'alejandro.calderon@itdurango.edu.mx';
-        const GOOGLE_CLIENT_ID = '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com';
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
-
-        // Consulta el estado real desde el backend (igual para todos los usuarios/dispositivos)
-        async function fetchInscriptionState() {
-            try {
-                const res = await fetch(APPS_SCRIPT_URL + '?action=getRegistryStatus');
-                const data = await res.json();
-                return data.success ? (data.status === 'OPEN') : true;
-            } catch(e) {
-                console.error('Error al obtener estado de inscripciones:', e);
-                return true; // Por defecto abierto si falla la red
-            }
-        }
-
-        // Guarda el nuevo estado en el backend vía POST con token JWT para autorización
-        async function saveInscriptionState(isOpen, idToken) {
-            try {
-                const res = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'setRegistryStatus',
-                        status: isOpen ? 'OPEN' : 'CLOSED',
-                        id_token: idToken
-                    })
-                });
-                const data = await res.json();
-                return data.success === true;
-            } catch(e) {
-                console.error('Error al guardar estado:', e);
-                return false;
-            }
-        }
-
-        // --- 2. Actualización de UI ---
-        function updateUI(isOpen) {
-            const card = document.getElementById('card-inscripciones');
-            const desc = document.getElementById('desc-inscripciones');
-            const badge = document.getElementById('badge-inscripciones');
-            const status = document.getElementById('status-inscripciones');
-
-            if (!card) return;
-
-            if (isOpen) {
-                // Estado: ABIERTO
-                card.href = "inscripciones.html";
-                card.classList.remove('bg-gray-50', 'grayscale', 'opacity-60', 'cursor-not-allowed');
-                card.classList.add('bg-white', 'hover:bg-rose-50', 'hover:border-rose-400');
-                
-                desc.textContent = "Registrate y no pierdas tu lugar";
-                desc.classList.remove('text-gray-500');
-                desc.classList.add('text-rose-600', 'dark:text-rose-400');
-                
-                badge.style.display = "block";
-                badge.style.background = "";
-                badge.textContent = "¡ABIERTO!";
-                
-                status.className = "inline-block bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full";
-                status.textContent = "✓ Disponible";
-            } else {
-                // Estado: CERRADO
-                card.removeAttribute('href');
-                card.classList.remove('bg-white', 'hover:bg-rose-50', 'hover:border-rose-400');
-                card.classList.add('bg-gray-50', 'grayscale', 'opacity-60', 'cursor-not-allowed');
-                
-                desc.textContent = "Periodo de inscripciones cerrado";
-                desc.classList.remove('text-rose-600', 'dark:text-rose-400');
-                desc.classList.add('text-gray-500');
-                
-                badge.style.display = "block";
-                badge.style.background = "";
-                badge.textContent = "¡ABIERTO!";
-                badge.style.background = "#6b7280";
-                badge.textContent = "🔒 CERRADO";
-                
-                status.className = "inline-block bg-guinda-100 dark:bg-guinda-900/40 text-guinda-700 dark:text-guinda-300 text-xs font-semibold px-3 py-1 rounded-full";
-                status.textContent = "✗ No disponible";
-            }
-        }
-
-        // --- 3. Lógica de Autenticación Admin ---
-        async function handleCredentialResponse(response) {
-            try {
-                const base64Url = response.credential.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                
-                const payload = JSON.parse(jsonPayload);
-
-                if (payload.email === ADMIN_EMAIL) {
-                    // Obtener estado REAL del servidor antes de toglear
-                    const currentState = await fetchInscriptionState();
-                    const newState = !currentState;
-                    const ok = await saveInscriptionState(newState, response.credential);
-                    
-                    if (ok) {
-                        updateUI(newState);
-                        const statusText = newState ? "ABIERTAS ✅" : "CERRADAS 🔒";
-                        alert(`✅ MODO ADMINISTRADOR\n\nCambio exitoso. Inscripciones ahora: ${statusText}\n\nEl cambio es visible para TODOS los usuarios de inmediato.`);
-                    } else {
-                        alert("⚠️ Error al guardar en el servidor. Intente nuevamente.");
-                    }
-                } else {
-                    alert("⛔ Acceso denegado.\nSolo el administrador puede modificar el estado del portal.");
-                }
-            } catch (e) {
-                console.error("Error al procesar credencial", e);
-                alert("Error de autenticación.");
-            }
-        }
-
-        // Cursor
-        const cursorDot = document.getElementById('cursor-dot');
-        window.addEventListener('mousemove', e => {
-            const { clientX, clientY } = e;
-            requestAnimationFrame(() => {
-                cursorDot.style.left = `${clientX}px`;
-                cursorDot.style.top = `${clientY}px`;
-            });
-            const target = e.target;
-            if (target.closest('a, button, [role="button"], .card-portal, .cursor-pointer')) {
-                cursorDot.classList.add('active');
-            } else {
-                cursorDot.classList.remove('active');
-            }
-        });
-
-        // ==========================================
-        // MENU HAMBURGUESA LÓGICA
-        // ==========================================
-        const mainMenuBtn = document.getElementById('main-menu-btn');
-        const mainMenuDropdown = document.getElementById('main-menu-dropdown');
-
-        if (mainMenuBtn && mainMenuDropdown) {
-            mainMenuBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                mainMenuDropdown.classList.toggle('hidden');
-            });
-
-            // Cerrar al hacer clic fuera
-            document.addEventListener('click', (e) => {
-                if (!mainMenuBtn.contains(e.target) && !mainMenuDropdown.contains(e.target)) {
-                    mainMenuDropdown.classList.add('hidden');
-                }
-            });
-        }
-
-        // Date & Clock
-        function updateDate() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const ds = now.toLocaleDateString('es-MX', options);
-            document.getElementById('currentDate').textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
-        }
-        function startClock() {
-            function updateClock() {
-                const now = new Date();
-                document.getElementById('clock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-            }
-            updateClock(); setInterval(updateClock, 1000);
-        }
-        
-        // Year Updates
-        function updateYears() {
-             const year = new Date().getFullYear();
-             const calEl = document.getElementById('calendar-year-text');
-             if(calEl) calEl.textContent = `Calendario Institucional ${year}`;
-             
-             const copyEl = document.getElementById('copyright-year');
-             if(copyEl) copyEl.textContent = year;
-        }
-
-        // Weather
-        function updateWeather() {
-            const weatherElement = document.getElementById('weatherInfo');
-            if (!weatherElement) return;
-            const getWeatherIcon = (code) => {
-                if (code === 0) return '☀️';
-                if ([1, 2, 3].includes(code)) return '⛅';
-                if ([45, 48].includes(code)) return '🌫️';
-                if ([51, 53, 55].includes(code)) return '🌦️';
-                if ([61, 63, 65].includes(code)) return '🌧️';
-                if ([71, 73, 75, 77].includes(code)) return '🌨️';
-                if ([80, 81, 82].includes(code)) return '⛈️';
-                if ([95, 96, 99].includes(code)) return '🌩️';
-                return '🌤️';
-            };
-            const showWeather = (lat, lon) => {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
-                fetch(url)
-                    .then(response => { if (!response.ok) throw new Error('Err'); return response.json(); })
-                    .then(data => {
-                        if (data && data.current_weather) {
-                            const temp = Math.round(data.current_weather.temperature);
-                            const icon = getWeatherIcon(data.current_weather.weathercode);
-                            weatherElement.innerHTML = `<span class="text-2xl weather-icon">${icon}</span><span class="font-semibold">Durango, Dgo. ${temp}°C</span>`;
-                        }
-                    })
-                    .catch(e => console.error(e));
-            };
-            const durangoLat = 24.0277;
-            const durangoLon = -104.653;
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (p) => showWeather(p.coords.latitude, p.coords.longitude),
-                    (e) => showWeather(durangoLat, durangoLon)
-                );
-            } else { showWeather(durangoLat, durangoLon); }
-        }
-
-        // Quotes
-        const inspirationalQuotes = [
-            { quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.", author: "Nelson Mandela" },
-            { quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.", author: "Carl Sagan" },
-            { quote: "La educación no es preparación para la vida; la educación es la vida misma.", author: "John Dewey" },
-            { quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.", author: "Albert Einstein" },
-            { quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.", author: "Platón" }
-        ];
-        function rotateQuotes() {
-            const qc = document.getElementById('quote-container');
-            if (!qc) return;
-            const q = inspirationalQuotes[Math.floor(Math.random() * inspirationalQuotes.length)];
-            qc.style.opacity = 0;
-            setTimeout(() => {
-                qc.innerHTML = `<p class="text-base sm:text-lg italic text-gray-700 dark:text-gray-300 leading-relaxed">"${q.quote}"</p><p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 text-right mt-2">- ${q.author}</p>`;
-                qc.style.opacity = 1;
-            }, 500);
-        }
-
-        // Banner
-        const announcementBanner = document.getElementById('announcement-banner');
-        if (announcementBanner) {
-            let bannerHidden = false;
-            const hideBanner = () => {
-                if (!bannerHidden) {
-                    bannerHidden = true;
-                    announcementBanner.classList.add('hidden-banner');
-                    window.removeEventListener('scroll', hideBanner);
-                }
-            };
-            setTimeout(hideBanner, 10000);
-            window.addEventListener('scroll', hideBanner, { once: true });
-            announcementBanner.addEventListener('click', hideBanner);
-        }
-
-        // Dark Mode Toggle Logic
-        var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-        var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-        var themeToggleBtn = document.getElementById('theme-toggle-btn');
-
-        function updateThemeIcons() {
-            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                themeToggleLightIcon.classList.remove('hidden');
-                themeToggleDarkIcon.classList.add('hidden');
-                document.documentElement.classList.add('dark');
-            } else {
-                themeToggleLightIcon.classList.add('hidden');
-                themeToggleDarkIcon.classList.remove('hidden');
-                document.documentElement.classList.remove('dark');
-            }
-        }
-
-        // Initial check
-        updateThemeIcons();
-
-        function toggleTheme() {
-            if (localStorage.getItem('color-theme')) {
-                if (localStorage.getItem('color-theme') === 'light') {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                }
-            } else {
-                if (document.documentElement.classList.contains('dark')) {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                } else {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                }
-            }
-            updateThemeIcons();
-        }
-
-        if(themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
-
-        window.addEventListener('load', function() {
-            startClock(); updateDate(); updateWeather(); updateYears();
-            rotateQuotes(); setInterval(rotateQuotes, 15000);
-
-            // Consultar estado desde el servidor (visible igual para todos)
-            fetchInscriptionState().then(isOpen => updateUI(isOpen));
-
-            // Listener para Admin Trigger
-            const trigger = document.getElementById('admin-trigger');
-            if (trigger) {
-                trigger.addEventListener('click', () => {
-                    if (typeof google === 'undefined' || !google.accounts) {
-                        alert("El servicio de Google no ha cargado. Intente recargar la página.");
-                        return;
-                    }
-
-                    // Si ya existe el modal, cerrarlo (toggle)
-                    const existing = document.getElementById('admin-google-modal');
-                    if (existing) { existing.remove(); return; }
-
-                    // Crear modal con botón oficial de Google
-                    const modal = document.createElement('div');
-                    modal.id = 'admin-google-modal';
-                    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);';
-
-                    const box = document.createElement('div');
-                    box.style.cssText = 'background:#fff;border-radius:20px;padding:36px 32px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.4);max-width:340px;width:90%;';
-                    box.innerHTML = '<p style="font-size:28px;margin-bottom:8px;">🔐</p><p style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:4px;">Acceso Administrativo</p><p style="font-size:12px;color:#64748b;margin-bottom:24px;">Identifícate para cambiar el estado del portal</p>';
-
-                    const btnContainer = document.createElement('div');
-                    btnContainer.id = 'admin-google-btn';
-                    btnContainer.style.cssText = 'display:flex;justify-content:center;margin-bottom:16px;min-height:44px;';
-
-                    const cancelBtn = document.createElement('button');
-                    cancelBtn.textContent = 'Cancelar';
-                    cancelBtn.style.cssText = 'font-size:13px;color:#94a3b8;background:none;border:none;cursor:pointer;margin-top:4px;padding:4px 12px;border-radius:8px;transition:color 0.2s;';
-                    cancelBtn.onmouseover = () => cancelBtn.style.color = '#475569';
-                    cancelBtn.onmouseout = () => cancelBtn.style.color = '#94a3b8';
-                    cancelBtn.onclick = () => modal.remove();
-
-                    box.appendChild(btnContainer);
-                    box.appendChild(cancelBtn);
-                    modal.appendChild(box);
-                    modal.addEventListener('click', (ev) => { if (ev.target === modal) modal.remove(); });
-                    document.body.appendChild(modal);
-
-                    google.accounts.id.initialize({
-                        client_id: GOOGLE_CLIENT_ID,
-                        callback: (response) => {
-                            modal.remove();
-                            handleCredentialResponse(response);
-                        }
-                    });
-                    google.accounts.id.renderButton(btnContainer, {
-                        theme: 'filled_blue', size: 'large', shape: 'pill', text: 'continue_with'
-                    });
-                });
-            }
-        });
-    </script>
-<script type="module" src="/index.tsx"></script>
-
-<script>
-    // ==========================================
-    // MODAL CURSOS ACTUALES
-    // ==========================================
-    const COURSES_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRK9g_iWtGGIazGRfNNmnb1W2qpedwy_9pgSr6NKz04aav65YYd-DOF7dCP425wdRIwQ4hIe-H7jFx8/pub?gid=0&single=true&output=csv';
-
-    function parseCSVCursos(text) {
-        const lines = text.trim().split(/\r?\n/).slice(1); // skip header
-        return lines.map(line => {
-            const values = [];
-            let current = '', inQuotes = false;
-            for (let ch of line) {
-                if (ch === '"') { inQuotes = !inQuotes; }
-                else if (ch === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
-                else { current += ch; }
-            }
-            values.push(current.trim());
-            // cols: 0=fecha, 1=OficioNo, 2=curso, 3=Instructor, 4=duracion, 5=modalidad,
-            //       6=dia1, 7=objetivo, 8=departamento, 9=lugar, 10=nombre_jefe, 11=jefatura
-            return {
-                fecha:        values[0] || '',
-                curso:        values[2] || '',
-                instructor:   values[3] || '',
-                duracion:     values[4] || '',
-                modalidad:    values[5] || '',
-                departamento: values[8] || '',
-                lugar:        values[9] || ''
-            };
-        }).filter(r => r.curso && r.curso !== '');
-    }
-
-    // Paleta de colores por fecha única — se asigna un color distinto a cada fecha diferente
-    const DATE_PALETTE = [
-        { bg: '#eff6ff', border: '#3b82f6', text: '#1d4ed8', label: '#dbeafe' },
-        { bg: '#f0fdf4', border: '#16a34a', text: '#15803d', label: '#dcfce7' },
-        { bg: '#fff7ed', border: '#ea580c', text: '#c2410c', label: '#ffedd5' },
-        { bg: '#faf5ff', border: '#9333ea', text: '#7e22ce', label: '#f3e8ff' },
-        { bg: '#fefce8', border: '#ca8a04', text: '#854d0e', label: '#fef9c3' },
-        { bg: '#f0fdfa', border: '#0d9488', text: '#0f766e', label: '#ccfbf1' },
-        { bg: '#fff1f2', border: '#e11d48', text: '#be123c', label: '#ffe4e6' },
-        { bg: '#fdf4ff', border: '#c026d3', text: '#86198f', label: '#fae8ff' },
-    ];
-
-    function buildDateColorMap(cursos) {
-        const map = {};
-        let idx = 0;
-        cursos.forEach(c => {
-            if (c.fecha && !map[c.fecha]) {
-                map[c.fecha] = DATE_PALETTE[idx % DATE_PALETTE.length];
-                idx++;
-            }
-        });
-        return map;
-    }
-
-    function renderCursos(cursos) {
-        const body = document.getElementById('modal-cursos-body');
-        if (!cursos.length) {
-            body.innerHTML = `
-                <div style="text-align:center;padding:48px 24px;">
-                    <div style="font-size:56px;margin-bottom:16px;">🗓️</div>
-                    <p style="font-size:17px;font-weight:700;color:#1e293b;margin:0 0 8px;">Sin cursos en este momento</p>
-                    <p style="font-size:13px;color:#64748b;line-height:1.6;max-width:300px;margin:0 auto 20px;">
-                        El periodo actual ha concluido o aún no se han registrado cursos para el próximo periodo.
-                    </p>
-                    <div style="display:inline-flex;align-items:center;gap:8px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:10px 18px;">
-                        <span style="font-size:16px;">✨</span>
-                        <span style="font-size:12px;font-weight:600;color:#15803d;">Pronto se publicarán los cursos del siguiente periodo</span>
-                    </div>
-                </div>`;
-            return;
-        }
-
-        // Ordenar por fecha antes de renderizar
-        // Las fechas vienen como "DEL 10 AL 14 DE AGO" — extraemos el día inicial para ordenar
-        // Soporta nombres completos (JUNIO, AGOSTO) y abreviados (JUN, AGO)
-        const MESES = {
-            ENERO:1, FEBRERO:2, MARZO:3, ABRIL:4, MAYO:5, JUNIO:6,
-            JULIO:7, AGOSTO:8, SEPTIEMBRE:9, OCTUBRE:10, NOVIEMBRE:11, DICIEMBRE:12,
-            ENE:1, FEB:2, MAR:3, ABR:4, MAY:5, JUN:6, JUL:7, AGO:8, SEP:9, OCT:10, NOV:11, DIC:12
-        };
-        function parseFechaOrden(fecha) {
-            if (!fecha) return 9999;
-            const upper = fecha.toUpperCase();
-            const mesMatch = upper.match(/(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE|ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)/);
-            const diaMatch = upper.match(/(\d{1,2})/);
-            const mes = mesMatch ? (MESES[mesMatch[1]] || 99) : 99;
-            const dia = diaMatch ? parseInt(diaMatch[1]) : 99;
-            return mes * 100 + dia;
-        }
-        cursos.sort((a, b) => parseFechaOrden(a.fecha) - parseFechaOrden(b.fecha));
-
-        const dateColorMap = buildDateColorMap(cursos);
-
-        // Leyenda de fechas
-        const leyenda = Object.entries(dateColorMap).map(([fecha, col]) =>
-            `<span style="display:inline-flex;align-items:center;gap:5px;background:${col.label};border:1px solid ${col.border};color:${col.text};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
-                <span style="width:8px;height:8px;border-radius:50%;background:${col.border};display:inline-block;"></span>${fecha}
-            </span>`
-        ).join('');
-
-        const header = `
-            <div style="margin-bottom:14px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-                    <span style="background:#dbeafe;color:#1d4ed8;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;">
-                        ${cursos.length} curso${cursos.length !== 1 ? 's' : ''}
-                    </span>
-                    <span style="font-size:11px;color:#94a3b8;">● color por periodo de fechas</span>
-                </div>
-                <div style="display:flex;flex-wrap:wrap;gap:6px;">${leyenda}</div>
-            </div>`;
-
-        const cards = cursos.map((c, i) => {
-            const col = dateColorMap[c.fecha] || DATE_PALETTE[0];
-            return `
-            <div style="background:${col.bg};border-left:4px solid ${col.border};border-top:1px solid ${col.border}33;border-right:1px solid ${col.border}33;border-bottom:1px solid ${col.border}33;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
-                <div style="font-size:22px;flex-shrink:0;">📖</div>
-                <div style="flex:1;min-width:0;">
-                    <p style="font-size:14px;font-weight:700;color:#1e293b;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.curso}</p>
-                    <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#64748b;">
-                        <span style="display:flex;align-items:center;gap:3px;font-weight:600;color:${col.text};">📅 ${c.fecha}</span>
-                        <span style="display:flex;align-items:center;gap:3px;">👤 ${c.instructor}</span>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-
-        body.innerHTML = header + cards;
-    }
-
-    async function abrirModalCursos() {
-        const modal = document.getElementById('modal-cursos');
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-
-        // Reset a loading state
-        document.getElementById('modal-cursos-body').innerHTML = `
-            <div class="flex items-center justify-center py-12 text-gray-400">
-                <svg class="animate-spin w-8 h-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                </svg>
-                <span class="text-sm font-medium">Cargando cursos...</span>
-            </div>`;
-
-        try {
-            const res = await fetch(COURSES_SHEET_URL);
-            const text = await res.text();
-            const cursos = parseCSVCursos(text);
-            renderCursos(cursos);
-        } catch(e) {
-            document.getElementById('modal-cursos-body').innerHTML = 
-                '<div class="text-center py-12"><p class="text-4xl mb-3">⚠️</p><p class="text-red-500 font-medium">No se pudo cargar la información.</p><p class="text-gray-400 text-sm mt-1">Verifica tu conexión e intenta de nuevo.</p></div>';
-        }
-    }
-
-    function cerrarModalCursos() {
-        document.getElementById('modal-cursos').classList.add('hidden');
-        document.body.style.overflow = '';
-    }
-
-    // Cerrar con Escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') cerrarModalCursos();
-    });
-
-    // Cerrar al hacer clic fuera del contenido
-    document.getElementById('modal-cursos').addEventListener('click', function(e) {
-        if (e.target === this) cerrarModalCursos();
-    });
-</script>
 </body>
 </html>
