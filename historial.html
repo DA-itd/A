@@ -6,6 +6,7 @@
     
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
 <title>Historial Académico - Portal ITD</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -93,8 +94,13 @@
                 if (window.google && window.google.accounts && googleBtnRef.current) {
                     clearInterval(interval);
                     try {
-                        window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
+                        window.google.accounts.id.initialize({ 
+                            client_id: CONFIG.GOOGLE_CLIENT_ID, 
+                            callback: onLogin,
+                            use_fedcm_for_prompt: false
+                        });
                         window.google.accounts.id.renderButton(googleBtnRef.current, { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill" });
+                        window.google.accounts.id.prompt();
                     } catch (e) { console.error("Error rendering Google Button", e); }
                 }
             }, 500);
@@ -257,7 +263,7 @@
                         mode: 'cors',
                         redirect: 'follow',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action: 'getTeacherHistory', id_token: response.credential })
+                        body: JSON.stringify({ action: 'getTeacherHistory', id_token: response.credential, email: payload.email })
                     })
                     .then(r => r.json())
                     .then(res => {
