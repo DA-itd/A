@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,23 +9,18 @@
 <title>Estadísticas - Portal de Actualización Docente ITD</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
 
-<!-- React y Babel -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Chart.js y Plugin de Etiquetas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 
-<!-- Librerías para PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
@@ -65,7 +59,7 @@
     .loader-spinner {
         width: 64px;
         height: 64px;
-        border: 4px solid #1B396A; /* Aro exterior azul */
+        border: 4px solid #1B396A; 
         border-radius: 50%;
         position: relative;
         margin: 0 auto 20px;
@@ -73,7 +67,6 @@
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 
-    /* Punto central */
     .loader-spinner::before {
         content: '';
         position: absolute;
@@ -85,49 +78,42 @@
         z-index: 2;
     }
 
-    /* Manecilla giratoria */
     .loader-spinner::after {
         content: '';
         position: absolute;
         width: 4px; height: 24px;
-        background: #9D2449; /* Color guinda para la manecilla */
+        background: #9D2449; 
         top: 50%; left: 50%;
-        margin-left: -2px; /* Centrar horizontalmente */
-        margin-top: -24px; /* Mover arriba para que pivote desde el centro */
+        margin-left: -2px; 
+        margin-top: -24px; 
         transform-origin: bottom center;
         border-radius: 2px;
         animation: spin 2s linear infinite;
     }
     
-    /* Utilidades */
     .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 </style>
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800 flex flex-col">
 
-<!-- HEADER WEB -->
 <header id="web-header" class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A]">
     <div class="container mx-auto px-4 py-4 sm:py-6 flex items-center justify-between gap-4">
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
         <div class="text-center flex-1 px-2 sm:px-4">
-            <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#1B396A] leading-tight">PANEL DE ESTADÍSTICAS</h1>
-            <p class="text-xs sm:text-sm md:text-base text-[#9D2449] mt-1 font-semibold">Desarrollo Académico</p>
+            <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#1B396A] leading-tight text-center">PANEL DE ESTADÍSTICAS</h1>
+            <p class="text-xs sm:text-sm md:text-base text-[#9D2449] mt-1 font-semibold text-center">Desarrollo Académico</p>
         </div>
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
     </div>
 </header>
 
-<!-- ENLACE DE NAVEGACIÓN -->
-<div id="back-link" class="container mx-auto px-4 py-4">
-    <a href="index.html" 
-       class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center gap-1 text-sm font-bold transition-colors">
+<div id="back-link" class="container mx-auto px-4 py-4 text-center">
+    <a href="index.html" class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center justify-center gap-1 text-sm font-bold transition-colors">
         ← Volver al Portal Principal
     </a>
 </div>
 
-<!-- CONTENEDOR PRINCIPAL DE REACT -->
 <div id="root" class="flex-grow flex flex-col">
-    <!-- Loader Inicial (HTML puro para feedback inmediato) -->
     <div class="flex justify-center items-center h-64 flex-grow">
         <div class="text-center">
             <div class="loader-spinner"></div>
@@ -136,7 +122,6 @@
     </div>
 </div>
 
-<!-- FOOTER WEB -->
 <footer id="web-footer" class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449]">
     <div class="container mx-auto px-4">
          <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
@@ -145,39 +130,27 @@
     </div>
 </footer>
 
-<!-- SCRIPT DE INICIALIZACIÓN -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var yearEl = document.getElementById('copyright-year');
-        if (yearEl) {
-            yearEl.textContent = new Date().getFullYear();
-        }
+        if (yearEl) { yearEl.textContent = new Date().getFullYear(); }
     });
 </script>
 
-<!-- APLICACIÓN REACT -->
 <script type="text/babel">
     const React = window.React;
     const ReactDOM = window.ReactDOM;
 
-    // ====================================================================
-    // CONFIGURACIÓN GLOBAL
-    // ====================================================================
     const CONFIG = {
         GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', 
         APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
     };
 
-    // Colores Institucionales y Vibrantes
     const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
     const VIBRANT_COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC926', '#1982C4', '#E91E63', '#009688'];
     const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
     const GUINDA_COLOR = '#9D2449';
     const BLUE_COLOR = '#1B396A';
-    
-    // ====================================================================
-    // UTILIDADES
-    // ====================================================================
     
     const shortenLabel = (label) => {
         if (!label) return '';
@@ -194,7 +167,7 @@
             .trim();
     };
     
-    const getChartHeight = (count) => Math.max(400, count * 35) + "px"; // Aumentado ligeramente el alto por barra
+    const getChartHeight = (count) => Math.max(400, count * 35) + "px";
 
     const getImageDataFromURL = (url) => {
         return new Promise((resolve) => {
@@ -208,21 +181,14 @@
         });
     };
 
-    // ====================================================================
-    // COMPONENTE: Login
-    // ====================================================================
     const Login = ({ onLogin, loginError }) => {
         const googleButtonRef = React.useRef(null);
-
         React.useEffect(() => {
             let intervalId;
             const initGoogle = () => {
                 if (window.google && window.google.accounts && googleButtonRef.current) {
                     try {
-                        window.google.accounts.id.initialize({ 
-                            client_id: CONFIG.GOOGLE_CLIENT_ID, 
-                            callback: onLogin 
-                        });
+                        window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
                         window.google.accounts.id.renderButton(googleButtonRef.current, { 
                             theme: "outline", size: "large", text: "signin_with", shape: "rectangular", logo_alignment: "left"
                         });
@@ -231,10 +197,7 @@
                 }
                 return false;
             };
-            
-            if (!initGoogle()) { 
-                intervalId = setInterval(() => { if (initGoogle()) clearInterval(intervalId); }, 500); 
-            }
+            if (!initGoogle()) { intervalId = setInterval(() => { if (initGoogle()) clearInterval(intervalId); }, 500); }
             return () => { if(intervalId) clearInterval(intervalId); };
         }, [onLogin]);
 
@@ -242,8 +205,8 @@
             <div className="flex flex-col justify-center items-center py-20 animate-fadeIn px-4 flex-grow">
                 <div className="bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-8 border-[#9D2449]">
                     <img src={ITD_LOGO_URL} alt="Logo ITD" className="h-24 mx-auto mb-6 object-contain" />
-                    <h2 className="text-3xl font-bold text-[#1B396A] mb-2">Acceso Restringido</h2>
-                    <p className="text-gray-500 mb-8 text-sm font-medium uppercase tracking-wide">Estadísticas Institucionales</p>
+                    <h2 className="text-3xl font-bold text-[#1B396A] mb-2 text-center">Acceso Restringido</h2>
+                    <p className="text-gray-500 mb-8 text-sm font-medium uppercase tracking-wide text-center">Estadísticas Institucionales</p>
                     {loginError && (<div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm font-bold">{loginError}</div>)}
                     <div className="flex justify-center min-h-[50px]" ref={googleButtonRef}></div>
                 </div>
@@ -251,9 +214,6 @@
         );
     };
 
-    // ====================================================================
-    // COMPONENTE: ChartBox
-    // ====================================================================
     const ChartBox = ({ type, data, title, id, horizontal = false, shortenLabels = false, minHeight = "350px", isHistory = false, customColors = null }) => {
         const chartRef = React.useRef(null);
         const canvasRef = React.useRef(null);
@@ -261,48 +221,31 @@
         const menuRef = React.useRef(null);
 
         React.useEffect(() => {
-            const handleClickOutside = (event) => {
-                if (menuRef.current && !menuRef.current.contains(event.target)) {
-                    setMenuOpen(false);
-                }
-            };
+            const handleClickOutside = (event) => { if (menuRef.current && !menuRef.current.contains(event.target)) setMenuOpen(false); };
             document.addEventListener("mousedown", handleClickOutside);
-            return () => {
-                document.removeEventListener("mousedown", handleClickOutside);
-            };
+            return () => document.removeEventListener("mousedown", handleClickOutside);
         }, []);
 
         React.useEffect(() => {
             if (!canvasRef.current || !data) return;
-            if (typeof window.Chart === 'undefined') return;
-            
             if (chartRef.current) chartRef.current.destroy();
-
             const ctx = canvasRef.current.getContext('2d');
             const isPie = type === 'pie' || type === 'doughnut';
-            
-            // Preparar datos
             let chartDataConfig = {};
 
             if (isHistory) {
-                // Modo historial: 'data' ya viene preparada desde el componente padre
                 chartDataConfig = data;
             } else {
-                // Modo estándar: 'data' es un objeto clave-valor simple
                 const rawLabels = Object.keys(data);
                 const displayLabels = rawLabels.map(l => shortenLabels ? shortenLabel(l) : l);
-                
-                // Determinación de colores
                 const bgColors = customColors || (isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS);
-                const borderColors = isPie ? '#ffffff' : (customColors || VIBRANT_COLORS);
-
                 chartDataConfig = {
                     labels: displayLabels,
                     datasets: [{ 
                         label: title.replace(/[📚👥🏢📋📈🏫👨‍🏫]/g, '').trim(), 
                         data: Object.values(data), 
                         backgroundColor: bgColors,
-                        borderColor: borderColors,
+                        borderColor: isPie ? '#ffffff' : bgColors,
                         borderWidth: isPie ? 2 : 1,
                         borderRadius: isPie ? 0 : 6,
                         barPercentage: 0.6,
@@ -316,309 +259,90 @@
             let config = {
                 type: type,
                 data: chartDataConfig,
-                plugins: window.ChartDataLabels ? [window.ChartDataLabels] : [],
+                plugins: [window.ChartDataLabels],
                 options: {
-                    responsive: true, 
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     indexAxis: horizontal ? 'y' : 'x',
-                    animation: { duration: 600, easing: 'easeOutQuart' },
+                    animation: { duration: 600 },
                     scales: isPie ? {} : { 
                         y: { 
                             beginAtZero: true, 
-                            ticks: { 
-                                color: '#374151',
-                                font: { size: 11, weight: '600' },
-                                autoSkip: false,
-                                padding: 10,
-                                callback: function(value) { 
-                                    if (this.getLabelForValue && !isHistory && horizontal) {
-                                        // Auto-wrap para etiquetas largas
-                                        const label = this.getLabelForValue(value);
-                                        // Aumentado el límite de caracteres antes de cortar línea para aprovechar el ancho completo
-                                        const charLimit = 80; 
-                                        if (typeof label === 'string' && label.length > charLimit) {
-                                            const words = label.split(' ');
-                                            const lines = [];
-                                            let currentLine = words[0];
-                                            for (let i = 1; i < words.length; i++) {
-                                                if (currentLine.length + words[i].length < charLimit) {
-                                                    currentLine += ' ' + words[i];
-                                                } else {
-                                                    lines.push(currentLine);
-                                                    currentLine = words[i];
-                                                }
-                                            }
-                                            lines.push(currentLine);
-                                            return lines;
-                                        }
-                                        return label;
-                                    }
-                                    if (value % 1 === 0) return value; 
-                                } 
-                            },
-                            grid: { color: '#e5e7eb', borderDash: [5, 5], display: !horizontal }
+                            ticks: { font: { size: 11, weight: '600' }, autoSkip: false, callback: function(value) { 
+                                if (this.getLabelForValue && !isHistory && horizontal) {
+                                    const label = this.getLabelForValue(value);
+                                    if (typeof label === 'string' && label.length > 80) return label.substring(0, 77) + "...";
+                                    return label;
+                                }
+                                return (value % 1 === 0) ? value : null; 
+                            }},
+                            grid: { display: !horizontal }
                         },
-                        x: {
-                            beginAtZero: true, 
-                            ticks: { 
-                                color: '#374151',
-                                font: { size: 11, weight: '600' }
-                            },
-                            grid: { display: false }
-                        }
+                        x: { grid: { display: false } }
                     },
                     plugins: { 
                         datalabels: {
-                            display: true, 
-                            align: isHistory ? 'top' : (horizontal ? 'end' : 'top'),
-                            anchor: isHistory ? 'center' : (horizontal ? 'end' : 'end'),
-                            backgroundColor: isHistory ? 'white' : (isPie ? 'rgba(0,0,0,0.6)' : 'transparent'),
-                            borderRadius: 4,
-                            color: isHistory ? '#1B396A' : (isPie ? '#fff' : '#374151'),
+                            display: true, align: 'end', anchor: 'end',
+                            color: isPie ? '#fff' : '#374151',
                             font: { weight: 'bold', size: 10 },
-                            padding: 2,
                             formatter: (value) => {
-                                if (isHistory) return value > 0 ? value : '';
-                                if (totalValues > 0) {
-                                    const percentage = ((value / totalValues) * 100).toFixed(1);
-                                    if(percentage < 3 && !horizontal) return value;
-                                    return `${value} (${percentage}%)`;
-                                }
+                                if (isHistory) return value || '';
+                                if (isPie && totalValues > 0) return `${value} (${((value/totalValues)*100).toFixed(1)}%)`;
                                 return value;
-                            },
-                            offset: 4,
-                            clip: false
-                        },
-                        legend: { 
-                            display: isPie || isHistory, 
-                            position: 'bottom',
-                            labels: {
-                                usePointStyle: true,
-                                boxWidth: 8
                             }
-                        }
-                    },
-                    layout: { padding: { top: 25, right: 25, left: horizontal ? 10 : 10, bottom: 10 } }
+                        },
+                        legend: { display: isPie || isHistory, position: 'bottom' }
+                    }
                 }
             };
-
-            if (!isPie && horizontal) {
-                config.options.scales.x.display = false;
-            }
-            if (isPie) config.options.layout.padding = 20;
-
             chartRef.current = new window.Chart(ctx, config);
-            return () => { if (chartRef.current) chartRef.current.destroy(); };
-        }, [data, type, title, horizontal, id, shortenLabels, isHistory, customColors]);
+        }, [data, type, title, horizontal, shortenLabels, isHistory]);
 
         const downloadSingleChart = (format) => {
             setMenuOpen(false);
-            // Pequeño delay para que se cierre el menú antes de capturar
             setTimeout(async () => {
                 const element = document.getElementById(`chartBox-${id}`);
-                if (!element) return;
+                const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                const logoData = await getImageDataFromURL(ITD_LOGO_URL);
+                const cleanTitle = title.replace(/[📚👥🏢📋📈🏫👨‍🏫]/g, '').trim();
 
-                try {
-                    // Escala 3 para mayor calidad
-                    const canvas = await html2canvas(element, { 
-                        scale: 3, 
-                        useCORS: true, 
-                        backgroundColor: '#ffffff',
-                        ignoreElements: (el) => el.id === `menu-btn-${id}` 
-                    });
-
-                    // Cargar Logo
-                    const logoData = await getImageDataFromURL(ITD_LOGO_URL);
-                    const cleanTitle = title.replace(/[📚👥🏢📋📈🏫👨‍🏫]/g, '').trim();
-
-                    if (format === 'png') {
-                        // Crear Canvas Compuesto para PNG
-                        const finalCanvas = document.createElement('canvas');
-                        const ctx = finalCanvas.getContext('2d');
-                        
-                        // Altura de encabezado optimizada para evitar solapamientos
-                        const headerHeight = 240; 
-                        const margin = 40;
-                        finalCanvas.width = canvas.width;
-                        finalCanvas.height = canvas.height + headerHeight;
-
-                        // Fondo Blanco
-                        ctx.fillStyle = '#ffffff';
-                        ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-
-                        // 1. Logo (Izquierda)
-                        if (logoData) {
-                            const img = new Image();
-                            img.src = logoData;
-                            await new Promise(r => img.onload = r);
-                            
-                            const maxLogoHeight = 90;
-                            const ratio = img.width / img.height;
-                            const logoW = maxLogoHeight * ratio;
-                            const logoH = maxLogoHeight;
-                            
-                            ctx.drawImage(img, margin, 40, logoW, logoH);
-                        }
-
-                        // 2. Títulos (Centrados y distribuidos)
-                        ctx.textAlign = 'center';
-                        
-                        // Instituto
-                        ctx.fillStyle = BLUE_COLOR;
-                        ctx.font = 'bold 38px Helvetica, Arial, sans-serif';
-                        ctx.fillText('INSTITUTO TECNOLÓGICO DE DURANGO', finalCanvas.width / 2, 75);
-                        
-                        // Subtítulo
-                        ctx.fillStyle = '#666';
-                        ctx.font = '24px Helvetica, Arial, sans-serif';
-                        ctx.fillText('Coordinación de Actualización Docente', finalCanvas.width / 2, 110);
-
-                        // Título de la Gráfica
-                        ctx.fillStyle = BLUE_COLOR;
-                        ctx.font = 'bold 30px Helvetica, Arial, sans-serif';
-                        ctx.fillText(cleanTitle, finalCanvas.width / 2, 160);
-
-                        // 3. Línea Guinda (Separador)
-                        ctx.strokeStyle = GUINDA_COLOR;
-                        ctx.lineWidth = 5;
-                        ctx.beginPath();
-                        ctx.moveTo(margin, 190);
-                        ctx.lineTo(finalCanvas.width - margin, 190);
-                        ctx.stroke();
-
-                        // 4. Gráfica
-                        ctx.drawImage(canvas, 0, headerHeight);
-
-                        const link = document.createElement('a');
-                        link.download = `${cleanTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
-                        link.href = finalCanvas.toDataURL('image/png');
-                        link.click();
-
-                    } else if (format === 'pdf') {
-                        const { jsPDF } = window.jspdf;
-                        
-                        const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
-                        const pdf = new jsPDF(orientation, 'mm', 'letter');
-                        
-                        const pdfWidth = pdf.internal.pageSize.getWidth();
-                        const pdfHeight = pdf.internal.pageSize.getHeight();
-                        const margin = 10;
-
-                        // --- 1. Encabezado Institucional ---
-                        // Logo
-                        if (logoData) {
-                            const imgProps = pdf.getImageProperties(logoData);
-                            const logoWidth = 22;
-                            const logoHeight = (imgProps.height * logoWidth) / imgProps.width;
-                            pdf.addImage(logoData, 'PNG', margin, 5, logoWidth, logoHeight); 
-                        }
-                        
-                        // Textos
-                        pdf.setFontSize(14);
-                        pdf.setFont('helvetica', 'bold');
-                        pdf.setTextColor(27, 57, 106); // Azul #1B396A
-                        pdf.text('INSTITUTO TECNOLÓGICO DE DURANGO', pdfWidth / 2, 12, { align: 'center' });
-                        
-                        pdf.setFontSize(10);
-                        pdf.setFont('helvetica', 'normal');
-                        pdf.setTextColor(80);
-                        pdf.text('Coordinación de Actualización Docente', pdfWidth / 2, 18, { align: 'center' });
-
-                        // Línea Guinda
-                        pdf.setDrawColor(157, 36, 73); // #9D2449
-                        pdf.setLineWidth(1);
-                        pdf.line(margin, 28, pdfWidth - margin, 28);
-
-                        // --- 2. Título de la Gráfica ---
-                        pdf.setFontSize(12);
-                        pdf.setTextColor(27, 57, 106);
-                        pdf.setFont('helvetica', 'bold');
-                        pdf.text(cleanTitle, pdfWidth / 2, 38, { align: 'center' });
-
-                        // --- 3. Imagen de la Gráfica ---
-                        const imgData = canvas.toDataURL('image/png');
-                        const imgProps = pdf.getImageProperties(imgData);
-                        const ratio = imgProps.width / imgProps.height;
-                        
-                        const availWidth = pdfWidth - (margin * 2);
-                        const availHeight = pdfHeight - 45 - 15 - 10 - (margin * 2);
-                        
-                        let finalW = availWidth;
-                        let finalH = finalW / ratio;
-                        
-                        if (finalH > availHeight) {
-                            finalH = availHeight;
-                            finalW = finalH * ratio;
-                        }
-                        
-                        const x = (pdfWidth - finalW) / 2;
-                        const y = 45 + ((availHeight - finalH) / 2); 
-
-                        pdf.addImage(imgData, 'PNG', x, y, finalW, finalH);
-
-                        // --- 4. Pie de Página ---
-                        pdf.setDrawColor(157, 36, 73); 
-                        pdf.line(margin, pdfHeight - 12, pdfWidth - margin, pdfHeight - 12);
-                        
-                        pdf.setFontSize(8);
-                        pdf.setTextColor(100);
-                        const dateStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
-                        pdf.text(`Generado: ${dateStr}`, margin, pdfHeight - 7);
-                        pdf.text('ITD - Estadística Oficial', pdfWidth - margin, pdfHeight - 7, { align: 'right' });
-
-                        pdf.save(`${cleanTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
-                    }
-                } catch (err) {
-                    console.error("Error descargando gráfica", err);
-                    alert("Error al generar la descarga.");
+                if (format === 'png') {
+                    const link = document.createElement('a');
+                    link.download = `${cleanTitle}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } else {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('l', 'mm', 'letter');
+                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 30, 260, 150);
+                    pdf.save(`${cleanTitle}.pdf`);
                 }
             }, 100);
         };
 
         return (
-            <div id={`chartBox-${id}`} className="bg-white p-5 rounded-xl shadow-md h-full flex flex-col border border-gray-100 transition-all hover:shadow-lg relative" style={{ minHeight }}>
+            <div id={`chartBox-${id}`} className="bg-white p-5 rounded-xl shadow-md h-full flex flex-col border border-gray-100 relative" style={{ minHeight }}>
                 <div className="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
                     <div className="w-8"></div> 
-                    <h3 className="text-gray-700 font-bold text-center text-base flex items-center justify-center gap-2 flex-grow">
+                    <h3 className="text-[#1B396A] font-bold text-center text-base flex items-center justify-center gap-2 flex-grow uppercase">
                         {title}
                     </h3>
                     <div className="relative" ref={menuRef}>
-                        <button 
-                            id={`menu-btn-${id}`}
-                            onClick={() => setMenuOpen(!menuOpen)}
-                            className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 focus:outline-none transition-colors"
-                            title="Opciones de descarga"
-                        >
+                        <button onClick={() => setMenuOpen(!menuOpen)} className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
                         </button>
                         {menuOpen && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-50 border border-gray-200 animate-fadeIn">
-                                <div className="py-1">
-                                    <button 
-                                        onClick={() => downloadSingleChart('png')}
-                                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#1B396A]"
-                                    >
-                                        <span className="mr-2">🖼️</span> Descargar PNG
-                                    </button>
-                                    <button 
-                                        onClick={() => downloadSingleChart('pdf')}
-                                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#1B396A]"
-                                    >
-                                        <span className="mr-2">📄</span> Descargar PDF
-                                    </button>
-                                </div>
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-50 border border-gray-200">
+                                <button onClick={() => downloadSingleChart('png')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">🖼️ PNG</button>
+                                <button onClick={() => downloadSingleChart('pdf')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📄 PDF</button>
                             </div>
                         )}
                     </div>
                 </div>
-                <div className="flex-1 relative w-full h-full" style={{ minHeight: '200px' }}><canvas ref={canvasRef} id={id}></canvas></div>
+                <div className="flex-1 relative w-full h-full"><canvas ref={canvasRef}></canvas></div>
             </div>
         );
     };
 
-    // ====================================================================
-    // COMPONENTE: Dashboard (Lógica principal)
-    // ====================================================================
     const Dashboard = ({ user, onLogout }) => {
         const [statsData, setStatsData] = React.useState(null);
         const [loading, setLoading] = React.useState(true);
@@ -626,9 +350,7 @@
         const [period, setPeriod] = React.useState("ACTUAL");
         const [availableYears, setAvailableYears] = React.useState([]);
 
-        React.useEffect(() => {
-            fetchData();
-        }, [period]);
+        React.useEffect(() => { fetchData(); }, [period]);
 
         const fetchData = async () => {
             setLoading(true);
@@ -638,355 +360,161 @@
                 if (result.success) {
                     setStatsData(result.data);
                     if(result.availableYears) setAvailableYears(result.availableYears);
-                } else {
-                    alert("Error obteniendo datos: " + result.message);
                 }
-            } catch (error) {
-                console.error("Error:", error);
-            } finally {
-                setLoading(false);
-            }
+            } catch (error) { console.error(error); } finally { setLoading(false); }
         };
 
+        // ====================================================================
+        // FUNCIÓN DE PDF CORREGIDA (MULTIPLE PÁGINA Y AUTODIMENSIÓN)
+        // ====================================================================
         const generatePDF = async () => {
             setGeneratingPDF(true);
-            await new Promise(resolve => setTimeout(resolve, 500)); 
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
             const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'letter'); 
+            const pdf = new jsPDF('p', 'mm', 'letter');
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
-            const margin = 10;
+            const margin = 15;
             const contentWidth = pdfWidth - (margin * 2);
+            let currentY = 25; 
+            let pageNumber = 1;
 
-            const captureElement = async (elementId) => {
-                const element = document.getElementById(elementId);
-                if (!element) return null;
-                const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-                return canvas.toDataURL('image/png');
-            };
-
-            const addHeader = async (doc) => {
+            const drawHeader = async (doc) => {
                 const logo = await getImageDataFromURL(ITD_LOGO_URL);
-                doc.setFillColor(27, 57, 106); 
+                doc.setFillColor(27, 57, 106);
                 doc.rect(0, 0, pdfWidth, 20, 'F');
-                if (logo) {
-                    doc.addImage(logo, 'PNG', margin, 2, 16, 16);
-                }
-                doc.setFontSize(12);
-                doc.setFont("helvetica", "bold");
-                doc.setTextColor(255, 255, 255);
+                if (logo) doc.addImage(logo, 'PNG', margin, 2, 16, 16);
+                doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(255);
                 doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pdfWidth / 2, 10, { align: "center" });
-                doc.setFontSize(9);
-                doc.setFont("helvetica", "normal");
-                doc.text("Reporte Estadístico de Actualización Docente", pdfWidth / 2, 16, { align: "center" });
+                doc.setFontSize(9); doc.setFont("helvetica", "normal");
+                doc.text(`Reporte Estadístico de Actualización Docente - ${period}`, pdfWidth / 2, 16, { align: "center" });
             };
 
-            const addFooter = (doc, pageNum) => {
-                doc.setFillColor(157, 36, 73); 
+            const drawFooter = (doc, pNum) => {
+                doc.setFillColor(157, 36, 73);
                 doc.rect(0, pdfHeight - 12, pdfWidth, 12, 'F');
-                doc.setFontSize(8);
-                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(8); doc.setTextColor(255);
                 const date = new Date().toLocaleDateString();
-                doc.text(`Generado: ${date} | Página ${pageNum}`, margin, pdfHeight - 5);
-                doc.text("Coordinación de Actualización Docente", pdfWidth - margin, pdfHeight - 5, { align: "right" });
+                doc.text(`Generado: ${date} | Página ${pNum}`, margin, pdfHeight - 5);
             };
 
-            // Página 1: KPIs y Top Cursos/Deptos
-            await addHeader(pdf);
-            const kpiImg = await captureElement('kpi-section');
-            if (kpiImg) {
-                pdf.addImage(kpiImg, 'PNG', margin, 25, contentWidth, 30);
-            }
-            const chart1Img = await captureElement('chartBox-topCursos');
-            if (chart1Img) {
-                pdf.addImage(chart1Img, 'PNG', margin, 60, contentWidth, 100);
-            }
-            const chart2Img = await captureElement('chartBox-topDeptos');
-            if (chart2Img) {
-                pdf.addImage(chart2Img, 'PNG', margin, 170, contentWidth, 90);
-            }
-            addFooter(pdf, 1);
+            const addElement = async (doc, id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const canvas = await html2canvas(el, { scale: 2, useCORS: true, logging: false });
+                const imgData = canvas.toDataURL('image/png');
+                const props = doc.getImageProperties(imgData);
+                const h = (props.height * contentWidth) / props.width;
 
-            // Página 2: Demografía y Tipos
-            pdf.addPage();
-            await addHeader(pdf);
-            const chart3Img = await captureElement('chartBox-genero');
-            if (chart3Img) {
-                pdf.addImage(chart3Img, 'PNG', margin, 25, contentWidth / 2 - 5, 80);
-            }
-            const chart4Img = await captureElement('chartBox-tipo');
-            if (chart4Img) {
-                pdf.addImage(chart4Img, 'PNG', pdfWidth / 2 + 5, 25, contentWidth / 2 - 5, 80);
-            }
-            const chart5Img = await captureElement('chartBox-frecuencia');
-            if (chart5Img) {
-                pdf.addImage(chart5Img, 'PNG', margin, 115, contentWidth, 90);
-            }
-            addFooter(pdf, 2);
+                if (currentY + h > pdfHeight - 20) {
+                    drawFooter(doc, pageNumber);
+                    doc.addPage(); pageNumber++;
+                    await drawHeader(doc);
+                    currentY = 25;
+                }
+                doc.addImage(imgData, 'PNG', margin, currentY, contentWidth, h);
+                currentY += h + 10;
+            };
 
-            // Página 3: Histórico y Docentes
-            pdf.addPage();
-            await addHeader(pdf);
-            const chart6Img = await captureElement('chartBox-historico');
-            if (chart6Img) {
-                pdf.addImage(chart6Img, 'PNG', margin, 25, contentWidth, 100);
-            }
-            const chart7Img = await captureElement('chartBox-docentesYear');
-            if (chart7Img) {
-                pdf.addImage(chart7Img, 'PNG', margin, 135, contentWidth, 100);
-            }
-            addFooter(pdf, 3);
-
-            pdf.save(`Reporte_Estadistico_${period}.pdf`);
-            setGeneratingPDF(false);
+            try {
+                await drawHeader(pdf);
+                await addElement(pdf, 'kpi-section');
+                await addElement(pdf, 'chartBox-topCursos');
+                await addElement(pdf, 'chartBox-topDeptos');
+                await addElement(pdf, 'chartBox-genero');
+                await addElement(pdf, 'chartBox-tipo');
+                await addElement(pdf, 'chartBox-historico');
+                await addElement(pdf, 'chartBox-docentesYear');
+                drawFooter(pdf, pageNumber);
+                pdf.save(`Reporte_ITD_${period}.pdf`);
+            } catch (err) { console.error(err); } finally { setGeneratingPDF(false); }
         };
 
         const generateCourseEvolutionData = () => {
-            if (!statsData || !statsData.periodTrend || !statsData.historicalTrend) return { labels: [], datasets: [] };
-            
-            const pTrend = statsData.periodTrend;
-            const hTrend = statsData.historicalTrend;
-            
-            const sortedYears = Object.keys(hTrend).sort();
-            
-            const labels = [];
-            const dataValues = [];
-            const bgColors = [];
-
-            sortedYears.forEach(year => {
-                const total = hTrend[year]?.cursos || 0;
-                const ene = pTrend[`${year}-Enero`]?.cursos || 0;
-                const jun = pTrend[`${year}-Junio`]?.cursos || 0;
-                const ago = pTrend[`${year}-Agosto`]?.cursos || 0;
-
+            if (!statsData) return { labels: [], datasets: [] };
+            const { periodTrend, historicalTrend } = statsData;
+            const years = Object.keys(historicalTrend).sort();
+            const labels = [], dataValues = [], bgColors = [];
+            years.forEach(year => {
                 labels.push(`Total '${year.substring(2)}`, 'Ene', 'Jun', 'Ago');
-                dataValues.push(total, ene, jun, ago);
-                
-                bgColors.push('#1e3a8a'); // Navy para Total
-                bgColors.push('#f472b6'); // Pink para Ene
-                bgColors.push('#3b82f6'); // Blue para Jun
-                bgColors.push('#fbbf24'); // Yellow para Ago
+                dataValues.push(historicalTrend[year].cursos, periodTrend[`${year}-Enero`]?.cursos || 0, periodTrend[`${year}-Junio`]?.cursos || 0, periodTrend[`${year}-Agosto`]?.cursos || 0);
+                bgColors.push('#1B396A', '#9D2449', '#3b82f6', '#fbbf24');
             });
-
-            return {
-                labels: labels,
-                datasets: [{
-                    label: 'Cursos Ofertados',
-                    data: dataValues,
-                    backgroundColor: bgColors,
-                    borderRadius: 4,
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.8
-                }]
-            };
+            return { labels, datasets: [{ label: 'Cursos', data: dataValues, backgroundColor: bgColors, borderRadius: 4 }] };
         };
 
         const generateTeacherEvolutionData = () => {
-            if (!statsData || !statsData.historicalTrend) return { labels: [], datasets: [] };
-            
+            if (!statsData) return { labels: [], datasets: [] };
             const years = Object.keys(statsData.historicalTrend).sort();
-            const colors = ['#4f46e5', '#06b6d4', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']; 
-            
-            return {
-                labels: years,
-                datasets: [{
-                    label: 'Total Docentes',
-                    data: years.map(y => statsData.historicalTrend[y].registros),
-                    backgroundColor: years.map((_, i) => colors[i % colors.length]),
-                    borderRadius: 6,
-                    barPercentage: 0.5,
-                    maxBarThickness: 50
-                }]
-            };
+            return { labels: years, datasets: [{ label: 'Docentes', data: years.map(y => statsData.historicalTrend[y].registros), backgroundColor: VIBRANT_COLORS, borderRadius: 6 }] };
         };
 
-        // --- RELOJ DE CARGA (LOADER) ---
-        if (loading) {
-            return (
-                <div className="flex justify-center items-center h-full flex-col">
-                    <div className="loader-spinner"></div>
-                    <p className="text-[#1B396A] font-bold text-lg animate-pulse">Cargando estadísticas...</p>
-                </div>
-            );
-        }
+        if (loading) return <div className="flex justify-center items-center h-full flex-col flex-grow"><div className="loader-spinner"></div><p className="text-[#1B396A] font-bold text-lg animate-pulse">Cargando estadísticas...</p></div>;
 
         return (
             <div className="p-6 max-w-7xl mx-auto animate-fadeIn relative">
-                {/* Modal de Generando PDF */}
-                {generatingPDF && (
-                    <div className="pdf-overlay">
-                        <div className="pdf-modal">
-                            <div className="loader-spinner"></div>
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">Generando Reporte PDF</h3>
-                            <p className="text-gray-500">Por favor espere, procesando gráficas...</p>
-                        </div>
-                    </div>
-                )}
-
-                {/* Encabezado del Dashboard */}
+                {generatingPDF && <div className="pdf-overlay"><div className="pdf-modal"><div className="loader-spinner"></div><h3 className="text-xl font-bold text-gray-800 mb-2">Generando Reporte PDF</h3><p className="text-gray-500">Por favor espere, procesando gráficas...</p></div></div>}
+                
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-white p-6 rounded-xl shadow-md border-l-4 border-[#1B396A]">
-                    <div>
-                        <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
-                            Dashboard Estratégico
-                        </h2>
-                        <p className="text-gray-500 mt-1">
-                            Análisis de datos de actualización docente. Usuario: <span className="font-semibold text-[#1B396A]">{user.name}</span>
-                        </p>
+                    <div className="text-center md:text-left">
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Dashboard Estratégico</h2>
+                        <p className="text-gray-500 mt-1">Usuario: <span className="font-semibold text-[#1B396A]">{user.name}</span></p>
                     </div>
                     <div className="flex gap-3">
-                        <div className="relative">
-                            <select 
-                                value={period} 
-                                onChange={(e) => setPeriod(e.target.value)}
-                                className="appearance-none bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-[#1B396A] font-bold cursor-pointer hover:bg-gray-100 transition-colors shadow-sm"
-                            >
-                                <option value="ACTUAL">🟢 Periodo Actual</option>
-                                {availableYears.map(y => <option key={y} value={y}>📅 Año {y}</option>)}
-                            </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                            </div>
-                        </div>
-                        <button onClick={generatePDF} className="bg-[#9D2449] hover:bg-[#801d3a] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2">
-                            <span>📄</span> PDF
-                        </button>
-                        <button onClick={onLogout} className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors">
-                            Salir
-                        </button>
+                        <select value={period} onChange={(e) => setPeriod(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg font-bold">
+                            <option value="ACTUAL">🟢 Periodo Actual</option>
+                            {availableYears.map(y => <option key={y} value={y}>📅 Año {y}</option>)}
+                        </select>
+                        <button onClick={generatePDF} className="bg-[#9D2449] text-white font-bold py-2 px-6 rounded-lg shadow transition-transform hover:scale-105">📄 PDF</button>
+                        <button onClick={onLogout} className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg">Salir</button>
                     </div>
                 </div>
 
-                {/* KPIs (Modificado: 3 columnas, eliminado Cursos Activos) */}
                 <div id="kpi-section" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-blue-600 flex items-center justify-between">
-                        <div>
-                            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Total Inscripciones</p>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{statsData.totalInscripciones}</p>
-                        </div>
-                        <div className="text-3xl bg-blue-100 p-3 rounded-full text-blue-600">📝</div>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-green-500 flex items-center justify-between">
-                        <div>
-                            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Docentes Únicos</p>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{statsData.coberturaDocente.actualizados}</p>
-                        </div>
-                        <div className="text-3xl bg-green-100 p-3 rounded-full text-green-600">👥</div>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-yellow-500 flex items-center justify-between">
-                        <div>
-                            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Cobertura Plantilla</p>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{statsData.coberturaDocente.porcentaje}%</p>
-                        </div>
-                        <div className="text-3xl bg-yellow-100 p-3 rounded-full text-yellow-600">🏫</div>
-                    </div>
+                    <KPICard title="Total Inscripciones" value={statsData.totalInscripciones} icon="📝" color="border-blue-600" />
+                    <KPICard title="Docentes Únicos" value={statsData.coberturaDocente.actualizados} icon="👥" color="border-green-500" />
+                    <KPICard title="Cobertura Plantilla" value={`${statsData.coberturaDocente.porcentaje}%`} icon="🏫" color="border-yellow-500" />
                 </div>
 
-                {/* Sección Principal de Gráficas: AHORA CADA UNA EN SU PROPIA FILA (Full Width) */}
-                <div className="mb-8 space-y-8">
-                    {/* Top Cursos - ANCHO COMPLETO */}
-                    <div className="w-full">
-                        <ChartBox 
-                            id="topCursos"
-                            type="bar" 
-                            title="📚 Cursos Más Demandados" 
-                            data={Object.fromEntries(statsData.topCursos.slice(0, 10))} 
-                            horizontal={true}
-                            minHeight={getChartHeight(10)}
-                        />
-                    </div>
-                    
-                    {/* Top Departamentos - ANCHO COMPLETO */}
-                    <div className="w-full">
-                        <ChartBox 
-                            id="topDeptos"
-                            type="bar" 
-                            title="🏢 Participación por Departamento" 
-                            data={Object.fromEntries(statsData.topDepartamentos)} 
-                            shortenLabels={true}
-                            horizontal={true}
-                            minHeight={getChartHeight(statsData.topDepartamentos.length)}
-                        />
-                    </div>
+                <div className="space-y-8">
+                    <ChartBox id="topCursos" type="bar" title="📚 Cursos Más Demandados" data={Object.fromEntries(statsData.topCursos.slice(0, 10))} horizontal={true} minHeight={getChartHeight(10)} />
+                    <ChartBox id="topDeptos" type="bar" title="🏢 Participación por Departamento" data={Object.fromEntries(statsData.topDepartamentos)} shortenLabels={true} horizontal={true} minHeight={getChartHeight(statsData.topDepartamentos.length)} />
                 </div>
 
-                {/* Sección Secundaria */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                    <div className="md:col-span-1">
-                        <ChartBox 
-                            id="genero" 
-                            type="doughnut" 
-                            title="👥 Distribución por Género" 
-                            data={statsData.distribucionGenero}
-                            customColors={['#36A2EB', '#FF6384']} // Azul y Rosa
-                        />
-                    </div>
-                    <div className="md:col-span-1">
-                        <ChartBox 
-                            id="tipo" 
-                            type="pie" 
-                            title="📋 Tipo de Curso" 
-                            data={statsData.distribucionTipo}
-                            customColors={['#10b981', '#f59e0b']} // Esmeralda y Ámbar
-                        />
-                    </div>
-                    <div className="md:col-span-1">
-                        <ChartBox id="frecuencia" type="bar" title="📈 Cursos por Docente" data={statsData.frecuenciaParticipacion} />
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 my-8">
+                    <ChartBox id="genero" type="doughnut" title="👥 Género" data={statsData.distribucionGenero} customColors={['#36A2EB', '#FF6384']} />
+                    <ChartBox id="tipo" type="pie" title="📋 Modalidad" data={statsData.distribucionTipo} customColors={['#10b981', '#f59e0b']} />
+                    <ChartBox id="frecuencia" type="bar" title="📈 Cursos por Docente" data={statsData.frecuenciaParticipacion} />
                 </div>
 
-                {/* Evolución Histórica */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                    <ChartBox 
-                        id="historico"
-                        type="bar" 
-                        title="📅 Cursos Ofertados (Periodos vs Total Anual)" 
-                        data={generateCourseEvolutionData()} 
-                        isHistory={true}
-                    />
-                    <ChartBox 
-                        id="docentesYear"
-                        type="bar" 
-                        title="👨‍🏫 Total Docentes por Año" 
-                        data={generateTeacherEvolutionData()} 
-                        isHistory={true}
-                    />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <ChartBox id="historico" type="bar" title="📅 Evolución Cursos" data={generateCourseEvolutionData()} isHistory={true} />
+                    <ChartBox id="docentesYear" type="bar" title="👨‍🏫 Docentes por Año" data={generateTeacherEvolutionData()} isHistory={true} />
                 </div>
             </div>
         );
     };
 
-    // ====================================================================
-    // COMPONENTE PRINCIPAL: App
-    // ====================================================================
+    const KPICard = ({ title, value, icon, color }) => (
+        <div className={`bg-white p-6 rounded-xl shadow-md border-b-4 ${color} flex items-center justify-between`}>
+            <div><p className="text-gray-500 text-xs font-bold uppercase tracking-wider">{title}</p><p className="text-3xl font-bold text-gray-800 mt-1">{value}</p></div>
+            <div className="text-3xl opacity-50">{icon}</div>
+        </div>
+    );
+
     const App = () => {
         const [user, setUser] = React.useState(null);
         const [loginError, setLoginError] = React.useState('');
-
         const handleLogin = (response) => {
-            try {
-                const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                if (['alejandro.calderon@itdurango.edu.mx', 'desarrollo.academico@itdurango.edu.mx'].includes(payload.email)) {
-                    setUser({ name: payload.name, email: payload.email, picture: payload.picture });
-                } else {
-                    setLoginError("Acceso denegado: Cuenta no autorizada para ver estadísticas.");
-                }
-            } catch (error) {
-                setLoginError("Error de autenticación.");
-            }
+            const payload = JSON.parse(atob(response.credential.split('.')[1]));
+            if (payload.email.endsWith('@itdurango.edu.mx')) setUser(payload);
+            else setLoginError("Acceso denegado.");
         };
-
-        const handleLogout = () => {
-            setUser(null);
-            setLoginError('');
-            if (window.google) window.google.accounts.id.disableAutoSelect();
-        };
-
         if (!user) return <Login onLogin={handleLogin} loginError={loginError} />;
-        return <Dashboard user={user} onLogout={handleLogout} />;
+        return <Dashboard user={user} onLogout={() => setUser(null)} />;
     };
 
-    // Renderizado
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
 </script>
