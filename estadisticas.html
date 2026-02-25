@@ -1,283 +1,1110 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V2V4CT2C69"></script>
-    <script src="ga.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estadísticas - Portal de Actualización Docente ITD</title>
+    
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
-
+    
+    <!-- React y Babel -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS y Chart.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <!-- Plugin para etiquetas de datos en gráficas -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    
+    <!-- PDF y Captura -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Google Sign-In -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JH1X2720VL');
+    </script>
+
     <style>
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loader-spinner { width: 64px; height: 64px; border: 4px solid #1B396A; border-radius: 50%; position: relative; margin: 0 auto 20px; animation: spin 2s linear infinite; }
-        .loader-spinner::after { content: ''; position: absolute; width: 4px; height: 24px; background: #9D2449; top: 50%; left: 50%; margin-left: -2px; margin-top: -24px; transform-origin: bottom center; border-radius: 2px; }
-        .pdf-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(5px); }
-        .pdf-modal { background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); max-width: 400px; border-top: 8px solid #1B396A; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
+
+        .print-only { display: none !important; }
+        
+        .pdf-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .pdf-modal {
+            background: white;
+            padding: 40px 60px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            max-width: 400px;
+        }
+        
+        .pdf-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #e5e7eb;
+            border-top-color: #1B396A;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Estilos para el modal de preview */
+        .preview-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            z-index: 10000;
+        }
+
+        .preview-header {
+            background: #1B396A;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-body {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            background: #525659;
+        }
+
+        .preview-body iframe {
+            background: white;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            max-width: 100%;
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800 flex flex-col">
+<body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800">
 
-<header id="web-header" class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A]">
-    <div class="container mx-auto px-4 py-4 sm:py-6 flex items-center justify-between gap-4">
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
-        <div class="text-center flex-1 px-2 sm:px-4">
-            <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#1B396A] leading-tight">PANEL DE ESTADÍSTICAS</h1>
-            <p class="text-xs sm:text-sm md:text-base text-[#9D2449] mt-1 font-semibold italic">Desarrollo Académico</p>
+    <!-- HEADER WEB -->
+    <header id="web-header" class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A]">
+        <div class="container mx-auto px-4 py-4 sm:py-6">
+            <div class="flex items-center justify-between gap-4">
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
+                <div class="text-center flex-1 px-2 sm:px-4">
+                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#1B396A] leading-tight">PANEL DE ESTADÍSTICAS</h1>
+                    <p class="text-xs sm:text-sm md:text-base text-[#9D2449] mt-1 font-semibold">Desarrollo Académico</p>
+                </div>
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
+            </div>
         </div>
-        <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
+    </header>
+    
+    <!-- ENLACE DE NAVEGACIÓN -->
+    <div id="back-link" class="container mx-auto px-4 py-4">
+        <a href="index.html" 
+           onclick="event.preventDefault(); window.location.href = 'index.html';" 
+           class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center gap-1 text-sm font-bold transition-colors">
+            ← Volver al Portal Principal
+        </a>
     </div>
-</header>
-<div id="root"></div>
-<script type="text/babel">
-    const { useState, useEffect, useRef } = React;
 
-    const CONFIG = {
-        GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
-        APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
-    };
-
-    const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#D4AF37', '#455A64', '#708090', '#546E7A', '#B0BEC5'];
-
-    // Recuperamos tu función de formateo de etiquetas completa
-    const shortenLabel = (label) => {
-        if (!label) return "";
-        let s = label.toUpperCase();
-        s = s.replace(/DEPARTAMENTO DE /g, 'DEPTO. ');
-        s = s.replace(/DIVISIÓN DE /g, 'DIV. ');
-        s = s.replace(/INGENIERÍA /g, 'ING. ');
-        s = s.replace(/CIENCIAS /g, 'CC. ');
-        s = s.replace(/SISTEMAS Y COMPUTACIÓN/g, 'SISTEMAS');
-        s = s.replace(/ECONÓMICO-ADMINISTRATIVAS/g, 'ECA');
-        return s.trim();
-    };
-
-    const ChartBox = ({ id, type, title, data, horizontal = false, isHistory = false, minHeight = "450px", isPie = false, period }) => {
-        const canvasRef = useRef(null);
-        const chartRef = useRef(null);
-        const [menuOpen, setMenuOpen] = useState(false);
-
-        useEffect(() => {
-            if (!canvasRef.current || !data) return;
-            if (chartRef.current) chartRef.current.destroy();
-            const ctx = canvasRef.current.getContext('2d');
-            
-            chartRef.current = new Chart(ctx, {
-                type: type,
-                data: isHistory ? data : {
-                    labels: Object.keys(data).map(l => horizontal ? shortenLabel(l) : l),
-                    datasets: [{
-                        label: 'Cantidad',
-                        data: Object.values(data),
-                        backgroundColor: isPie ? INSTITUTIONAL_COLORS : '#1B396A',
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: horizontal ? 'y' : 'x',
-                    plugins: {
-                        legend: { display: isPie || isHistory, position: 'bottom' },
-                        datalabels: { anchor: 'end', align: 'end', font: { weight: 'bold', size: 10 } }
-                    },
-                    scales: isPie ? {} : {
-                        y: { beginAtZero: true, ticks: { font: { size: 9 } } },
-                        x: { ticks: { font: { size: 9 } } }
-                    }
-                },
-                plugins: [ChartDataLabels]
-            });
-        }, [data, type, period]);
-
-        const download = async (fmt) => {
-            const el = document.getElementById(`chartBox-${id}`);
-            const canvas = await html2canvas(el, { scale: 3, useCORS: true });
-            const link = document.createElement('a');
-            link.download = `${title}.${fmt}`;
-            link.href = canvas.toDataURL(`image/${fmt}`);
-            link.click();
-            setMenuOpen(false);
-        };
-
-        return (
-            <div id={`chartBox-${id}`} className="bg-white p-6 rounded-2xl shadow-xl border flex flex-col relative transition-all" style={{ minHeight }}>
-                <div className="flex justify-between items-center mb-4 border-b pb-2">
-                    <h3 className="text-[#1B396A] font-black uppercase text-sm">{title}</h3>
-                    <div className="relative">
-                        <button onClick={() => setMenuOpen(!menuOpen)} className="text-gray-400 hover:text-blue-900 font-bold px-2">⋮</button>
-                        {menuOpen && (
-                            <div className="absolute right-0 mt-2 w-40 bg-white shadow-2xl rounded border z-50 p-2 text-xs">
-                                <button onClick={() => download('png')} className="block w-full text-left p-2 hover:bg-gray-100">Imagen PNG (HD)</button>
-                                <button onClick={() => download('jpeg')} className="block w-full text-left p-2 hover:bg-gray-100">Imagen JPG (HD)</button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <div className="flex-1 relative w-full h-full"><canvas ref={canvasRef}></canvas></div>
+    <!-- CONTENEDOR PRINCIPAL DE REACT -->
+    <div id="root">
+        <div class="flex justify-center items-center h-64">
+            <div class="text-center">
+                <div class="animate-spin h-10 w-10 border-4 border-[#1B396A] rounded-full border-t-transparent mx-auto mb-4"></div>
+                <p class="text-gray-600 font-semibold">Cargando sistema...</p>
             </div>
-        );
-    };
-   const Dashboard = ({ user, onLogout }) => {
-        const [stats, setStats] = useState(null);
-        const [loading, setLoading] = useState(true);
-        const [generatingPDF, setGeneratingPDF] = useState(false);
-        const [period, setPeriod] = useState("ACTUAL");
+        </div>
+    </div>
 
-        useEffect(() => {
-            fetchData();
-        }, [period]);
+    <!-- FOOTER WEB -->
+    <footer id="web-footer" class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449]">
+        <div class="container mx-auto px-4">
+             <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
+             <p class="text-xs sm:text-sm opacity-90">M.C. Alejandro Calderón Rentería</p>
+             <p id="copyright-year" class="text-xs sm:text-sm opacity-75 mt-1"></p>
+        </div>
+    </footer>
 
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const res = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}`);
-                const r = await res.json();
-                if (r.success) setStats(r.data);
-            } catch (e) { console.error(e); }
-            setLoading(false);
-        };
-
-        const generatePDF = async () => {
-            setGeneratingPDF(true);
-            await new Promise(r => setTimeout(r, 1000));
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'letter');
-            const contentWidth = pdf.internal.pageSize.getWidth() - 30;
-            let y = 25;
-
-            const addHeader = (doc) => {
-                doc.setFillColor(27, 57, 106); doc.rect(0, 0, 216, 20, 'F');
-                doc.setTextColor(255); doc.setFontSize(12);
-                doc.text("INSTITUTO TECNOLÓGICO DE DURANGO - ESTADÍSTICAS", 108, 12, { align: "center" });
-            };
-
-            const capture = async (id) => {
-                const el = document.getElementById(id);
-                const canvas = await html2canvas(el, { scale: 3, useCORS: true });
-                const img = canvas.toDataURL('image/png');
-                const h = (canvas.height * contentWidth) / canvas.width;
-                if (y + h > 260) { docFooter(pdf); pdf.addPage(); addHeader(pdf); y = 25; }
-                pdf.addImage(img, 'PNG', 15, y, contentWidth, h);
-                y += h + 10;
-            };
-
-            const docFooter = (doc) => {
-                doc.setFillColor(157, 36, 73); doc.rect(0, 267, 216, 12, 'F');
-                doc.setTextColor(255); doc.setFontSize(8);
-                doc.text(`Reporte Oficial CAD | ${new Date().toLocaleDateString()}`, 15, 274);
-            };
-
-            addHeader(pdf);
-            await capture('kpi-section');
-            await capture('chartBox-topCursos');
-            await capture('chartBox-topDeptos');
-            await capture('chartBox-historico');
-            docFooter(pdf);
-            pdf.save(`Estadisticas_ITD_${period}.pdf`);
-            setGeneratingPDF(false);
-        };
-
-        if (loading) return <div className="h-screen flex items-center justify-center"><div className="loader-spinner"></div></div>;
-
-        return (
-            <div className="p-8 max-w-7xl mx-auto animate-fadeIn">
-                {generatingPDF && <div className="pdf-overlay"><div className="pdf-modal"><div className="loader-spinner"></div><p className="font-bold">Generando Reporte HD...</p></div></div>}
-                
-                <div className="flex justify-between items-center mb-8 bg-white p-8 rounded-3xl shadow-xl border-l-[10px] border-[#1B396A]">
-                    <div className="flex items-center gap-4">
-                        <img src={user.picture} className="h-16 w-16 rounded-full border-4 border-[#9D2449]" />
-                        <h2 className="text-2xl font-black uppercase">{user.name}</h2>
-                    </div>
-                    <div className="flex gap-4 items-center">
-                        <select value={period} onChange={(e) => setPeriod(e.target.value)} className="border-2 p-3 rounded-xl font-bold">
-                            <option value="ACTUAL">PERIODO ACTUAL</option>
-                            <option value="2025">2025</option>
-                            <option value="2024">2024</option>
-                            <option value="2023">2023</option>
-                            <option value="2022">2022</option>
-                            <option value="HISTORICO">HISTÓRICO</option>
-                        </select>
-                        <button onClick={generatePDF} className="bg-[#9D2449] text-white px-8 py-3 rounded-xl font-bold shadow-lg">REPORTE HD</button>
-                        <button onClick={onLogout} className="text-gray-400 underline text-xs">Salir</button>
-                    </div>
-                </div>
-
-                <div id="kpi-section" className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                    <div className="bg-white p-8 rounded-3xl shadow border-b-8 border-blue-600 flex justify-between">
-                        <div><p className="text-gray-400 text-xs font-bold uppercase">Inscritos</p><p className="text-4xl font-black">{stats.totalInscripciones}</p></div>
-                        <span className="text-4xl">👤</span>
-                    </div>
-                    <div className="bg-white p-8 rounded-3xl shadow border-b-8 border-[#9D2449] flex justify-between">
-                        <div><p className="text-gray-400 text-xs font-bold uppercase">Actualizados</p><p className="text-4xl font-black">{stats.coberturaDocente.actualizados}</p></div>
-                        <span className="text-4xl">👨‍🏫</span>
-                    </div>
-                    <div className="bg-white p-8 rounded-3xl shadow border-b-8 border-amber-500 flex justify-between">
-                        <div><p className="text-gray-400 text-xs font-bold uppercase">Cobertura</p><p className="text-4xl font-black">{stats.coberturaDocente.porcentaje}%</p></div>
-                        <span className="text-4xl">📊</span>
-                    </div>
-                </div>
-
-                <div className="flex flex-col gap-12">
-                    <ChartBox id="topCursos" type="bar" title="Cursos con Mayor Demanda" data={Object.fromEntries(stats.topCursos.slice(0, 15))} horizontal={true} minHeight="700px" period={period} />
-                    <ChartBox id="topDeptos" type="bar" title="Participación por Departamento" data={Object.fromEntries(stats.topDepartamentos)} horizontal={true} minHeight="900px" period={period} />
-                    <ChartBox id="historico" type="line" title="Evolución 2022 - Actual" isHistory={true} data={{
-                        labels: Object.keys(stats.historicalTrend),
-                        datasets: [
-                            { label: 'Inscritos', data: Object.values(stats.historicalTrend).map(v => v.inscritos), borderColor: '#1B396A', fill: true, tension: 0.4 },
-                            { label: 'Cursos', data: Object.values(stats.historicalTrend).map(v => v.cursos), borderColor: '#9D2449', tension: 0.4 }
-                        ]
-                    }} period={period} />
-                </div>
-            </div>
-        );
-    };
-
-    const Login = ({ onLogin, loginError }) => {
-        useEffect(() => {
-            if (window.google) {
-                window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
-                window.google.accounts.id.renderButton(document.getElementById('google-btn'), { theme: 'outline', size: 'large' });
+    <!-- SCRIPT DE INICIALIZACIÓN -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var yearEl = document.getElementById('copyright-year');
+            if (yearEl) {
+                yearEl.textContent = new Date().getFullYear();
             }
-        }, []);
-        return (
-            <div className="h-screen flex items-center justify-center bg-[#1B396A]">
-                <div className="bg-white p-12 rounded-[40px] text-center max-w-md w-full border-t-[10px] border-[#9D2449]">
-                    <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" className="h-24 mx-auto mb-6" />
-                    <h2 className="text-3xl font-black text-[#1B396A] mb-8 uppercase">Estadísticas CAD</h2>
-                    {loginError && <p className="text-red-600 mb-4">{loginError}</p>}
-                    <div id="google-btn" className="flex justify-center"></div>
-                </div>
-            </div>
-        );
-    };
+        });
+    </script>
 
-    const App = () => {
-        const [user, setUser] = useState(null);
-        const [err, setErr] = useState("");
-        const handleLogin = (res) => {
-            const p = JSON.parse(atob(res.credential.split('.')[1]));
-            if (p.email.endsWith('@itdurango.edu.mx')) setUser(p);
-            else setErr("Acceso no autorizado.");
+    <!-- APLICACIÓN REACT -->
+    <script type="text/babel">
+        const React = window.React;
+        const ReactDOM = window.ReactDOM;
+
+        const CONFIG = {
+            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', 
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
         };
-        return user ? <Dashboard user={user} onLogout={() => setUser(null)} /> : <Login onLogin={handleLogin} loginError={err} />;
-    };
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
+        const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
+        const VIBRANT_COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC926', '#1982C4'];
+        
+        const DEPT_ACRONYMS = { 
+            "SISTEMAS Y COMPUTACION": "DSC", 
+            "CIENCIAS ECONOMICO-ADMINISTRATIVAS": "DCEA", 
+            "INGENIERÍA QUÍMICA-BIOQUÍMICA": "DIQB", 
+            "QUIMICA-BIOQUIMICA": "DIQB", 
+            "CIENCIAS DE LA TIERRA": "DCT", 
+            "CIENCIAS BASICAS": "DCB", 
+            "METAL-MECÁNICA": "DMM", 
+            "METAL MECANICA": "DMM", 
+            "INGENIERÍA INDUSTRIAL": "DII", 
+            "INDUSTRIAL": "DII", 
+            "INGENIERÍA ELÉCTRICA Y ELECTRÓNICA": "DIEE", 
+            "ELECTRICA Y ELECTRONICA": "DIEE", 
+            "POSGRADO E INVESTIGACION": "DEPI", 
+            "ADMINISTRATIVO": "ADMON", 
+            "EXTERNO": "EXT", 
+            "DESARROLLO ACADÉMICO": "DDA", 
+            "GESTION TECNOLOGICA": "DGT" 
+        };
+        
+        const getAcronym = (fullName) => { 
+            if(!fullName) return "ND"; 
+            const nameUpper = fullName.toUpperCase().replace('DEPARTAMENTO DE ', '').replace('DIVISION DE ESTUDIOS DE ', '').replace('CENTRO DE ', ''); 
+            for (const [key, val] of Object.entries(DEPT_ACRONYMS)) { 
+                if (nameUpper.includes(key)) return val; 
+            } 
+            const words = nameUpper.split(' '); 
+            if(words.length > 1) return words.map(w => w[0]).join('').substring(0,4); 
+            return nameUpper.substring(0, 4); 
+        };
+        
+        const splitLabel = (label, maxLength = 25) => { 
+            if (!label || label.length <= maxLength) return label; 
+            const words = label.split(' '); 
+            const lines = []; 
+            let currentLine = words[0]; 
+            for (let i = 1; i < words.length; i++) { 
+                if (currentLine.length + 1 + words[i].length <= maxLength) { 
+                    currentLine += " " + words[i]; 
+                } else { 
+                    lines.push(currentLine); 
+                    currentLine = words[i]; 
+                } 
+            } 
+            lines.push(currentLine); 
+            return lines; 
+        };
+
+        // ====================================================================
+        // COMPONENTE: Login
+        // ====================================================================
+        const Login = ({ onLogin, loginError }) => {
+            const googleButtonRef = React.useRef(null);
+
+            React.useEffect(() => {
+                let intervalId;
+                const initGoogle = () => {
+                    if (window.google && window.google.accounts && googleButtonRef.current) {
+                        try {
+                            window.google.accounts.id.initialize({ 
+                                client_id: CONFIG.GOOGLE_CLIENT_ID, 
+                                callback: onLogin 
+                            });
+                            window.google.accounts.id.renderButton(googleButtonRef.current, { 
+                                theme: "outline", 
+                                size: "large", 
+                                text: "signin_with" 
+                            });
+                            return true;
+                        } catch (e) { 
+                            console.error("Error initializing Google Sign-In", e); 
+                            return false; 
+                        }
+                    }
+                    return false;
+                };
+                if (!initGoogle()) { 
+                    intervalId = setInterval(() => { 
+                        if (initGoogle()) clearInterval(intervalId); 
+                    }, 500); 
+                }
+                return () => { if(intervalId) clearInterval(intervalId); };
+            }, [onLogin]);
+
+            return (
+                <div className="flex flex-col justify-center items-center py-20 animate-fadeIn px-4">
+                    <div className="bg-white p-10 rounded-xl shadow-lg text-center max-w-md w-full border-t-4 border-[#9D2449]">
+                        <div className="text-4xl mb-4">🔒</div>
+                        <h2 className="text-2xl font-bold text-[#9D2449] mb-4">Acceso Restringido</h2>
+                        <p className="text-gray-600 mb-8 font-bold">Inicie sesión con su cuenta institucional.</p>
+                        {loginError && <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">{loginError}</div>}
+                        <div className="flex justify-center min-h-[50px]" ref={googleButtonRef}></div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ====================================================================
+        // COMPONENTE: Dashboard
+        // ====================================================================
+        const Dashboard = ({ user, onLogout }) => {
+            const [stats, setStats] = React.useState(null);
+            const [loading, setLoading] = React.useState(true);
+            const [error, setError] = React.useState(null);
+            const [period, setPeriod] = React.useState('ACTUAL');
+            const [availableYears, setAvailableYears] = React.useState([]);
+            const [pdfState, setPdfState] = React.useState({ generating: false, preview: null, blob: null });
+
+            React.useEffect(() => {
+                let isMounted = true;
+                setLoading(true);
+                setError(null);
+
+                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}`)
+                    .then(r => { 
+                        if(!r.ok) throw new Error(`Error HTTP: ${r.status}`); 
+                        return r.json(); 
+                    })
+                    .then(res => {
+                        if (!isMounted) return;
+                        if (res.success) {
+                            setStats(res.data);
+                            if (res.availableYears) setAvailableYears(res.availableYears);
+                        } else throw new Error(res.message || "Error de datos.");
+                    })
+                    .catch(err => { if (isMounted) setError(err.message); })
+                    .finally(() => { if (isMounted) setLoading(false); });
+
+                return () => { isMounted = false; };
+            }, [period]);
+
+            const processedDepts = React.useMemo(() => {
+                if (!stats?.topDepartamentos) return { chartData: {}, legend: [] };
+                const chartData = {}; 
+                const legend = [];
+                stats.topDepartamentos.forEach(([name, count]) => {
+                    const acronym = getAcronym(name);
+                    chartData[acronym] = count;
+                    legend.push({ acronym, name });
+                });
+                return { chartData, legend };
+            }, [stats]);
+
+            // ================================================================
+            // FUNCIÓN: Capturar elemento como imagen con html2canvas
+            // ================================================================
+            const captureElement = async (elementId) => {
+                const element = document.getElementById(elementId);
+                if (!element) return null;
+                
+                try {
+                    const canvas = await html2canvas(element, {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#ffffff',
+                        logging: false
+                    });
+                    return canvas.toDataURL('image/png');
+                } catch (err) {
+                    console.error(`Error capturando ${elementId}:`, err);
+                    return null;
+                }
+            };
+
+            // ================================================================
+            // FUNCIÓN: Cargar imagen externa
+            // ================================================================
+            const loadImage = (url) => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        resolve(canvas.toDataURL('image/png'));
+                    };
+                    img.onerror = () => resolve(null);
+                    img.src = url;
+                });
+            };
+
+            // ================================================================
+            // FUNCIÓN: Generar Reporte Word (Solo Datos)
+            // ================================================================
+            const generateWordReport = () => {
+                if (!stats) return;
+
+                const content = `
+                    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head>
+                        <meta charset='utf-8'>
+                        <title>Reporte Estadístico</title>
+                        <style>
+                            body { font-family: 'Arial', sans-serif; font-size: 12pt; }
+                            table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                            th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+                            th { background-color: #1B396A; color: white; }
+                            h1 { color: #1B396A; font-size: 18pt; text-align: center; }
+                            h2 { color: #9D2449; font-size: 14pt; text-align: center; }
+                            h3 { color: #333; font-size: 12pt; margin-top: 20px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+                            .footer { font-size: 9pt; color: #666; text-align: center; margin-top: 30px; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>INSTITUTO TECNOLÓGICO DE DURANGO</h1>
+                        <h2>Reporte Estadístico - Periodo: ${period}</h2>
+                        <p style="text-align: center;">Generado el: ${new Date().toLocaleDateString()}</p>
+                        <br/>
+
+                        <h3>Resumen General (KPIs)</h3>
+                        <table>
+                            <tr>
+                                <th>Indicador</th>
+                                <th>Valor</th>
+                            </tr>
+                            <tr><td>Docentes Inscritos</td><td>${stats.totalInscripciones}</td></tr>
+                            <tr><td>Docentes Únicos</td><td>${stats.coberturaDocente.actualizados}</td></tr>
+                            <tr><td>Docentes Recurrentes</td><td>${stats.coberturaDocente.recurrentes}</td></tr>
+                            <tr><td>Cobertura Estimada</td><td>${stats.coberturaDocente.porcentaje}%</td></tr>
+                        </table>
+
+                        <h3>Cursos Más Demandados</h3>
+                        <table>
+                            <tr><th>Curso</th><th>Inscripciones</th></tr>
+                            ${stats.topCursos.map(([name, count]) => `<tr><td>${name}</td><td>${count}</td></tr>`).join('')}
+                        </table>
+
+                        <h3>Distribución por Género</h3>
+                        <table>
+                            <tr><th>Género</th><th>Cantidad</th></tr>
+                            ${Object.entries(stats.distribucionGenero).map(([key, val]) => `<tr><td>${key}</td><td>${val}</td></tr>`).join('')}
+                        </table>
+
+                        <h3>Top Departamentos</h3>
+                        <table>
+                            <tr><th>Departamento</th><th>Participación</th></tr>
+                            ${stats.topDepartamentos.map(([name, count]) => `<tr><td>${name}</td><td>${count}</td></tr>`).join('')}
+                        </table>
+
+                        <h3>Tipo de Curso</h3>
+                        <table>
+                            <tr><th>Tipo</th><th>Cantidad</th></tr>
+                            ${Object.entries(stats.distribucionTipo).map(([key, val]) => `<tr><td>${key}</td><td>${val}</td></tr>`).join('')}
+                        </table>
+                        
+                        <h3>Evolución Histórica</h3>
+                        <table>
+                            <tr><th>Año</th><th>Registros</th><th>Cursos Ofertados</th></tr>
+                            ${Object.entries(stats.historicalTrend || {}).map(([year, data]) => `<tr><td>${year}</td><td>${data.registros}</td><td>${data.cursos}</td></tr>`).join('')}
+                        </table>
+
+                        <div class="footer">
+                            <p>Coordinación de Actualización Docente - ITD</p>
+                        </div>
+                    </body>
+                    </html>
+                `;
+
+                const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Reporte_Datos_${period}_${new Date().toISOString().split('T')[0]}.doc`;
+                link.click();
+                URL.revokeObjectURL(url);
+            };
+
+            // ================================================================
+            // FUNCIÓN: Generar PDF con Preview - VERSIÓN CORREGIDA
+            // ================================================================
+            const generatePDF = async () => {
+                setPdfState({ generating: true, preview: null, blob: null });
+                
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('portrait', 'mm', 'letter');
+                    
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const margin = 10;
+                    const contentWidth = pageWidth - (margin * 2);
+                    
+                    let yPos = margin;
+                    
+                    // ========== ENCABEZADO ==========
+                    pdf.setFillColor(27, 57, 106);
+                    pdf.rect(0, 0, pageWidth, 18, 'F');
+                    
+                    pdf.setFontSize(14);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.text('INSTITUTO TECNOLOGICO DE DURANGO', pageWidth / 2, 8, { align: 'center' });
+                    
+                    pdf.setFontSize(10);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text('Coordinacion de Actualizacion Docente - Reporte Estadistico', pageWidth / 2, 14, { align: 'center' });
+                    
+                    yPos = 22;
+                    
+                    // ========== PERIODO ==========
+                    pdf.setFontSize(9);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(157, 36, 73);
+                    const periodoTexto = period === 'ACTUAL' ? 'Periodo Actual' : 'Historico ' + period;
+                    pdf.text('Periodo: ' + periodoTexto, margin, yPos);
+                    
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setTextColor(100, 100, 100);
+                    const today = new Date().toLocaleDateString('es-MX', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    pdf.text('Generado: ' + today, pageWidth - margin, yPos, { align: 'right' });
+                    
+                    yPos += 6;
+                    
+                    // ========== KPIs ==========
+                    const kpiData = [
+                        { value: stats.totalInscripciones, label: 'Docentes Inscritos', color: [27,57,106] },
+                        { value: stats.coberturaDocente.actualizados, label: 'Docentes Unicos', color: [212,175,55] },
+                        { value: stats.coberturaDocente.recurrentes, label: 'Recurrentes', color: [157,36,73] },
+                        { value: stats.coberturaDocente.porcentaje + '%', label: 'Cobertura', color: [84,110,122] }
+                    ];
+                    
+                    const kpiWidth = (contentWidth - 9) / 4;
+                    const kpiHeight = 14;
+                    
+                    kpiData.forEach((kpi, idx) => {
+                        const x = margin + (idx * (kpiWidth + 3));
+                        
+                        pdf.setFillColor(250, 250, 250);
+                        pdf.setDrawColor(200, 200, 200);
+                        pdf.roundedRect(x, yPos, kpiWidth, kpiHeight, 2, 2, 'FD');
+                        
+                        pdf.setFillColor(...kpi.color);
+                        pdf.rect(x, yPos, 2, kpiHeight, 'F');
+                        
+                        pdf.setFontSize(13);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setTextColor(40, 40, 40);
+                        pdf.text(String(kpi.value), x + kpiWidth/2 + 1, yPos + 6, { align: 'center' });
+                        
+                        pdf.setFontSize(5.5);
+                        pdf.setFont('helvetica', 'normal');
+                        pdf.setTextColor(100, 100, 100);
+                        pdf.text(kpi.label.toUpperCase(), x + kpiWidth/2 + 1, yPos + 11, { align: 'center' });
+                    });
+                    
+                    yPos += kpiHeight + 5;
+                    
+                    // ========== FILA 1: Cursos + Género ==========
+                    const coursesImg = await captureElement('chartBox-chartCourses');
+                    const genderImg = await captureElement('chartBox-chartGender');
+                    
+                    const row1Height = 62;
+                    const coursesWidth = contentWidth * 0.72;
+                    
+                    // Proporciones para gráfica circular (ligeramente más ancha que alta)
+                    const genderWidth = 44;
+                    const genderHeight = 42;
+                    
+                    if (coursesImg) {
+                        pdf.addImage(coursesImg, 'PNG', margin, yPos, coursesWidth, row1Height);
+                    }
+                    
+                    if (genderImg) {
+                        // Gráfica circular con proporción más alta para evitar achatamiento
+                        const genderX = margin + coursesWidth + 3;
+                        const adjustedGenderWidth = 40;
+                        const adjustedGenderHeight = 52; // Más alta que ancha para compensar
+                        const genderY = yPos + (row1Height - adjustedGenderHeight) / 2;
+                        pdf.addImage(genderImg, 'PNG', genderX, genderY, adjustedGenderWidth, adjustedGenderHeight);
+                    }
+                    
+                    yPos += row1Height + 4;
+                    
+                    // ========== FILA 2: Departamentos + Tipo (MÁS GRANDE) ==========
+                    const deptsImg = await captureElement('chartBox-chartDepts');
+                    const typeImg = await captureElement('chartBox-chartType');
+                    
+                    const row2Height = 58; // Aumentado de 52 a 58
+                    
+                    if (deptsImg) {
+                        const deptsWidth = contentWidth * 0.65;
+                        pdf.addImage(deptsImg, 'PNG', margin, yPos, deptsWidth, row2Height);
+                    }
+                    
+                    if (typeImg) {
+                        const typeX = margin + contentWidth * 0.67;
+                        const typeWidth = contentWidth * 0.33;
+                        pdf.addImage(typeImg, 'PNG', typeX, yPos, typeWidth, row2Height);
+                    }
+                    
+                    yPos += row2Height + 3;
+                    
+                    // ========== LEYENDA ==========
+                    pdf.setFontSize(6);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(60, 60, 60);
+                    pdf.text('Siglas:', margin, yPos);
+                    
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setFontSize(5);
+                    
+                    const legendItems = processedDepts.legend.map(item => item.acronym + ': ' + item.name);
+                    const legendText = legendItems.join('  |  ');
+                    
+                    if (legendText.length > 130) {
+                        const half = Math.ceil(legendItems.length / 2);
+                        pdf.setTextColor(80, 80, 80);
+                        pdf.text(legendItems.slice(0, half).join('  |  '), margin + 10, yPos);
+                        yPos += 3;
+                        pdf.text(legendItems.slice(half).join('  |  '), margin, yPos);
+                        yPos += 3;
+                    } else {
+                        pdf.setTextColor(80, 80, 80);
+                        pdf.text(legendText, margin + 10, yPos);
+                        yPos += 4;
+                    }
+                    
+                    // ========== FILA 3: Histórico (USA TODO EL ESPACIO RESTANTE) ==========
+                    const historyImg = await captureElement('chartBox-chartHistory');
+                    
+                    if (historyImg) {
+                        const footerHeight = 10;
+                        const remainingHeight = pageHeight - yPos - footerHeight - 2;
+                        const historyHeight = Math.max(remainingHeight, 45); // Mínimo 45mm
+                        pdf.addImage(historyImg, 'PNG', margin, yPos, contentWidth, historyHeight);
+                    }
+                    
+                    // ========== PIE DE PÁGINA ==========
+                    pdf.setFillColor(27, 57, 106);
+                    pdf.rect(0, pageHeight - 8, pageWidth, 8, 'F');
+                    
+                    pdf.setFontSize(7);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.text('Coordinacion de Actualizacion Docente - Instituto Tecnologico de Durango', pageWidth / 2, pageHeight - 3, { align: 'center' });
+                    
+                    // Crear blob para preview
+                    const pdfBlob = pdf.output('blob');
+                    const pdfUrl = URL.createObjectURL(pdfBlob);
+                    
+                    setPdfState({ 
+                        generating: false, 
+                        preview: pdfUrl, 
+                        blob: pdfBlob,
+                        filename: 'Reporte_Estadisticas_' + period + '_' + new Date().toISOString().split('T')[0] + '.pdf'
+                    });
+                    
+                } catch (err) {
+                    console.error('Error generando PDF:', err);
+                    alert('Error al generar el PDF. Por favor intente de nuevo.');
+                    setPdfState({ generating: false, preview: null, blob: null });
+                }
+            };
+
+            // ================================================================
+            // FUNCIÓN: Descargar PDF
+            // ================================================================
+            const downloadPDF = () => {
+                if (pdfState.blob && pdfState.filename) {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(pdfState.blob);
+                    link.download = pdfState.filename;
+                    link.click();
+                }
+            };
+
+            // ================================================================
+            // FUNCIÓN: Cerrar Preview
+            // ================================================================
+            const closePreview = () => {
+                if (pdfState.preview) {
+                    URL.revokeObjectURL(pdfState.preview);
+                }
+                setPdfState({ generating: false, preview: null, blob: null });
+            };
+
+            if (loading && !stats) {
+                return (
+                    <div className="flex justify-center items-center h-96">
+                        <div className="animate-spin h-16 w-16 border-4 border-[#1B396A] rounded-full border-t-transparent"></div>
+                    </div>
+                );
+            }
+            
+            if (error) {
+                return (
+                    <div className="flex justify-center items-center py-20">
+                        <div className="text-red-600 font-bold text-xl text-center">
+                            Error: {error} <br/>
+                            <button onClick={() => window.location.reload()} className="text-sm text-blue-600 underline mt-2">Recargar</button>
+                        </div>
+                    </div>
+                );
+            }
+            
+            if (!stats) return null;
+
+            return (
+                <div className="container mx-auto px-4 py-6 max-w-7xl animate-fadeIn">
+                    
+                    {/* Modal de generación de PDF */}
+                    {pdfState.generating && (
+                        <div className="pdf-overlay">
+                            <div className="pdf-modal">
+                                <div className="pdf-spinner"></div>
+                                <p className="text-lg font-bold text-gray-700">Generando PDF...</p>
+                                <p className="text-sm text-gray-500 mt-2">Capturando gráficas, por favor espere</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Modal de Preview del PDF */}
+                    {pdfState.preview && (
+                        <div className="preview-overlay">
+                            <div className="preview-header">
+                                <div>
+                                    <h3 className="text-lg font-bold">Vista Previa del Reporte</h3>
+                                    <p className="text-sm opacity-80">{pdfState.filename}</p>
+                                </div>
+                                <div className="flex gap-3">
+                                    <button 
+                                        onClick={downloadPDF}
+                                        className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 transition"
+                                    >
+                                        <span>⬇️</span> Descargar PDF
+                                    </button>
+                                    <button 
+                                        onClick={closePreview}
+                                        className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-bold transition"
+                                    >
+                                        ✕ Cerrar
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="preview-body">
+                                <iframe 
+                                    src={pdfState.preview} 
+                                    style={{ width: '850px', height: '100%', border: 'none' }}
+                                    title="Vista previa del PDF"
+                                />
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* CONTROLES DEL DASHBOARD */}
+                    <div className="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-col md:flex-row justify-between items-center border-l-4 border-[#9D2449] gap-4">
+                        <div className="flex-1">
+                            <h2 className="text-xl font-bold text-[#1B396A]">Dashboard de Resultados</h2>
+                            <p className="text-sm text-gray-500 font-bold">Usuario: <span className="font-extrabold text-gray-700">{user.name}</span></p>
+                        </div>
+                        <div className="flex items-center gap-3 flex-wrap justify-center">
+                            <select value={period} onChange={(e) => setPeriod(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md font-bold block p-2 outline-none focus:ring-2 focus:ring-[#1B396A]">
+                                <option value="ACTUAL">🟢 Periodo Actual</option>
+                                {availableYears.filter(y => y !== 'ACTUAL').map(year => <option key={year} value={year}>📅 Histórico {year}</option>)}
+                            </select>
+                            <button 
+                                onClick={generatePDF} 
+                                disabled={pdfState.generating}
+                                className="bg-[#1B396A] hover:bg-[#152d54] text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-md disabled:opacity-50"
+                            >
+                                <span>📄</span> Generar PDF
+                            </button>
+                            <button 
+                                onClick={generateWordReport} 
+                                className="bg-[#9D2449] hover:bg-[#7a1c38] text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-md"
+                            >
+                                <span>📝</span> Reporte Word
+                            </button>
+                            <button onClick={onLogout} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-bold text-gray-700 border border-gray-300 transition">
+                                Cerrar Sesión
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {loading && <div className="flex justify-center items-center h-16 text-blue-600 font-bold">Actualizando datos...</div>}
+
+                    {/* SECCIÓN 1: KPIs */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        {[
+                            { icon: "📝", val: stats.totalInscripciones, label: "Docentes Inscritos", color: "border-[#1B396A]" },
+                            { icon: "👩‍🏫", val: stats.coberturaDocente.actualizados, label: "Docentes Únicos", color: "border-[#D4AF37]" },
+                            { icon: "🔁", val: stats.coberturaDocente.recurrentes, label: "Docentes Recurrentes", color: "border-[#9D2449]" },
+                            { icon: "🎯", val: `${stats.coberturaDocente.porcentaje}%`, label: "Cobertura Estimada", color: "border-gray-500" }
+                        ].map((kpi, idx) => (
+                            <div key={idx} className={`bg-white p-4 rounded-xl shadow-md border-b-4 ${kpi.color} flex items-center gap-3`}>
+                                <div className="text-3xl">{kpi.icon}</div>
+                                <div>
+                                    <div className="text-2xl font-bold text-gray-800">{kpi.val}</div>
+                                    <div className="text-[10px] font-bold text-gray-500 uppercase">{kpi.label}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* SECCIÓN 2: CURSOS (75%) + GÉNERO (25%) */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+                        <div className="lg:col-span-9">
+                            <ChartBox 
+                                type="bar" 
+                                data={Object.fromEntries(stats.topCursos||[])} 
+                                title="📚 Cursos Más Demandados" 
+                                id="chartCourses" 
+                                horizontal={true}
+                                minHeight="380px"
+                            />
+                        </div>
+                        <div className="lg:col-span-3">
+                            <ChartBox 
+                                type="doughnut" 
+                                data={stats.distribucionGenero} 
+                                title="👥 Distribución por Género" 
+                                id="chartGender"
+                                minHeight="380px"
+                            />
+                        </div>
+                    </div>
+
+                    {/* SECCIÓN 3: DEPARTAMENTOS + TIPO */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+                        <div className="lg:col-span-8">
+                            <ChartBox 
+                                type="bar" 
+                                data={processedDepts.chartData} 
+                                title="🏢 Top 5 Departamentos" 
+                                id="chartDepts" 
+                                horizontal={true}
+                                legend={processedDepts.legend}
+                                minHeight="320px"
+                            />
+                        </div>
+                        <div className="lg:col-span-4">
+                            <ChartBox 
+                                type="bar" 
+                                data={stats.distribucionTipo} 
+                                title="📋 Tipo de Curso" 
+                                id="chartType" 
+                                horizontal={false}
+                                minHeight="320px"
+                            />
+                        </div>
+                    </div>
+
+                    {/* SECCIÓN 4: EVOLUCIÓN HISTÓRICA */}
+                    <div className="mb-6">
+                        <ChartBox 
+                            type="line" 
+                            data={stats.historicalTrend || {}} 
+                            title="📈 Evolución Histórica de Participación" 
+                            id="chartHistory"
+                            minHeight="350px"
+                        />
+                    </div>
+                </div>
+            );
+        };
+        
+        // ====================================================================
+        // COMPONENTE: ChartBox (Contenedor de Gráfica)
+        // ====================================================================
+        const ChartBox = ({ type, data, title, id, horizontal = false, legend = null, minHeight = "320px" }) => {
+            const chartRef = React.useRef(null);
+            const canvasRef = React.useRef(null);
+
+            React.useEffect(() => {
+                if (!canvasRef.current || !data || Object.keys(data).length === 0) return;
+                if (typeof window.Chart === 'undefined') return;
+                
+                // Destruir gráfica anterior
+                if (chartRef.current) {
+                    chartRef.current.destroy();
+                }
+
+                const ctx = canvasRef.current.getContext('2d');
+                const isHistory = id === 'chartHistory';
+                const isPie = type === 'pie' || type === 'doughnut';
+                
+                let config = {
+                    type: isHistory ? 'line' : type,
+                    data: { labels: [], datasets: [] },
+                    // Registrar el plugin localmente para esta instancia
+                    plugins: window.ChartDataLabels ? [window.ChartDataLabels] : [],
+                    options: {
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        indexAxis: horizontal ? 'y' : 'x',
+                        animation: { duration: 400 },
+                        scales: isPie ? {} : { 
+                            y: { 
+                                beginAtZero: true, 
+                                ticks: { 
+                                    stepSize: 1, 
+                                    color: '#374151',
+                                    font: { size: 11, weight: '600' }
+                                },
+                                grid: { color: '#f3f4f6' }
+                            },
+                            x: {
+                                beginAtZero: true, 
+                                ticks: { 
+                                    stepSize: 1,
+                                    color: '#374151',
+                                    font: { size: 11, weight: '600' }
+                                },
+                                grid: { color: '#f3f4f6' }
+                            }
+                        },
+                        plugins: { 
+                            // Configuración de DataLabels (Números sobre los puntos)
+                            datalabels: {
+                                display: isHistory, // Solo mostrar en historial como se pidió
+                                align: 'top',
+                                anchor: 'center',
+                                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                                borderRadius: 4,
+                                color: function(context) {
+                                    return context.dataset.borderColor;
+                                },
+                                font: {
+                                    weight: 'bold',
+                                    size: 10
+                                },
+                                padding: 4,
+                                formatter: Math.round // Asegurar enteros
+                            },
+                            legend: { 
+                                display: isPie || isHistory, 
+                                position: 'bottom',
+                                labels: { 
+                                    color: '#374151',
+                                    font: { size: 12, weight: '600' },
+                                    padding: 15,
+                                    usePointStyle: true
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#1f2937',
+                                titleFont: { size: 13 },
+                                bodyFont: { size: 12 },
+                                padding: 12,
+                                cornerRadius: 8
+                            }
+                        },
+                        layout: { padding: { top: 10, bottom: 10, left: 10, right: 10 } }
+                    }
+                };
+                
+                // Configuración para barras horizontales
+                if (horizontal) {
+                    config.options.scales.y.ticks.autoSkip = false;
+                }
+                
+                // Configuración para gráfica de pastel - SIN plugin datalabels
+                if (isPie) {
+                    config.options.plugins.legend = {
+                        display: true,
+                        position: 'bottom',
+                        labels: { 
+                            color: '#374151',
+                            font: { size: 11, weight: '600' },
+                            padding: 12,
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const percentage = Math.round((value / total) * 100);
+                                        return {
+                                            text: `${label}: ${percentage}%`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    };
+                }
+
+                // Configuración para gráfica histórica
+                if (isHistory) {
+                    const years = Object.keys(data).sort((a,b) => parseInt(a) - parseInt(b));
+                    config.data = {
+                        labels: years,
+                        datasets: [
+                            { 
+                                label: 'Docentes Inscritos', 
+                                data: years.map(y => data[y]?.registros || 0), 
+                                borderColor: '#36A2EB', 
+                                backgroundColor: 'rgba(54, 162, 235, 0.15)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 6,
+                                pointBackgroundColor: '#36A2EB',
+                                borderWidth: 3
+                            },
+                            { 
+                                label: 'Cursos Ofertados', 
+                                data: years.map(y => data[y]?.cursos || 0), 
+                                borderColor: '#FF6384', 
+                                backgroundColor: 'rgba(255, 99, 132, 0.15)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 6,
+                                pointBackgroundColor: '#FF6384',
+                                borderWidth: 3
+                            }
+                        ]
+                    };
+                } else {
+                    // Configuración para otras gráficas
+                    const labels = Object.keys(data);
+                    config.data = {
+                        labels: labels.map(l => horizontal ? splitLabel(l, 28) : l),
+                        datasets: [{ 
+                            label: title.replace(/[📚👥🏢📋📈]/g, '').trim(), 
+                            data: Object.values(data), 
+                            backgroundColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS,
+                            borderColor: isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS.map(c => c),
+                            borderWidth: 1,
+                            borderRadius: isPie ? 0 : 6
+                        }]
+                    };
+                }
+
+                chartRef.current = new window.Chart(ctx, config);
+                
+                return () => { 
+                    if (chartRef.current) {
+                        chartRef.current.destroy();
+                    }
+                };
+            }, [data, type, title, horizontal, id]);
+
+            const downloadChart = () => {
+                if (chartRef.current) {
+                    const link = document.createElement('a');
+                    link.href = chartRef.current.toBase64Image();
+                    link.download = `Grafica_${title.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+                    link.click();
+                }
+            };
+
+            return (
+                <div 
+                    id={`chartBox-${id}`}
+                    className="bg-white p-5 rounded-xl shadow-md h-full flex flex-col border border-gray-100" 
+                    style={{ minHeight }}
+                >
+                    <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+                        <h3 className="text-gray-700 font-bold text-base">{title}</h3>
+                        <button 
+                            onClick={downloadChart}
+                            className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded flex items-center gap-1 transition border border-gray-300"
+                            title="Descargar imagen en alta calidad"
+                        >
+                            📷 PNG
+                        </button>
+                    </div>
+                    <div className="flex-1 relative" style={{ minHeight: '200px' }}>
+                        <canvas ref={canvasRef} id={id}></canvas>
+                    </div>
+                    {/* Leyenda de departamentos */}
+                    {legend && legend.length > 0 && (
+                        <div className="bg-gray-50 p-3 border-t border-gray-100 mt-4 rounded-b-lg">
+                            <p className="text-xs font-bold text-gray-500 mb-2 uppercase">Leyenda de Siglas:</p>
+                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-gray-600">
+                                {legend.map((item, idx) => (
+                                    <div key={idx} className="flex items-start gap-1">
+                                        <strong className="text-[#1B396A] min-w-[40px]">{item.acronym}:</strong>
+                                        <span className="truncate" title={item.name}>{item.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ====================================================================
+        // COMPONENTE: App Principal
+        // ====================================================================
+        const App = () => {
+            const [user, setUser] = React.useState(null);
+            const [loginError, setLoginError] = React.useState(null);
+            
+            const handleLogin = (res) => {
+                try {
+                    const p = JSON.parse(atob(res.credential.split('.')[1]));
+                    setUser({ name: p.name, email: p.email });
+                } catch (e) { 
+                    setLoginError("Error de acceso."); 
+                }
+            };
+            
+            return user 
+                ? <Dashboard user={user} onLogout={() => setUser(null)} /> 
+                : <Login onLogin={handleLogin} loginError={loginError} />;
+        };
+
+        // ====================================================================
+        // INICIALIZACIÓN
+        // ====================================================================
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
 </body>
 </html>
