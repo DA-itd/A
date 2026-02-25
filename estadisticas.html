@@ -29,8 +29,10 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .loader-spinner { width: 64px; height: 64px; border: 4px solid #1B396A; border-radius: 50%; position: relative; margin: 0 auto 20px; animation: spin 2s linear infinite; }
     .loader-spinner::after { content: ''; position: absolute; width: 4px; height: 24px; background: #9D2449; top: 50%; left: 50%; margin-left: -2px; margin-top: -24px; transform-origin: bottom center; border-radius: 2px; }
-    .pdf-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px); }
-    .pdf-modal { background: white; padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3); max-width: 400px; border-top: 6px solid #1B396A; }
+    .pdf-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(5px); }
+    .pdf-modal { background: white; padding: 40px; border-radius: 24px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.4); max-width: 450px; border-top: 8px solid #1B396A; }
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 </style>
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800 flex flex-col">
@@ -40,7 +42,7 @@
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
         <div class="text-center flex-1 px-2 sm:px-4">
             <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#1B396A] leading-tight">PANEL DE ESTADÍSTICAS</h1>
-            <p class="text-xs sm:text-sm md:text-base text-[#9D2449] mt-1 font-semibold">Desarrollo Académico</p>
+            <p class="text-xs sm:text-sm md:text-base text-[#9D2449] mt-1 font-semibold italic">Desarrollo Académico</p>
         </div>
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
     </div>
@@ -48,13 +50,12 @@
 
 <div id="root" class="flex-grow flex flex-col"></div>
 
-<footer class="bg-[#1B396A] text-white text-center py-8 mt-12 border-t-4 border-[#9D2449]">
+<footer class="bg-[#1B396A] text-white text-center py-10 mt-12 border-t-4 border-[#9D2449]">
     <div class="container mx-auto px-4">
-         <p class="font-semibold mb-2">© Coordinación de Actualización Docente</p>
-         <p id="copyright-year" class="text-sm opacity-75"></p>
+         <p class="font-bold text-lg mb-2 uppercase tracking-widest">Coordinación de Actualización Docente</p>
+         <p id="copyright-year" class="text-sm opacity-60"></p>
     </div>
 </footer>
-
 <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
@@ -63,26 +64,22 @@
         APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
     };
 
-    const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#D4AF37', '#546E7A', '#455A64'];
-    const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
+    const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#D4AF37', '#546E7A', '#455A64', '#708090', '#1E88E5', '#D81B60'];
 
     const shortenLabel = (label) => {
         if (!label) return "";
-        return label.replace(/DEPARTAMENTO DE /gi, 'DEPTO. ').replace(/DIVISION DE /gi, 'DIV. ').trim();
+        return label
+            .replace(/DEPARTAMENTO DE /gi, 'DEPTO. ')
+            .replace(/DIVISION DE /gi, 'DIV. ')
+            .replace(/INGENIERÍA /gi, 'ING. ')
+            .replace(/CIENCIAS /gi, 'CC. ')
+            .trim();
     };
 
-    const getImageDataFromURL = (url) => new Promise((resolve) => {
-        const img = new Image(); img.crossOrigin = 'Anonymous';
-        img.onload = () => {
-            const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height;
-            canvas.getContext('2d').drawImage(img, 0, 0); resolve(canvas.toDataURL('image/png'));
-        };
-        img.onerror = () => resolve(null); img.src = url;
-    });
-
-    const ChartBox = ({ id, type, title, data, horizontal = false, isHistory = false, minHeight = "400px", isPie = false }) => {
+    const ChartBox = ({ id, type, title, data, horizontal = false, isHistory = false, minHeight = "450px", isPie = false, period }) => {
         const canvasRef = useRef(null);
         const chartRef = useRef(null);
+        const [menuOpen, setMenuOpen] = useState(false);
 
         useEffect(() => {
             if (!canvasRef.current || !data) return;
@@ -97,10 +94,11 @@
                 data: isHistory ? data : {
                     labels,
                     datasets: [{
-                        label: 'Cantidad',
+                        label: 'Participantes',
                         data: values,
                         backgroundColor: isPie ? INSTITUTIONAL_COLORS : '#1B396A',
-                        borderRadius: 4
+                        borderRadius: 8,
+                        hoverBackgroundColor: '#9D2449'
                     }]
                 },
                 options: {
@@ -108,9 +106,10 @@
                     maintainAspectRatio: false,
                     indexAxis: horizontal ? 'y' : 'x',
                     plugins: {
-                        legend: { display: isPie || isHistory, position: 'bottom' },
+                        legend: { display: isPie || isHistory, position: 'bottom', labels: { font: { size: 11, weight: 'bold' } } },
                         datalabels: {
                             anchor: 'end', align: 'end',
+                            offset: 4,
                             font: { weight: 'bold', size: 11 },
                             formatter: (v) => v || ''
                         }
@@ -122,12 +121,33 @@
                 },
                 plugins: [ChartDataLabels]
             });
-        }, [data, type, title]);
+        }, [data, type, period]);
+
+        const downloadImage = async (format) => {
+            const el = document.getElementById(`chartBox-${id}`);
+            const canvas = await html2canvas(el, { scale: 3, useCORS: true });
+            const link = document.createElement('a');
+            link.download = `${title}_${period}.${format}`;
+            link.href = canvas.toDataURL(`image/${format}`);
+            link.click();
+            setMenuOpen(false);
+        };
 
         return (
-            <div id={`chartBox-${id}`} className="bg-white p-6 rounded-xl shadow-md border border-gray-100 flex flex-col w-full" style={{ minHeight }}>
-                <h3 className="text-[#1B396A] font-bold text-center mb-6 uppercase tracking-wider border-b pb-2">{title}</h3>
-                <div className="flex-1 relative"><canvas ref={canvasRef}></canvas></div>
+            <div id={`chartBox-${id}`} className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 flex flex-col relative transition-all hover:shadow-2xl" style={{ minHeight }}>
+                <div className="flex justify-between items-center mb-6 border-b pb-4">
+                    <h3 className="text-[#1B396A] font-black uppercase tracking-tight text-lg">{title}</h3>
+                    <div className="relative">
+                        <button onClick={() => setMenuOpen(!menuOpen)} className="text-gray-300 hover:text-[#1B396A] transition-colors text-2xl font-bold px-2">⋮</button>
+                        {menuOpen && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white shadow-2xl rounded-xl z-50 border p-2 animate-fadeIn">
+                                <button onClick={() => downloadImage('png')} className="block w-full text-left p-3 hover:bg-gray-50 rounded-lg text-sm font-bold text-gray-700">Descargar PNG (HD)</button>
+                                <button onClick={() => downloadImage('jpeg')} className="block w-full text-left p-3 hover:bg-gray-50 rounded-lg text-sm font-bold text-gray-700">Descargar JPG (HD)</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="flex-1 relative w-full h-full"><canvas ref={canvasRef}></canvas></div>
             </div>
         );
     };
@@ -149,144 +169,136 @@
                 setLoading(false);
             };
             fetchData();
-            document.getElementById('copyright-year').innerText = new Date().getFullYear();
+            document.getElementById('copyright-year').innerText = `Portal de Estadísticas ITD | ${new Date().getFullYear()}`;
         }, [period]);
 
         const generatePDF = async () => {
             setGeneratingPDF(true);
-            await new Promise(r => setTimeout(r, 1200));
-
+            await new Promise(r => setTimeout(r, 1500));
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'letter');
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
             const margin = 15;
             const contentWidth = pdfWidth - (margin * 2);
-            let currentY = 25;
-            let page = 1;
+            let currentY = 28;
 
-            const addHeader = async (doc) => {
-                doc.setFillColor(27, 57, 106); doc.rect(0, 0, pdfWidth, 20, 'F');
-                doc.setTextColor(255); doc.setFontSize(12); doc.setFont("helvetica", "bold");
-                doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pdfWidth / 2, 10, { align: "center" });
+            const addHeader = (doc) => {
+                doc.setFillColor(27, 57, 106); doc.rect(0, 0, pdfWidth, 22, 'F');
+                doc.setTextColor(255); doc.setFontSize(14); doc.setFont("helvetica", "bold");
+                doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pdfWidth / 2, 11, { align: "center" });
                 doc.setFontSize(9); doc.setFont("helvetica", "normal");
-                doc.text(`Reporte de Actualización Docente - ${period}`, pdfWidth / 2, 16, { align: "center" });
+                doc.text(`Reporte de Actualización Docente - Periodo: ${period}`, pdfWidth / 2, 17, { align: "center" });
             };
 
-            const addFooter = (doc, p) => {
-                doc.setFillColor(157, 36, 73); doc.rect(0, pdfHeight - 12, pdfWidth, 12, 'F');
-                doc.setTextColor(255); doc.setFontSize(8);
-                doc.text(`Página ${p} | Generado: ${new Date().toLocaleDateString()}`, margin, pdfHeight - 5);
-            };
-
-            const capture = async (doc, id) => {
+            const capture = async (id) => {
                 const el = document.getElementById(id);
                 if (!el) return;
-                // ESCALA 3 para máxima nitidez (HD)
-                const canvas = await html2canvas(el, { scale: 3, useCORS: true, logging: false });
+                const canvas = await html2canvas(el, { scale: 3, useCORS: true });
                 const imgData = canvas.toDataURL('image/png');
-                const props = doc.getImageProperties(imgData);
+                const props = pdf.getImageProperties(imgData);
                 const h = (props.height * contentWidth) / props.width;
 
-                if (currentY + h > pdfHeight - 20) {
-                    addFooter(doc, page); doc.addPage(); page++;
-                    await addHeader(doc); currentY = 25;
+                if (currentY + h > 265) {
+                    docFooter(pdf); pdf.addPage(); addHeader(pdf); currentY = 28;
                 }
-                doc.addImage(imgData, 'PNG', margin, currentY, contentWidth, h);
-                currentY += h + 10;
+                pdf.addImage(imgData, 'PNG', margin, currentY, contentWidth, h);
+                currentY += h + 12;
             };
 
-            await addHeader(pdf);
-            await capture(pdf, 'kpi-section');
-            await capture(pdf, 'chartBox-topCursos');
-            await capture(pdf, 'chartBox-topDeptos');
-            await capture(pdf, 'chartBox-historico');
-            await capture(pdf, 'chartBox-genero-tipo'); // Contenedor de las dos pequeñas
+            const docFooter = (doc) => {
+                doc.setFillColor(157, 36, 73); doc.rect(0, pdfHeight - 12, pdfWidth, 12, 'F');
+                doc.setTextColor(255); doc.setFontSize(8);
+                doc.text(`Generado automáticamente por el Portal CAD ITD | ${new Date().toLocaleString()}`, margin, pdfHeight - 5);
+            };
+
+            addHeader(pdf);
+            await capture('kpi-section');
+            await capture('chartBox-topCursos');
+            await capture('chartBox-topDeptos');
+            await capture('chartBox-historico');
+            await capture('row-pie-charts');
+            docFooter(pdf);
             
-            addFooter(pdf, page);
-            pdf.save(`Reporte_Estadistico_${period}.pdf`);
+            pdf.save(`Reporte_Estadistico_ITD_${period}.pdf`);
             setGeneratingPDF(false);
         };
 
-        if (loading) return <div className="min-h-screen flex justify-center items-center"><div className="loader-spinner"></div></div>;
+        if (loading) return <div className="min-h-screen flex flex-col justify-center items-center bg-white"><div className="loader-spinner"></div><p className="font-black text-[#1B396A] animate-pulse">CARGANDO DATOS...</p></div>;
 
         return (
             <div className="p-6 max-w-7xl mx-auto animate-fadeIn relative">
-                {generatingPDF && (
-                    <div className="pdf-overlay">
-                        <div className="pdf-modal">
-                            <div className="loader-spinner"></div>
-                            <h2 className="text-xl font-bold mb-2 text-[#1B396A]">Generando PDF HD</h2>
-                            <p className="text-gray-500">Procesando gráficos en alta resolución...</p>
+                {generatingPDF && <div className="pdf-overlay"><div className="pdf-modal"><div className="loader-spinner"></div><h2 className="text-xl font-black text-[#1B396A] mb-2">GENERANDO REPORTE HD</h2><p className="text-gray-500 font-bold">Procesando gráficos en alta resolución...</p></div></div>}
+
+                <div className="flex flex-col md:flex-row justify-between items-center mb-12 bg-white p-8 rounded-[2rem] shadow-2xl border-l-[12px] border-[#1B396A]">
+                    <div className="flex items-center gap-6">
+                        <img src={user.picture} className="h-20 w-20 rounded-full border-4 border-[#9D2449] shadow-lg" />
+                        <div>
+                            <h2 className="text-3xl font-black text-gray-800 tracking-tighter">ESTADÍSTICAS</h2>
+                            <p className="text-[#9D2449] font-bold uppercase tracking-widest text-sm">{user.name}</p>
                         </div>
                     </div>
-                )}
-
-                <div className="flex flex-col md:flex-row justify-between items-center mb-10 bg-white p-6 rounded-2xl shadow-lg border-l-8 border-[#1B396A]">
-                    <div>
-                        <h2 className="text-3xl font-bold text-gray-800 tracking-tight">Análisis Estadístico</h2>
-                        <p className="text-[#9D2449] font-medium">Capacitación y Actualización Docente</p>
-                    </div>
-                    <div className="flex gap-4 mt-4 md:mt-0">
-                        <select value={period} onChange={(e) => setPeriod(e.target.value)} className="bg-gray-100 border-none rounded-xl px-4 py-2 font-bold text-gray-700 outline-none focus:ring-2 focus:ring-[#1B396A]">
-                            <option value="ACTUAL">Periodo Actual</option>
-                            <option value="2024">Año 2024</option>
-                            <option value="HISTORICO">Histórico Completo</option>
+                    <div className="flex flex-wrap gap-4 mt-6 md:mt-0">
+                        <select value={period} onChange={(e) => setPeriod(e.target.value)} className="bg-gray-50 border-2 border-gray-100 rounded-2xl px-6 py-3 font-black text-gray-700 outline-none focus:border-[#1B396A] shadow-inner">
+                            <option value="ACTUAL">PERIODO ACTUAL</option>
+                            <option value="2025">AÑO 2025</option>
+                            <option value="2024">AÑO 2024</option>
+                            <option value="2023">AÑO 2023</option>
+                            <option value="2022">AÑO 2022</option>
+                            <option value="HISTORICO">HISTÓRICO COMPLETO</option>
                         </select>
-                        <button onClick={generatePDF} className="bg-[#9D2449] text-white px-8 py-2 rounded-xl font-bold shadow-lg hover:bg-[#861d3d] transition-all uppercase text-sm">PDF Alta Calidad</button>
-                        <button onClick={onLogout} className="bg-gray-200 px-4 py-2 rounded-xl font-bold">Salir</button>
+                        <button onClick={generatePDF} className="bg-[#9D2449] text-white px-10 py-3 rounded-2xl font-black shadow-lg hover:scale-105 transition-transform uppercase text-sm">Reporte PDF HD</button>
+                        <button onClick={onLogout} className="text-gray-400 font-bold underline text-xs">Salir</button>
                     </div>
                 </div>
 
-                <div id="kpi-section" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                    <KPICard title="Total Inscritos" value={stats.totalInscripciones} color="border-blue-600" />
-                    <KPICard title="Docentes Únicos" value={stats.coberturaDocente.actualizados} color="border-[#9D2449]" />
-                    <KPICard title="Cobertura Plantilla" value={`${stats.coberturaDocente.porcentaje}%`} color="border-amber-500" />
+                <div id="kpi-section" className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                    <KPICard title="Total Inscripciones" value={stats.totalInscripciones} icon="🎟️" color="border-blue-600" />
+                    <KPICard title="Docentes Únicos" value={stats.coberturaDocente.actualizados} icon="👨‍🏫" color="border-[#9D2449]" />
+                    <KPICard title="Cobertura Plantilla" value={`${stats.coberturaDocente.porcentaje}%`} icon="📈" color="border-amber-500" />
                 </div>
 
                 <div className="flex flex-col gap-12">
-                    <ChartBox id="topCursos" type="bar" title="Cursos con Mayor Demanda" data={Object.fromEntries(stats.topCursos.slice(0, 15))} horizontal={true} minHeight="600px" />
-                    <ChartBox id="topDeptos" type="bar" title="Participación por Departamentos Académicos" data={Object.fromEntries(stats.topDepartamentos)} horizontal={true} minHeight="800px" />
-                    <ChartBox id="historico" type="line" title="Evolución Histórica de Capacitación" isHistory={true} data={{
+                    <ChartBox id="topCursos" type="bar" title="Cursos con mayor demanda" data={Object.fromEntries(stats.topCursos.slice(0, 15))} horizontal={true} minHeight="700px" period={period} />
+                    <ChartBox id="topDeptos" type="bar" title="Participación por Departamento" data={Object.fromEntries(stats.topDepartamentos)} horizontal={true} minHeight="950px" period={period} />
+                    <ChartBox id="historico" type="line" title="Evolución 2022 - Presente" isHistory={true} data={{
                         labels: Object.keys(stats.historicalTrend),
                         datasets: [
-                            { label: 'Inscritos', data: Object.values(stats.historicalTrend).map(v => v.inscritos), borderColor: '#1B396A', tension: 0.3, fill: false },
-                            { label: 'Cursos', data: Object.values(stats.historicalTrend).map(v => v.cursos), borderColor: '#9D2449', tension: 0.3, fill: false }
+                            { label: 'Inscritos', data: Object.values(stats.historicalTrend).map(v => v.inscritos), borderColor: '#1B396A', backgroundColor: 'rgba(27,57,106,0.1)', fill: true, tension: 0.4 },
+                            { label: 'Cursos', data: Object.values(stats.historicalTrend).map(v => v.cursos), borderColor: '#9D2449', tension: 0.4 }
                         ]
-                    }} />
+                    }} minHeight="450px" period={period} />
                     
-                    <div id="chartBox-genero-tipo" className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <ChartBox id="genero" type="doughnut" title="Distribución por Género" data={stats.porGenero} isPie={true} minHeight="350px" />
-                        <ChartBox id="tipo" type="pie" title="Tipo de Capacitación" data={stats.porTipo} isPie={true} minHeight="350px" />
+                    <div id="row-pie-charts" className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <ChartBox id="genero" type="doughnut" title="Distribución por Género" data={stats.porGenero} isPie={true} period={period} />
+                        <ChartBox id="tipo" type="pie" title="Tipo de Capacitación" data={stats.porTipo} isPie={true} period={period} />
                     </div>
                 </div>
             </div>
         );
     };
 
-    const KPICard = ({ title, value, color }) => (
-        <div className={`bg-white p-8 rounded-2xl shadow-md border-b-8 ${color} text-center transform hover:scale-105 transition-transform`}>
-            <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">{title}</p>
-            <p className="text-4xl font-black text-[#1B396A]">{value}</p>
+    const KPICard = ({ title, value, icon, color }) => (
+        <div className={`bg-white p-8 rounded-[2rem] shadow-xl border-b-[10px] ${color} flex justify-between items-center transform hover:-translate-y-2 transition-all`}>
+            <div><p className="text-gray-400 text-xs font-black uppercase tracking-widest mb-1">{title}</p><p className="text-4xl font-black text-[#1B396A]">{value}</p></div>
+            <div className="text-5xl opacity-10">{icon}</div>
         </div>
     );
 
     const Login = ({ onLogin, loginError }) => {
         useEffect(() => {
-            const init = () => {
-                if (window.google) {
-                    window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
-                    window.google.accounts.id.renderButton(document.getElementById('google-btn'), { theme: 'outline', size: 'large' });
-                }
-            };
-            init();
+            if (window.google) {
+                window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
+                window.google.accounts.id.renderButton(document.getElementById('google-btn'), { theme: 'outline', size: 'large', shape: 'pill', width: 320 });
+            }
         }, []);
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#1B396A] p-4">
-                <div className="bg-white p-10 rounded-3xl shadow-2xl max-w-md w-full text-center border-t-8 border-[#9D2449] animate-fadeIn">
-                    <img src={ITD_LOGO_URL} className="h-24 mx-auto mb-6" />
-                    <h2 className="text-2xl font-black text-[#1B396A] mb-8">ESTADÍSTICAS DOCENTES</h2>
-                    {loginError && <p className="text-red-600 font-bold mb-4">{loginError}</p>}
+                <div className="bg-white p-12 rounded-[3rem] shadow-2xl max-w-md w-full text-center border-t-[12px] border-[#9D2449] animate-fadeIn">
+                    <img src={ITD_LOGO_URL} className="h-28 mx-auto mb-8 drop-shadow-xl" />
+                    <h2 className="text-3xl font-black text-[#1B396A] mb-2 tracking-tighter uppercase">ESTADÍSTICAS CAD</h2>
+                    <p className="text-gray-400 mb-10 font-bold text-xs tracking-widest uppercase">Portal Institucional</p>
+                    {loginError && <div className="bg-red-50 text-red-600 p-4 rounded-2xl mb-6 text-sm font-black">{loginError}</div>}
                     <div id="google-btn" className="flex justify-center"></div>
                 </div>
             </div>
@@ -295,13 +307,13 @@
 
     const App = () => {
         const [user, setUser] = useState(null);
-        const [error, setError] = useState("");
+        const [err, setErr] = useState("");
         const handleLogin = (res) => {
             const p = JSON.parse(atob(res.credential.split('.')[1]));
-            if (p.email.endsWith('@itdurango.edu.mx')) setUser(p);
-            else setError("Solo cuentas institucionales");
+            if (['alejandro.calderon@itdurango.edu.mx', 'desarrollo.academico@itdurango.edu.mx'].includes(p.email) || p.email.endsWith('@itdurango.edu.mx')) setUser(p);
+            else setErr("CUENTA NO AUTORIZADA");
         };
-        return user ? <Dashboard user={user} onLogout={() => setUser(null)} /> : <Login onLogin={handleLogin} loginError={error} />;
+        return user ? <Dashboard user={user} onLogout={() => setUser(null)} /> : <Login onLogin={handleLogin} loginError={err} />;
     };
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
