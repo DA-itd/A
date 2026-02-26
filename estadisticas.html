@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -25,6 +24,9 @@
 <!-- Librerías para PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- Librería para Word/DOCX -->
+<script src="https://cdn.jsdelivr.net/npm/docx@9.0.2/build/index.umd.js"></script>
 
 <!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -419,11 +421,14 @@
                 if (!element) return;
 
                 try {
-                    // Escala 3 para mayor calidad
+                    // Escala 4 para máxima calidad
                     const canvas = await html2canvas(element, { 
-                        scale: 3, 
+                        scale: 4, 
                         useCORS: true, 
                         backgroundColor: '#ffffff',
+                        logging: false,
+                        allowTaint: false,
+                        imageTimeout: 15000,
                         ignoreElements: (el) => el.id === `menu-btn-${id}` 
                     });
 
@@ -662,8 +667,15 @@
             const captureElement = async (elementId) => {
                 const element = document.getElementById(elementId);
                 if (!element) return null;
-                const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-                return canvas.toDataURL('image/png');
+                const canvas = await html2canvas(element, { 
+                    scale: 4, 
+                    useCORS: true, 
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    allowTaint: false,
+                    imageTimeout: 15000
+                });
+                return canvas.toDataURL('image/jpeg', 0.95);
             };
 
             const addHeader = async (doc) => {
@@ -696,15 +708,15 @@
             await addHeader(pdf);
             const kpiImg = await captureElement('kpi-section');
             if (kpiImg) {
-                pdf.addImage(kpiImg, 'PNG', margin, 25, contentWidth, 30);
+                pdf.addImage(kpiImg, 'JPEG', margin, 25, contentWidth, 30);
             }
             const chart1Img = await captureElement('chartBox-topCursos');
             if (chart1Img) {
-                pdf.addImage(chart1Img, 'PNG', margin, 60, contentWidth, 100);
+                pdf.addImage(chart1Img, 'JPEG', margin, 60, contentWidth, 100);
             }
             const chart2Img = await captureElement('chartBox-topDeptos');
             if (chart2Img) {
-                pdf.addImage(chart2Img, 'PNG', margin, 170, contentWidth, 90);
+                pdf.addImage(chart2Img, 'JPEG', margin, 170, contentWidth, 90);
             }
             addFooter(pdf, 1);
 
@@ -713,15 +725,15 @@
             await addHeader(pdf);
             const chart3Img = await captureElement('chartBox-genero');
             if (chart3Img) {
-                pdf.addImage(chart3Img, 'PNG', margin, 25, contentWidth / 2 - 5, 80);
+                pdf.addImage(chart3Img, 'JPEG', margin, 25, contentWidth / 2 - 5, 80);
             }
             const chart4Img = await captureElement('chartBox-tipo');
             if (chart4Img) {
-                pdf.addImage(chart4Img, 'PNG', pdfWidth / 2 + 5, 25, contentWidth / 2 - 5, 80);
+                pdf.addImage(chart4Img, 'JPEG', pdfWidth / 2 + 5, 25, contentWidth / 2 - 5, 80);
             }
             const chart5Img = await captureElement('chartBox-frecuencia');
             if (chart5Img) {
-                pdf.addImage(chart5Img, 'PNG', margin, 115, contentWidth, 90);
+                pdf.addImage(chart5Img, 'JPEG', margin, 115, contentWidth, 90);
             }
             addFooter(pdf, 2);
 
@@ -730,16 +742,207 @@
             await addHeader(pdf);
             const chart6Img = await captureElement('chartBox-historico');
             if (chart6Img) {
-                pdf.addImage(chart6Img, 'PNG', margin, 25, contentWidth, 100);
+                pdf.addImage(chart6Img, 'JPEG', margin, 25, contentWidth, 100);
             }
             const chart7Img = await captureElement('chartBox-docentesYear');
             if (chart7Img) {
-                pdf.addImage(chart7Img, 'PNG', margin, 135, contentWidth, 100);
+                pdf.addImage(chart7Img, 'JPEG', margin, 135, contentWidth, 100);
             }
             addFooter(pdf, 3);
 
             pdf.save(`Reporte_Estadistico_${period}.pdf`);
             setGeneratingPDF(false);
+        };
+
+        const generateWord = async () => {
+            if (!statsData) return;
+            setGeneratingPDF(true); // Reusar el modal de carga
+
+            try {
+                const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+                        AlignmentType, HeadingLevel, WidthType, BorderStyle, ShadingType,
+                        VerticalAlign, PageNumber, Header, Footer, PageBreak } = window.docx;
+
+                const dateStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                const border = { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" };
+                const borders = { top: border, bottom: border, left: border, right: border };
+
+                const makeHeading = (text, level = HeadingLevel.HEADING_1) => new Paragraph({
+                    heading: level,
+                    children: [new TextRun({ text, bold: true, color: level === HeadingLevel.HEADING_1 ? "1B396A" : "9D2449", font: "Arial", size: level === HeadingLevel.HEADING_1 ? 28 : 24 })],
+                    spacing: { before: 240, after: 120 }
+                });
+
+                const makePara = (text, bold = false, color = "333333", size = 22) => new Paragraph({
+                    children: [new TextRun({ text, bold, color, font: "Arial", size })],
+                    spacing: { before: 60, after: 60 }
+                });
+
+                const makeKpiTable = (rows) => new Table({
+                    width: { size: 9360, type: WidthType.DXA },
+                    columnWidths: [4680, 4680],
+                    rows: rows.map(([label, value]) => new TableRow({
+                        children: [
+                            new TableCell({
+                                borders, width: { size: 4680, type: WidthType.DXA },
+                                shading: { fill: "D5E8F0", type: ShadingType.CLEAR },
+                                margins: { top: 80, bottom: 80, left: 120, right: 120 },
+                                children: [new Paragraph({ children: [new TextRun({ text: label, font: "Arial", size: 22, bold: true, color: "1B396A" })] })]
+                            }),
+                            new TableCell({
+                                borders, width: { size: 4680, type: WidthType.DXA },
+                                margins: { top: 80, bottom: 80, left: 120, right: 120 },
+                                children: [new Paragraph({ children: [new TextRun({ text: String(value), font: "Arial", size: 22, bold: true, color: "9D2449" })], alignment: AlignmentType.RIGHT })]
+                            })
+                        ]
+                    }))
+                });
+
+                const makeDataTable = (headers, dataRows, colWidths) => {
+                    const totalW = colWidths.reduce((a, b) => a + b, 0);
+                    const allRows = [
+                        new TableRow({
+                            children: headers.map((h, i) => new TableCell({
+                                borders,
+                                width: { size: colWidths[i], type: WidthType.DXA },
+                                shading: { fill: "1B396A", type: ShadingType.CLEAR },
+                                margins: { top: 80, bottom: 80, left: 120, right: 120 },
+                                children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, color: "FFFFFF", font: "Arial", size: 20 })] })]
+                            }))
+                        }),
+                        ...dataRows.map((row, ri) => new TableRow({
+                            children: row.map((cell, i) => new TableCell({
+                                borders,
+                                width: { size: colWidths[i], type: WidthType.DXA },
+                                shading: { fill: ri % 2 === 0 ? "FFFFFF" : "F5F7FA", type: ShadingType.CLEAR },
+                                margins: { top: 60, bottom: 60, left: 120, right: 120 },
+                                children: [new Paragraph({ children: [new TextRun({ text: String(cell), font: "Arial", size: 20, color: "444444" })] })]
+                            }))
+                        }))
+                    ];
+                    return new Table({ width: { size: totalW, type: WidthType.DXA }, columnWidths: colWidths, rows: allRows });
+                };
+
+                const children = [];
+
+                // PORTADA
+                children.push(new Paragraph({
+                    children: [new TextRun({ text: "INSTITUTO TECNOLÓGICO DE DURANGO", bold: true, color: "1B396A", font: "Arial", size: 40 })],
+                    alignment: AlignmentType.CENTER, spacing: { before: 480, after: 120 }
+                }));
+                children.push(new Paragraph({
+                    children: [new TextRun({ text: "Reporte Estadístico de Actualización Docente", bold: true, color: "9D2449", font: "Arial", size: 28 })],
+                    alignment: AlignmentType.CENTER, spacing: { before: 0, after: 120 }
+                }));
+                children.push(new Paragraph({
+                    children: [new TextRun({ text: `Fecha de generación: ${dateStr}`, font: "Arial", size: 22, color: "666666" })],
+                    alignment: AlignmentType.CENTER, spacing: { before: 0, after: 480 }
+                }));
+                children.push(new Paragraph({
+                    border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "9D2449", space: 1 } },
+                    spacing: { before: 0, after: 480 }
+                }));
+
+                // 1. KPIs PRINCIPALES
+                children.push(makeHeading("1. Indicadores Clave de Desempeño"));
+                children.push(makeKpiTable([
+                    ["Total de Inscripciones", statsData.totalInscripciones],
+                    ["Docentes Únicos Actualizados", statsData.coberturaDocente.actualizados],
+                    ["Cobertura de Plantilla Docente", `${statsData.coberturaDocente.porcentaje}%`],
+                ]));
+                children.push(new Paragraph({ spacing: { before: 240 } }));
+
+                // 2. TOP CURSOS
+                children.push(makeHeading("2. Cursos Más Demandados (Top 10)"));
+                const topCursosRows = statsData.topCursos.slice(0, 10).map(([nombre, inscripciones], i) => [
+                    `${i + 1}`, nombre, inscripciones
+                ]);
+                children.push(makeDataTable(["#", "Nombre del Curso", "Inscripciones"], topCursosRows, [700, 6560, 2100]));
+                children.push(new Paragraph({ spacing: { before: 240 } }));
+
+                // 3. PARTICIPACIÓN POR DEPARTAMENTO
+                children.push(makeHeading("3. Participación por Departamento"));
+                const deptoRows = statsData.topDepartamentos.map(([dept, total], i) => [
+                    `${i + 1}`, dept, total
+                ]);
+                children.push(makeDataTable(["#", "Departamento", "Total"], deptoRows, [700, 6560, 2100]));
+                children.push(new Paragraph({ spacing: { before: 240 } }));
+
+                // 4. DISTRIBUCIÓN POR GÉNERO
+                children.push(makeHeading("4. Distribución por Género"));
+                const generoEntries = Object.entries(statsData.distribucionGenero);
+                children.push(makeKpiTable(generoEntries.map(([g, v]) => [g, v])));
+                children.push(new Paragraph({ spacing: { before: 240 } }));
+
+                // 5. TIPO DE CURSO
+                children.push(makeHeading("5. Tipo de Curso"));
+                const tipoEntries = Object.entries(statsData.distribucionTipo);
+                children.push(makeKpiTable(tipoEntries.map(([t, v]) => [t, v])));
+                children.push(new Paragraph({ spacing: { before: 240 } }));
+
+                // 6. FRECUENCIA DE PARTICIPACIÓN
+                children.push(makeHeading("6. Cursos por Docente"));
+                const freqEntries = Object.entries(statsData.frecuenciaParticipacion);
+                children.push(makeDataTable(
+                    ["Cursos Tomados", "Cantidad de Docentes"],
+                    freqEntries.map(([k, v]) => [k, v]),
+                    [4680, 4680]
+                ));
+                children.push(new Paragraph({ spacing: { before: 240 } }));
+
+                // 7. EVOLUCIÓN HISTÓRICA
+                if (statsData.historicalTrend) {
+                    children.push(makeHeading("7. Evolución Histórica por Año"));
+                    const years = Object.keys(statsData.historicalTrend).sort();
+                    const histRows = years.map(y => [
+                        y,
+                        statsData.historicalTrend[y]?.cursos || 0,
+                        statsData.historicalTrend[y]?.registros || 0
+                    ]);
+                    children.push(makeDataTable(
+                        ["Año", "Cursos Ofertados", "Total Docentes"],
+                        histRows,
+                        [2340, 3510, 3510]
+                    ));
+                }
+
+                children.push(new Paragraph({ spacing: { before: 480 } }));
+                children.push(new Paragraph({
+                    border: { top: { style: BorderStyle.SINGLE, size: 6, color: "9D2449", space: 1 } },
+                    spacing: { before: 0, after: 120 }
+                }));
+                children.push(makePara("Coordinación de Actualización Docente — M.C. Alejandro Calderón Rentería", false, "666666", 18));
+
+                const doc = new Document({
+                    styles: {
+                        default: { document: { run: { font: "Arial", size: 22 } } }
+                    },
+                    sections: [{
+                        properties: {
+                            page: {
+                                size: { width: 12240, height: 15840 },
+                                margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 }
+                            }
+                        },
+                        children
+                    }]
+                });
+
+                const buffer = await Packer.toBuffer(doc);
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Reporte_Estadistico_${period}.docx`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error("Error generando Word:", err);
+                alert("Error al generar el documento Word: " + err.message);
+            } finally {
+                setGeneratingPDF(false);
+            }
         };
 
         const generateCourseEvolutionData = () => {
@@ -818,8 +1021,8 @@
                     <div className="pdf-overlay">
                         <div className="pdf-modal">
                             <div className="loader-spinner"></div>
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">Generando Reporte PDF</h3>
-                            <p className="text-gray-500">Por favor espere, procesando gráficas...</p>
+                            <h3 className="text-xl font-bold text-gray-800 mb-2">Generando Reporte</h3>
+                            <p className="text-gray-500">Por favor espere, procesando datos...</p>
                         </div>
                     </div>
                 )}
@@ -850,6 +1053,9 @@
                         </div>
                         <button onClick={generatePDF} className="bg-[#9D2449] hover:bg-[#801d3a] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2">
                             <span>📄</span> PDF
+                        </button>
+                        <button onClick={generateWord} className="bg-[#1B396A] hover:bg-[#142b52] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2">
+                            <span>📝</span> Word
                         </button>
                         <button onClick={onLogout} className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors">
                             Salir
