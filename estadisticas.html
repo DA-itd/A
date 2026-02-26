@@ -509,8 +509,8 @@
                         const headerEnd = 32;
                         const footerStart = pdfHeight - 12;
 
-                        // Encabezado azul
-                        pdf.setFillColor(27, 57, 106);
+                        // Encabezado blanco con logos y línea guinda
+                        pdf.setFillColor(255, 255, 255);
                         pdf.rect(0, 0, pdfWidth, headerEnd, 'F');
 
                         if (logoData) {
@@ -523,16 +523,19 @@
 
                         pdf.setFontSize(15);
                         pdf.setFont('helvetica', 'bold');
-                        pdf.setTextColor(255, 255, 255);
+                        pdf.setTextColor(27, 57, 106);
                         pdf.text('INSTITUTO TECNOLÓGICO DE DURANGO', pdfWidth / 2, 14, { align: 'center' });
                         pdf.setFontSize(9);
                         pdf.setFont('helvetica', 'normal');
+                        pdf.setTextColor(100, 100, 100);
                         pdf.text('Coordinación de Actualización Docente', pdfWidth / 2, 21, { align: 'center' });
 
-                        // Línea guinda + título gráfica
+                        // Línea gruesa guinda al final del encabezado
                         pdf.setDrawColor(157, 36, 73);
-                        pdf.setLineWidth(0.8);
-                        pdf.line(margin, headerEnd + 1, pdfWidth - margin, headerEnd + 1);
+                        pdf.setLineWidth(1.5);
+                        pdf.line(0, headerEnd, pdfWidth, headerEnd);
+
+                        pdf.setLineWidth(0.5);
                         pdf.setFontSize(13);
                         pdf.setFont('helvetica', 'bold');
                         pdf.setTextColor(27, 57, 106);
@@ -550,14 +553,14 @@
                         const fy = headerEnd + 13 + (availH - fh) / 2;
                         pdf.addImage(imgData, 'JPEG', fx, fy, fw, fh);
 
-                        // Pie de página guinda
-                        pdf.setFillColor(157, 36, 73);
+                        // Pie de página azul
+                        pdf.setFillColor(27, 57, 106);
                         pdf.rect(0, footerStart, pdfWidth, 12, 'F');
                         pdf.setFontSize(8);
                         pdf.setTextColor(255, 255, 255);
                         const dateStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
                         pdf.text(`Generado: ${dateStr}`, margin, footerStart + 7);
-                        pdf.text('ITD — Estadística Oficial', pdfWidth - margin, footerStart + 7, { align: 'right' });
+                        pdf.text('Generado en: Coordinación de Actualización Docente — ITD', pdfWidth - margin, footerStart + 7, { align: 'right' });
 
                         pdf.save(`${cleanTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
                     }
@@ -688,7 +691,8 @@
 
                 const addHeader = async (doc) => {
                     const logo = await getImageDataFromURL(ITD_LOGO_URL);
-                    doc.setFillColor(27, 57, 106);
+                    // Fondo blanco
+                    doc.setFillColor(255, 255, 255);
                     doc.rect(0, 0, pdfWidth, headerH, 'F');
                     if (logo) {
                         const imgProps = doc.getImageProperties(logo);
@@ -699,21 +703,27 @@
                     }
                     doc.setFontSize(13);
                     doc.setFont("helvetica", "bold");
-                    doc.setTextColor(255, 255, 255);
+                    doc.setTextColor(27, 57, 106);
                     doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pdfWidth / 2, 11, { align: "center" });
                     doc.setFontSize(8.5);
                     doc.setFont("helvetica", "normal");
+                    doc.setTextColor(100, 100, 100);
                     doc.text("Reporte Estadístico de Actualización Docente", pdfWidth / 2, 18, { align: "center" });
+                    // Línea gruesa guinda al final del encabezado
+                    doc.setDrawColor(157, 36, 73);
+                    doc.setLineWidth(1.5);
+                    doc.line(0, headerH, pdfWidth, headerH);
                 };
 
                 const addFooter = (doc, pageNum, total) => {
-                    doc.setFillColor(157, 36, 73);
+                    // Franja azul en el pie
+                    doc.setFillColor(27, 57, 106);
                     doc.rect(0, pdfHeight - footerH, pdfWidth, footerH, 'F');
                     doc.setFontSize(8);
                     doc.setTextColor(255, 255, 255);
                     const date = new Date().toLocaleDateString('es-MX');
                     doc.text(`Generado: ${date}  |  Página ${pageNum} de ${total}`, margin, pdfHeight - 4);
-                    doc.text("Coordinación de Actualización Docente — ITD", pdfWidth - margin, pdfHeight - 4, { align: "right" });
+                    doc.text(`Generado en: Coordinación de Actualización Docente — ITD`, pdfWidth - margin, pdfHeight - 4, { align: "right" });
                 };
 
                 const newPage = async (doc, pageNum, total) => {
@@ -979,8 +989,7 @@
                     }]
                 });
 
-                const buffer = await Packer.toBuffer(doc);
-                const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+                const blob = await Packer.toBlob(doc);
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
