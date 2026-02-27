@@ -9,7 +9,701 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitio en Mantenimiento - ITD</title>
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
         :root {
+            --guinda:       #9D2449;
+            --guinda-dark:  #7a1a38;
+            --guinda-light: rgba(157,36,73,.08);
+            --azul:         #1B396A;
+            --azul-mid:     #2a52a0;
+            --azul-light:   rgba(27,57,106,.07);
+            --gris:         #6b7280;
+            --gris-light:   #f3f4f6;
+            --blanco:       #ffffff;
+        }
+
+        * { box-sizing:border-box; margin:0; padding:0; }
+
+        body {
+            font-family:'Barlow', system-ui, sans-serif;
+            background: var(--gris-light);
+            background-image:
+                radial-gradient(ellipse at 10% 15%, rgba(157,36,73,.06) 0%, transparent 55%),
+                radial-gradient(ellipse at 90% 85%, rgba(27,57,106,.07) 0%, transparent 55%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── VIEWS ── */
+        #view-info   { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:24px 16px; }
+        #view-tetris { display:none; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:12px 8px; }
+
+        @keyframes fadeIn  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+        @keyframes fadeOut { from{opacity:1} to{opacity:0;transform:translateY(-10px)} }
+        .fade-in  { animation:fadeIn  .35s ease-out forwards; }
+        .fade-out { animation:fadeOut .3s  ease-in  forwards; }
+
+        /* ── INFO CARD ── */
+        .info-card {
+            background: var(--blanco);
+            border-radius: 20px;
+            border: 1px solid rgba(157,36,73,.12);
+            box-shadow: 0 6px 32px rgba(157,36,73,.1), 0 1px 4px rgba(0,0,0,.04);
+            max-width: 460px; width: 100%;
+            padding: 0 0 28px;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Franja superior */
+        .card-header-stripe {
+            background: var(--azul);
+            padding: 18px 24px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 4px solid var(--guinda);
+        }
+        .card-header-stripe img { height: 50px; width: auto; object-fit: contain; }
+        .card-header-text { flex: 1; text-align: center; }
+        .card-header-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.1em; font-weight: 800;
+            color: white; text-transform: uppercase; letter-spacing: .5px; line-height: 1.1;
+        }
+        .card-header-sub { font-size: .72em; color: rgba(255,255,255,.7); margin-top: 2px; }
+
+        /* Cuerpo de la card */
+        .card-body { padding: 26px 28px 0; }
+
+        /* Engranajes */
+        .gears { display:flex; justify-content:center; align-items:center; gap:4px; margin-bottom:16px; }
+
+        /* Chip de estado */
+        .status-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--guinda-light);
+            border: 1px solid rgba(157,36,73,.2);
+            border-radius: 999px; padding: 5px 16px;
+            font-size: 12px; font-weight: 600; color: var(--guinda);
+        }
+        .status-dot { width:7px;height:7px;border-radius:50%;background:var(--guinda);animation:pulse-dot 1.5s ease-in-out infinite; }
+
+        .divider { height: 2px; background: linear-gradient(90deg, transparent, var(--guinda), rgba(27,57,106,.4), var(--guinda), transparent); border-radius: 2px; margin: 18px auto; width: 80px; }
+        .divider-full { height: 1px; background: linear-gradient(90deg, transparent, rgba(157,36,73,.2), rgba(27,57,106,.2), transparent); margin: 20px 0 16px; }
+
+        /* Título */
+        .main-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2em; font-weight: 800; color: var(--azul);
+            text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px;
+        }
+        .main-sub { font-size: .7em; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--guinda); opacity: .7; }
+
+        /* Puntos animados */
+        .dots { display:flex; justify-content:center; gap:8px; margin:16px 0; }
+
+        /* Botón Jugar */
+        .play-btn {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, var(--guinda), #c42d5a);
+            color: white; border: none; border-radius: 14px;
+            padding: 13px 28px; font-family: 'Barlow', sans-serif;
+            font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 4px;
+            box-shadow: 0 4px 18px rgba(157,36,73,.35);
+            transition: transform .15s, box-shadow .15s;
+        }
+        .play-btn:hover { transform: scale(1.05); box-shadow: 0 6px 24px rgba(157,36,73,.45); }
+        .play-btn:active { transform: scale(.97); }
+
+        /* Tetris icon */
+        .tetris-icon { display:grid; grid-template-columns:repeat(3,8px); gap:2px; }
+        .tetris-icon span { width:8px;height:8px;border-radius:2px;background:rgba(255,255,255,.85); }
+        .tetris-icon span.e { background:transparent; }
+
+        /* Footer info */
+        .info-footer { font-size: .8em; color: var(--gris); }
+        .info-footer strong { color: var(--azul); }
+        .email-link { color:var(--guinda);font-weight:600;text-decoration:none;border-bottom:1px dashed rgba(157,36,73,.4); }
+        .email-link:hover { color: var(--guinda-dark); }
+
+        /* ══════════════════════════════════════════
+           TETRIS CARD — totalmente responsivo
+        ══════════════════════════════════════════ */
+        .tetris-wrap {
+            background: var(--blanco);
+            border-radius: 18px;
+            border: 1px solid rgba(157,36,73,.12);
+            box-shadow: 0 6px 28px rgba(157,36,73,.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* Header del juego */
+        .game-header {
+            background: var(--azul);
+            border-bottom: 4px solid var(--guinda);
+            padding: 10px 14px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+            color: white; border-radius: 8px; padding: 5px 12px;
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            font-family: 'Barlow', sans-serif; transition: background .2s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,.22); }
+        .game-title-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1em; font-weight: 700; color: rgba(255,255,255,.9); letter-spacing: .5px;
+        }
+        #btn-sound { background:none;border:none;cursor:pointer;font-size:18px;padding:0;line-height:1; }
+
+        /* Scores */
+        .score-row { display:flex; gap:6px; padding: 10px 12px 6px; }
+        .score-box {
+            flex:1; background: linear-gradient(135deg, var(--guinda-light), var(--azul-light));
+            border: 1px solid rgba(157,36,73,.12); border-radius: 8px;
+            padding: 5px 6px; text-align: center;
+        }
+        .score-box span   { display:block;font-size:9px;color:var(--guinda);font-weight:600;text-transform:uppercase;letter-spacing:.04em; }
+        .score-box strong { font-size:14px;color:var(--azul);font-weight:700; }
+
+        /* Área de juego */
+        .game-area { display:flex; gap:8px; justify-content:center; align-items:flex-start; padding: 0 12px 8px; }
+
+        #tetris {
+            border: 2px solid rgba(157,36,73,.3);
+            border-radius: 8px; background: #0f1624; display:block;
+            /* tamaño se asigna por JS según pantalla */
+        }
+
+        .side-panel { display:flex; flex-direction:column; gap:6px; min-width: 60px; }
+        .side-label  { font-size:9px;font-weight:700;color:var(--guinda);opacity:.7;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px; }
+        #next-piece  { border:1px solid rgba(157,36,73,.2);border-radius:7px;background:#0f1624;display:block; }
+        .hint-keys   { font-size:10px;color:var(--azul);opacity:.6;line-height:1.9; }
+
+        /* Controles táctiles */
+        .ctrl-grid { padding: 6px 12px 10px; }
+        .btn-row   { display:flex; gap:8px; justify-content:center; margin-bottom:7px; }
+        .ctrl-btn  {
+            background: linear-gradient(135deg, var(--guinda), #c42d5a);
+            color: white; border: none; border-radius: 10px;
+            width: 48px; height: 48px; font-size: 18px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(157,36,73,.3);
+            transition: transform .1s; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ctrl-btn:active { transform: scale(.88); }
+        .ctrl-btn.wide   { width: 110px; font-size: 13px; font-weight: 700; }
+        .ctrl-btn.azul   { background: linear-gradient(135deg, var(--azul), var(--azul-mid)); box-shadow: 0 2px 8px rgba(27,57,106,.3); }
+        .hint-touch { font-size:10px;color:var(--gris);text-align:center;margin-top:2px;opacity:.6; }
+
+        /* Game overlay */
+        #game-overlay {
+            position: absolute; inset: 0; border-radius: 8px;
+            background: rgba(15,22,36,.88); backdrop-filter: blur(5px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+        }
+        #game-overlay img { height: 52px; width: auto; object-fit: contain; opacity: .85; margin-bottom: 4px; filter: drop-shadow(0 2px 8px rgba(157,36,73,.5)); }
+        #game-overlay h3  { font-family:'Barlow Condensed',sans-serif; font-size:22px; color:white; font-weight:800; letter-spacing:1px; }
+        #game-overlay p   { font-size:12px; color:rgba(255,255,255,.55); }
+        .start-btn {
+            background: linear-gradient(135deg, var(--guinda), #c42d5a);
+            color: white; font-family:'Barlow',sans-serif;
+            font-weight:700; font-size:14px; padding:10px 28px;
+            border-radius:999px; border:none; cursor:pointer;
+            box-shadow:0 4px 16px rgba(157,36,73,.4);
+            transition:transform .15s; margin-top:4px;
+        }
+        .start-btn:hover { transform: scale(1.06); }
+
+        /* Idle bar */
+        #idle-bar-wrap { width:100%; background:rgba(157,36,73,.1); height:4px; overflow:hidden; display:none; }
+        #idle-bar      { height:100%; background:linear-gradient(90deg,var(--guinda),var(--azul)); width:100%; transition:none; }
+        #idle-msg      { font-size:10px;color:var(--guinda);text-align:center;padding:3px 0 6px;display:none;opacity:.75; }
+
+        /* ── ANIMACIONES ── */
+        @keyframes shimmer      { 0%{background-position:0% 0%} 100%{background-position:200% 0%} }
+        @keyframes spin-slow    { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+        @keyframes spin-reverse { from{transform:rotate(0)} to{transform:rotate(-360deg)} }
+        @keyframes pulse-logo   { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.04);opacity:.9} }
+        @keyframes bounce-dot   { 0%,80%,100%{transform:translateY(0);opacity:.4} 40%{transform:translateY(-7px);opacity:1} }
+        @keyframes float-1      { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-10px) rotate(5deg)} }
+        @keyframes float-2      { 0%,100%{transform:translateY(0) rotate(8deg)}  50%{transform:translateY(-13px) rotate(-4deg)} }
+        @keyframes pulse-dot    { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:.6} }
+
+        .spin-slow    { animation:spin-slow    8s linear infinite; }
+        .spin-reverse { animation:spin-reverse 6s linear infinite; }
+        .pulse-logo   { animation:pulse-logo   3s ease-in-out infinite; }
+        .dot-1{animation:bounce-dot 1.4s ease-in-out 0s   infinite;}
+        .dot-2{animation:bounce-dot 1.4s ease-in-out .2s  infinite;}
+        .dot-3{animation:bounce-dot 1.4s ease-in-out .4s  infinite;}
+        .float-1{animation:float-1 4s ease-in-out infinite;}
+        .float-2{animation:float-2 5s ease-in-out .5s infinite;}
+
+        /* ── RESPONSIVO ── */
+        @media(max-width:400px){
+            .card-header-stripe { padding:14px 14px 12px; }
+            .card-header-stripe img { height:40px; }
+            .card-header-title { font-size:.95em; }
+            .card-body { padding:20px 18px 0; }
+            .main-title { font-size:1.7em; }
+            .play-btn { padding:11px 22px; font-size:14px; }
+            .ctrl-btn { width:44px; height:44px; font-size:16px; }
+            .ctrl-btn.wide { width:100px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ════════════════ VIEW: INFO ════════════════ -->
+<div id="view-info">
+    <div class="info-card">
+
+        <!-- Header con logos -->
+        <div class="card-header-stripe">
+            <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM">
+            <div class="card-header-text">
+                <div class="card-header-title">Portal de Actualización Docente</div>
+                <div class="card-header-sub">TecNM · Instituto Tecnológico de Durango</div>
+            </div>
+            <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="pulse-logo">
+        </div>
+
+        <div class="card-body">
+
+            <!-- Engranajes decorativos -->
+            <div class="gears" style="margin-bottom:14px;">
+                <span class="spin-slow"    style="font-size:28px;color:var(--guinda);opacity:.6;">⚙️</span>
+                <span class="spin-reverse" style="font-size:20px;color:var(--azul);opacity:.5;margin-top:8px;">⚙️</span>
+                <span class="spin-slow"    style="font-size:24px;color:var(--gris);opacity:.4;animation-delay:1s;">⚙️</span>
+            </div>
+
+            <!-- Chip estado -->
+            <div style="display:flex;justify-content:center;margin-bottom:14px;">
+                <div class="status-chip">
+                    <span class="status-dot"></span>
+                    Trabajando en mejoras
+                </div>
+            </div>
+
+            <!-- Título -->
+            <h1 class="main-title">Sitio en Mantenimiento</h1>
+            <p class="main-sub">Coordinación de Actualización Docente</p>
+
+            <div class="divider"></div>
+
+            <p style="color:var(--gris);font-size:.88em;line-height:1.6;margin-bottom:8px;max-width:340px;margin-left:auto;margin-right:auto;">
+                ¡Disculpen las molestias! Estamos realizando mejoras importantes para ofrecerles un mejor servicio.
+            </p>
+            <p style="color:#9ca3af;font-size:.78em;line-height:1.5;max-width:300px;margin:0 auto 16px;">
+                El sistema estará disponible en breve. Agradecemos su paciencia.
+            </p>
+
+            <!-- Puntos animados -->
+            <div class="dots">
+                <span class="dot-1" style="width:10px;height:10px;border-radius:50%;display:inline-block;background:var(--guinda);"></span>
+                <span class="dot-2" style="width:10px;height:10px;border-radius:50%;display:inline-block;background:var(--azul);"></span>
+                <span class="dot-3" style="width:10px;height:10px;border-radius:50%;display:inline-block;background:var(--gris);"></span>
+            </div>
+
+            <!-- Botón Jugar -->
+            <button class="play-btn" id="btn-open-tetris">
+                <span class="tetris-icon" aria-hidden="true">
+                    <span></span><span></span><span class="e"></span>
+                    <span></span><span></span><span></span>
+                    <span class="e"></span><span></span><span class="e"></span>
+                </span>
+                🎮 Jugar mientras esperas
+            </button>
+
+            <!-- Footer -->
+            <div class="divider-full"></div>
+            <div class="info-footer">
+                <strong>M.C. Alejandro Calderón Rentería</strong><br>
+                <span style="font-size:.85em;">Coordinación de Actualización Docente</span><br>
+                <span style="font-size:.82em;color:#9ca3af;">¿Urgencia? &nbsp;
+                    <a href="/cdn-cgi/l/email-protection#57363b323d36393325387934363b3332253839173e233322253639303879323322793a2f" class="email-link"><span class="__cf_email__" data-cfemail="1978757c7378777d6b76377a78757d7c6b767759706d7d6c6b78777e76377c7d6c377461">[email&#160;protected]</span></a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════ VIEW: TETRIS ════════════════ -->
+<div id="view-tetris">
+    <div class="tetris-wrap">
+
+        <!-- Header del juego -->
+        <div class="game-header">
+            <button class="back-btn" id="btn-back">← Volver</button>
+            <span class="game-title-label">🎮 TETRIS ITD</span>
+            <button id="btn-sound" title="Sonido">🔊</button>
+        </div>
+
+        <!-- Scores -->
+        <div class="score-row">
+            <div class="score-box"><span>Puntaje</span><strong id="score">0</strong></div>
+            <div class="score-box"><span>Nivel</span>  <strong id="level">1</strong></div>
+            <div class="score-box"><span>Líneas</span> <strong id="lines">0</strong></div>
+        </div>
+
+        <!-- Canvas responsivo -->
+        <div class="game-area">
+            <div style="position:relative;">
+                <canvas id="tetris"></canvas>
+                <div id="game-overlay">
+                    <img src="https://github.com/DA-itd/A/blob/main/pola.png?raw=true" alt="Logo">
+                    <h3>TETRIS ITD</h3>
+                    <p id="overlay-msg">¿Listo para jugar?</p>
+                    <button class="start-btn" id="start-btn">▶ Iniciar</button>
+                </div>
+            </div>
+            <div class="side-panel">
+                <div>
+                    <div class="side-label">Siguiente</div>
+                    <canvas id="next-piece" width="56" height="56"></canvas>
+                </div>
+                <div style="margin-top:4px;">
+                    <div class="side-label">Teclado</div>
+                    <div class="hint-keys">← → Mover<br>↑ Rotar<br>↓ Bajar<br>Esp. Caer</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles táctiles -->
+        <div class="ctrl-grid">
+            <div class="btn-row">
+                <button class="ctrl-btn" id="btn-left">◀</button>
+                <button class="ctrl-btn azul" id="btn-rotate">🔄</button>
+                <button class="ctrl-btn" id="btn-right">▶</button>
+            </div>
+            <div class="btn-row">
+                <button class="ctrl-btn" id="btn-down">▼</button>
+                <button class="ctrl-btn wide azul" id="btn-drop">⬇ Caer</button>
+            </div>
+            <p class="hint-touch">Toca los botones o usa el teclado</p>
+        </div>
+
+        <!-- Idle bar -->
+        <div id="idle-bar-wrap"><div id="idle-bar"></div></div>
+        <p id="idle-msg">Regresando al inicio en <span id="idle-countdown">20</span>s…</p>
+
+    </div>
+</div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── TAMAÑO RESPONSIVO DEL CANVAS ──────────────────────
+const COLS = 10, ROWS = 20;
+
+function calcSZ(){
+    const maxW = Math.min(window.innerWidth - 120, 260); // espacio para side panel
+    const byW  = Math.floor(maxW / COLS);
+    const maxH = Math.min(window.innerHeight - 260, 420);
+    const byH  = Math.floor(maxH / ROWS);
+    return Math.max(14, Math.min(byW, byH));
+}
+
+let SZ = calcSZ();
+
+function resizeCanvas(){
+    SZ = calcSZ();
+    const cv = document.getElementById('tetris');
+    cv.width  = COLS * SZ;
+    cv.height = ROWS * SZ;
+}
+
+window.addEventListener('resize', ()=>{ resizeCanvas(); if(running) render(); });
+// Asignar tamaño inicial inmediatamente (sin esperar DOMContentLoaded)
+resizeCanvas();
+
+// ── VIEWS ─────────────────────────────────────────────
+const viewInfo   = document.getElementById('view-info');
+const viewTetris = document.getElementById('view-tetris');
+
+function showTetris(){
+    viewInfo.classList.add('fade-out');
+    setTimeout(()=>{
+        viewInfo.style.display='none';
+        viewInfo.classList.remove('fade-out');
+        viewTetris.style.display='flex';
+        viewTetris.classList.add('fade-in');
+        // Recalcular tamaño ahora que el elemento es visible
+        setTimeout(()=>{
+            resizeCanvas();
+            viewTetris.classList.remove('fade-in');
+        }, 50);
+    },300);
+    resetIdle();
+}
+function showInfo(){
+    if(running) pauseGame();
+    viewTetris.classList.add('fade-out');
+    setTimeout(()=>{
+        viewTetris.style.display='none';
+        viewTetris.classList.remove('fade-out');
+        viewInfo.style.display='flex';
+        viewInfo.classList.add('fade-in');
+        setTimeout(()=>viewInfo.classList.remove('fade-in'),400);
+        clearIdleTimer();
+    },300);
+}
+
+document.getElementById('btn-open-tetris').addEventListener('click', showTetris);
+document.getElementById('btn-back').addEventListener('click', showInfo);
+
+// ── SONIDO ────────────────────────────────────────────
+let audioCtx=null, soundOn=true;
+function getAudio(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function beep(freq,dur,type='square',vol=0.08){
+    if(!soundOn)return;
+    try{
+        const ac=getAudio(),o=ac.createOscillator(),g=ac.createGain();
+        o.connect(g);g.connect(ac.destination);
+        o.type=type;o.frequency.setValueAtTime(freq,ac.currentTime);
+        g.gain.setValueAtTime(vol,ac.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
+        o.start();o.stop(ac.currentTime+dur);
+    }catch(e){}
+}
+function soundMove()  { beep(220,.05,'square',.05); }
+function soundRotate(){ beep(330,.06,'sine',.07); }
+function soundDrop()  { beep(110,.12,'sawtooth',.09); }
+function soundLine(n) {
+    const notes=[[262,.08],[330,.08],[392,.08],[523,.12]];
+    let delay=0;
+    for(let i=0;i<Math.min(n,4);i++){
+        const [f,d]=notes[i];
+        setTimeout(()=>beep(f,d,'sine',.1),delay); delay+=80;
+    }
+}
+function soundGameOver(){ [220,196,174,156,130].forEach((f,i)=>setTimeout(()=>beep(f,.18,'sawtooth',.1),i*120)); }
+function soundStart()   { [330,392,523].forEach((f,i)=>setTimeout(()=>beep(f,.1,'sine',.08),i*100)); }
+
+const btnSound=document.getElementById('btn-sound');
+btnSound.addEventListener('click',()=>{ soundOn=!soundOn; btnSound.textContent=soundOn?'🔊':'🔇'; });
+
+// ── IDLE TIMER ────────────────────────────────────────
+const IDLE_SECS=20;
+let idleTimer=null, idleTick=null, idleLeft=IDLE_SECS;
+
+function resetIdle(){
+    clearIdleTimer();
+    if(!running)return;
+    idleLeft=IDLE_SECS;
+    document.getElementById('idle-bar').style.width='100%';
+    document.getElementById('idle-bar-wrap').style.display='none';
+    document.getElementById('idle-msg').style.display='none';
+}
+function startIdleCountdown(){
+    document.getElementById('idle-bar-wrap').style.display='block';
+    document.getElementById('idle-msg').style.display='block';
+    idleLeft=IDLE_SECS;
+    document.getElementById('idle-countdown').textContent=idleLeft;
+    document.getElementById('idle-bar').style.transition='none';
+    document.getElementById('idle-bar').style.width='100%';
+    requestAnimationFrame(()=>{
+        document.getElementById('idle-bar').style.transition=`width ${IDLE_SECS}s linear`;
+        document.getElementById('idle-bar').style.width='0%';
+    });
+    idleTick=setInterval(()=>{
+        idleLeft--;
+        document.getElementById('idle-countdown').textContent=idleLeft;
+        if(idleLeft<=0){ clearInterval(idleTick); showInfo(); }
+    },1000);
+}
+function clearIdleTimer(){
+    clearTimeout(idleTimer); clearInterval(idleTick);
+    document.getElementById('idle-bar-wrap').style.display='none';
+    document.getElementById('idle-msg').style.display='none';
+}
+['keydown','touchstart','mousedown'].forEach(ev=>{
+    document.addEventListener(ev,()=>{
+        if(viewTetris.style.display!=='none'&&running){
+            clearIdleTimer();
+            clearTimeout(idleTimer);
+            idleTimer=setTimeout(startIdleCountdown,8000);
+        }
+    },{passive:true});
+});
+
+// ── TETRIS ENGINE ─────────────────────────────────────
+const cv  = document.getElementById('tetris');
+const cx  = cv.getContext('2d');
+const ncv = document.getElementById('next-piece');
+const ncx = ncv.getContext('2d');
+
+// Paleta: guinda / azul / grises + acentos
+const C=['','#9D2449','#1B396A','#c42d5a','#2a52a0','#7a1a38','#6b7280','#e5e7eb'];
+const GHOST='rgba(157,36,73,.12)';
+
+const SHAPES=[
+    null,
+    [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+    [[2,2],[2,2]],
+    [[0,3,0],[3,3,3],[0,0,0]],
+    [[0,4,4],[4,4,0],[0,0,0]],
+    [[5,5,0],[0,5,5],[0,0,0]],
+    [[6,0,0],[6,6,6],[0,0,0]],
+    [[0,0,7],[7,7,7],[0,0,0]],
+];
+
+let board,piece,px,py,nextT;
+let sc=0,lv=1,ln=0;
+let running=false,paused=false,animId,lastT=0;
+
+const mkBoard=()=>Array.from({length:ROWS},()=>new Array(COLS).fill(0));
+const randT  =()=>Math.floor(Math.random()*7)+1;
+
+function hits(b,p,ox,oy){
+    for(let r=0;r<p.length;r++)
+        for(let c=0;c<p[r].length;c++)
+            if(p[r][c]){ const x=ox+c,y=oy+r; if(x<0||x>=COLS||y>=ROWS)return true; if(y>=0&&b[y][x])return true; }
+    return false;
+}
+function spawn(){
+    const t=nextT||randT(); nextT=randT();
+    piece=SHAPES[t].map(r=>[...r]);
+    px=Math.floor(COLS/2)-Math.floor(piece[0].length/2); py=0;
+    drawNext();
+    if(hits(board,piece,px,py)) endGame();
+}
+function merge(){ piece.forEach((r,ri)=>r.forEach((v,ci)=>{ if(v&&py+ri>=0)board[py+ri][px+ci]=v; })); }
+function rotateMx(p){ const R=p.length,C2=p[0].length; return Array.from({length:C2},(_,r)=>Array.from({length:R},(_,c)=>p[R-1-c][r])); }
+function tryRot(){
+    const rot=rotateMx(piece);
+    for(const dx of[0,-1,1,-2,2]) if(!hits(board,rot,px+dx,py)){piece=rot;px+=dx;soundRotate();return;}
+}
+function clearLines(){
+    let cl=0;
+    for(let r=ROWS-1;r>=0;r--)
+        if(board[r].every(v=>v)){board.splice(r,1);board.unshift(new Array(COLS).fill(0));cl++;r++;}
+    if(cl){
+        soundLine(cl);
+        sc+=([0,100,300,500,800][cl]||800)*lv;
+        ln+=cl; lv=Math.floor(ln/10)+1;
+        document.getElementById('score').textContent=sc;
+        document.getElementById('level').textContent=lv;
+        document.getElementById('lines').textContent=ln;
+    }
+}
+function drop(){
+    if(!running||paused)return;
+    py++;
+    if(hits(board,piece,px,py)){py--;merge();clearLines();spawn();}
+}
+function hardDrop(){ while(!hits(board,piece,px,py+1))py++; soundDrop(); drop(); }
+function ghostPY(){ let g=py; while(!hits(board,piece,px,g+1))g++; return g; }
+
+function drawBlock(ctx2,x,y,col,sz){
+    ctx2.fillStyle=col;
+    ctx2.fillRect(x*sz+1,y*sz+1,sz-2,sz-2);
+    ctx2.fillStyle='rgba(255,255,255,.18)';
+    ctx2.fillRect(x*sz+2,y*sz+2,sz-4,4);
+    ctx2.fillStyle='rgba(0,0,0,.25)';
+    ctx2.fillRect(x*sz+1,y*sz+sz-4,sz-2,3);
+}
+function render(){
+    const sz=SZ;
+    cx.fillStyle='#0f1624'; cx.fillRect(0,0,cv.width,cv.height);
+    cx.strokeStyle='rgba(27,57,106,.12)'; cx.lineWidth=.5;
+    for(let r=0;r<ROWS;r++){cx.beginPath();cx.moveTo(0,r*sz);cx.lineTo(cv.width,r*sz);cx.stroke();}
+    for(let c=0;c<COLS;c++){cx.beginPath();cx.moveTo(c*sz,0);cx.lineTo(c*sz,cv.height);cx.stroke();}
+    board.forEach((row,r)=>row.forEach((v,c)=>{if(v)drawBlock(cx,c,r,C[v],sz);}));
+    if(running&&piece){
+        const gy=ghostPY();
+        piece.forEach((row,r)=>row.forEach((v,c)=>{if(v&&gy+r>=0){cx.fillStyle=GHOST;cx.fillRect((px+c)*sz+1,(gy+r)*sz+1,sz-2,sz-2);}}));
+        piece.forEach((row,r)=>row.forEach((v,c)=>{if(v&&py+r>=0)drawBlock(cx,px+c,py+r,C[v],sz);}));
+    }
+}
+function drawNext(){
+    const s=13;
+    ncx.fillStyle='#0f1624'; ncx.fillRect(0,0,ncv.width,ncv.height);
+    if(!nextT)return;
+    const p=SHAPES[nextT];
+    const ox=Math.floor((ncv.width -p[0].length*s)/2);
+    const oy=Math.floor((ncv.height-p.length*s)/2);
+    p.forEach((row,r)=>row.forEach((v,c)=>{
+        if(v){ ncx.fillStyle=C[v]; ncx.fillRect(ox+c*s+1,oy+r*s+1,s-2,s-2); ncx.fillStyle='rgba(255,255,255,.18)'; ncx.fillRect(ox+c*s+2,oy+r*s+2,s-4,3); }
+    }));
+}
+function loop(ts){
+    if(!running||paused)return;
+    const speed=Math.max(80,500-(lv-1)*45);
+    if(ts-lastT>=speed){drop();lastT=ts;}
+    render();
+    animId=requestAnimationFrame(loop);
+}
+function startGame(){
+    SZ = calcSZ();
+    const cvEl = document.getElementById('tetris');
+    cvEl.width  = COLS * SZ;
+    cvEl.height = ROWS * SZ;
+    board=mkBoard();sc=0;lv=1;ln=0;
+    document.getElementById('score').textContent=0;
+    document.getElementById('level').textContent=1;
+    document.getElementById('lines').textContent=0;
+    nextT=randT(); spawn(); running=true; paused=false; lastT=0;
+    document.getElementById('game-overlay').style.display='none';
+    soundStart();
+    animId=requestAnimationFrame(loop);
+    clearIdleTimer();
+    idleTimer=setTimeout(startIdleCountdown,8000);
+}
+function pauseGame(){ paused=true; running=false; cancelAnimationFrame(animId); }
+function endGame(){
+    running=false; paused=false; cancelAnimationFrame(animId); render();
+    soundGameOver(); clearIdleTimer();
+    document.getElementById('overlay-msg').textContent='Puntaje final: '+sc;
+    document.getElementById('start-btn').textContent='↺ Reiniciar';
+    document.getElementById('game-overlay').style.display='flex';
+}
+
+document.getElementById('start-btn').addEventListener('click', startGame);
+
+// Teclado
+document.addEventListener('keydown',e=>{
+    if(!running||paused)return;
+    let acted=false;
+    if     (e.key==='ArrowLeft' &&!hits(board,piece,px-1,py)){px--;soundMove();acted=true;}
+    else if(e.key==='ArrowRight'&&!hits(board,piece,px+1,py)){px++;soundMove();acted=true;}
+    else if(e.key==='ArrowDown'){drop();acted=true;}
+    else if(e.key==='ArrowUp'){tryRot();acted=true;}
+    else if(e.key===' '){e.preventDefault();hardDrop();acted=true;}
+    if(acted){ render(); resetIdle(); clearTimeout(idleTimer); idleTimer=setTimeout(startIdleCountdown,8000); }
+});
+
+// Botones táctiles
+function addBtn(id,fn){
+    const b=document.getElementById(id); if(!b)return;
+    let iv;
+    const go=()=>{if(running&&!paused){fn();render();resetIdle();clearTimeout(idleTimer);idleTimer=setTimeout(startIdleCountdown,8000);}};
+    b.addEventListener('touchstart',e=>{e.preventDefault();go();iv=setInterval(go,110);},{passive:false});
+    b.addEventListener('touchend',  e=>{e.preventDefault();clearInterval(iv);},{passive:false});
+    b.addEventListener('mousedown', e=>{e.preventDefault();go();iv=setInterval(go,110);});
+    b.addEventListener('mouseup',   ()=>clearInterval(iv));
+    b.addEventListener('mouseleave',()=>clearInterval(iv));
+}
+addBtn('btn-left', ()=>{if(!hits(board,piece,px-1,py)){px--;soundMove();}});
+addBtn('btn-right',()=>{if(!hits(board,piece,px+1,py)){px++;soundMove();}});
+a
             --guinda:       #9D2449;
             --guinda-dark:  #7a1a38;
             --guinda-light: rgba(157,36,73,.08);
