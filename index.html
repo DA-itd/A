@@ -417,12 +417,11 @@ function resizeCanvas(){
     const cv = document.getElementById('tetris');
     cv.width  = COLS * SZ;
     cv.height = ROWS * SZ;
-    if(typeof render === 'function') render();
 }
 
-window.addEventListener('resize', resizeCanvas);
-// Inicializar tamaño antes de usar el canvas
-document.addEventListener('DOMContentLoaded', resizeCanvas);
+window.addEventListener('resize', ()=>{ resizeCanvas(); if(running) render(); });
+// Asignar tamaño inicial inmediatamente (sin esperar DOMContentLoaded)
+resizeCanvas();
 
 // ── VIEWS ─────────────────────────────────────────────
 const viewInfo   = document.getElementById('view-info');
@@ -435,8 +434,11 @@ function showTetris(){
         viewInfo.classList.remove('fade-out');
         viewTetris.style.display='flex';
         viewTetris.classList.add('fade-in');
-        resizeCanvas();
-        setTimeout(()=>viewTetris.classList.remove('fade-in'),400);
+        // Recalcular tamaño ahora que el elemento es visible
+        setTimeout(()=>{
+            resizeCanvas();
+            viewTetris.classList.remove('fade-in');
+        }, 50);
     },300);
     resetIdle();
 }
@@ -639,7 +641,10 @@ function loop(ts){
     animId=requestAnimationFrame(loop);
 }
 function startGame(){
-    resizeCanvas();
+    SZ = calcSZ();
+    const cvEl = document.getElementById('tetris');
+    cvEl.width  = COLS * SZ;
+    cvEl.height = ROWS * SZ;
     board=mkBoard();sc=0;lv=1;ln=0;
     document.getElementById('score').textContent=0;
     document.getElementById('level').textContent=1;
@@ -687,3 +692,4 @@ function addBtn(id,fn){
 }
 addBtn('btn-left', ()=>{if(!hits(board,piece,px-1,py)){px--;soundMove();}});
 addBtn('btn-right',()=>{if(!hits(board,piece,px+1,py)){px++;soundMove();}});
+a
