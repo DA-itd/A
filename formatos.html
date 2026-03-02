@@ -110,55 +110,15 @@
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
         // ─────────────────────────────────────────────────────────────────────────────
 
-        const FORMATOS_DATA = [
-            {
-                id: 'oficio_registro',
-                title: 'Registro de Curso-Taller & Evaluación de Instructor',
-                description: 'Ahora es más fácil: completa el registro de tu curso y la evaluación de criterios del instructor en un solo lugar, sin descargar formatos vacíos.',
-                category: 'Generales',
-                fileType: 'Plataforma Web',
-                icon: '✉️',
-                url: 'https://script.google.com/macros/s/AKfycbxAkhCTUui7Ii45A9bCQZcxsWb045rRWJwwGSRqCAf_7EWBvTBZwxLBwWSLd-_rsdBaJg/exec',
-                downloadUrl: 'https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-06%20Formatos%20de%20Criterios%20para%20Seleccionar%20Instructores.docx',
-                downloadUrl2: 'https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-07-Oficio%20de%20registro%20de%20cursos%202025.docx'
-            },
-            {
-                id: 'cvu',
-                title: 'CVU - Curriculum del Instructor',
-                description: 'Formato estandarizado para registrar el curriculum vitae de los instructores.',
-                category: 'Instructores',
-                fileType: 'Word (.doc)',
-                icon: '📘',
-                url: 'https://raw.githubusercontent.com/DA-itd/A/main/TecNM-AC-PO-005-11%20CVU%20curriculum%20del%20instructor%20(1).doc'
-            },
-            {
-                id: 'ficha_tecnica',
-                title: 'Ficha Técnica del Curso',
-                description: 'Documento con los detalles técnicos, objetivos y contenido de un curso propuesto.',
-                category: 'Instructores',
-                fileType: 'Word (.doc)',
-                icon: '📗',
-                url: 'https://raw.githubusercontent.com/DA-itd/A/main/TecNM-AC-PO-005-12%20FICHA%20TECNICA%20(1).doc'
-            },
-            {
-                id: 'deteccion_necesidades',
-                title: 'Detección de Necesidades',
-                description: 'Formato para la detección de necesidades de actualización docente.',
-                category: 'Generales',
-                fileType: 'Word (.docx)',
-                icon: '🔍',
-                url: 'https://raw.githubusercontent.com/DA-itd/A/main/ITD-AC-PO-10-01%20Deteccion%20de%20necesidades.docx'
-            },
+        const REGISTRO_URL = 'https://script.google.com/macros/s/AKfycbxAkhCTUui7Ii45A9bCQZcxsWb045rRWJwwGSRqCAf_7EWBvTBZwxLBwWSLd-_rsdBaJg/exec';
+        const URL_CRITERIOS = 'https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-06%20Formatos%20de%20Criterios%20para%20Seleccionar%20Instructores.docx';
+        const URL_OFICIO    = 'https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-07-Oficio%20de%20registro%20de%20cursos%202025.docx';
 
-            {
-                id: 'lista_asistencia',
-                title: 'Lista de Asistencia',
-                description: 'Formato oficial para el registro de asistencia de los participantes a los cursos.',
-                category: 'Instructores',
-                fileType: 'Excel (.xlsx)',
-                icon: '📝',
-                url: 'https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-08%20Formato%20de%20Lista%20de%20Asistencia_.xlsx'
-            }
+        const OTROS_FORMATOS = [
+            { id: 'cvu',              title: 'CVU — Curriculum del Instructor', fileType: 'Word (.doc)',  icon: '📘', url: 'https://raw.githubusercontent.com/DA-itd/A/main/TecNM-AC-PO-005-11%20CVU%20curriculum%20del%20instructor%20(1).doc' },
+            { id: 'ficha_tecnica',    title: 'Ficha Técnica del Curso',         fileType: 'Word (.doc)',  icon: '📗', url: 'https://raw.githubusercontent.com/DA-itd/A/main/TecNM-AC-PO-005-12%20FICHA%20TECNICA%20(1).doc' },
+            { id: 'deteccion',        title: 'Detección de Necesidades',        fileType: 'Word (.docx)', icon: '🔍', url: 'https://raw.githubusercontent.com/DA-itd/A/main/ITD-AC-PO-10-01%20Deteccion%20de%20necesidades.docx' },
+            { id: 'lista_asistencia', title: 'Lista de Asistencia',             fileType: 'Excel (.xlsx)',icon: '📝', url: 'https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-08%20Formato%20de%20Lista%20de%20Asistencia_.xlsx' },
         ];
 
         const FormatosApp = () => {
@@ -301,94 +261,113 @@
                             ← Volver al Portal Principal
                         </a>
 
+                        {/* Banner */}
                         <div className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl shadow-xl p-6 sm:p-8 text-white mb-8 animate-fadeIn">
                             <div className="flex items-center gap-4">
                                 <div className="text-5xl">📋</div>
                                 <div>
                                     <h2 className="text-2xl sm:text-3xl font-bold mb-2">Descarga de Formatos</h2>
                                     <p className="text-sm sm:text-base opacity-90">
-                                        Aquí encontrará los documentos oficiales necesarios para los procesos de actualización docente.
+                                        Documentos oficiales para los procesos de actualización docente.
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Indicador de carga del estado */}
                         {loadingStatus && (
                             <div className="text-center py-4 text-blue-600 text-sm animate-pulse mb-4">
                                 ⏳ Verificando disponibilidad del registro...
                             </div>
                         )}
-                        
-                        {FORMATOS_DATA.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                {FORMATOS_DATA.map((formato, index) => {
-                                    const isHighlighted     = formato.id === 'oficio_registro';
-                                    const isDownloading     = downloadingId === formato.id;
-                                    const isDownloadingDoc  = downloadingId === (formato.id + '_doc');
-                                    const isExternal        = formato.url.includes('script.google.com');
-                                    const isRegistry        = formato.id === 'oficio_registro';
-                                    const isDisabled        = isRegistry && !isRegistryOpen;
 
-                                    const cardClasses = isHighlighted 
-                                        ? `format-card bg-amber-50 rounded-xl shadow-xl p-6 border-t-4 border-amber-500 flex flex-col h-full ${isDisabled ? 'opacity-60 grayscale' : ''}`
-                                        : "format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-indigo-500 flex flex-col h-full";
-                                    
-                                    const animationDelay = { animationDelay: `${index * 100}ms` };
+                        {/* ── GRID 2 TARJETAS ── */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 items-start">
 
-                                    return (
-                                        <div key={formato.id} className="relative animate-fadeIn" style={animationDelay}>
-                                            {isHighlighted && (
-                                                <div className={`absolute top-0 right-0 mt-3 mr-3 z-10 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg ${isDisabled ? 'bg-gray-500' : 'bg-amber-500'}`}>
-                                                    {isDisabled ? 'CERRADO' : 'MÁS USADO'}
-                                                </div>
-                                            )}
-                                            <div className={cardClasses}>
-                                                <div className="text-5xl mb-4">{formato.icon}</div>
-                                                <h3 className="text-lg font-bold text-gray-800 mb-2 flex-grow">
-                                                    {formato.title}
-                                                </h3>
-                                                <p className="text-sm text-gray-600 mb-4">{formato.description}</p>
-                                                <p className="text-xs text-gray-500 mb-4 font-mono bg-gray-100 px-2 py-1 rounded inline-block">
-                                                    {formato.fileType}
-                                                </p>
-                                                
-                                                {(!isRegistry || isRegistryOpen) ? (
-                                                    <a href={formato.url}
-                                                       target={isExternal ? "_blank" : "_self"}
-                                                       rel={isExternal ? "noopener noreferrer" : ""}
-                                                       onClick={(e) => !isExternal && handleDownload(e, formato)}
-                                                       className={`block w-full mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors flex items-center justify-center gap-2 ${isDownloading ? 'opacity-75 cursor-wait' : ''}`}>
-                                                        <span>{isDownloading ? '⏳' : (isExternal ? '🔗' : '⬇️')}</span> 
-                                                        {isDownloading ? 'Descargando...' : (isExternal ? 'Abrir' : 'Descargar')}
-                                                    </a>
-                                                ) : (
-                                                    <button disabled className="block w-full mt-auto bg-gray-400 text-white font-bold py-3 px-4 rounded-lg text-center cursor-not-allowed flex items-center justify-center gap-2">
-                                                        <span>🔒</span> No Disponible
-                                                    </button>
-                                                )}
-                                                
-                                                {formato.downloadUrl && (
-                                                    <a href={formato.downloadUrl}
-                                                       onClick={(e) => handleDownload(e, { ...formato, url: formato.downloadUrl, id: formato.id + '_doc' })}
-                                                       className={`block w-full mt-2 bg-white border-2 border-indigo-100 hover:border-indigo-200 text-indigo-600 font-bold py-2 px-4 rounded-lg text-center transition-colors text-sm flex items-center justify-center gap-2 ${isDownloadingDoc ? 'opacity-75 cursor-wait' : ''}`}>
-                                                        <span>{isDownloadingDoc ? '⏳' : '📄'}</span> {isDownloadingDoc ? 'Descargando...' : 'Descargar Formato Word'}
-                                                    </a>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                            {/* ── TARJETA 1: Registro & Criterios ── */}
+                            <div className="relative animate-fadeIn" style={{animationDelay:'0ms'}}>
+                                <div className={`absolute top-0 right-0 mt-3 mr-3 z-10 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg ${!isRegistryOpen ? 'bg-gray-500' : 'bg-amber-500'}`}>
+                                    {!isRegistryOpen ? 'CERRADO' : 'MÁS USADO'}
+                                </div>
+                                <div className={`format-card bg-amber-50 rounded-xl shadow-xl p-6 border-t-4 border-amber-500 flex flex-col ${!isRegistryOpen ? 'opacity-60 grayscale' : ''}`}>
+                                    <div className="text-5xl mb-4">✉️</div>
+                                    <h3 className="text-lg font-bold text-gray-800 mb-2">
+                                        Registro de Curso-Taller &amp; Evaluación de Instructor
+                                    </h3>
+                                    <p className="text-sm text-gray-600 mb-4">
+                                        Ahora es más fácil: completa el registro de tu curso y la evaluación de criterios del instructor en un solo lugar, sin descargar formatos vacíos.
+                                    </p>
+                                    <p className="text-xs text-gray-500 mb-4 font-mono bg-gray-100 px-2 py-1 rounded inline-block">Plataforma Web</p>
+
+                                    {/* Botón principal */}
+                                    {isRegistryOpen ? (
+                                        <a href={REGISTRO_URL} target="_blank" rel="noopener noreferrer"
+                                           className="block w-full mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors flex items-center justify-center gap-2">
+                                            <span>🔗</span> Abrir Plataforma de Registro
+                                        </a>
+                                    ) : (
+                                        <button disabled className="block w-full mt-auto bg-gray-400 text-white font-bold py-3 px-4 rounded-lg text-center cursor-not-allowed flex items-center justify-center gap-2">
+                                            <span>🔒</span> No Disponible
+                                        </button>
+                                    )}
+
+                                    {/* Separador */}
+                                    <div className="flex items-center gap-2 my-3">
+                                        <div className="flex-1 h-px bg-amber-200"></div>
+                                        <span className="text-xs text-amber-400 font-semibold">formatos en Word</span>
+                                        <div className="flex-1 h-px bg-amber-200"></div>
+                                    </div>
+
+                                    {/* Botón discreto: Criterios */}
+                                    <a href={URL_CRITERIOS}
+                                       onClick={(e) => handleDownload(e, { url: URL_CRITERIOS, id: 'criterios_dl' })}
+                                       className="block w-full bg-white border border-amber-200 hover:border-amber-400 hover:bg-amber-50 text-gray-500 hover:text-amber-700 font-medium py-2 px-3 rounded-lg text-center transition-all text-xs flex items-center justify-center gap-2 mb-2">
+                                        {downloadingId === 'criterios_dl'
+                                            ? <><span>⏳</span> Descargando...</>
+                                            : <><span>📋</span> Criterios para Seleccionar Instructor</>}
+                                    </a>
+
+                                    {/* Botón discreto: Oficio */}
+                                    <a href={URL_OFICIO}
+                                       onClick={(e) => handleDownload(e, { url: URL_OFICIO, id: 'oficio_dl' })}
+                                       className="block w-full bg-white border border-amber-200 hover:border-amber-400 hover:bg-amber-50 text-gray-500 hover:text-amber-700 font-medium py-2 px-3 rounded-lg text-center transition-all text-xs flex items-center justify-center gap-2">
+                                        {downloadingId === 'oficio_dl'
+                                            ? <><span>⏳</span> Descargando...</>
+                                            : <><span>📄</span> Oficio de Registro de Cursos</>}
+                                    </a>
+                                </div>
                             </div>
-                        ) : (
-                             <div className="text-center py-12 bg-gray-50 rounded-lg">
-                                <p className="text-gray-600">No hay formatos disponibles en este momento.</p>
-                             </div>
-                        )}
-                        
+
+                            {/* ── TARJETA 2: Formatos varios ── */}
+                            <div className="animate-fadeIn" style={{animationDelay:'100ms'}}>
+                                <div className="format-card bg-white rounded-xl shadow-lg p-6 border-t-4 border-indigo-500 flex flex-col">
+                                    <div className="text-5xl mb-4">🗂️</div>
+                                    <h3 className="text-lg font-bold text-gray-800 mb-4">Formatos</h3>
+                                    <div className="flex flex-col gap-1">
+                                        {OTROS_FORMATOS.map(f => (
+                                            <div key={f.id} className="flex items-center justify-between gap-3 py-2 border-b border-gray-100 last:border-0">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <span className="text-lg flex-shrink-0">{f.icon}</span>
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm font-semibold text-gray-700 leading-tight">{f.title}</p>
+                                                        <p className="text-xs text-gray-400 font-mono">{f.fileType}</p>
+                                                    </div>
+                                                </div>
+                                                <a href={f.url}
+                                                   onClick={(e) => handleDownload(e, f)}
+                                                   className="flex-shrink-0 flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-semibold text-xs py-1.5 px-3 rounded-lg transition-colors border border-indigo-100 hover:border-indigo-200 whitespace-nowrap">
+                                                    {downloadingId === f.id ? <span>⏳</span> : <><span>⬇️</span> Descargar</>}
+                                                </a>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
                         {/* Botón de administración */}
                         <div className="mt-12 flex justify-center">
-                            <button 
+                            <button
                                 onClick={handleAdminClick}
                                 disabled={savingStatus}
                                 className="opacity-50 hover:opacity-100 transition-opacity p-2 rounded-full hover:bg-gray-100 disabled:cursor-wait"
@@ -397,9 +376,9 @@
                                 {savingStatus ? (
                                     <div className="h-16 w-16 flex items-center justify-center text-2xl animate-spin">⏳</div>
                                 ) : (
-                                    <img 
-                                        src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
-                                        alt="Admin Access" 
+                                    <img
+                                        src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png"
+                                        alt="Admin Access"
                                         className="h-16 w-auto grayscale hover:grayscale-0 transition-all"
                                     />
                                 )}
@@ -409,7 +388,6 @@
                 </main>
             );
         };
-        
         window.addEventListener('load', () => {
             const rootElement = document.getElementById('root');
             if (rootElement) {
