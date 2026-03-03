@@ -589,14 +589,13 @@
                 }
 
                 try {
-                    setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Convirtiendo archivos... ⏳' });
-                    const cvuFileBase64 = await fileToBase64(cvuFile);
-                    
-                    setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Subiendo CVU... 📤' });
-                    const fichaFileBase64 = await fileToBase64(fichaFile);
-                    
-                    setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Subiendo Ficha Técnica... 📤' });
+                  setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Convirtiendo archivos... ⏳' });
+                     const [cvuFileBase64, fichaFileBase64] = await Promise.all([
+                      fileToBase64(cvuFile),
+                      fileToBase64(fichaFile)
+                  ]);
 
+setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Subiendo documentación... 📤' });
                     await submitInstructorProposal({
                         instructorName: proposalForm.instructorName,
                         instructorEmail: proposalForm.instructorEmail,
