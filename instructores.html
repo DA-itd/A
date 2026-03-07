@@ -578,20 +578,20 @@
                 e.preventDefault();
                 setProposalStatus({ isSubmitting: true, error: null, success: null, progress: null });
                 
-                if (Error || fichaError) {
+                if (cvuError || fichaError) {
                     setProposalStatus({ isSubmitting: false, error: 'Corrija los errores en los archivos', success: null, progress: null });
                     return;
                 }
 
-                if (!proposalForm.instructorName || !proposalForm.courseName || !File || !fichaFile) {
+                if (!proposalForm.instructorName || !proposalForm.courseName || !cvuFile || !fichaFile) {
                     setProposalStatus({ isSubmitting: false, error: 'Todos los campos son obligatorios', success: null, progress: null });
                     return;
                 }
 
                 try {
                   setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Convirtiendo archivos... ⏳' });
-                     const [FileBase64, fichaFileBase64] = await Promise.all([
-                      fileToBase64(File),
+                     const [cvuFileBase64, fichaFileBase64] = await Promise.all([
+                      fileToBase64(cvuFile),
                       fileToBase64(fichaFile)
                   ]);
 
@@ -601,7 +601,7 @@ setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'S
                         instructorEmail: proposalForm.instructorEmail,
                         courseName: proposalForm.courseName,
                         courseId: proposalForm.courseId,
-                        File: FileBase64,
+                        File: cvuFileBase64,
                         fichaFile: fichaFileBase64
                     });
 
@@ -798,7 +798,7 @@ setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'S
                                     <FileInput
                                         id="File"
                                         label="CV (PDF)"
-                                        onFileSelect={setFile}
+                                        onFileSelect={setCvuFile}
                                         onError={setCvuError}
                                         acceptedFile={cvuFile}
                                         acceptedTypes={['application/pdf']}
