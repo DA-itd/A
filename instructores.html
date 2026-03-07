@@ -7,8 +7,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área para Instructores - ITD</title>
-    <meta name="description" content="Área exclusiva para instructores del ITD. Sube tus propuestas de cursos, CVU, fichas técnicas y gestiona tus evidencias de impartición.">
-    <meta name="keywords" content="instructores ITD, propuestas de cursos, subir CVU, evidencias curso, desarrollo académico">
+    <meta name="description" content="Área exclusiva para instructores del ITD. Sube tus propuestas de cursos, CV, fichas técnicas y gestiona tus evidencias de impartición.">
+    <meta name="keywords" content="instructores ITD, propuestas de cursos, subir CV, evidencias curso, desarrollo académico">
     
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
     
@@ -430,7 +430,7 @@
                         </h3>
                     </div>
                     <p className="text-sm text-gray-700 mb-4">
-                        Por favor sube tu <strong>CVU</strong> y <strong>Ficha técnica</strong> del curso-taller a desarrollar.
+                        Por favor sube tu <strong>CV</strong> y <strong>Ficha técnica</strong> del curso-taller a desarrollar.
                         Para tu comodidad, las plantillas se encuentran en nuestra sección de formatos.
                     </p>
                     <a
@@ -578,20 +578,20 @@
                 e.preventDefault();
                 setProposalStatus({ isSubmitting: true, error: null, success: null, progress: null });
                 
-                if (cvuError || fichaError) {
+                if (Error || fichaError) {
                     setProposalStatus({ isSubmitting: false, error: 'Corrija los errores en los archivos', success: null, progress: null });
                     return;
                 }
 
-                if (!proposalForm.instructorName || !proposalForm.courseName || !cvuFile || !fichaFile) {
+                if (!proposalForm.instructorName || !proposalForm.courseName || !File || !fichaFile) {
                     setProposalStatus({ isSubmitting: false, error: 'Todos los campos son obligatorios', success: null, progress: null });
                     return;
                 }
 
                 try {
                   setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Convirtiendo archivos... ⏳' });
-                     const [cvuFileBase64, fichaFileBase64] = await Promise.all([
-                      fileToBase64(cvuFile),
+                     const [FileBase64, fichaFileBase64] = await Promise.all([
+                      fileToBase64(File),
                       fileToBase64(fichaFile)
                   ]);
 
@@ -601,7 +601,7 @@ setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'S
                         instructorEmail: proposalForm.instructorEmail,
                         courseName: proposalForm.courseName,
                         courseId: proposalForm.courseId,
-                        cvuFile: cvuFileBase64,
+                        File: FileBase64,
                         fichaFile: fichaFileBase64
                     });
 
@@ -692,7 +692,7 @@ setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'S
                         <DownloadFormatsSection />
                         
                         <div className="bg-blue-700 text-white p-4 rounded-lg mb-6 text-xs sm:text-sm text-center">
-                            <p>⚠️ Envíe CVU y ficha técnica en PDF genuinos (No fotos ni capturas de pantalla).</p>
+                            <p>⚠️ Envíe CV y ficha técnica en PDF genuinos (No fotos ni capturas de pantalla).</p>
                         </div>
                         
                         {proposalStatus.error && (
@@ -796,9 +796,9 @@ setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'S
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                 <div>
                                     <FileInput
-                                        id="cvuFile"
-                                        label="CVU (PDF)"
-                                        onFileSelect={setCvuFile}
+                                        id="File"
+                                        label="CV (PDF)"
+                                        onFileSelect={setFile}
                                         onError={setCvuError}
                                         acceptedFile={cvuFile}
                                         acceptedTypes={['application/pdf']}
