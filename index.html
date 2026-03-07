@@ -1107,16 +1107,16 @@
                 else { current += ch; }
             }
             values.push(current.trim());
-            // cols: 0=fecha, 1=OficioNo, 2=curso, 3=Instructor, 4=duracion, 5=modalidad,
-            //       6=dia1, 7=objetivo, 8=departamento, 9=lugar, 10=nombre_jefe, 11=jefatura
+            // cols: 0=id, 1=name(curso), 2=date(fecha), 3=period, 4=Horas,
+            //       5=location, 6=schedule, 7=type, 8=Departamento, 9=Instructor
             return {
-                fecha:        values[0] || '',
-                curso:        values[2] || '',
-                instructor:   values[3] || '',
+                fecha:        values[2] || '',
+                curso:        values[1] || '',
+                instructor:   values[9] || '',
                 duracion:     values[4] || '',
-                modalidad:    values[5] || '',
+                modalidad:    values[7] || '',
                 departamento: values[8] || '',
-                lugar:        values[9] || ''
+                lugar:        values[5] || ''
             };
         }).filter(r => r.curso && r.curso !== '');
     }
