@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth" style="visibility: hidden; opacity: 0;">
+<head>
+    <meta name="google-site-verification" content="no3sRtXHiydJtG7sAE69l-JoUZRF4z6EPipOGbJ1jkE" />
+    <script src="ga.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Actualización Docente - ITD | 78 Aniversario 1948–2026</title>
+    <meta name="description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango. Celebramos el 78 Aniversario del ITD, 2 de agosto de 2026.">
+    <meta name="keywords" content="ITD, Instituto Tecnológico de Durango, 78 aniversario, actualización docente, Durango, TecNM">
+    <meta name="author" content="Coordinación de Actualización Docente - ITD">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://da-itd.github.io/A/">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://da-itd.github.io/A/">
+    <meta property="og:title" content="78 Aniversario ITD 1948–2026 | Portal Actualización Docente">
+    <meta property="og:description" content="El Instituto Tecnológico de Durango celebra 78 años de excelencia académica.">
+    <meta property="og:image" content="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+    <meta property="og:locale" content="es_MX">
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+    <link rel="shortcut icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+    <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
+
+    <!-- Fuentes: Cinzel Decorative (monumental) + EB Garamond (elegante serif) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display':   ['Cinzel Decorative', 'Georgia', 'serif'],
+                        'heading':   ['Cinzel', 'Georgia', 'serif'],
+                        'body':      ['EB Garamond', 'Georgia', 'serif'],
+                        'sans-body': ['system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        guinda: {
+                            50:  '#fdf2f4', 100: '#fce7eb', 200: '#f9d0d8',
+                            300: '#f4a8b8', 400: '#ec7590', 500: '#e04d6d',
+                            600: '#c73153', 700: '#a72344', 800: '#8c1f3b',
+                            900: '#6b1e2e', 950: '#3d0a18',
+                        },
+                        dorado: {
+                            100: '#fdf8e8', 200: '#faefc4', 300: '#f5e08a',
+                            400: '#eecc55', 500: '#e0b030', 600: '#c5950e',
+                            700: '#a37a0a', 800: '#7a5a08', 900: '#4a3604',
+                        },
+                        dark: {
+                            bg:   '#1a0810', card: '#2d1020',
+                            nav:  '#3d0a18', deep: '#0d0408',
+                        }
+                    },
+                    animation: {
+                        'slide-down':    'slideDown 0.3s ease-out forwards',
+                        'fadeInUp':      'fadeInUp 0.8s ease-out forwards',
+                        'fadeInScale':   'fadeInScale 1s ease-out forwards',
+                        'pulse-slow':    'pulseSlow 3s ease-in-out infinite',
+                        'float':         'float 5s ease-in-out infinite',
+                        'gold-shimmer':  'goldShimmer 3s linear infinite',
+                        'glow-gold':     'glowGold 2.5s ease-in-out infinite alternate',
+                        'glow-white':    'glowWhite 3s ease-in-out infinite alternate',
+                        'confetti-fall': 'confettiFall linear infinite',
+                        'sparkle':       'sparkle 1.5s ease-in-out infinite',
+                        'border-glow':   'borderGlow 3s linear infinite',
+                        'rotate-slow':   'rotateSlow 20s linear infinite',
+                    },
+                    keyframes: {
+                        slideDown:    { '0%':{opacity:'0',transform:'translateY(-10px)'},'100%':{opacity:'1',transform:'translateY(0)'} },
+                        fadeInUp:     { from:{opacity:'0',transform:'translateY(35px)'}, to:{opacity:'1',transform:'translateY(0)'} },
+                        fadeInScale:  { from:{opacity:'0',transform:'scale(0.85)'}, to:{opacity:'1',transform:'scale(1)'} },
+                        pulseSlow:    { '0%,100%':{transform:'scale(1)'},'50%':{transform:'scale(1.04)'} },
+                        float:        { '0%,100%':{transform:'translateY(0) rotate(-1deg)'},'50%':{transform:'translateY(-12px) rotate(1deg)'} },
+                        goldShimmer:  { '0%':{backgroundPosition:'-300% 0'},'100%':{backgroundPosition:'300% 0'} },
+                        glowGold:     { from:{textShadow:'0 0 8px rgba(197,149,14,0.4),0 0 18px rgba(197,149,14,0.2)'}, to:{textShadow:'0 0 22px rgba(224,176,48,0.85),0 0 45px rgba(224,176,48,0.5),0 0 70px rgba(224,176,48,0.25)'} },
+                        glowWhite:    { from:{textShadow:'0 0 8px rgba(255,255,255,0.3)'}, to:{textShadow:'0 0 20px rgba(255,255,255,0.9),0 0 40px rgba(255,255,255,0.4)'} },
+                        confettiFall: { '0%':{transform:'translateY(-30px) rotate(0deg) scale(1)',opacity:'1'},'85%':{opacity:'0.7'},'100%':{transform:'translateY(108vh) rotate(810deg) scale(0.4)',opacity:'0'} },
+                        sparkle:      { '0%,100%':{opacity:'0',transform:'scale(0.5)'},'50%':{opacity:'1',transform:'scale(1.2)'} },
+                        borderGlow:   { '0%,100%':{boxShadow:'0 0 10px rgba(197,149,14,0.3),inset 0 0 10px rgba(197,149,14,0.05)'},'50%':{boxShadow:'0 0 30px rgba(197,149,14,0.7),0 0 60px rgba(197,149,14,0.3),inset 0 0 20px rgba(197,149,14,0.1)'} },
+                        rotateSlow:   { from:{transform:'rotate(0deg)'},to:{transform:'rotate(360deg)'} },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fix Safari + Dark Mode -->
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else { document.documentElement.classList.remove('dark'); }
+        window.onunload = function() {};
+        function safeReveal() {
+            var body = document.body;
+            var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            var hasStyles = window.getComputedStyle(body).backgroundImage.includes('gradient');
+            if (isSafari && !hasStyles) { window.location.reload(); return; }
+            document.documentElement.style.transition = 'opacity 0.5s ease-in';
+            document.documentElement.style.visibility = 'visible';
+            document.documentElement.style.opacity = '1';
+        }
+        window.addEventListener('pageshow', e => e.persisted ? window.location.reload() : setTimeout(safeReveal, 150));
+        window.addEventListener('load', () => setTimeout(safeReveal, 150));
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
+    <script>
+        window.dataLayer=window.dataLayer||[];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js',new Date()); gtag('config','G-JH1X2720VL');
+    </script>
+
+    <style>
+        /* ── VARIABLES ── */
+        :root {
+            --guinda:     #6b1e2e;
+            --guinda-mid: #8c1f3b;
+            --guinda-v:   #a72344;
+            --dorado:     #c5950e;
+            --dorado-l:   #e0b030;
+            --dorado-xl:  #f5e08a;
+            --dorado-pale:#fdf8e8;
+            --blanco:     #ffffff;
+            --crema:      #fdf6ee;
+        }
+
+        /* ── BASE ── */
+        body {
+            font-family: 'EB Garamond', Georgia, serif;
+            cursor: none;
+            background: radial-gradient(ellipse at 20% 20%, #3d0a18 0%, #1a0810 40%, #0d0408 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        /* Modo claro: fondo crema guinda muy suave */
+        html:not(.dark) body {
+            background: linear-gradient(160deg, #fdf6ee 0%, #fdf2f4 35%, #fce7eb 65%, #fdf6ee 100%);
+            background-attachment: fixed;
+        }
+        h1, h2, h3, .font-display { font-family: 'Cinzel Decorative', Georgia, serif; }
+        .font-heading { font-family: 'Cinzel', Georgia, serif; }
+        a, button, .cursor-pointer { cursor: none; }
+
+        /* ── CURSOR DORADO ── */
+        #cursor-dot {
+            position: fixed; width: 13px; height: 13px;
+            background: radial-gradient(circle, var(--dorado-l) 0%, var(--dorado) 100%);
+            border: 2px solid rgba(197,149,14,0.7);
+            border-radius: 50%; pointer-events: none;
+            transform: translate(-50%,-50%); z-index: 9999;
+            transition: width .2s, height .2s;
+            box-shadow: 0 0 12px rgba(197,149,14,0.6), 0 0 4px rgba(197,149,14,0.3);
+        }
+        #cursor-dot.active {
+            width: 38px; height: 38px;
+            background: rgba(197,149,14,0.12);
+            border: 2px solid rgba(197,149,14,0.8);
+            box-shadow: 0 0 22px rgba(197,149,14,0.5);
+        }
+
+        /* ── HERO ── */
+        .hero-aniversario {
+            background: linear-gradient(135deg,
+                #0d0408 0%, #1a0810 12%,
+                #3d0a18 28%, #6b1e2e 42%,
+                #8c1f3b 50%,
+                #6b1e2e 58%, #3d0a18 72%,
+                #1a0810 88%, #0d0408 100%);
+            position: relative; overflow: hidden;
+        }
+        /* Textura de lujo: líneas diagonales doradas muy finas */
+        .hero-aniversario::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                repeating-linear-gradient(
+                    45deg,
+                    transparent 0px, transparent 28px,
+                    rgba(197,149,14,0.035) 28px, rgba(197,149,14,0.035) 29px
+                ),
+                radial-gradient(ellipse at 50% 0%, rgba(197,149,14,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 100%, rgba(140,31,59,0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(140,31,59,0.3) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        /* Marco dorado decorativo */
+        .hero-aniversario::after {
+            content: '';
+            position: absolute;
+            top: 12px; left: 12px; right: 12px; bottom: 0;
+            border: 1px solid rgba(197,149,14,0.2);
+            border-bottom: none;
+            pointer-events: none;
+        }
+
+        /* ── TEXTO DORADO BRILLANTE ── */
+        .text-gold-shimmer {
+            background: linear-gradient(90deg,
+                #a37a0a 0%, #c5950e 15%, #e0b030 30%,
+                #f5e08a 45%, #eecc55 50%, #f5e08a 55%,
+                #e0b030 70%, #c5950e 85%, #a37a0a 100%);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: goldShimmer 4s linear infinite;
+        }
+        .text-gold-glow {
+            color: var(--dorado-l);
+            animation: glowGold 2.5s ease-in-out infinite alternate;
+        }
+        .text-white-glow {
+            color: #ffffff;
+            animation: glowWhite 3s ease-in-out infinite alternate;
+        }
+
+        /* ── ORNAMENTO DORADO ── */
+        .ornament-gold {
+            display: inline-block;
+            color: var(--dorado);
+            letter-spacing: 0.4em;
+            opacity: 0.8;
+            font-size: 0.85em;
+        }
+        /* Línea ornamental */
+        .gold-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--dorado), #f5e08a, var(--dorado), transparent);
+            margin: 8px auto;
+        }
+        .gold-line-thick {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--guinda-v), var(--dorado-l), var(--guinda-v), transparent);
+        }
+
+        /* ── IMAGEN ANIVERSARIO ── */
+        .aniv-img-wrap {
+            position: relative; display: inline-block;
+        }
+        .aniv-img-wrap::before {
+            content: '';
+            position: absolute; inset: -18px;
+            border-radius: 50%;
+            background: conic-gradient(
+                rgba(197,149,14,0) 0deg,
+                rgba(197,149,14,0.6) 60deg,
+                rgba(245,224,138,0.9) 120deg,
+                rgba(197,149,14,0.6) 180deg,
+                rgba(197,149,14,0) 240deg,
+                rgba(245,224,138,0.5) 300deg,
+                rgba(197,149,14,0) 360deg
+            );
+            animation: rotateSlow 8s linear infinite;
+            filter: blur(3px);
+        }
+        .aniv-img-wrap::after {
+            content: '';
+            position: absolute; inset: -8px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(197,149,14,0.35);
+            animation: borderGlow 3s ease-in-out infinite;
+        }
+
+        /* ── BARRA GUINDA-DORADA ── */
+        .aniv-bar {
+            height: 5px;
+            background: linear-gradient(90deg,
+                var(--guinda-v), var(--dorado), #f5e08a,
+                var(--dorado), var(--guinda-v));
+            background-size: 200% 100%;
+            animation: goldShimmer 4s linear infinite;
+        }
+        .aniv-bar-thin {
+            height: 3px;
+            background: linear-gradient(90deg,
+                var(--guinda), var(--dorado-l), var(--guinda));
+        }
+
+        /* ── CONFETI ── */
+        .confeti-aniv {
+            position: fixed; pointer-events: none; z-index: 9990;
+            border-radius: 2px;
+            animation: confettiFall linear infinite;
+        }
+
+        /* ── NAV ── */
+        .nav-aniv {
+            background: linear-gradient(90deg,
+                #0d0408 0%, #3d0a18 25%, #6b1e2e 50%,
+                #3d0a18 75%, #0d0408 100%);
+            position: relative;
+        }
+        .nav-aniv::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg,
+                transparent 0%, var(--dorado) 30%,
+                #f5e08a 50%, var(--dorado) 70%, transparent 100%);
+        }
+
+        /* ── TARJETAS ── */
+        .card-portal {
+            transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+            position: relative; overflow: hidden;
+            border-radius: 20px;
+            background: #ffffff;
+            border: 1px solid rgba(107,30,46,0.12);
+            box-shadow: 0 2px 16px rgba(107,30,46,0.07);
+        }
+        html.dark .card-portal {
+            background: linear-gradient(145deg, #2d1020 0%, #1a0810 100%);
+            border-color: rgba(197,149,14,0.18);
+        }
+        .card-portal::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg,
+                var(--guinda), var(--dorado), #f5e08a,
+                var(--dorado), var(--guinda));
+            background-size: 200% 100%;
+            opacity: 0; transition: opacity 0.35s;
+        }
+        .card-portal:hover::after { opacity: 1; animation: goldShimmer 2s linear infinite; }
+        .card-portal::before {
+            content: '';
+            position: absolute; top: -60%; left: -60%; width: 60%; height: 220%;
+            background: linear-gradient(105deg, transparent 40%, rgba(245,224,138,0.25) 50%, transparent 60%);
+            transition: left 0.6s ease; pointer-events: none;
+        }
+        .card-portal:hover::before { left: 140%; }
+        .card-portal:hover {
+            transform: translateY(-7px) scale(1.02);
+            box-shadow: 0 20px 44px rgba(107,30,46,0.16), 0 4px 12px rgba(197,149,14,0.12);
+            border-color: rgba(197,149,14,0.45);
+        }
+        html.dark .card-portal:hover {
+            box-shadow: 0 20px 44px rgba(0,0,0,0.5), 0 4px 12px rgba(197,149,14,0.2);
+            border-color: rgba(197,149,14,0.5);
+        }
+        .card-bg {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 80% 0%, rgba(197,149,14,0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        html.dark .card-bg {
+            background: radial-gradient(ellipse at 80% 0%, rgba(107,30,46,0.2) 0%, transparent 60%);
+        }
+        .card-icon-wrap {
+            width: 64px; height: 64px; margin: 0 auto 14px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(107,30,46,0.09) 0%, rgba(197,149,14,0.12) 100%);
+            border: 1px solid rgba(107,30,46,0.13);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.35s;
+        }
+        .card-portal:hover .card-icon-wrap {
+            background: linear-gradient(135deg, rgba(107,30,46,0.16) 0%, rgba(197,149,14,0.22) 100%);
+            transform: scale(1.1) rotate(-3deg);
+            box-shadow: 0 6px 18px rgba(107,30,46,0.18);
+            border-color: rgba(197,149,14,0.5);
+        }
+        html.dark .card-icon-wrap {
+            background: linear-gradient(135deg, rgba(107,30,46,0.3) 0%, rgba(61,10,24,0.5) 100%);
+            border-color: rgba(197,149,14,0.2);
+        }
+        .card-divider {
+            width: 32px; height: 2px;
+            background: linear-gradient(90deg, var(--guinda), var(--dorado-l), var(--guinda));
+            border-radius: 2px; margin: 10px auto; transition: width 0.35s;
+        }
+        .card-portal:hover .card-divider { width: 58px; }
+
+        /* ── ANIMACIONES ── */
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fadeInUp { animation: fadeInUp 0.7s ease-out forwards; }
+        .delay-100{animation-delay:.1s;opacity:0}.delay-200{animation-delay:.2s;opacity:0}
+        .delay-300{animation-delay:.3s;opacity:0}.delay-400{animation-delay:.4s;opacity:0}
+        .delay-500{animation-delay:.5s;opacity:0}.delay-600{animation-delay:.6s;opacity:0}
+        .delay-700{animation-delay:.7s;opacity:0}.delay-800{animation-delay:.8s;opacity:0}
+        .delay-900{animation-delay:.9s;opacity:0}
+        @keyframes pulseSlow{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+        .animate-pulse-slow{animation:pulseSlow 3s ease-in-out infinite}
+        @keyframes float{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-12px) rotate(1deg)}}
+        .animate-float{animation:float 5s ease-in-out infinite}
+        @keyframes fadeInScale{from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)}}
+        .animate-fadeInScale{animation:fadeInScale 1s ease-out forwards}
+
+        /* ── QUOTE ── */
+        .quote-container {
+            background: linear-gradient(135deg, rgba(253,242,244,0.7) 0%, rgba(253,248,232,0.7) 100%);
+            border-left: 3px solid rgba(107,30,46,0.5);
+        }
+        html.dark .quote-container {
+            background: linear-gradient(135deg, rgba(45,16,32,0.6) 0%, rgba(26,8,16,0.6) 100%);
+            border-left-color: rgba(197,149,14,0.5);
+        }
+
+        /* ── BANNER ── */
+        #announcement-banner { transition: all .8s cubic-bezier(.4,0,.2,1); overflow: hidden; }
+        #announcement-banner.hidden-banner { opacity:0;height:0!important;padding:0!important;margin:0!important; }
+
+        /* ── WEATHER ── */
+        .weather-icon{animation:float 3.5s ease-in-out infinite}
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar{width:6px}
+        ::-webkit-scrollbar-track{background:#fdf2f4}
+        ::-webkit-scrollbar-thumb{background:linear-gradient(var(--guinda),var(--dorado));border-radius:3px}
+        html.dark ::-webkit-scrollbar-track{background:#1a0810}
+
+        /* ── SPARKLE decorativo ── */
+        .sparkle-dot {
+            position: absolute; width: 4px; height: 4px;
+            border-radius: 50%;
+            background: var(--dorado-xl);
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+
+        /* ── BADGE ── */
+        .badge-aniv {
+            background: linear-gradient(135deg, var(--guinda), var(--guinda-v));
+            animation: pulseSlow 2s infinite;
+        }
+    </style>
+</head>
+
+<body class="dark min-h-screen transition-colors duration-500">
+
+    <div id="confeti-container"></div>
+    <div id="cursor-dot"></div>
+
+    <!-- ══════════════════════════════════════
+         HERO 78 ANIVERSARIO
+    ══════════════════════════════════════ -->
+    <div class="hero-aniversario py-8 sm:py-12 text-center animate-fadeInUp">
+        <div class="relative z-10 container mx-auto px-4">
+
+            <!-- Años arriba -->
+            <p class="font-heading text-xs sm:text-sm tracking-[0.4em] uppercase mb-3 text-gold-glow" style="opacity:0.85;">
+                1948 &nbsp;·&nbsp; Instituto Tecnológico de Durango &nbsp;·&nbsp; 2026
+            </p>
+
+            <!-- Línea ornamental superior -->
+            <div class="gold-line w-48 sm:w-72 mb-4"></div>
+            <div class="ornament-gold text-sm mb-4">✦ ✦ ✦</div>
+
+            <!-- Imagen 78 Aniversario — pieza central -->
+            <div class="flex justify-center mb-5">
+                <div class="aniv-img-wrap animate-float" style="border-radius:50%;padding:8px;">
+                    <img src="https://github.com/DA-itd/A/blob/main/imagen%2078%20aniversario%20(1).png?raw=true"
+                         alt="78 Aniversario ITD"
+                         class="relative z-10 animate-fadeInScale"
+                         style="height:clamp(130px,24vw,240px);width:auto;object-fit:contain;
+                                filter:drop-shadow(0 0 30px rgba(197,149,14,0.55)) drop-shadow(0 0 10px rgba(197,149,14,0.3)) drop-shadow(0 6px 20px rgba(0,0,0,0.6));
+                                border-radius:50%;">
+                </div>
+            </div>
+
+            <!-- Título principal -->
+            <h1 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-1 leading-tight">
+                <span class="text-gold-shimmer">78 Aniversario</span>
+            </h1>
+            <h2 class="font-heading text-base sm:text-xl md:text-2xl mb-2 text-white-glow tracking-widest uppercase">
+                Instituto Tecnológico de Durango
+            </h2>
+
+            <!-- Línea ornamental media -->
+            <div class="gold-line w-64 sm:w-80 mx-auto my-3"></div>
+
+            <!-- Subtítulo elegante -->
+            <p class="font-body text-base sm:text-lg md:text-xl italic mb-1"
+               style="color:rgba(245,224,138,0.88);letter-spacing:0.04em;">
+                "Siete décadas y ocho años forjando excelencia académica"
+            </p>
+            <p class="font-heading text-xs sm:text-sm tracking-[0.3em] uppercase mb-4"
+               style="color:rgba(255,255,255,0.55);">
+                2 de Agosto · Durango, México
+            </p>
+
+            <!-- Fechas solemnes -->
+            <div class="inline-flex items-center gap-4 bg-white/8 backdrop-blur-sm border rounded-full px-6 py-3"
+                 style="border-color:rgba(197,149,14,0.35);">
+                <span class="font-heading text-xs tracking-widest uppercase" style="color:rgba(245,224,138,0.7);">Fundación</span>
+                <span class="font-display text-lg font-bold text-gold-shimmer">1948</span>
+                <span style="color:rgba(197,149,14,0.4);font-size:1.2em;">✦</span>
+                <span class="font-display text-lg font-bold text-gold-shimmer">2026</span>
+                <span class="font-heading text-xs tracking-widest uppercase" style="color:rgba(245,224,138,0.7);">Aniversario</span>
+            </div>
+
+            <div class="ornament-gold text-sm mt-5 mb-2">✦ ✦ ✦</div>
+            <div class="gold-line w-48 sm:w-72 mt-2"></div>
+        </div>
+
+        <div class="aniv-bar mt-6"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         HEADER INSTITUCIONAL
+    ══════════════════════════════════════ -->
+    <header class="bg-white dark:bg-dark-card shadow-xl sticky top-0 z-40 transition-colors duration-500"
+            style="border-bottom: 4px solid var(--guinda);">
+        <div class="aniv-bar-thin"></div>
+        <div class="container mx-auto px-4 py-3 sm:py-4">
+            <div class="flex items-center justify-between gap-4">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM"
+                     class="h-10 sm:h-14 md:h-16 object-contain bg-white rounded-lg p-1">
+                <div class="text-center flex-1 px-2">
+                    <h2 class="text-xs sm:text-lg md:text-xl font-heading font-bold leading-tight tracking-wide uppercase transition-colors"
+                        style="color:var(--guinda);">
+                        Actualización Docente
+                    </h2>
+                    <p class="text-xs sm:text-sm font-heading font-semibold tracking-widest uppercase opacity-75 transition-colors"
+                       style="color:var(--dorado);">
+                        Desarrollo Académico · 78° Aniversario
+                    </p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500">TecNM · Instituto Tecnológico de Durango</p>
+                </div>
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD"
+                     class="h-10 sm:h-14 md:h-16 object-contain">
+            </div>
+        </div>
+
+        <!-- Navbar -->
+        <nav class="nav-aniv text-white shadow-md relative">
+            <div class="container mx-auto px-4">
+                <div class="flex justify-between items-center py-1">
+
+                    <a href="#inicio" class="flex items-center gap-2 font-heading text-sm hover:text-dorado-300 transition-colors px-2 py-2 rounded tracking-wide">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                        <span class="hidden sm:inline">Inicio</span>
+                    </a>
+
+                    <button id="btn-cursos-actuales" onclick="abrirModalCursos()"
+                        class="flex items-center gap-2 font-heading text-xs px-4 py-2 rounded-lg transition-all border shadow-sm tracking-wide"
+                        style="background:rgba(197,149,14,0.15);border-color:rgba(197,149,14,0.4);"
+                        onmouseover="this.style.background='rgba(197,149,14,0.28)'"
+                        onmouseout="this.style.background='rgba(197,149,14,0.15)'">
+                        <span>📋</span>
+                        <span class="hidden sm:inline">Cursos Actuales</span>
+                        <span class="sm:hidden">Cursos</span>
+                    </button>
+
+                    <div class="flex items-center gap-3">
+                        <button id="theme-toggle-btn" class="p-2 rounded-lg hover:bg-white/10 transition-colors focus:outline-none">
+                            <svg id="theme-toggle-light-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/>
+                            </svg>
+                            <svg id="theme-toggle-dark-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                            </svg>
+                        </button>
+                        <button id="main-menu-btn" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 focus:outline-none group">
+                            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dropdown -->
+            <div id="main-menu-dropdown" class="hidden absolute right-0 top-full w-64 bg-white dark:bg-dark-card shadow-2xl rounded-b-xl z-50 overflow-hidden animate-slide-down"
+                 style="border-top:2px solid rgba(197,149,14,0.5);">
+                <div class="flex flex-col py-2">
+                    <a href="inscripciones.html" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-600 group">
+                        <span class="text-xl group-hover:scale-110 transition-transform">📝</span><span class="font-sans-body font-medium text-sm">Inscripciones</span>
+                    </a>
+                    <a href="historial.html" class="px-6 py-3 dark:hover:bg-dorado-900/10 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent group"
+                       style="--hover-bg:rgba(197,149,14,0.08);"
+                       onmouseover="this.style.background='rgba(197,149,14,0.08)';this.style.borderLeftColor='var(--dorado)'"
+                       onmouseout="this.style.background='';this.style.borderLeftColor='transparent'">
+                        <span class="text-xl group-hover:scale-110 transition-transform">📚</span><span class="font-sans-body font-medium text-sm">Historial</span>
+                    </a>
+                    <a href="formatos.html" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-500 group">
+                        <span class="text-xl group-hover:scale-110 transition-transform">📋</span><span class="font-sans-body font-medium text-sm">Formatos</span>
+                    </a>
+                    <a href="instructores.html" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-700 group">
+                        <span class="text-xl group-hover:scale-110 transition-transform">👨‍🏫</span><span class="font-sans-body font-medium text-sm">Instructores</span>
+                    </a>
+                    <a href="encuestas.html" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-400 group">
+                        <span class="text-xl group-hover:scale-110 transition-transform">📊</span><span class="font-sans-body font-medium text-sm">Encuestas</span>
+                    </a>
+                    <a href="verificador.html" class="px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/30 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-gray-400 group">
+                        <span class="text-xl group-hover:scale-110 transition-transform">✅</span><span class="font-sans-body font-medium text-sm">Validación</span>
+                    </a>
+                    <a href="https://da-itd.github.io/B/" target="_blank" rel="noopener noreferrer" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-600 group">
+                        <span class="text-xl group-hover:scale-110 transition-transform">🏅</span><span class="font-sans-body font-medium text-sm">Constancias</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Barra clima -->
+    <div class="text-white shadow-lg transition-colors duration-500" style="background:var(--guinda);">
+        <div class="container mx-auto px-4 py-2.5">
+            <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 text-sm">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">📅</span>
+                    <span id="currentDate" class="font-sans-body font-semibold text-sm">Cargando...</span>
+                </div>
+                <div id="weatherInfo" class="flex items-center gap-2">
+                    <span class="text-xl weather-icon">🌤️</span>
+                    <span class="font-sans-body font-semibold text-sm">Durango, Dgo.</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🕒</span>
+                    <span id="clock" class="font-mono font-bold text-base" style="color:var(--dorado-xl);">--:--:--</span>
+                </div>
+            </div>
+        </div>
+        <div class="aniv-bar-thin"></div>
+    </div>
+
+    <!-- Banner anuncio -->
+    <div id="announcement-banner" class="text-white p-3 text-center font-heading font-bold shadow-lg cursor-pointer text-sm"
+         style="background:linear-gradient(90deg,#0d0408,#3d0a18,#6b1e2e,#3d0a18,#0d0408);">
+        <div class="container mx-auto flex items-center justify-center gap-3">
+            <span class="animate-pulse" style="color:var(--dorado-xl)">✦</span>
+            <div>
+                <strong class="block sm:inline tracking-widest">¡GRACIAS!</strong>
+                <span class="block sm:inline ml-2 font-sans-body font-normal opacity-90">Por su participación, los esperamos para el próximo periodo.</span>
+            </div>
+            <span class="animate-pulse" style="color:var(--dorado-xl)">✦</span>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         MAIN CONTENT
+    ══════════════════════════════════════ -->
+    <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
+
+        <!-- Frase motivacional -->
+        <section class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
+            <div id="quote-container" class="quote-container rounded-xl p-6 text-center transition-opacity duration-500"></div>
+        </section>
+
+        <!-- Título Servicios -->
+        <div id="servicios" class="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32" style="position:relative;">
+
+            <!-- Imagen decorativa izquierda -->
+            <img src="https://github.com/DA-itd/A/blob/main/imagen%2078%20aniversario%20(1).png?raw=true"
+                 alt="" aria-hidden="true"
+                 class="pointer-events-none select-none hidden sm:block"
+                 style="position:absolute;left:-15px;top:50%;transform:translateY(-50%) scaleX(-1);
+                        height:clamp(80px,12vw,155px);opacity:0.2;
+                        filter:saturate(1.1) drop-shadow(0 0 8px rgba(197,149,14,0.3));z-index:0;">
+
+            <!-- Imagen decorativa derecha -->
+            <img src="https://github.com/DA-itd/A/blob/main/imagen%2078%20aniversario%20(1).png?raw=true"
+                 alt="" aria-hidden="true"
+                 class="pointer-events-none select-none hidden sm:block"
+                 style="position:absolute;right:-15px;top:50%;transform:translateY(-50%);
+                        height:clamp(80px,12vw,155px);opacity:0.2;
+                        filter:saturate(1.1) drop-shadow(0 0 8px rgba(197,149,14,0.3));z-index:0;">
+
+            <div class="relative" style="z-index:1;">
+                <div class="flex items-baseline justify-center gap-4 sm:gap-6 mb-3">
+                    <div class="inline-block animate-pulse-slow">
+                        <img src="https://raw.githubusercontent.com/DA-itd/A/main/pola.png" alt="Servicios"
+                             class="h-14 object-contain">
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-heading font-bold transition-colors"
+                        style="color:var(--guinda);">
+                        <span class="dark:hidden">Servicios Disponibles</span>
+                        <span class="hidden dark:inline text-gold-shimmer">Servicios Disponibles</span>
+                    </h2>
+                </div>
+                <div class="gold-line w-48 mx-auto mb-3"></div>
+                <p class="text-base sm:text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto px-4 font-body italic">
+                    Seleccione la opción que necesite para acceder a los diferentes servicios
+                </p>
+            </div>
+        </div>
+
+        <!-- Grid de Tarjetas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
+
+            <a id="card-inscripciones" href="inscripciones.html"
+               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-300 relative group">
+                <div class="card-bg"></div>
+                <div id="badge-inscripciones" class="badge-aniv absolute top-3 right-3 text-white text-[10px] px-2.5 py-1 rounded-full font-sans-body font-bold tracking-widest shadow-md">¡ABIERTO!</div>
+                <div class="card-icon-wrap"><span class="text-3xl">📝</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--guinda);">
+                    <span class="dark:hidden">Inscripción a Cursos</span>
+                    <span class="hidden dark:inline" style="color:var(--dorado-xl);">Inscripción a Cursos</span>
+                </h3>
+                <div class="card-divider"></div>
+                <p id="desc-inscripciones" class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Regístrate y no pierdas tu lugar</p>
+                <div id="status-inscripciones" class="inline-flex items-center gap-1.5 text-xs font-sans-body font-semibold px-3 py-1 rounded-full border"
+                     style="background:rgba(107,30,46,0.07);color:var(--guinda);border-color:rgba(107,30,46,0.2);">✓ Disponible</div>
+            </a>
+
+            <a href="historial.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-400 group">
+                <div class="card-bg"></div>
+                <div class="card-icon-wrap"><span class="text-3xl">📚</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--guinda);"><span class="dark:hidden">Historial de Cursos</span><span class="hidden dark:inline" style="color:var(--dorado-xl);">Historial de Cursos</span></h3>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Consulta tu historial de actualización docente</p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans-body font-semibold px-3 py-1 rounded-full border"
+                     style="background:rgba(197,149,14,0.08);color:var(--dorado);border-color:rgba(197,149,14,0.3);">✓ Disponible</div>
+            </a>
+
+            <a href="formatos.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-500 relative group">
+                <div class="card-bg"></div>
+                <div class="absolute top-3 right-3 text-white text-[10px] px-2.5 py-1 rounded-full font-sans-body font-bold shadow-md animate-pulse tracking-widest"
+                     style="background:var(--guinda-v);">PRE-REGISTRO</div>
+                <div class="card-icon-wrap"><span class="text-3xl">📋</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--guinda);"><span class="dark:hidden">Formatos Oficiales</span><span class="hidden dark:inline" style="color:var(--dorado-xl);">Formatos Oficiales</span></h3>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Descarga de formatos y <strong style="color:var(--guinda);">Pre-Registro</strong></p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans-body font-semibold px-3 py-1 rounded-full border"
+                     style="background:rgba(107,30,46,0.07);color:var(--guinda);border-color:rgba(107,30,46,0.2);">✓ Disponible</div>
+            </a>
+
+            <a href="verificador.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-600 group">
+                <div class="card-bg"></div>
+                <div class="card-icon-wrap"><span class="text-3xl">✅</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--guinda);"><span class="dark:hidden">Validación de Constancias</span><span class="hidden dark:inline" style="color:var(--dorado-xl);">Validación de Constancias</span></h3>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Verifica la autenticidad de documentos</p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans-body font-semibold px-3 py-1 rounded-full border bg-gray-50 dark:bg-gray-800/40 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600">✓ Disponible</div>
+            </a>
+
+            <a href="instructores.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-700 group">
+                <div class="card-bg"></div>
+                <div class="card-icon-wrap"><span class="text-3xl">👨‍🏫</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--guinda);"><span class="dark:hidden">Área para Instructores</span><span class="hidden dark:inline" style="color:var(--dorado-xl);">Área para Instructores</span></h3>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Carga tu CV y Evidencias de cursos</p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans-body font-semibold px-3 py-1 rounded-full border"
+                     style="background:rgba(107,30,46,0.07);color:var(--guinda);border-color:rgba(107,30,46,0.2);">✓ Disponible</div>
+            </a>
+
+            <a href="encuestas.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-800 group">
+                <div class="card-bg"></div>
+                <div class="card-icon-wrap"><span class="text-3xl">📊</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--guinda);"><span class="dark:hidden">Encuestas de Opinión</span><span class="hidden dark:inline" style="color:var(--dorado-xl);">Encuestas de Opinión</span></h3>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Evaluación de cursos y servicios docentes</p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans-body font-semibold px-3 py-1 rounded-full border"
+                     style="background:rgba(197,149,14,0.08);color:var(--dorado);border-color:rgba(197,149,14,0.3);">✓ Disponible</div>
+            </a>
+
+            <a href="estadisticas.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-900 group">
+                <div class="card-bg"></div>
+                <div class="card-icon-wrap"><span class="text-3xl">📈</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--guinda);"><span class="dark:hidden">Estadísticas</span><span class="hidden dark:inline" style="color:var(--dorado-xl);">Estadísticas</span></h3>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Análisis y resultados de actualización docente</p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans-body font-semibold px-3 py-1 rounded-full border"
+                     style="background:rgba(107,30,46,0.07);color:var(--guinda);border-color:rgba(107,30,46,0.2);">✓ Disponible</div>
+            </a>
+
+            <a href="https://da-itd.github.io/B/" target="_blank" rel="noopener noreferrer"
+               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-900 group">
+                <div class="card-bg"></div>
+                <div class="card-icon-wrap"><span class="text-3xl">🏅</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--guinda);"><span class="dark:hidden">Descarga de Constancias</span><span class="hidden dark:inline" style="color:var(--dorado-xl);">Descarga de Constancias</span></h3>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Descarga constancias y reconocimientos oficiales</p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans-body font-semibold px-3 py-1 rounded-full border"
+                     style="background:rgba(107,30,46,0.07);color:var(--guinda);border-color:rgba(107,30,46,0.2);">✓ Disponible</div>
+            </a>
+        </div>
+
+        <!-- Información Importante -->
+        <div id="informacion" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
+            <div class="rounded-2xl shadow-xl p-6 sm:p-8 bg-white dark:bg-dark-card transition-colors"
+                 style="border-top:4px solid var(--guinda);">
+                <div class="aniv-bar-thin rounded mb-5"></div>
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="text-3xl">ℹ️</div>
+                    <h3 class="text-xl sm:text-2xl font-heading font-bold" style="color:var(--guinda);">Información Importante</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex items-start gap-3 p-4 rounded-xl border" style="background:rgba(107,30,46,0.04);border-color:rgba(107,30,46,0.12);">
+                        <div class="text-2xl flex-shrink-0">📚</div>
+                        <div><p class="text-sm font-sans-body font-semibold" style="color:var(--guinda);">Límite de cursos</p><p class="text-sm text-gray-600 dark:text-gray-400 mt-1 font-sans-body">Puedes tomar hasta <strong>dos cursos</strong> sin empalme de horarios y fechas.</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 rounded-xl border" style="background:rgba(197,149,14,0.05);border-color:rgba(197,149,14,0.2);">
+                        <div class="text-2xl flex-shrink-0">📝</div>
+                        <div><p class="text-sm font-sans-body font-semibold" style="color:var(--dorado);">Formatos</p><p class="text-xs text-gray-600 dark:text-gray-400 mt-1 font-sans-body">Los formatos (CVU y Ficha técnica) serán en PDF, los demás firmados en Coordinación.</p></div>
+                    </div>
+                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer"
+                       class="flex items-start gap-3 p-4 rounded-xl border transition-colors hover:opacity-80"
+                       style="background:rgba(107,30,46,0.04);border-color:rgba(107,30,46,0.12);">
+                        <div class="text-2xl flex-shrink-0">🗓️</div>
+                        <div><p id="calendar-year-text" class="text-sm font-sans-body font-semibold text-gray-800 dark:text-gray-200">Calendario Institucional</p><p class="text-xs text-gray-600 dark:text-gray-400 mt-1 font-sans-body">Consulte las fechas importantes del ciclo escolar.</p></div>
+                    </a>
+                </div>
+                <div class="mt-4 flex items-start gap-3 p-4 rounded-xl border-l-4" style="background:rgba(107,30,46,0.05);border-left-color:var(--guinda);">
+                    <div class="text-2xl flex-shrink-0">🧑‍💼</div>
+                    <div><p class="text-sm font-sans-body font-semibold" style="color:var(--guinda);">Nota Importante</p><p class="text-sm text-gray-600 dark:text-gray-400 mt-1 font-sans-body">Estos cursos están dirigidos al personal docente con plaza.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enlaces Institucionales -->
+        <div id="enlaces" class="max-w-4xl mx-auto scroll-mt-32">
+            <div class="rounded-2xl shadow-xl p-6 text-white transition-colors"
+                 style="background:linear-gradient(135deg,#0d0408 0%,#3d0a18 40%,#6b1e2e 70%,#3d0a18 100%);">
+                <h3 class="text-xl font-heading font-bold mb-2 text-center tracking-widest"
+                    style="color:var(--dorado-xl);">
+                    🔗 <span class="text-white">Enlaces</span> Institucionales
+                </h3>
+                <div class="gold-line w-48 mx-auto mb-5"></div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <a href="https://www.itdurango.edu.mx" target="_blank" rel="noopener noreferrer" class="bg-sky-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-2xl mb-1">🏛️</div><p class="font-sans-body font-semibold text-xs">ITD</p><p class="text-xs opacity-90">Portal Principal</p></a>
+                    <a href="https://www.tecnm.mx" target="_blank" rel="noopener noreferrer" class="bg-emerald-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-2xl mb-1">🎓</div><p class="font-sans-body font-semibold text-xs">TecNM</p><p class="text-xs opacity-90">Sitio Nacional</p></a>
+                    <a href="https://mooc.tecnm.mx/portal/" target="_blank" rel="noopener noreferrer" class="bg-purple-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-2xl mb-1">💻</div><p class="font-sans-body font-semibold text-xs">MOOC</p><p class="text-xs opacity-90">Cursos en Línea</p></a>
+                    <a href="https://www.itdurango.edu.mx/sgi/" target="_blank" rel="noopener noreferrer" class="bg-rose-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-2xl mb-1">📂</div><p class="font-sans-body font-semibold text-xs">SGI</p><p class="text-xs opacity-90">Gestión Integrado</p></a>
+                    <a href="https://www.labmexia.gob.mx" target="_blank" rel="noopener noreferrer" class="bg-fuchsia-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-2xl mb-1">🧪</div><p class="font-sans-body font-semibold text-xs">LabMexIA</p><p class="text-xs opacity-90">Laboratorio IA</p></a>
+                    <a href="https://saberes.gob.mx/cms/index.php" target="_blank" rel="noopener noreferrer" class="bg-teal-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-2xl mb-1">🧠</div><p class="font-sans-body font-semibold text-xs">Saberes</p><p class="text-xs opacity-90">Plataforma</p></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contacto -->
+        <div id="contacto" class="max-w-4xl mx-auto mt-8 scroll-mt-32">
+            <div class="rounded-2xl shadow-xl p-6 text-white transition-colors"
+                 style="background:linear-gradient(135deg,#0d0408,#3d0a18,#6b1e2e,#3d0a18);">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+                    <div class="flex items-center gap-4">
+                        <div class="text-4xl hidden sm:block">💬</div>
+                        <div>
+                            <h3 class="text-lg font-heading font-bold tracking-widest" style="color:var(--dorado-xl);">¿Necesitas Ayuda?</h3>
+                            <p class="text-sm opacity-85 font-body italic">Contacta a la Coordinación de Actualización Docente.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <img id="admin-trigger"
+                             src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png"
+                             alt="ITD Admin Access"
+                             class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity bg-white/20 p-1 rounded"
+                             title="Acceso Administrativo"/>
+                        <a href="mailto:alejandro.calderon@itdurango.edu.mx"
+                           class="w-full sm:w-auto inline-flex items-center justify-center font-sans-body font-bold px-5 py-2 rounded-lg transition-colors shadow-md"
+                           style="background:var(--dorado-xl);color:var(--guinda);"
+                           onmouseover="this.style.background='#f5e08a'"
+                           onmouseout="this.style.background='var(--dorado-xl)'">
+                            <span class="mr-2">📧</span> Enviar Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-white text-center py-6 sm:py-8 mt-8 transition-colors"
+            style="background:linear-gradient(180deg,#1a0810 0%,#0d0408 100%);">
+        <div class="aniv-bar mb-6"></div>
+        <div class="container mx-auto px-4">
+            <div class="text-2xl mb-2">🏛️</div>
+            <p class="font-heading font-semibold text-sm sm:text-base mb-1 tracking-widest" style="color:var(--dorado-xl);">
+                © Coordinación de Actualización Docente
+            </p>
+            <p class="text-xs sm:text-sm opacity-85 font-body italic">M.C. Alejandro Calderón Rentería</p>
+            <p class="text-xs opacity-60 mt-1 font-sans-body">Todos los derechos reservados <span id="copyright-year"></span></p>
+            <div class="gold-line w-48 mx-auto my-3"></div>
+            <p class="text-xs font-body italic" style="color:var(--dorado);opacity:0.7;">
+                "78 años sembrando conocimiento, cosechando profesionistas."
+            </p>
+            <div class="mt-4 pt-4 border-t border-white/8 flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="aviso.html" class="text-xs text-white/50 hover:text-white transition-colors underline">Aviso de Privacidad</a>
+                <a href="admin.html" class="text-xs text-white/35 hover:text-white/75 transition-colors flex items-center gap-1">
+                    <span>🔒</span> Acceso Administrativo
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal Cursos -->
+    <div id="modal-cursos" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+         style="background:rgba(13,4,8,0.88);backdrop-filter:blur(6px);">
+        <div class="rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-fadeInUp bg-white dark:bg-dark-card">
+            <div class="px-6 py-4 flex items-center justify-between flex-shrink-0"
+                 style="background:linear-gradient(90deg,#0d0408,#3d0a18,#6b1e2e);">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">📋</span>
+                    <div>
+                        <h2 class="text-white font-heading font-bold text-base tracking-wide">Cursos del Periodo Actual</h2>
+                        <p class="text-xs opacity-70 font-sans-body" style="color:var(--dorado-xl);">Coordinación de Actualización Docente · ITD</p>
+                    </div>
+                </div>
+                <button onclick="cerrarModalCursos()" class="text-white/70 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="modal-cursos-body" class="overflow-y-auto flex-1 p-5"></div>
+            <div class="border-t px-6 py-3 flex-shrink-0 text-center border-gray-100 dark:border-gray-700">
+                <p class="text-xs text-gray-400 font-sans-body">Los datos se actualizan en tiempo real desde el registro oficial</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════ JAVASCRIPT ══════════ -->
+    <script>
+        // ── CONFETI GUINDA-DORADO-BLANCO ──
+        (function() {
+            const c = document.getElementById('confeti-container');
+            // colores: guinda, dorado claro, dorado, blanco, guinda claro
+            const cols = ['#6b1e2e','#8c1f3b','#c5950e','#e0b030','#f5e08a','#ffffff','#fce7eb','#a72344'];
+            const shapes = ['circle','square','rect','diamond'];
+            for (let i = 0; i < 50; i++) {
+                const el = document.createElement('div');
+                el.className = 'confeti-aniv';
+                const col   = cols[Math.floor(Math.random() * cols.length)];
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                const size  = 5 + Math.random() * 10;
+                const dur   = 7 + Math.random() * 10;
+                const delay = Math.random() * 16;
+                const left  = Math.random() * 100;
+                let br = '2px', w = size, h = size * 1.6;
+                if (shape === 'circle') { br = '50%'; w = size; h = size; }
+                else if (shape === 'square') { w = size; h = size; }
+                else if (shape === 'diamond') { br = '2px'; w = size; h = size; }
+                el.style.cssText = `left:${left}vw;width:${w}px;height:${h}px;background:${col};border-radius:${br};animation-duration:${dur}s;animation-delay:${delay}s;opacity:0.85;`;
+                c.appendChild(el);
+            }
+        })();
+
+        // ── ADMIN ──
+        const ADMIN_EMAIL = 'alejandro.calderon@itdurango.edu.mx';
+        const GOOGLE_CLIENT_ID = '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com';
+        const APPS_SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
+
+        async function fetchInscriptionState(){try{const r=await fetch(APPS_SCRIPT_URL+'?action=getRegistryStatus');const d=await r.json();return d.success?(d.status==='OPEN'):true;}catch(e){return true;}}
+        async function saveInscriptionState(isOpen,idToken){try{const r=await fetch(APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'setRegistryStatus',status:isOpen?'OPEN':'CLOSED',id_token:idToken})});const d=await r.json();return d.success===true;}catch(e){return false;}}
+        function updateUI(isOpen){
+            const card=document.getElementById('card-inscripciones'),desc=document.getElementById('desc-inscripciones'),badge=document.getElementById('badge-inscripciones'),status=document.getElementById('status-inscripciones');
+            if(!card)return;
+            if(isOpen){card.href='inscripciones.html';card.classList.remove('bg-gray-50','grayscale','opacity-60','cursor-not-allowed');desc.textContent='Regístrate y no pierdas tu lugar';badge.style.display='block';badge.style.background='';badge.textContent='¡ABIERTO!';}
+            else{card.removeAttribute('href');card.classList.add('bg-gray-50','grayscale','opacity-60','cursor-not-allowed');desc.textContent='Periodo de inscripciones cerrado';badge.style.background='#6b7280';badge.textContent='🔒 CERRADO';}
+        }
+        async function handleCredentialResponse(response){
+            try{const b=response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');const p=JSON.parse(decodeURIComponent(atob(b).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+            if(p.email===ADMIN_EMAIL){const cur=await fetchInscriptionState();const nw=!cur;const ok=await saveInscriptionState(nw,response.credential);if(ok){updateUI(nw);alert(`✅ MODO ADMINISTRADOR\n\nInscripciones: ${nw?'ABIERTAS ✅':'CERRADAS 🔒'}`);}else alert('⚠️ Error al guardar.');}
+            else alert('⛔ Acceso denegado.');}catch(e){alert('Error de autenticación.');}
+        }
+
+        // ── CURSOR ──
+        const cd=document.getElementById('cursor-dot');
+        window.addEventListener('mousemove',e=>{requestAnimationFrame(()=>{cd.style.left=`${e.clientX}px`;cd.style.top=`${e.clientY}px`;});cd.classList.toggle('active',!!e.target.closest('a,button,[role="button"],.card-portal,.cursor-pointer'));});
+
+        // ── MENÚ ──
+        const mb=document.getElementById('main-menu-btn'),md=document.getElementById('main-menu-dropdown');
+        if(mb&&md){mb.addEventListener('click',e=>{e.stopPropagation();md.classList.toggle('hidden');});document.addEventListener('click',e=>{if(!mb.contains(e.target)&&!md.contains(e.target))md.classList.add('hidden');});}
+
+        // ── RELOJ / FECHA ──
+        function updateDate(){const d=new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});document.getElementById('currentDate').textContent=d.charAt(0).toUpperCase()+d.slice(1);}
+        function startClock(){const t=()=>{const n=new Date();document.getElementById('clock').textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;};t();setInterval(t,1000);}
+        function updateYears(){const y=new Date().getFullYear();const c=document.getElementById('calendar-year-text');if(c)c.textContent=`Calendario Institucional ${y}`;const cp=document.getElementById('copyright-year');if(cp)cp.textContent=y;}
+
+        // ── CLIMA ──
+        function updateWeather(){
+            const el=document.getElementById('weatherInfo');if(!el)return;
+            const ic=c=>c===0?'☀️':[1,2,3].includes(c)?'⛅':[45,48].includes(c)?'🌫️':[51,53,55].includes(c)?'🌦️':[61,63,65].includes(c)?'🌧️':[80,81,82].includes(c)?'⛈️':'🌤️';
+            const sh=(lat,lon)=>fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`).then(r=>r.json()).then(d=>{if(d&&d.current_weather)el.innerHTML=`<span class="text-xl weather-icon">${ic(d.current_weather.weathercode)}</span><span class="font-sans-body font-semibold text-sm">Durango ${Math.round(d.current_weather.temperature)}°C</span>`;}).catch(()=>{});
+            navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>sh(p.coords.latitude,p.coords.longitude),()=>sh(24.0277,-104.653)):sh(24.0277,-104.653);
+        }
+
+        // ── FRASES ──
+        const quotes=[
+            {quote:'La educación es la herencia más noble que una institución puede dejar a su pueblo.',author:'Benito Juárez'},
+            {quote:'78 años sembrando ciencia, tecnología y valores en generaciones de duranguenses.',author:'ITD — 1948 · 2026'},
+            {quote:'La grandeza de una institución se mide por el impacto que tiene en quienes la habitaron.',author:'Anónimo'},
+            {quote:'Enseñar es dejar una huella en el otro que no se borra con el tiempo.',author:'Cécile Delannoy'},
+            {quote:'La excelencia no es un acto, es un hábito que se cultiva día a día.',author:'Aristóteles'},
+            {quote:'La mente que se abre a una nueva idea jamás volverá a su tamaño original.',author:'Albert Einstein'},
+        ];
+        function rotateQuotes(){
+            const qc=document.getElementById('quote-container');if(!qc)return;
+            const q=quotes[Math.floor(Math.random()*quotes.length)];
+            qc.style.opacity=0;
+            setTimeout(()=>{qc.innerHTML=`<p class="text-base sm:text-lg italic text-gray-700 dark:text-gray-300 font-body leading-relaxed" style="font-size:1.15rem">"${q.quote}"</p><p class="text-sm text-gray-500 dark:text-gray-400 text-right mt-2 font-body">— ${q.author}</p>`;qc.style.opacity=1;},500);
+        }
+
+        // ── BANNER ──
+        const banner=document.getElementById('announcement-banner');
+        if(banner){let h=false;const hide=()=>{if(!h){h=true;banner.classList.add('hidden-banner');}};setTimeout(hide,10000);window.addEventListener('scroll',hide,{once:true});banner.addEventListener('click',hide);}
+
+        // ── DARK MODE ──
+        const li=document.getElementById('theme-toggle-light-icon'),di=document.getElementById('theme-toggle-dark-icon'),tb=document.getElementById('theme-toggle-btn');
+        function updateThemeIcons(){const dk=localStorage.getItem('color-theme')==='dark'||(!('color-theme' in localStorage)&&window.matchMedia('(prefers-color-scheme: dark)').matches);li.classList.toggle('hidden',!dk);di.classList.toggle('hidden',dk);document.documentElement.classList.toggle('dark',dk);}
+        updateThemeIcons();
+        function toggleTheme(){const dk=document.documentElement.classList.contains('dark');document.documentElement.classList.toggle('dark',!dk);localStorage.setItem('color-theme',dk?'light':'dark');updateThemeIcons();}
+        if(tb)tb.addEventListener('click',toggleTheme);
+
+        // ── INIT ──
+        window.addEventListener('load',function(){
+            startClock();updateDate();updateWeather();updateYears();
+            rotateQuotes();setInterval(rotateQuotes,15000);
+            fetchInscriptionState().then(o=>updateUI(o));
+            const trigger=document.getElementById('admin-trigger');
+            if(trigger){trigger.addEventListener('click',()=>{
+                if(typeof google==='undefined'||!google.accounts){alert('El servicio de Google no ha cargado.');return;}
+                const ex=document.getElementById('admin-google-modal');if(ex){ex.remove();return;}
+                const modal=document.createElement('div');modal.id='admin-google-modal';modal.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);';
+                const box=document.createElement('div');box.style.cssText='background:#fff;border-radius:20px;padding:36px 32px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.5);max-width:340px;width:90%;border-top:4px solid #6b1e2e;';
+                box.innerHTML='<p style="font-size:28px;margin-bottom:8px;">🔐</p><p style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:4px;font-family:Cinzel,serif;">Acceso Administrativo</p><p style="font-size:12px;color:#64748b;margin-bottom:24px;">Identifícate para cambiar el estado del portal</p>';
+                const bc=document.createElement('div');bc.id='admin-google-btn';bc.style.cssText='display:flex;justify-content:center;margin-bottom:16px;min-height:44px;';
+                const cb=document.createElement('button');cb.textContent='Cancelar';cb.style.cssText='font-size:13px;color:#94a3b8;background:none;border:none;cursor:pointer;padding:4px 12px;border-radius:8px;';cb.onclick=()=>modal.remove();
+                box.appendChild(bc);box.appendChild(cb);modal.appendChild(box);modal.addEventListener('click',ev=>{if(ev.target===modal)modal.remove();});document.body.appendChild(modal);
+                google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:r=>{modal.remove();handleCredentialResponse(r);}});
+                google.accounts.id.renderButton(bc,{theme:'filled_blue',size:'large',shape:'pill',text:'continue_with'});
+            });}
+        });
+    </script>
+
+    <!-- MODAL CURSOS -->
+    <script>
+        const COURSES_SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRK9g_iWtGGIazGRfNNmnb1W2qpedwy_9pgSr6NKz04aav65YYd-DOF7dCP425wdRIwQ4hIe-H7jFx8/pub?gid=0&single=true&output=csv';
+        function parseCSVCursos(t){return t.trim().split(/\r?\n/).slice(1).map(l=>{const v=[];let c='',q=false;for(let ch of l){if(ch==='"')q=!q;else if(ch===','&&!q){v.push(c.trim());c='';}else c+=ch;}v.push(c.trim());return{fecha:v[0]||'',curso:v[2]||'',instructor:v[3]||''};}).filter(r=>r.curso&&r.curso!=='');}
+        const DP=[{bg:'#fdf2f4',border:'#8c1f3b',text:'#6b1e2e',label:'#f9d0d8'},{bg:'#fdf8e8',border:'#c5950e',text:'#7a5a08',label:'#faefc4'},{bg:'#fff0f6',border:'#e0105c',text:'#9c0d40',label:'#ffc0dc'},{bg:'#eff6ff',border:'#3b82f6',text:'#1d4ed8',label:'#dbeafe'},{bg:'#f0fdf4',border:'#16a34a',text:'#15803d',label:'#dcfce7'},{bg:'#fefce8',border:'#ca8a04',text:'#854d0e',label:'#fef9c3'},{bg:'#f0fdfa',border:'#0d9488',text:'#0f766e',label:'#ccfbf1'},{bg:'#fdf4ff',border:'#c026d3',text:'#86198f',label:'#fae8ff'}];
+        function bdc(cs){const m={};let i=0;cs.forEach(c=>{if(c.fecha&&!m[c.fecha]){m[c.fecha]=DP[i%DP.length];i++;}});return m;}
+        function renderCursos(cs){
+            const body=document.getElementById('modal-cursos-body');
+            if(!cs.length){body.innerHTML='<div style="text-align:center;padding:48px 24px;"><div style="font-size:56px;margin-bottom:16px;">🗓️</div><p style="font-size:17px;font-weight:700;color:#1e293b;margin:0 0 8px;">Sin cursos en este momento</p></div>';return;}
+            const MS={ENERO:1,FEBRERO:2,MARZO:3,ABRIL:4,MAYO:5,JUNIO:6,JULIO:7,AGOSTO:8,SEPTIEMBRE:9,OCTUBRE:10,NOVIEMBRE:11,DICIEMBRE:12,ENE:1,FEB:2,MAR:3,ABR:4,MAY:5,JUN:6,JUL:7,AGO:8,SEP:9,OCT:10,NOV:11,DIC:12};
+            const pf=f=>{if(!f)return 9999;const u=f.toUpperCase();const ms=(u.match(/(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE|ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)/)||[])[1];return((MS[ms]||99)*100)+(parseInt((u.match(/(\d{1,2})/)||[])[1])||99);};
+            cs.sort((a,b)=>pf(a.fecha)-pf(b.fecha));const dm=bdc(cs);
+            const ley=Object.entries(dm).map(([f,c])=>`<span style="display:inline-flex;align-items:center;gap:5px;background:${c.label};border:1px solid ${c.border};color:${c.text};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;"><span style="width:8px;height:8px;border-radius:50%;background:${c.border};display:inline-block;"></span>${f}</span>`).join('');
+            const hdr=`<div style="margin-bottom:14px;"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;"><span style="background:#f9d0d8;color:#6b1e2e;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;">${cs.length} curso${cs.length!==1?'s':''}</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">${ley}</div></div>`;
+            const cards=cs.map(c=>{const cl=dm[c.fecha]||DP[0];return`<div style="background:${cl.bg};border-left:4px solid ${cl.border};border:1px solid ${cl.border}33;border-left:4px solid ${cl.border};border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;"><div style="font-size:22px;flex-shrink:0;">📖</div><div style="flex:1;min-width:0;"><p style="font-size:14px;font-weight:700;color:#1e293b;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.curso}</p><div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#64748b;"><span style="font-weight:600;color:${cl.text};">📅 ${c.fecha}</span><span>👤 ${c.instructor}</span></div></div></div>`;}).join('');
+            body.innerHTML=hdr+cards;
+        }
+        async function abrirModalCursos(){
+            document.getElementById('modal-cursos').classList.remove('hidden');document.body.style.overflow='hidden';
+            document.getElementById('modal-cursos-body').innerHTML='<div class="flex items-center justify-center py-12 text-gray-400"><svg class="animate-spin w-8 h-8 mr-3" style="color:#c5950e" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg><span class="text-sm">Cargando cursos...</span></div>';
+            try{const r=await fetch(COURSES_SHEET_URL);renderCursos(parseCSVCursos(await r.text()));}
+            catch(e){document.getElementById('modal-cursos-body').innerHTML='<div class="text-center py-12"><p class="text-4xl mb-3">⚠️</p><p class="text-red-500">No se pudo cargar la información.</p></div>';}
+        }
+        function cerrarModalCursos(){document.getElementById('modal-cursos').classList.add('hidden');document.body.style.overflow='';}
+        document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrarModalCursos();});
+        document.getElementById('modal-cursos').addEventListener('click',function(e){if(e.target===this)cerrarModalCursos();});
+    </script>
+</body>
+</html>
