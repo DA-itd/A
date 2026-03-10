@@ -58,6 +58,7 @@
                 
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
                      alt="ITD" 
+                     id="itd-shield"
                      class="h-12 sm:h-16 md:h-20 object-contain">
             </div>
         </div>
@@ -513,5 +514,25 @@
         });
     </script>
 
+    <script>
+        // 🎮 Easter egg: 3 clicks rápidos sobre el escudo ITD → abre Tetris
+        (function(){
+            var shield = document.getElementById('itd-shield');
+            if(!shield) return;
+            var clicks = 0, timer = null;
+            shield.style.cursor = 'default'; // sin pista visual
+            shield.addEventListener('click', function(e){
+                clicks++;
+                clearTimeout(timer);
+                if(clicks >= 3){
+                    clicks = 0;
+                    window.open('index-tetris.html', '_blank');
+                } else {
+                    // reinicia contador si pasan 600ms sin otro click
+                    timer = setTimeout(function(){ clicks = 0; }, 600);
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
