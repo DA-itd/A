@@ -1,466 +1,399 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NUMPUZ - ITD Arcade</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #0a0a0a; overflow-x: hidden; }
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NUMPUZ - ITD Arcade</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    overflow-x: hidden;
+    padding: 16px;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px);
+    pointer-events: none; z-index: 999;
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 8px;
+    border: 3px solid rgba(255,159,10,0.2);
+    border-radius: 14px;
+    pointer-events: none; z-index: 998;
+    box-shadow: 0 0 60px rgba(255,159,10,0.07), inset 0 0 60px rgba(0,0,0,0.5);
+  }
+  #scanline {
+    position: fixed; left: 0; right: 0; height: 4px;
+    background: linear-gradient(transparent, rgba(255,180,0,0.07), transparent);
+    pointer-events: none; z-index: 997; top: 0;
+  }
+  .marquee-wrap { width: 100%; overflow: hidden; height: 18px; margin-bottom: 14px; }
+  .marquee-text {
+    display: inline-block; white-space: nowrap;
+    color: rgba(255,159,10,0.3); font-size: 0.38rem; letter-spacing: 0.2em;
+    animation: marquee 22s linear infinite;
+  }
+  @keyframes marquee { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
+
+  .game-header {
+    display: flex; align-items: center; justify-content: center;
+    gap: 14px; margin-bottom: 18px; width: 100%; max-width: 520px;
+  }
+  .itd-logo { height: 52px; width: 52px; object-fit: contain; flex-shrink: 0; animation: logoGlow 3s ease-in-out infinite; }
+  .itd-logo.delay { animation-delay: 1.5s; }
+  @keyframes logoGlow {
+    0%,100% { filter: drop-shadow(0 0 4px rgba(255,159,10,0.4)); }
+    50%      { filter: drop-shadow(0 0 14px rgba(255,159,10,0.9)); }
+  }
+  .title-wrap { text-align: center; }
+  .title-main {
+    font-size: clamp(1.4rem, 5vw, 2.8rem); color: #ffd60a;
+    text-shadow: 4px 4px 0 #c44b00, 8px 8px 0 #5a1a00, 0 0 30px rgba(255,214,10,0.4);
+    letter-spacing: 0.08em; line-height: 1.1;
+  }
+  .title-red { color: #ff2d55; text-shadow: 4px 4px 0 #7a0000, 0 0 20px rgba(255,45,85,0.4); }
+  .title-sub { color: rgba(255,159,10,0.5); font-size: 0.32rem; letter-spacing: 0.35em; margin-top: 6px; }
+
+  .size-btns { display: flex; gap: 8px; margin-bottom: 18px; }
+  .size-btn {
+    padding: 9px 16px; background: #111; color: rgba(255,214,10,0.4);
+    border: 2px solid rgba(255,214,10,0.15);
+    font-family: 'Press Start 2P', monospace; font-size: 0.48rem;
+    letter-spacing: 0.05em; cursor: pointer; outline: none; box-shadow: 2px 2px 0 #000;
+  }
+  .size-btn.active {
+    background: #ffd60a; color: #000; border-color: #ffd60a;
+    box-shadow: 4px 4px 0 #7a4000, 0 0 14px rgba(255,214,10,0.3);
+  }
+
+  .stats {
+    display: flex; gap: 24px; margin-bottom: 16px;
+    background: #0d0d0d; border: 2px solid #2a2a2a;
+    padding: 8px 24px; box-shadow: 3px 3px 0 #000;
+  }
+  .stat { text-align: center; }
+  .stat-label { color: #444; font-size: 0.32rem; letter-spacing: 0.2em; margin-bottom: 4px; }
+  .stat-value { color: #ff9f0a; font-size: 0.85rem; text-shadow: 0 0 8px rgba(255,159,10,0.5); }
+  .stat-value.green { color: #34c759; text-shadow: 0 0 8px rgba(52,199,89,0.5); }
+
+  #board {
+    display: grid; padding: 12px;
+    background: #0d0d0d; border: 3px solid #2a2a2a;
+    box-shadow: 6px 6px 0 #000, 0 0 20px rgba(255,159,10,0.05);
+  }
+  .tile {
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Press Start 2P', monospace;
+    user-select: none; position: relative; overflow: hidden;
+    transition: transform 0.1s; cursor: default;
+  }
+  .tile.movable { cursor: pointer; border: 2px solid #fff !important; }
+  .tile.empty   { background: #080808 !important; border: 2px dashed #1a1a1a !important; box-shadow: none !important; }
+  .tile.flash   { transform: scale(0.87) translateY(3px); }
+  .tile-shine {
+    position: absolute; top: 2px; left: 2px; right: 55%; height: 38%;
+    background: rgba(255,255,255,0.28); pointer-events: none;
+  }
+
+  .action-btns { display: flex; gap: 10px; margin-top: 18px; }
+  .action-btn {
+    padding: 10px 18px; background: #111; border-width: 2px; border-style: solid;
+    font-family: 'Press Start 2P', monospace; font-size: 0.42rem;
+    letter-spacing: 0.05em; cursor: pointer; outline: none;
+  }
+  .btn-green { color: #34c759; border-color: rgba(52,199,89,0.4);  box-shadow: 3px 3px 0 #000; }
+  .btn-red   { color: #ff2d55; border-color: rgba(255,45,85,0.4);  box-shadow: 3px 3px 0 #000; }
+
+  .hint { margin-top: 10px; color: #2a2a2a; font-size: 0.3rem; letter-spacing: 0.15em; }
+  .close-btn {
+    margin-top: 10px; padding: 6px 14px; background: transparent;
+    color: rgba(255,159,10,0.25); border: 1px solid rgba(255,159,10,0.15);
+    font-family: 'Press Start 2P', monospace; font-size: 0.28rem;
+    cursor: pointer; letter-spacing: 0.1em; outline: none;
+  }
+
+  #win-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    align-items: center; justify-content: center; z-index: 1000;
+  }
+  #win-overlay.show { display: flex; }
+  .win-box {
+    background: #111; border: 4px solid #ffd60a;
+    box-shadow: 8px 8px 0 #000, 0 0 50px rgba(255,214,10,0.3);
+    padding: 36px 48px; text-align: center;
+    animation: winPop 0.4s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  @keyframes winPop {
+    0%  { transform: scale(0.7); opacity: 0; }
+    70% { transform: scale(1.05); }
+    100%{ transform: scale(1);   opacity: 1; }
+  }
+  .win-logo   { height: 48px; margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(255,214,10,0.6)); }
+  .win-title  { font-size: clamp(1rem,4vw,2rem); color: #ffd60a; text-shadow: 4px 4px 0 #c44b00; margin-bottom: 16px; }
+  .win-stat   { color: #ff9f0a; font-size: 0.5rem; margin-bottom: 6px; }
+  .win-record { color: #34c759; font-size: 0.4rem; margin-bottom: 16px; animation: blink 0.7s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .win-btn {
+    margin-top: 8px; padding: 12px 28px; background: #ffd60a; color: #000;
+    border: none; font-family: 'Press Start 2P', monospace;
+    font-size: 0.55rem; cursor: pointer; box-shadow: 4px 4px 0 #000;
+  }
+</style>
 </head>
 <body>
-<div id="root"></div>
 
-<script type="text/babel">
-const { useState, useEffect, useCallback, useRef } = React;
+<div id="scanline"></div>
 
-const SIZES = {
-  "3x3": { n: 3, label: "3×3", tileSize: 110, gap: 6 },
-  "4x4": { n: 4, label: "4×4", tileSize: 82,  gap: 5 },
-  "5x5": { n: 5, label: "5×5", tileSize: 64,  gap: 4 },
-};
+<div class="marquee-wrap">
+  <span class="marquee-text">★ NUMPUZ ARCADE ★ ITD DURANGO ★ SLIDE TO WIN ★ HIGH SCORE ★ PRESS START ★ TECNM ★ NUMPUZ ARCADE ★ ITD DURANGO ★</span>
+</div>
 
-function createSolved(n) {
-  const total = n * n;
-  return Array.from({ length: total }, (_, i) => (i === total - 1 ? 0 : i + 1));
+<div class="game-header">
+  <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="itd-logo">
+  <div class="title-wrap">
+    <div class="title-main">NUM<span class="title-red">PUZ</span></div>
+    <div class="title-sub">── ARCADE · ITD DURANGO ──</div>
+  </div>
+  <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="itd-logo delay">
+</div>
+
+<div class="size-btns">
+  <button class="size-btn active" data-size="3">3×3</button>
+  <button class="size-btn"        data-size="4">4×4</button>
+  <button class="size-btn"        data-size="5">5×5</button>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-label">MOVES</div>
+    <div class="stat-value" id="stat-moves">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">TIME</div>
+    <div class="stat-value" id="stat-time">00:00</div>
+  </div>
+  <div class="stat" id="best-wrap" style="display:none">
+    <div class="stat-label">BEST</div>
+    <div class="stat-value green" id="stat-best">-</div>
+  </div>
+</div>
+
+<div id="board"></div>
+
+<div class="action-btns">
+  <button class="action-btn btn-green" id="btn-nuevo">&#9658; NUEVO</button>
+  <button class="action-btn btn-red"   id="btn-reset">&#9632; RESET</button>
+</div>
+<div class="hint">CLICK TILE &middot; TECLAS DE DIRECCIÓN</div>
+<button class="close-btn" onclick="window.close()">&larr; CERRAR</button>
+
+<div id="win-overlay">
+  <div class="win-box">
+    <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="win-logo">
+    <div class="win-title">&#9733; GANASTE! &#9733;</div>
+    <div class="win-stat"   id="win-moves"></div>
+    <div class="win-stat"   id="win-time"></div>
+    <div class="win-record" id="win-record" style="display:none">&#10022; NUEVO RÉCORD! &#10022;</div>
+    <button class="win-btn" id="btn-play-again">JUGAR DE NUEVO</button>
+  </div>
+</div>
+
+<script>
+const COLORS = [
+  "#ff2d55","#ff9f0a","#ffd60a","#34c759","#30d5c8",
+  "#0a84ff","#bf5af2","#ff6b6b","#ff9f43","#48dbfb",
+  "#ff6b81","#eccc68","#a29bfe","#fd79a8","#00b894",
+  "#e17055","#fdcb6e","#6c5ce7","#00cec9","#fab1a0",
+  "#55efc4","#74b9ff","#a29bfe","#fd79a8","#e84393"
+];
+
+var n=3, board=[], moves=0, seconds=0, running=false, won=false, timerID=null;
+var bestScores={3:null,4:null,5:null}, audioCtx=null;
+
+function getAudio(){
+  if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+  return audioCtx;
 }
-
-function isSolvable(board, n) {
-  const flat = board.filter(x => x !== 0);
-  let inv = 0;
-  for (let i = 0; i < flat.length; i++)
-    for (let j = i + 1; j < flat.length; j++)
-      if (flat[i] > flat[j]) inv++;
-  if (n % 2 === 1) return inv % 2 === 0;
-  const zRow = Math.floor(board.indexOf(0) / n);
-  return (n - zRow) % 2 === 0 ? inv % 2 === 1 : inv % 2 === 0;
+function beep(){
+  var ctx=getAudio();if(!ctx)return;
+  var freqs=[523,659,784,1047];
+  var o=ctx.createOscillator(),g=ctx.createGain();
+  o.connect(g);g.connect(ctx.destination);
+  o.type='square';o.frequency.value=freqs[Math.floor(Math.random()*4)];
+  g.gain.setValueAtTime(0.08,ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.1);
+  o.start();o.stop(ctx.currentTime+0.1);
 }
-
-function isSolved(board) {
-  for (let i = 0; i < board.length - 1; i++) if (board[i] !== i + 1) return false;
-  return board[board.length - 1] === 0;
-}
-
-function shuffleBoard(n) {
-  const total = n * n;
-  let board;
-  do {
-    board = Array.from({ length: total }, (_, i) => (i === total - 1 ? 0 : i + 1));
-    for (let i = board.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [board[i], board[j]] = [board[j], board[i]];
-    }
-  } while (!isSolvable(board, n) || isSolved(board));
-  return board;
-}
-
-function getNeighbors(idx, n) {
-  const r = Math.floor(idx / n), c = idx % n, nb = [];
-  if (r > 0) nb.push(idx - n);
-  if (r < n - 1) nb.push(idx + n);
-  if (c > 0) nb.push(idx - 1);
-  if (c < n - 1) nb.push(idx + 1);
-  return nb;
-}
-
-function getTileColor(num) {
-  const colors = [
-    "#ff2d55","#ff9f0a","#ffd60a","#34c759","#30d5c8",
-    "#0a84ff","#bf5af2","#ff6b6b","#ff9f43","#48dbfb",
-    "#ff6b81","#eccc68","#a29bfe","#fd79a8","#00b894",
-    "#e17055","#fdcb6e","#6c5ce7","#00cec9","#fab1a0",
-    "#55efc4","#74b9ff","#a29bfe","#fd79a8","#e84393",
-  ];
-  if (num === 0) return "transparent";
-  return colors[(num - 1) % colors.length];
-}
-
-function playBeep(audioCtx) {
-  if (!audioCtx) return;
-  const freqs = [523, 659, 784, 1047];
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain); gain.connect(audioCtx.destination);
-  osc.type = "square";
-  osc.frequency.value = freqs[Math.floor(Math.random() * freqs.length)];
-  gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-  osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-}
-
-function playWin(audioCtx) {
-  if (!audioCtx) return;
-  [523, 659, 784, 1047, 1319].forEach((freq, i) => {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.type = "square"; osc.frequency.value = freq;
-    const t = audioCtx.currentTime + i * 0.13;
-    gain.gain.setValueAtTime(0.1, t);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-    osc.start(t); osc.stop(t + 0.25);
+function winSound(){
+  var ctx=getAudio();if(!ctx)return;
+  [523,659,784,1047,1319].forEach(function(f,i){
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='square';o.frequency.value=f;
+    var t=ctx.currentTime+i*0.13;
+    g.gain.setValueAtTime(0.1,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+    o.start(t);o.stop(t+0.25);
   });
 }
 
-function NumPuz() {
-  const [sizeKey, setSizeKey] = useState("3x3");
-  const { n, tileSize, gap } = SIZES[sizeKey];
-  const [board, setBoard]   = useState(() => shuffleBoard(3));
-  const [moves, setMoves]   = useState(0);
-  const [time,  setTime]    = useState(0);
-  const [running, setRunning] = useState(false);
-  const [won,   setWon]     = useState(false);
-  const [flash, setFlash]   = useState(null);
-  const [scanLine, setScanLine] = useState(0);
-  const audioRef = useRef(null);
-  const [bestScores, setBestScores] = useState({ "3x3": null, "4x4": null, "5x5": null });
-
-  const getAudio = () => {
-    if (!audioRef.current) {
-      try { audioRef.current = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
-    }
-    return audioRef.current;
-  };
-
-  // Scanline animation
-  useEffect(() => {
-    const id = setInterval(() => setScanLine(s => (s + 2) % 100), 30);
-    return () => clearInterval(id);
-  }, []);
-
-  // Reset on size change
-  useEffect(() => {
-    setBoard(shuffleBoard(n));
-    setMoves(0); setTime(0); setRunning(false); setWon(false);
-  }, [sizeKey]);
-
-  // Timer
-  useEffect(() => {
-    if (!running) return;
-    const id = setInterval(() => setTime(t => t + 1), 1000);
-    return () => clearInterval(id);
-  }, [running]);
-
-  const handleTile = useCallback((idx) => {
-    if (won) return;
-    const zeroIdx = board.indexOf(0);
-    if (!getNeighbors(idx, n).includes(zeroIdx)) return;
-    playBeep(getAudio());
-    setFlash(idx);
-    setTimeout(() => setFlash(null), 120);
-    const nb = [...board];
-    [nb[idx], nb[zeroIdx]] = [nb[zeroIdx], nb[idx]];
-    setBoard(nb);
-    const newMoves = moves + 1;
-    setMoves(newMoves);
-    if (!running) setRunning(true);
-    if (isSolved(nb)) {
-      setWon(true);
-      setRunning(false);
-      playWin(getAudio());
-      setBestScores(prev => {
-        const cur = prev[sizeKey];
-        if (!cur || newMoves < cur.moves) return { ...prev, [sizeKey]: { moves: newMoves, time: time + 1 } };
-        return prev;
-      });
-    }
-  }, [board, n, won, running, moves, time, sizeKey]);
-
-  // Keyboard
-  useEffect(() => {
-    const h = (e) => {
-      const zeroIdx = board.indexOf(0);
-      const zR = Math.floor(zeroIdx / n), zC = zeroIdx % n;
-      let t = -1;
-      if (e.key === "ArrowUp"    && zR < n - 1) t = zeroIdx + n;
-      if (e.key === "ArrowDown"  && zR > 0)     t = zeroIdx - n;
-      if (e.key === "ArrowLeft"  && zC < n - 1) t = zeroIdx + 1;
-      if (e.key === "ArrowRight" && zC > 0)     t = zeroIdx - 1;
-      if (t !== -1) { e.preventDefault(); handleTile(t); }
-    };
-    window.addEventListener("keydown", h);
-    return () => window.removeEventListener("keydown", h);
-  }, [board, n, handleTile]);
-
-  const fmt = s => `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
-
-  return (
-    <div style={{
-      minHeight: "100vh",
-      background: "#0a0a0a",
-      backgroundImage: "radial-gradient(circle at 50% 40%, #1a0800 0%, #0a0a0a 65%)",
-      display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
-      padding: "16px", position: "relative", overflow: "hidden",
-      fontFamily: "'Press Start 2P', 'Courier New', monospace",
-    }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        @keyframes blink    { 0%,100%{opacity:1} 50%{opacity:0} }
-        @keyframes marquee  { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
-        @keyframes winPop   { 0%{transform:scale(0.7);opacity:0} 70%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
-        @keyframes logoGlow { 0%,100%{filter:drop-shadow(0 0 4px #ff9f0a44)} 50%{filter:drop-shadow(0 0 12px #ff9f0aaa)} }
-        * { box-sizing: border-box; }
-      `}</style>
-
-      {/* CRT scanlines */}
-      <div style={{
-        position:"fixed", inset:0, pointerEvents:"none", zIndex:50,
-        backgroundImage:"repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px)",
-      }}/>
-      {/* Moving scan line */}
-      <div style={{
-        position:"fixed", left:0, right:0, height:4, zIndex:51, pointerEvents:"none",
-        top:`${scanLine}%`,
-        background:"linear-gradient(transparent, rgba(255,180,0,0.07), transparent)",
-      }}/>
-      {/* CRT border */}
-      <div style={{
-        position:"fixed", inset:8,
-        border:"3px solid #ff9f0a33", borderRadius:14,
-        pointerEvents:"none", zIndex:49,
-        boxShadow:"0 0 60px #ff9f0a11, inset 0 0 60px #00000088",
-      }}/>
-
-      {/* Marquee */}
-      <div style={{ width:"100%", overflow:"hidden", marginBottom:14, height:16 }}>
-        <span style={{
-          display:"inline-block", whiteSpace:"nowrap",
-          animation:"marquee 22s linear infinite",
-          color:"#ff9f0a44", fontSize:"0.38rem", letterSpacing:"0.2em",
-        }}>
-          ★ NUMPUZ ARCADE ★ ITD DURANGO ★ SLIDE TO WIN ★ HIGH SCORE ★ PRESS START ★ TECNM ★ NUMPUZ ARCADE ★ ITD DURANGO ★
-        </span>
-      </div>
-
-      {/* Header: logo ITD + título + logo ITD */}
-      <div style={{
-        display:"flex", alignItems:"center", justifyContent:"center",
-        gap:16, marginBottom:18, width:"100%", maxWidth:520,
-      }}>
-        {/* Logo ITD izquierda */}
-        <img
-          src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png"
-          alt="ITD"
-          style={{
-            height:52, width:52, objectFit:"contain",
-            filter:"drop-shadow(0 0 6px #ff9f0a88)",
-            animation:"logoGlow 3s ease-in-out infinite",
-            flexShrink:0,
-          }}
-        />
-
-        {/* Título */}
-        <div style={{ textAlign:"center" }}>
-          <div style={{
-            fontSize:"clamp(1.4rem, 5vw, 2.8rem)",
-            color:"#ffd60a",
-            textShadow:"4px 4px 0 #c44b00, 8px 8px 0 #5a1a00, 0 0 30px #ffd60a66",
-            letterSpacing:"0.08em", lineHeight:1.1,
-          }}>
-            NUM<span style={{ color:"#ff2d55", textShadow:"4px 4px 0 #7a0000, 0 0 20px #ff2d5566" }}>PUZ</span>
-          </div>
-          <div style={{ color:"#ff9f0a77", fontSize:"0.35rem", letterSpacing:"0.35em", marginTop:5 }}>
-            ── ARCADE · ITD DURANGO ──
-          </div>
-        </div>
-
-        {/* Logo ITD derecha */}
-        <img
-          src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png"
-          alt="ITD"
-          style={{
-            height:52, width:52, objectFit:"contain",
-            filter:"drop-shadow(0 0 6px #ff9f0a88)",
-            animation:"logoGlow 3s ease-in-out infinite 1.5s",
-            flexShrink:0,
-          }}
-        />
-      </div>
-
-      {/* Size selector */}
-      <div style={{ display:"flex", gap:8, marginBottom:18 }}>
-        {Object.entries(SIZES).map(([key, { label }]) => {
-          const active = sizeKey === key;
-          return (
-            <button key={key} onClick={() => setSizeKey(key)} style={{
-              padding:"9px 16px",
-              background: active ? "#ffd60a" : "#111",
-              color:       active ? "#000"    : "#ffd60a66",
-              border:      active ? "2px solid #ffd60a" : "2px solid #ffd60a22",
-              borderRadius:0,
-              fontSize:"0.48rem",
-              fontFamily:"'Press Start 2P', monospace",
-              cursor:"pointer",
-              letterSpacing:"0.05em",
-              boxShadow: active ? "4px 4px 0 #7a4000, 0 0 14px #ffd60a44" : "2px 2px 0 #000",
-              transition:"all 0.1s",
-              outline:"none",
-            }}>{label}</button>
-          );
-        })}
-      </div>
-
-      {/* Stats */}
-      <div style={{
-        display:"flex", gap:24, marginBottom:16,
-        background:"#0d0d0d", border:"2px solid #2a2a2a",
-        padding:"8px 24px",
-        boxShadow:"3px 3px 0 #000",
-      }}>
-        {[["MOVES", moves], ["TIME", fmt(time)]].map(([lbl, val]) => (
-          <div key={lbl} style={{ textAlign:"center" }}>
-            <div style={{ color:"#444", fontSize:"0.32rem", letterSpacing:"0.2em", marginBottom:4 }}>{lbl}</div>
-            <div style={{ color:"#ff9f0a", fontSize:"0.85rem", textShadow:"0 0 8px #ff9f0a77" }}>{val}</div>
-          </div>
-        ))}
-        {bestScores[sizeKey] && (
-          <div style={{ textAlign:"center" }}>
-            <div style={{ color:"#444", fontSize:"0.32rem", letterSpacing:"0.2em", marginBottom:4 }}>BEST</div>
-            <div style={{ color:"#34c759", fontSize:"0.85rem", textShadow:"0 0 8px #34c75977" }}>{bestScores[sizeKey].moves}</div>
-          </div>
-        )}
-      </div>
-
-      {/* Board */}
-      <div style={{
-        display:"grid",
-        gridTemplateColumns:`repeat(${n}, ${tileSize}px)`,
-        gap:`${gap}px`,
-        padding:12,
-        background:"#0d0d0d",
-        border:"3px solid #2a2a2a",
-        boxShadow:"6px 6px 0 #000, 0 0 20px #ff9f0a0d",
-      }}>
-        {board.map((num, idx) => {
-          const empty    = num === 0;
-          const movable  = !empty && getNeighbors(idx, n).includes(board.indexOf(0));
-          const isFlash  = flash === idx;
-          const color    = getTileColor(num);
-          return (
-            <div key={idx} onClick={() => handleTile(idx)} style={{
-              width:tileSize, height:tileSize,
-              display:"flex", alignItems:"center", justifyContent:"center",
-              fontSize: n===3 ? "1.7rem" : n===4 ? "1.1rem" : "0.75rem",
-              fontFamily:"'Press Start 2P', monospace",
-              cursor: empty ? "default" : movable ? "pointer" : "default",
-              background: empty ? "#080808" : color,
-              color:"#000",
-              border: empty
-                ? "2px dashed #1a1a1a"
-                : movable
-                  ? "2px solid #fff"
-                  : "2px solid rgba(0,0,0,0.3)",
-              boxShadow: empty ? "none"
-                : movable
-                  ? `inset -3px -4px 0 rgba(0,0,0,0.4), inset 2px 2px 0 rgba(255,255,255,0.55), 0 0 12px ${color}77`
-                  : `inset -3px -4px 0 rgba(0,0,0,0.4), inset 2px 2px 0 rgba(255,255,255,0.3)`,
-              transform: isFlash ? "scale(0.87) translateY(3px)" : "scale(1)",
-              transition:"transform 0.1s",
-              userSelect:"none",
-              position:"relative",
-              overflow:"hidden",
-            }}>
-              {!empty && (
-                <>
-                  <div style={{
-                    position:"absolute", top:2, left:2, right:"55%", height:"38%",
-                    background:"rgba(255,255,255,0.28)", pointerEvents:"none",
-                  }}/>
-                  <span style={{ position:"relative", zIndex:1 }}>{num}</span>
-                </>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Buttons */}
-      <div style={{ display:"flex", gap:10, marginTop:18 }}>
-        {[
-          { label:"► NUEVO",  action:() => { setBoard(shuffleBoard(n)); setMoves(0); setTime(0); setRunning(false); setWon(false); }, color:"#34c759" },
-          { label:"■ RESET",  action:() => { setBoard(createSolved(n));  setMoves(0); setTime(0); setRunning(false); setWon(false); }, color:"#ff2d55"  },
-        ].map(({ label, action, color }) => (
-          <button key={label} onClick={action} style={{
-            padding:"10px 18px",
-            background:"#111", color,
-            border:`2px solid ${color}66`,
-            fontSize:"0.42rem",
-            fontFamily:"'Press Start 2P', monospace",
-            cursor:"pointer",
-            letterSpacing:"0.05em",
-            boxShadow:`3px 3px 0 #000, 0 0 8px ${color}22`,
-            outline:"none",
-          }}>{label}</button>
-        ))}
-      </div>
-
-      <div style={{ marginTop:10, color:"#2a2a2a", fontSize:"0.32rem", letterSpacing:"0.15em" }}>
-        CLICK TILE · TECLAS DE DIRECCIÓN
-      </div>
-
-      {/* Botón volver */}
-      <button onClick={() => window.close()} style={{
-        marginTop:12, padding:"6px 14px",
-        background:"transparent", color:"#ff9f0a33",
-        border:"1px solid #ff9f0a22",
-        fontSize:"0.3rem",
-        fontFamily:"'Press Start 2P', monospace",
-        cursor:"pointer", letterSpacing:"0.1em",
-        outline:"none",
-      }}>← CERRAR</button>
-
-      {/* WIN SCREEN */}
-      {won && (
-        <div style={{
-          position:"fixed", inset:0, background:"#000000bb",
-          display:"flex", alignItems:"center", justifyContent:"center", zIndex:100,
-        }}>
-          <div style={{
-            background:"#111", border:"4px solid #ffd60a",
-            boxShadow:"8px 8px 0 #000, 0 0 50px #ffd60a44",
-            padding:"36px 48px", textAlign:"center",
-            animation:"winPop 0.4s cubic-bezier(.4,0,.2,1) forwards",
-          }}>
-            {/* Logo en pantalla de victoria */}
-            <img
-              src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png"
-              alt="ITD"
-              style={{ height:48, marginBottom:12, filter:"drop-shadow(0 0 8px #ffd60a88)" }}
-            />
-            <div style={{ fontSize:"clamp(1rem,4vw,2rem)", color:"#ffd60a", textShadow:"4px 4px 0 #c44b00", marginBottom:16 }}>
-              ★ GANASTE! ★
-            </div>
-            <div style={{ color:"#ff9f0a", fontSize:"0.5rem", marginBottom:6 }}>MOVIMIENTOS: {moves}</div>
-            <div style={{ color:"#ff9f0a", fontSize:"0.5rem", marginBottom:18 }}>TIEMPO: {fmt(time)}</div>
-            {bestScores[sizeKey] && bestScores[sizeKey].moves === moves && (
-              <div style={{ color:"#34c759", fontSize:"0.4rem", marginBottom:16, animation:"blink 0.7s infinite" }}>
-                ✦ NUEVO RÉCORD! ✦
-              </div>
-            )}
-            <button onClick={() => { setBoard(shuffleBoard(n)); setMoves(0); setTime(0); setRunning(false); setWon(false); }} style={{
-              padding:"12px 28px", background:"#ffd60a", color:"#000",
-              border:"none", fontSize:"0.55rem",
-              fontFamily:"'Press Start 2P', monospace",
-              cursor:"pointer", boxShadow:"4px 4px 0 #000",
-            }}>JUGAR DE NUEVO</button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+function createSolved(){
+  var t=n*n;
+  return Array.from({length:t},function(_,i){return i===t-1?0:i+1;});
+}
+function isSolvable(b){
+  var flat=b.filter(function(x){return x!==0;}),inv=0;
+  for(var i=0;i<flat.length;i++)for(var j=i+1;j<flat.length;j++)if(flat[i]>flat[j])inv++;
+  if(n%2===1)return inv%2===0;
+  var zRow=Math.floor(b.indexOf(0)/n);
+  return (n-zRow)%2===0?inv%2===1:inv%2===0;
+}
+function checkSolved(b){
+  for(var i=0;i<b.length-1;i++)if(b[i]!==i+1)return false;
+  return b[b.length-1]===0;
+}
+function doShuffle(){
+  var t=n*n,b;
+  do{
+    b=Array.from({length:t},function(_,i){return i===t-1?0:i+1;});
+    for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=b[i];b[i]=b[j];b[j]=tmp;}
+  }while(!isSolvable(b)||checkSolved(b));
+  return b;
+}
+function neighbors(idx){
+  var r=Math.floor(idx/n),c=idx%n,nb=[];
+  if(r>0)nb.push(idx-n);if(r<n-1)nb.push(idx+n);
+  if(c>0)nb.push(idx-1);if(c<n-1)nb.push(idx+1);
+  return nb;
 }
 
-window.addEventListener('load', () => {
-  const root = ReactDOM.createRoot(document.getElementById('root'));
-  root.render(<NumPuz />);
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function updateStats(){
+  document.getElementById('stat-moves').textContent=moves;
+  document.getElementById('stat-time').textContent=fmt(seconds);
+  var best=bestScores[n];
+  if(best){document.getElementById('best-wrap').style.display='';document.getElementById('stat-best').textContent=best.moves;}
+  else{document.getElementById('best-wrap').style.display='none';}
+}
+function stopTimer(){clearInterval(timerID);timerID=null;running=false;}
+function startTimer(){
+  if(running)return;running=true;
+  timerID=setInterval(function(){seconds++;updateStats();},1000);
+}
+
+function tileSize(){return n===3?110:n===4?82:64;}
+function tileGap(){return n===3?6:n===4?5:4;}
+function tileFontSize(){return n===3?'1.7rem':n===4?'1.1rem':'0.75rem';}
+
+function renderBoard(){
+  var boardEl=document.getElementById('board');
+  var ts=tileSize(),gap=tileGap();
+  boardEl.style.gridTemplateColumns='repeat('+n+', '+ts+'px)';
+  boardEl.style.gap=gap+'px';
+  boardEl.innerHTML='';
+  var zeroIdx=board.indexOf(0);
+  board.forEach(function(num,idx){
+    var tile=document.createElement('div');
+    tile.className='tile';
+    tile.style.width=ts+'px';tile.style.height=ts+'px';
+    tile.style.fontSize=tileFontSize();
+    if(num===0){
+      tile.classList.add('empty');
+    } else {
+      var color=COLORS[(num-1)%COLORS.length];
+      tile.style.background=color;tile.style.color='#000';
+      tile.style.border='2px solid rgba(0,0,0,0.3)';
+      tile.style.boxShadow='inset -3px -4px 0 rgba(0,0,0,0.4),inset 2px 2px 0 rgba(255,255,255,0.3)';
+      if(neighbors(idx).indexOf(zeroIdx)!==-1){
+        tile.classList.add('movable');
+        tile.style.boxShadow='inset -3px -4px 0 rgba(0,0,0,0.4),inset 2px 2px 0 rgba(255,255,255,0.55),0 0 12px '+color+'77';
+      }
+      var shine=document.createElement('div');shine.className='tile-shine';tile.appendChild(shine);
+      var label=document.createElement('span');label.style.position='relative';label.style.zIndex='1';label.textContent=num;tile.appendChild(label);
+    }
+    tile.addEventListener('click',function(){handleMove(idx);});
+    boardEl.appendChild(tile);
+  });
+}
+
+function handleMove(idx){
+  if(won)return;
+  var zeroIdx=board.indexOf(0);
+  if(neighbors(idx).indexOf(zeroIdx)===-1)return;
+  beep();
+  var tiles=document.querySelectorAll('.tile');
+  tiles[idx].classList.add('flash');
+  setTimeout(function(){if(tiles[idx])tiles[idx].classList.remove('flash');},120);
+  var tmp=board[idx];board[idx]=board[zeroIdx];board[zeroIdx]=tmp;
+  moves++;
+  if(!running)startTimer();
+  renderBoard();updateStats();
+  if(checkSolved(board)){
+    won=true;stopTimer();winSound();
+    var prev=bestScores[n],isNew=!prev||moves<prev.moves;
+    if(isNew)bestScores[n]={moves:moves,time:seconds};
+    updateStats();showWin(isNew);
+  }
+}
+
+function showWin(isRecord){
+  document.getElementById('win-moves').textContent='MOVIMIENTOS: '+moves;
+  document.getElementById('win-time').textContent='TIEMPO: '+fmt(seconds);
+  document.getElementById('win-record').style.display=isRecord?'':'none';
+  document.getElementById('win-overlay').classList.add('show');
+}
+
+function newGame(){
+  stopTimer();won=false;moves=0;seconds=0;
+  board=doShuffle();
+  document.getElementById('win-overlay').classList.remove('show');
+  renderBoard();updateStats();
+}
+function resetGame(){
+  stopTimer();won=false;moves=0;seconds=0;
+  board=createSolved();
+  document.getElementById('win-overlay').classList.remove('show');
+  renderBoard();updateStats();
+}
+
+document.addEventListener('keydown',function(e){
+  var zeroIdx=board.indexOf(0),zR=Math.floor(zeroIdx/n),zC=zeroIdx%n,t=-1;
+  if(e.key==='ArrowUp'&&zR<n-1)t=zeroIdx+n;
+  if(e.key==='ArrowDown'&&zR>0)t=zeroIdx-n;
+  if(e.key==='ArrowLeft'&&zC<n-1)t=zeroIdx+1;
+  if(e.key==='ArrowRight'&&zC>0)t=zeroIdx-1;
+  if(t!==-1){e.preventDefault();handleMove(t);}
 });
+
+document.querySelectorAll('.size-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.size-btn').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    n=parseInt(btn.dataset.size);
+    newGame();
+  });
+});
+
+document.getElementById('btn-nuevo').addEventListener('click',newGame);
+document.getElementById('btn-reset').addEventListener('click',resetGame);
+document.getElementById('btn-play-again').addEventListener('click',newGame);
+
+var scanPos=0,scanEl=document.getElementById('scanline');
+setInterval(function(){scanPos=(scanPos+2)%100;scanEl.style.top=scanPos+'%';},30);
+
+newGame();
 </script>
 </body>
 </html>
