@@ -22,20 +22,20 @@
   body::before {
     content: '';
     position: fixed; inset: 0;
-    background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px);
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 5px, rgba(0,0,0,0.05) 5px, rgba(0,0,0,0.05) 6px);
     pointer-events: none; z-index: 999;
   }
   body::after {
     content: '';
     position: fixed; inset: 8px;
-    border: 3px solid rgba(255,159,10,0.2);
+    border: 2px solid rgba(255,159,10,0.12);
     border-radius: 14px;
     pointer-events: none; z-index: 998;
-    box-shadow: 0 0 60px rgba(255,159,10,0.07), inset 0 0 60px rgba(0,0,0,0.5);
+    box-shadow: 0 0 40px rgba(255,159,10,0.04), inset 0 0 80px rgba(0,0,0,0.2);
   }
   #scanline {
-    position: fixed; left: 0; right: 0; height: 4px;
-    background: linear-gradient(transparent, rgba(255,180,0,0.07), transparent);
+    position: fixed; left: 0; right: 0; height: 120px;
+    background: linear-gradient(transparent, rgba(255,200,80,0.025), transparent);
     pointer-events: none; z-index: 997; top: 0;
   }
   .marquee-wrap { width: 100%; overflow: hidden; height: 18px; margin-bottom: 14px; }
