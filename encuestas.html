@@ -45,6 +45,7 @@
             <div class="flex items-center justify-between gap-4">
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" 
                      alt="TecNM" 
+                     id="tecnm-logo"
                      class="h-12 sm:h-16 md:h-20 object-contain">
                 
                 <div class="text-center flex-1 px-2 sm:px-4">
@@ -520,7 +521,7 @@
             var shield = document.getElementById('itd-shield');
             if(!shield) return;
             var clicks = 0, timer = null;
-            shield.style.cursor = 'default'; // sin pista visual
+            shield.style.cursor = 'default';
             shield.addEventListener('click', function(e){
                 clicks++;
                 clearTimeout(timer);
@@ -528,7 +529,24 @@
                     clicks = 0;
                     window.open('index-tetris.html', '_blank');
                 } else {
-                    // reinicia contador si pasan 600ms sin otro click
+                    timer = setTimeout(function(){ clicks = 0; }, 600);
+                }
+            });
+        })();
+
+        // 🎮 Easter egg: 3 clicks rápidos sobre el logo TecNM → abre NumPuz
+        (function(){
+            var logo = document.getElementById('tecnm-logo');
+            if(!logo) return;
+            var clicks = 0, timer = null;
+            logo.style.cursor = 'default';
+            logo.addEventListener('click', function(e){
+                clicks++;
+                clearTimeout(timer);
+                if(clicks >= 3){
+                    clicks = 0;
+                    window.open('numpuz.html', '_blank');
+                } else {
                     timer = setTimeout(function(){ clicks = 0; }, 600);
                 }
             });
