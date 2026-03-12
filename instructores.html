@@ -138,15 +138,33 @@
             });
         };
 
+        // Devuelve SOLO los bytes base64, sin el prefijo "data:...;base64,"
+        const fileToBase64Clean = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    const result = reader.result;
+                    const base64 = result.includes(',') ? result.split(',')[1] : result;
+                    resolve(base64);
+                };
+                reader.onerror = error => reject(error);
+            });
+        };
+
         const fileToFileObject = (file, customFileName) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
-                reader.onload = () => resolve({
-                    base64:   reader.result,
-                    mimeType: file.type || 'application/octet-stream',
-                    fileName: customFileName || file.name
-                });
+                reader.onload = () => {
+                    const result = reader.result;
+                    const base64 = result.includes(',') ? result.split(',')[1] : result;
+                    resolve({
+                        base64,
+                        mimeType: file.type || 'application/octet-stream',
+                        fileName: customFileName || file.name
+                    });
+                };
                 reader.onerror = error => reject(error);
             });
         };
@@ -218,20 +236,23 @@
             try {
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
                     redirect: 'follow',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: 'submitInstructorProposal', ...data })
                 });
 
-                const result = await response.json();
-                if (result?.success) {
+                const text = await response.text();
+                let result;
+                try { result = JSON.parse(text); }
+                catch { throw new Error('Respuesta inesperada del servidor: ' + text.substring(0, 120)); }
+
+                if (result?.success || result?.ok) {
                     return result;
                 } else {
-                    throw new Error(result.message || 'Error al enviar propuesta');
+                    throw new Error(result?.message || result?.error || 'Error al enviar propuesta');
                 }
             } catch (error) {
-                throw new Error("No se pudo enviar la propuesta.");
+                if (error.message.includes('Respuesta inesperada') || error.message.includes('Error al enviar')) throw error;
+                throw new Error("No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.");
             }
         };
 
@@ -242,20 +263,23 @@
             try {
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
                     redirect: 'follow',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: 'submitInstructorEvidence', ...data })
                 });
 
-                const result = await response.json();
-                if (result?.success) {
+                const text = await response.text();
+                let result;
+                try { result = JSON.parse(text); }
+                catch { throw new Error('Respuesta inesperada del servidor: ' + text.substring(0, 120)); }
+
+                if (result?.success || result?.ok) {
                     return result;
                 } else {
-                    throw new Error(result.message || 'Error al enviar evidencia');
+                    throw new Error(result?.message || result?.error || 'Error al enviar evidencia');
                 }
             } catch (error) {
-                throw new Error("No se pudo enviar la evidencia.");
+                if (error.message.includes('Respuesta inesperada') || error.message.includes('Error al enviar')) throw error;
+                throw new Error("No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.");
             }
         };
 
@@ -525,7 +549,8 @@
             const [evidenceStatus, setEvidenceStatus] = useState({ 
                 isSubmitting: false, 
                 error: null, 
-                success: null 
+                success: null,
+                progress: null
             });
 
             useEffect(() => {
@@ -591,18 +616,19 @@
                 try {
                   setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Convirtiendo archivos... ⏳' });
                      const [cvuFileBase64, fichaFileBase64] = await Promise.all([
-                      fileToBase64(cvuFile),
-                      fileToBase64(fichaFile)
+                      fileToBase64Clean(cvuFile),
+                      fileToBase64Clean(fichaFile)
                   ]);
 
 setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Subiendo documentación... 📤' });
                     await submitInstructorProposal({
                         instructorName: proposalForm.instructorName,
-                        instructorEmail: proposalForm.instructorEmail,
                         courseName: proposalForm.courseName,
                         courseId: proposalForm.courseId,
-                        File: cvuFileBase64,
-                        fichaFile: fichaFileBase64
+                        cvuFile: cvuFileBase64,
+                        cvuFileName: cvuFile.name,
+                        fichaFile: fichaFileBase64,
+                        fichaFileName: fichaFile.name
                     });
 
                     setProposalStatus({ isSubmitting: false, error: null, success: '¡Propuesta enviada con éxito! ✅', progress: null });
@@ -626,21 +652,22 @@ setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'S
                 }
 
                 try {
+                    setEvidenceStatus({ isSubmitting: true, error: null, success: null, progress: 'Preparando archivos... ⏳' });
                     const evidenceFilesData = await Promise.all(evidenceFiles.map((file) => {
                         return fileToFileObject(file, file.name);
                     }));
-                    
+
+                    setEvidenceStatus({ isSubmitting: true, error: null, success: null, progress: 'Subiendo evidencias... 📤' });
                     await submitEvidence({
                         instructorName: evidenceForm.instructorName,
-                        instructorEmail: evidenceForm.instructorEmail || '',
                         courseName: evidenceForm.courseName,
                         courseId: evidenceForm.courseId,
                         evidenceFiles: evidenceFilesData
                     });
 
-                    setEvidenceStatus({ isSubmitting: false, error: null, success: '¡Evidencias enviadas con éxito! ✅' });
+                    setEvidenceStatus({ isSubmitting: false, error: null, success: '¡Evidencias enviadas con éxito! ✅', progress: null });
                 } catch (err) {
-                    setEvidenceStatus({ isSubmitting: false, error: err instanceof Error ? err.message : "Error al enviar", success: null });
+                    setEvidenceStatus({ isSubmitting: false, error: err instanceof Error ? err.message : "Error al enviar", success: null, progress: null });
                 }
             };
 
@@ -864,6 +891,12 @@ setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'S
                         {evidenceStatus.error && (
                             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md">
                                 <p className="text-sm">{evidenceStatus.error}</p>
+                            </div>
+                        )}
+
+                        {evidenceStatus.progress && (
+                            <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-md">
+                                <p className="font-bold text-sm animate-pulse">{evidenceStatus.progress}</p>
                             </div>
                         )}
                         
