@@ -732,7 +732,7 @@
                     await addHeader(doc);
                 };
 
-                const totalPages = 5;
+                const totalPages = 6;
                 let pageNum = 1;
                 await addHeader(pdf);
 
@@ -765,6 +765,49 @@
                 const g7Img = await captureElement('chartBox-docentesYear');
                 const h6 = placeImage(pdf, g6Img, margin, bodyTop, contentWidth, bodyHeight * 0.47);
                 placeImage(pdf, g7Img, margin, bodyTop + h6 + 6, contentWidth, bodyHeight * 0.47);
+                addFooter(pdf, pageNum, totalPages);
+
+                // --- Página 6: Docentes Sin Participar ---
+                await newPage(pdf, pageNum++, totalPages);
+                const np = statsData.docentesNoParticiparon;
+                if (np && np.total > 0) {
+                    let yPos = bodyTop + 4;
+                    // Título de sección
+                    pdf.setFontSize(13);
+                    pdf.setFont("helvetica", "bold");
+                    pdf.setTextColor(157, 36, 73);
+                    pdf.text("Docentes que No Participaron", pdfWidth / 2, yPos, { align: "center" });
+                    yPos += 8;
+                    // Subtítulo total
+                    pdf.setFontSize(10);
+                    pdf.setFont("helvetica", "normal");
+                    pdf.setTextColor(80, 80, 80);
+                    pdf.text(`Total: ${np.total} docentes`, pdfWidth / 2, yPos, { align: "center" });
+                    yPos += 10;
+                    // Cajas de género
+                    const boxW = 55, boxH = 18, gap = 8;
+                    const totalBoxW = boxW * 2 + gap;
+                    const startX = (pdfWidth - totalBoxW) / 2;
+                    // Hombres
+                    pdf.setFillColor(219, 234, 254);
+                    pdf.roundedRect(startX, yPos, boxW, boxH, 3, 3, 'F');
+                    pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(27, 57, 106);
+                    pdf.text("Hombres", startX + boxW / 2, yPos + 6, { align: "center" });
+                    pdf.setFontSize(14);
+                    pdf.text(String(np.hombres), startX + boxW / 2, yPos + 14, { align: "center" });
+                    // Mujeres
+                    const bx = startX + boxW + gap;
+                    pdf.setFillColor(252, 231, 243);
+                    pdf.roundedRect(bx, yPos, boxW, boxH, 3, 3, 'F');
+                    pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(157, 36, 73);
+                    pdf.text("Mujeres", bx + boxW / 2, yPos + 6, { align: "center" });
+                    pdf.setFontSize(14);
+                    pdf.text(String(np.mujeres), bx + boxW / 2, yPos + 14, { align: "center" });
+                    yPos += boxH + 10;
+                    // Nota informativa
+                    pdf.setFontSize(8); pdf.setFont("helvetica", "italic"); pdf.setTextColor(120, 120, 120);
+                    pdf.text("* La lista detallada de nombres y departamentos se encuentra en el reporte Word.", margin, yPos);
+                }
                 addFooter(pdf, pageNum, totalPages);
 
                 pdf.save(`Reporte_Estadistico_${period}.pdf`);
@@ -962,7 +1005,31 @@
                     children.push(spacer());
                 }
 
-                // Pie
+                // 8. Docentes que NO Participaron
+                if (statsData.docentesNoParticiparon?.total > 0) {
+                    const np = statsData.docentesNoParticiparon;
+                    children.push(heading("8. Docentes que No Participaron en el Periodo"));
+                    children.push(kpiTable([
+                        ["Total de docentes sin participación", np.total],
+                        ["Hombres", np.hombres],
+                        ["Mujeres", np.mujeres],
+                    ]));
+                    children.push(spacer());
+                    if (np.lista?.length > 0) {
+                        children.push(new Paragraph({
+                            spacing: { before: 160, after: 100 },
+                            children: [new TextRun({ text: "Listado de docentes sin participación:", bold: true, font: "Arial", size: 22, color: "374151" })]
+                        }));
+                        children.push(dataTable(
+                            ["#", "Nombre del Docente", "Departamento"],
+                            np.lista.map((d, i) => [`${i + 1}`, d.nombre, d.departamento]),
+                            [500, 5500, 3360]
+                        ));
+                    }
+                    children.push(spacer());
+                }
+
+                // Pie del documento
                 children.push(sep());
                 children.push(new Paragraph({
                     alignment: AlignmentType.CENTER,
@@ -1125,8 +1192,8 @@
                     </div>
                 </div>
 
-                {/* KPIs (Modificado: 3 columnas, eliminado Cursos Activos) */}
-                <div id="kpi-section" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {/* KPIs */}
+                <div id="kpi-section" className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-blue-600 flex items-center justify-between">
                         <div>
                             <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Total Inscripciones</p>
@@ -1147,6 +1214,18 @@
                             <p className="text-3xl font-bold text-gray-800 mt-1">{statsData.coberturaDocente.porcentaje}%</p>
                         </div>
                         <div className="text-3xl bg-yellow-100 p-3 rounded-full text-yellow-600">🏫</div>
+                    </div>
+                    <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-red-500 flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Sin Participar</p>
+                            <p className="text-3xl font-bold text-gray-800 mt-1">{statsData.docentesNoParticiparon?.total ?? '—'}</p>
+                            {statsData.docentesNoParticiparon?.total > 0 && (
+                                <p className="text-xs text-gray-400 mt-1">
+                                    H: {statsData.docentesNoParticiparon.hombres} &nbsp;|&nbsp; M: {statsData.docentesNoParticiparon.mujeres}
+                                </p>
+                            )}
+                        </div>
+                        <div className="text-3xl bg-red-100 p-3 rounded-full text-red-500">🚫</div>
                     </div>
                 </div>
 
