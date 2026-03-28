@@ -1074,6 +1074,392 @@
             }
         };
 
+        // ── NUEVO: Informe Trimestral Word ──────────────────────────────
+        const generateWordTrimestral = async () => {
+            if (!statsData) { alert("No hay datos cargados aún."); return; }
+            setGeneratingPDF(true);
+            try {
+                const docxLib = window.docx;
+                if (!docxLib) throw new Error("Librería docx no cargada.");
+                const {
+                    Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+                    AlignmentType, WidthType, BorderStyle, ShadingType, PageBreak
+                } = docxLib;
+
+                const dateStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+                const cellBorder = { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" };
+                const borders = { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder, insideH: cellBorder, insideV: cellBorder };
+
+                const para = (text, opts = {}) => new Paragraph({
+                    alignment: opts.align || AlignmentType.LEFT,
+                    spacing: { before: opts.before ?? 80, after: opts.after ?? 80 },
+                    children: [new TextRun({ text, font: "Arial", size: opts.size ?? 22, bold: opts.bold ?? false, color: opts.color ?? "000000", italics: opts.italic ?? false })]
+                });
+
+                const sep = () => new Paragraph({
+                    border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "9D2449", space: 1 } },
+                    spacing: { before: 60, after: 180 }
+                });
+
+                const heading = (text) => new Paragraph({
+                    spacing: { before: 280, after: 120 },
+                    children: [new TextRun({ text, bold: true, color: "1B396A", font: "Arial", size: 26 })],
+                    border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "D5E8F0", space: 1 } }
+                });
+
+                const kpiTable = (rows) => new Table({
+                    width: { size: 9360, type: WidthType.DXA },
+                    columnWidths: [5760, 3600],
+                    rows: rows.map(([label, value]) => new TableRow({
+                        children: [
+                            new TableCell({
+                                borders, width: { size: 5760, type: WidthType.DXA },
+                                shading: { fill: "EEF4FB", type: ShadingType.CLEAR },
+                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
+                                children: [new Paragraph({ children: [new TextRun({ text: String(label), font: "Arial", size: 22, color: "374151" })] })]
+                            }),
+                            new TableCell({
+                                borders, width: { size: 3600, type: WidthType.DXA },
+                                shading: { fill: "FFFFFF", type: ShadingType.CLEAR },
+                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
+                                children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: String(value), font: "Arial", size: 24, bold: true, color: "9D2449" })] })]
+                            })
+                        ]
+                    }))
+                });
+
+                const dataTable = (headers, rows, colWidths) => new Table({
+                    width: { size: colWidths.reduce((a,b)=>a+b,0), type: WidthType.DXA },
+                    columnWidths: colWidths,
+                    rows: [
+                        new TableRow({ tableHeader: true, children: headers.map((h,i) => new TableCell({
+                            borders, width: { size: colWidths[i], type: WidthType.DXA },
+                            shading: { fill: "1B396A", type: ShadingType.CLEAR },
+                            margins: { top: 100, bottom: 100, left: 160, right: 160 },
+                            children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, color: "FFFFFF", font: "Arial", size: 20 })] })]
+                        })) }),
+                        ...rows.map((row, ri) => new TableRow({ children: row.map((cell,i) => new TableCell({
+                            borders, width: { size: colWidths[i], type: WidthType.DXA },
+                            shading: { fill: ri%2===0 ? "FFFFFF":"F8F9FA", type: ShadingType.CLEAR },
+                            margins: { top: 80, bottom: 80, left: 160, right: 160 },
+                            children: [new Paragraph({ children: [new TextRun({ text: String(cell), font: "Arial", size: 20, color: "374151" })] })]
+                        })) }))
+                    ]
+                });
+
+                // Datos del trimestre (del PDF: ene/feb/mar 2026)
+                // Se usan statsData del periodo actual + los datos fijos del oficio 155/2026
+                const trimData = {
+                    totalInscripciones: statsData.totalInscripciones ?? 435,
+                    actualizados: statsData.coberturaDocente?.actualizados ?? 289,
+                    porcentaje: statsData.coberturaDocente?.porcentaje ?? 69.3,
+                    hombres: statsData.distribucionGenero?.Hombres ?? statsData.distribucionGenero?.hombres ?? 267,
+                    mujeres: statsData.distribucionGenero?.Mujeres ?? statsData.distribucionGenero?.mujeres ?? 168,
+                    profesional: statsData.distribucionTipo?.Profesional ?? statsData.distribucionTipo?.profesional ?? 333,
+                    docente: statsData.distribucionTipo?.Docente ?? statsData.distribucionTipo?.docente ?? 102,
+                    sinTotal: statsData.docentesNoParticiparon?.total ?? 173,
+                    sinHombres: statsData.docentesNoParticiparon?.hombres ?? 114,
+                    sinMujeres: statsData.docentesNoParticiparon?.mujeres ?? 59,
+                };
+
+                const children = [];
+
+                // ── MEMBRETE ───────────────────────────────────────────────
+                children.push(para("Instituto Tecnológico de Durango", { bold: true, size: 28, color: "1B396A", align: AlignmentType.CENTER, before: 0, after: 40 }));
+                children.push(para("Departamento de Desarrollo Académico", { size: 22, color: "555555", align: AlignmentType.CENTER, before: 0, after: 40 }));
+                children.push(sep());
+
+                // ── DATOS DEL OFICIO ──────────────────────────────────────
+                children.push(para(`Durango, Dgo., ${dateStr}`, { align: AlignmentType.RIGHT, before: 80, after: 40 }));
+                children.push(para("Oficio No. 155/2026", { align: AlignmentType.RIGHT, before: 0, after: 200 }));
+                children.push(para("C. MÓNICA ROSALES PÉREZ", { bold: true }));
+                children.push(para("JEFA DEL DEPTO. DESARROLLO ACADÉMICO", { bold: true }));
+                children.push(para("PRESENTE", { bold: true, after: 200 }));
+
+                // ── CUERPO DEL OFICIO ─────────────────────────────────────
+                children.push(para(
+                    "Sirva la presente para informarle que durante el Primer Trimestre de 2026 (enero–marzo), el programa de Formación y Actualización Docente presenta los siguientes resultados:",
+                    { after: 200 }
+                ));
+
+                // ── SECCIÓN 1: KPIs ───────────────────────────────────────
+                children.push(heading("1. Resumen de Indicadores — 1er Trimestre 2026"));
+                children.push(kpiTable([
+                    ["Total de Inscripciones", trimData.totalInscripciones],
+                    ["Docentes Únicos Actualizados", trimData.actualizados],
+                    ["Cobertura de Plantilla Docente", `${trimData.porcentaje}%`],
+                ]));
+                children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
+
+                // ── SECCIÓN 2: Distribución por Mes (periodos) ────────────
+                const pTrend = statsData.periodTrend || {};
+                const meses = [
+                    { label: "Enero 2026",   key: "2026-Enero"   },
+                    { label: "Febrero 2026", key: "2026-Febrero" },
+                    { label: "Marzo 2026",   key: "2026-Marzo"   },
+                    { label: "Junio 2026",   key: "2026-Junio"   },
+                    { label: "Agosto 2026",  key: "2026-Agosto"  },
+                ];
+                const mesesConDatos = meses.filter(m => pTrend[m.key]);
+                if (mesesConDatos.length > 0) {
+                    children.push(heading("2. Distribución por Periodo"));
+                    children.push(dataTable(
+                        ["Periodo", "Cursos Ofertados", "Total Docentes"],
+                        mesesConDatos.map(m => [m.label, pTrend[m.key]?.cursos ?? "—", pTrend[m.key]?.registros ?? "—"]),
+                        [3000, 3180, 3180]
+                    ));
+                    children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
+                }
+
+                // ── SECCIÓN 3: Género y Tipo de Curso ─────────────────────
+                children.push(heading("3. Distribución por Género y Tipo de Curso"));
+                children.push(dataTable(
+                    ["Categoría", "Hombres", "Mujeres", "Total"],
+                    [
+                        ["Inscripciones por género", String(trimData.hombres), String(trimData.mujeres), String(trimData.totalInscripciones)],
+                    ],
+                    [3600, 1920, 1920, 1920]
+                ));
+                children.push(new Paragraph({ spacing: { before: 120, after: 80 } }));
+                children.push(dataTable(
+                    ["Tipo de Curso", "Cantidad"],
+                    [
+                        ["Profesional", String(trimData.profesional)],
+                        ["Docente",     String(trimData.docente)],
+                        ["Total",       String(trimData.totalInscripciones)],
+                    ],
+                    [6480, 2880]
+                ));
+                children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
+
+                // ── SECCIÓN 4: Top Cursos del trimestre ────────────────────
+                if (statsData.topCursos?.length) {
+                    children.push(heading("4. Cursos Más Demandados en el Trimestre"));
+                    children.push(dataTable(
+                        ["#", "Nombre del Curso", "Inscripciones"],
+                        statsData.topCursos.slice(0, 10).map(([nombre, n], i) => [`${i+1}`, nombre, n]),
+                        [600, 6960, 1800]
+                    ));
+                    children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
+                }
+
+                // ── SECCIÓN 5: Docentes sin participación ──────────────────
+                children.push(heading("5. Docentes sin Participación"));
+                children.push(kpiTable([
+                    ["Total sin participación", trimData.sinTotal],
+                    ["Hombres",                 trimData.sinHombres],
+                    ["Mujeres",                 trimData.sinMujeres],
+                ]));
+                if (statsData.docentesNoParticiparon?.lista?.length > 0) {
+                    children.push(new Paragraph({ spacing: { before: 160, after: 80 }, children: [new TextRun({ text: "Listado de docentes sin participación:", bold: true, font: "Arial", size: 22, color: "374151" })] }));
+                    children.push(dataTable(
+                        ["#", "Nombre del Docente", "Departamento"],
+                        statsData.docentesNoParticiparon.lista.map((d, i) => [`${i+1}`, d.nombre, d.departamento]),
+                        [500, 5500, 3360]
+                    ));
+                }
+                children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
+
+                // ── CIERRE ─────────────────────────────────────────────────
+                children.push(para(
+                    "Los indicadores muestran una participación relevante en las actividades de actualización docente, alcanzando una cobertura del " + trimData.porcentaje + "%. No obstante, se identifican " + trimData.sinTotal + " docentes sin participación, lo que representa una oportunidad para fortalecer estrategias de inclusión y ampliar la cobertura en próximos periodos.",
+                    { after: 320 }
+                ));
+                children.push(para("A T E N T A M E N T E", { bold: true, align: AlignmentType.CENTER, before: 200, after: 40 }));
+                children.push(para("Excelencia en Educación Tecnológica®", { italic: true, align: AlignmentType.CENTER, after: 40 }));
+                children.push(para("La Técnica al Servicio de la Patria", { italic: true, align: AlignmentType.CENTER, after: 400 }));
+                children.push(para("C. ALEJANDRO CALDERÓN RENTERÍA", { bold: true, align: AlignmentType.CENTER, after: 40 }));
+                children.push(para("COORDINACIÓN DE ACTUALIZACIÓN DOCENTE", { bold: true, align: AlignmentType.CENTER, after: 40 }));
+                children.push(sep());
+                children.push(para("M.C. Alejandro Calderón Rentería — Coordinación de Actualización Docente", { align: AlignmentType.CENTER, color: "888888", size: 18 }));
+
+                const doc = new Document({
+                    creator: "ITD - Desarrollo Académico",
+                    title: "Informe Trimestral de Actualización Docente",
+                    styles: { default: { document: { run: { font: "Arial", size: 22 } } } },
+                    sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } } }, children }]
+                });
+
+                const blob = await Packer.toBlob(doc);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url; a.download = `Informe_Trimestral_1er_Trim_2026.docx`;
+                document.body.appendChild(a); a.click();
+                document.body.removeChild(a); URL.revokeObjectURL(url);
+
+            } catch (err) {
+                console.error("Error generando Informe Trimestral:", err);
+                alert("Error al generar el documento:\n" + err.message);
+            } finally {
+                setGeneratingPDF(false);
+            }
+        };
+
+        // ── NUEVO: Word Completo (todos los cursos) ─────────────────────
+        const generateWordCompleto = async () => {
+            if (!statsData) { alert("No hay datos cargados aún."); return; }
+            setGeneratingPDF(true);
+            try {
+                const docxLib = window.docx;
+                if (!docxLib) throw new Error("Librería docx no cargada.");
+                const {
+                    Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+                    AlignmentType, WidthType, BorderStyle, ShadingType
+                } = docxLib;
+
+                const dateStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+                const cellBorder = { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" };
+                const borders = { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder, insideH: cellBorder, insideV: cellBorder };
+
+                const sep = () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "9D2449", space: 1 } }, spacing: { before: 60, after: 180 } });
+                const title = (text) => new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 120 }, children: [new TextRun({ text, bold: true, color: "1B396A", font: "Arial", size: 32 })] });
+                const subtitle = (text) => new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 80 }, children: [new TextRun({ text, bold: true, color: "9D2449", font: "Arial", size: 26 })] });
+                const caption = (text) => new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 320 }, children: [new TextRun({ text, color: "888888", font: "Arial", size: 20 })] });
+                const heading = (text) => new Paragraph({ spacing: { before: 320, after: 120 }, children: [new TextRun({ text, bold: true, color: "1B396A", font: "Arial", size: 28 })], border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "D5E8F0", space: 1 } } });
+                const spacer = () => new Paragraph({ spacing: { before: 40, after: 40 } });
+
+                const kpiTable = (rows) => new Table({
+                    width: { size: 9360, type: WidthType.DXA }, columnWidths: [5760, 3600],
+                    rows: rows.map(([label, value]) => new TableRow({ children: [
+                        new TableCell({ borders, width: { size: 5760, type: WidthType.DXA }, shading: { fill: "EEF4FB", type: ShadingType.CLEAR }, margins: { top: 100, bottom: 100, left: 160, right: 160 }, children: [new Paragraph({ children: [new TextRun({ text: String(label), font: "Arial", size: 22, color: "374151" })] })] }),
+                        new TableCell({ borders, width: { size: 3600, type: WidthType.DXA }, shading: { fill: "FFFFFF", type: ShadingType.CLEAR }, margins: { top: 100, bottom: 100, left: 160, right: 160 }, children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: String(value), font: "Arial", size: 24, bold: true, color: "9D2449" })] })] })
+                    ]}))
+                });
+
+                const dataTable = (headers, rows, colWidths) => new Table({
+                    width: { size: colWidths.reduce((a,b)=>a+b,0), type: WidthType.DXA }, columnWidths: colWidths,
+                    rows: [
+                        new TableRow({ tableHeader: true, children: headers.map((h,i) => new TableCell({ borders, width: { size: colWidths[i], type: WidthType.DXA }, shading: { fill: "1B396A", type: ShadingType.CLEAR }, margins: { top: 100, bottom: 100, left: 160, right: 160 }, children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, color: "FFFFFF", font: "Arial", size: 20 })] })] })) }),
+                        ...rows.map((row, ri) => new TableRow({ children: row.map((cell,i) => new TableCell({ borders, width: { size: colWidths[i], type: WidthType.DXA }, shading: { fill: ri%2===0?"FFFFFF":"F8F9FA", type: ShadingType.CLEAR }, margins: { top: 80, bottom: 80, left: 160, right: 160 }, children: [new Paragraph({ children: [new TextRun({ text: String(cell), font: "Arial", size: 20, color: "374151" })] })] })) }))
+                    ]
+                });
+
+                const children = [];
+
+                // Portada
+                children.push(spacer(), spacer(), spacer());
+                children.push(title("INSTITUTO TECNOLÓGICO DE DURANGO"));
+                children.push(subtitle("Coordinación de Actualización Docente"));
+                children.push(spacer());
+                children.push(sep());
+                children.push(subtitle("Reporte Estadístico Completo"));
+                children.push(caption(`Generado el ${dateStr}`));
+
+                // 1. KPIs
+                children.push(heading("1. Indicadores Clave de Desempeño"));
+                children.push(kpiTable([
+                    ["Total de Inscripciones", statsData.totalInscripciones ?? "—"],
+                    ["Docentes Únicos Actualizados", statsData.coberturaDocente?.actualizados ?? "—"],
+                    ["Cobertura de Plantilla Docente", statsData.coberturaDocente?.porcentaje != null ? `${statsData.coberturaDocente.porcentaje}%` : "—"],
+                ]));
+                children.push(spacer());
+
+                // 2. TODOS LOS CURSOS con participantes
+                if (statsData.topCursos?.length) {
+                    children.push(heading(`2. Todos los Cursos y Número de Participantes (${statsData.topCursos.length} cursos)`));
+                    children.push(dataTable(
+                        ["#", "Nombre del Curso", "Participantes"],
+                        statsData.topCursos.map(([nombre, n], i) => [`${i+1}`, nombre, n]),
+                        [600, 6960, 1800]
+                    ));
+                    children.push(spacer());
+                }
+
+                // 3. Departamentos
+                if (statsData.topDepartamentos?.length) {
+                    children.push(heading("3. Participación por Departamento"));
+                    children.push(dataTable(
+                        ["#", "Departamento", "Total"],
+                        statsData.topDepartamentos.map(([dept, n], i) => [`${i+1}`, dept, n]),
+                        [600, 6960, 1800]
+                    ));
+                    children.push(spacer());
+                }
+
+                // 4. Género
+                if (statsData.distribucionGenero) {
+                    children.push(heading("4. Distribución por Género"));
+                    children.push(kpiTable(Object.entries(statsData.distribucionGenero)));
+                    children.push(spacer());
+                }
+
+                // 5. Tipo de Curso
+                if (statsData.distribucionTipo) {
+                    children.push(heading("5. Tipo de Curso"));
+                    children.push(kpiTable(Object.entries(statsData.distribucionTipo)));
+                    children.push(spacer());
+                }
+
+                // 6. Frecuencia
+                if (statsData.frecuenciaParticipacion) {
+                    children.push(heading("6. Cursos por Docente (Frecuencia de Participación)"));
+                    children.push(dataTable(
+                        ["Cursos Tomados", "Número de Docentes"],
+                        Object.entries(statsData.frecuenciaParticipacion),
+                        [4680, 4680]
+                    ));
+                    children.push(spacer());
+                }
+
+                // 7. Histórico
+                if (statsData.historicalTrend) {
+                    children.push(heading("7. Evolución Histórica por Año"));
+                    const years = Object.keys(statsData.historicalTrend).sort();
+                    children.push(dataTable(
+                        ["Año", "Cursos Ofertados", "Total Docentes"],
+                        years.map(y => [y, statsData.historicalTrend[y]?.cursos ?? 0, statsData.historicalTrend[y]?.registros ?? 0]),
+                        [2340, 3510, 3510]
+                    ));
+                    children.push(spacer());
+                }
+
+                // 8. Docentes sin participación
+                if (statsData.docentesNoParticiparon?.total > 0) {
+                    const np = statsData.docentesNoParticiparon;
+                    children.push(heading("8. Docentes que No Participaron en el Periodo"));
+                    children.push(kpiTable([
+                        ["Total de docentes sin participación", np.total],
+                        ["Hombres", np.hombres],
+                        ["Mujeres", np.mujeres],
+                    ]));
+                    children.push(spacer());
+                    if (np.lista?.length > 0) {
+                        children.push(new Paragraph({ spacing: { before: 160, after: 100 }, children: [new TextRun({ text: "Listado de docentes sin participación:", bold: true, font: "Arial", size: 22, color: "374151" })] }));
+                        children.push(dataTable(
+                            ["#", "Nombre del Docente", "Departamento"],
+                            np.lista.map((d, i) => [`${i+1}`, d.nombre, d.departamento]),
+                            [500, 5500, 3360]
+                        ));
+                    }
+                    children.push(spacer());
+                }
+
+                // Pie
+                children.push(sep());
+                children.push(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "M.C. Alejandro Calderón Rentería — Coordinación de Actualización Docente", font: "Arial", size: 18, color: "888888" })] }));
+
+                const doc = new Document({
+                    creator: "ITD - Desarrollo Académico",
+                    title: "Reporte Estadístico Completo de Actualización Docente",
+                    styles: { default: { document: { run: { font: "Arial", size: 22 } } } },
+                    sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } } }, children }]
+                });
+
+                const blob = await Packer.toBlob(doc);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url; a.download = `Reporte_Completo_Todos_Los_Cursos_${period}.docx`;
+                document.body.appendChild(a); a.click();
+                document.body.removeChild(a); URL.revokeObjectURL(url);
+
+            } catch (err) {
+                console.error("Error generando Reporte Completo:", err);
+                alert("Error al generar el documento:\n" + err.message);
+            } finally {
+                setGeneratingPDF(false);
+            }
+        };
+
         const generateCourseEvolutionData = () => {
             if (!statsData || !statsData.periodTrend || !statsData.historicalTrend) return { labels: [], datasets: [] };
             
@@ -1185,6 +1571,12 @@
                         </button>
                         <button onClick={generateWord} className="bg-[#1B396A] hover:bg-[#142b52] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2">
                             <span>📝</span> Word
+                        </button>
+                        <button onClick={generateWordTrimestral} className="bg-[#7B3F00] hover:bg-[#5c2f00] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2" title="Informe formal trimestral Ene-Mar 2026">
+                            <span>📋</span> Informe Trimestral
+                        </button>
+                        <button onClick={generateWordCompleto} className="bg-[#2E7D32] hover:bg-[#1b5e20] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2" title="Todos los cursos con participantes">
+                            <span>📊</span> Word Completo
                         </button>
                         <button onClick={onLogout} className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors">
                             Salir
