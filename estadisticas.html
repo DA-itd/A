@@ -1237,11 +1237,15 @@
 
                 // ── SECCIÓN 1: KPIs del trimestre ─────────────────────────
                 children.push(heading(`1. Resumen de Indicadores — ${tituloTrim}`));
-                children.push(kpiTable([
-                    ["Total de Inscripciones",        trimData.totalInscripciones],
-                    ["Docentes Únicos Actualizados",   trimData.actualizados],
-                    ["Cobertura de Plantilla Docente", trimData.porcentaje !== "—" ? `${trimData.porcentaje}%` : "—"],
-                ]));
+                children.push(dataTable(
+                    ["Indicador", "Cantidad"],
+                    [
+                        ["Total de Inscripciones",        String(trimData.totalInscripciones)],
+                        ["Docentes Únicos Actualizados",   String(trimData.actualizados)],
+                        ["Cobertura de Plantilla Docente", trimData.porcentaje !== "—" ? `${trimData.porcentaje}%` : "—"],
+                    ],
+                    [7200, 2160]
+                ));
                 children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
 
                 // ── SECCIÓN 2: Periodos del trimestre (solo los 3 meses) ──
@@ -1280,11 +1284,15 @@
 
                 // ── SECCIÓN 4: Docentes sin participación (solo cifras) ───
                 children.push(heading("4. Docentes sin Participación"));
-                children.push(kpiTable([
-                    ["Total sin participación", trimData.sinTotal],
-                    ["Hombres",                 trimData.sinHombres],
-                    ["Mujeres",                 trimData.sinMujeres],
-                ]));
+                children.push(dataTable(
+                    ["Categoría", "Total"],
+                    [
+                        ["Total sin participación", String(trimData.sinTotal)],
+                        ["Hombres",                 String(trimData.sinHombres)],
+                        ["Mujeres",                 String(trimData.sinMujeres)],
+                    ],
+                    [7200, 2160]
+                ));
                 children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
 
                 // ── CIERRE ─────────────────────────────────────────────────
