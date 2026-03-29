@@ -1147,20 +1147,68 @@
                     ]
                 });
 
-                // Datos del trimestre (del PDF: ene/feb/mar 2026)
-                // Se usan statsData del periodo actual + los datos fijos del oficio 155/2026
+                // ── Detectar trimestre actual por fecha del sistema ────────
+                // Trimestres del ITD:
+                //   1° Ene–Mar  → meses ITD: Enero, Febrero, Marzo
+                //   2° Abr–Jun  → meses ITD: Abril, Mayo, Junio
+                //   3° Jul–Sep  → meses ITD: Julio, Agosto, Septiembre
+                //   4° Oct–Dic  → meses ITD: Octubre, Noviembre, Diciembre
+                const hoy = new Date();
+                const mesActual = hoy.getMonth() + 1; // 1-12
+                const anioActual = hoy.getFullYear();
+
+                let numTrim, nombreTrim, mesesTrim, mesesKeys;
+                if (mesActual <= 3) {
+                    numTrim = 1; nombreTrim = "1er Trimestre";
+                    mesesTrim = ["Enero", "Febrero", "Marzo"];
+                } else if (mesActual <= 6) {
+                    numTrim = 2; nombreTrim = "2° Trimestre";
+                    mesesTrim = ["Abril", "Mayo", "Junio"];
+                } else if (mesActual <= 9) {
+                    numTrim = 3; nombreTrim = "3er Trimestre";
+                    mesesTrim = ["Julio", "Agosto", "Septiembre"];
+                } else {
+                    numTrim = 4; nombreTrim = "4° Trimestre";
+                    mesesTrim = ["Octubre", "Noviembre", "Diciembre"];
+                }
+                // Claves de periodTrend para este trimestre y año
+                mesesKeys = mesesTrim.map(m => `${anioActual}-${m}`);
+
+                const pTrend = statsData.periodTrend || {};
+
+                // Filtrar solo los periodos del trimestre actual (los que existan en los datos)
+                const mesesDelTrimestre = mesesTrim
+                    .map((m, i) => ({ label: `${m} ${anioActual}`, key: mesesKeys[i] }))
+                    .filter(m => pTrend[m.key]);
+
+                // Calcular totales SOLO sumando los periodos del trimestre actual
+                // Si no hay desglose por periodo se usan los datos globales de statsData
+                // (que el servidor ya filtra según el periodo seleccionado)
+                let totalInscTrim = 0, totalDocTrim = 0;
+                if (mesesDelTrimestre.length > 0) {
+                    mesesDelTrimestre.forEach(m => {
+                        totalInscTrim += pTrend[m.key]?.registros ?? 0;
+                        totalDocTrim  += pTrend[m.key]?.cursos   ?? 0;
+                    });
+                }
+
+                // KPIs globales del periodo (el servidor ya devuelve solo el periodo ACTUAL)
                 const trimData = {
-                    totalInscripciones: statsData.totalInscripciones ?? 435,
-                    actualizados: statsData.coberturaDocente?.actualizados ?? 289,
-                    porcentaje: statsData.coberturaDocente?.porcentaje ?? 69.3,
-                    hombres: statsData.distribucionGenero?.Hombres ?? statsData.distribucionGenero?.hombres ?? 267,
-                    mujeres: statsData.distribucionGenero?.Mujeres ?? statsData.distribucionGenero?.mujeres ?? 168,
-                    profesional: statsData.distribucionTipo?.Profesional ?? statsData.distribucionTipo?.profesional ?? 333,
-                    docente: statsData.distribucionTipo?.Docente ?? statsData.distribucionTipo?.docente ?? 102,
-                    sinTotal: statsData.docentesNoParticiparon?.total ?? 173,
-                    sinHombres: statsData.docentesNoParticiparon?.hombres ?? 114,
-                    sinMujeres: statsData.docentesNoParticiparon?.mujeres ?? 59,
+                    totalInscripciones: statsData.totalInscripciones ?? "—",
+                    actualizados:       statsData.coberturaDocente?.actualizados ?? "—",
+                    porcentaje:         statsData.coberturaDocente?.porcentaje   ?? "—",
+                    hombres:  statsData.distribucionGenero?.Hombres  ?? statsData.distribucionGenero?.hombres  ?? "—",
+                    mujeres:  statsData.distribucionGenero?.Mujeres  ?? statsData.distribucionGenero?.mujeres  ?? "—",
+                    profesional: statsData.distribucionTipo?.Profesional ?? statsData.distribucionTipo?.profesional ?? "—",
+                    docente:     statsData.distribucionTipo?.Docente     ?? statsData.distribucionTipo?.docente     ?? "—",
+                    sinTotal:    statsData.docentesNoParticiparon?.total   ?? "—",
+                    sinHombres:  statsData.docentesNoParticiparon?.hombres ?? "—",
+                    sinMujeres:  statsData.docentesNoParticiparon?.mujeres ?? "—",
                 };
+
+                const tituloTrim   = `${nombreTrim} ${anioActual}`;
+                const mesesRango   = `${mesesTrim[0]}–${mesesTrim[2]} ${anioActual}`;
+                const nombreArchivo = `Informe_Trimestral_${numTrim}T_${anioActual}.docx`;
 
                 const children = [];
 
@@ -1171,41 +1219,35 @@
 
                 // ── DATOS DEL OFICIO ──────────────────────────────────────
                 children.push(para(`Durango, Dgo., ${dateStr}`, { align: AlignmentType.RIGHT, before: 80, after: 40 }));
-                children.push(para("Oficio No. 155/2026", { align: AlignmentType.RIGHT, before: 0, after: 200 }));
                 children.push(para("C. MÓNICA ROSALES PÉREZ", { bold: true }));
                 children.push(para("JEFA DEL DEPTO. DESARROLLO ACADÉMICO", { bold: true }));
                 children.push(para("PRESENTE", { bold: true, after: 200 }));
 
                 // ── CUERPO DEL OFICIO ─────────────────────────────────────
                 children.push(para(
-                    "Sirva la presente para informarle que durante el Primer Trimestre de 2026 (enero–marzo), el programa de Formación y Actualización Docente presenta los siguientes resultados:",
+                    `Sirva la presente para informarle que durante el ${tituloTrim} (${mesesRango}), el programa de Formación y Actualización Docente presenta los siguientes resultados:`,
                     { after: 200 }
                 ));
 
-                // ── SECCIÓN 1: KPIs ───────────────────────────────────────
-                children.push(heading("1. Resumen de Indicadores — 1er Trimestre 2026"));
+                // ── SECCIÓN 1: KPIs del trimestre ─────────────────────────
+                children.push(heading(`1. Resumen de Indicadores — ${tituloTrim}`));
                 children.push(kpiTable([
-                    ["Total de Inscripciones", trimData.totalInscripciones],
-                    ["Docentes Únicos Actualizados", trimData.actualizados],
-                    ["Cobertura de Plantilla Docente", `${trimData.porcentaje}%`],
+                    ["Total de Inscripciones",        trimData.totalInscripciones],
+                    ["Docentes Únicos Actualizados",   trimData.actualizados],
+                    ["Cobertura de Plantilla Docente", trimData.porcentaje !== "—" ? `${trimData.porcentaje}%` : "—"],
                 ]));
                 children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
 
-                // ── SECCIÓN 2: Distribución por Mes (periodos) ────────────
-                const pTrend = statsData.periodTrend || {};
-                const meses = [
-                    { label: "Enero 2026",   key: "2026-Enero"   },
-                    { label: "Febrero 2026", key: "2026-Febrero" },
-                    { label: "Marzo 2026",   key: "2026-Marzo"   },
-                    { label: "Junio 2026",   key: "2026-Junio"   },
-                    { label: "Agosto 2026",  key: "2026-Agosto"  },
-                ];
-                const mesesConDatos = meses.filter(m => pTrend[m.key]);
-                if (mesesConDatos.length > 0) {
-                    children.push(heading("2. Distribución por Periodo"));
+                // ── SECCIÓN 2: Periodos del trimestre (solo los 3 meses) ──
+                if (mesesDelTrimestre.length > 0) {
+                    children.push(heading(`2. Distribución por Periodo (${mesesRango})`));
                     children.push(dataTable(
-                        ["Periodo", "Cursos Ofertados", "Total Docentes"],
-                        mesesConDatos.map(m => [m.label, pTrend[m.key]?.cursos ?? "—", pTrend[m.key]?.registros ?? "—"]),
+                        ["Periodo", "Cursos Ofertados", "Participantes"],
+                        mesesDelTrimestre.map(m => [
+                            m.label,
+                            pTrend[m.key]?.cursos    ?? "—",
+                            pTrend[m.key]?.registros ?? "—"
+                        ]),
                         [3000, 3180, 3180]
                     ));
                     children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
@@ -1215,9 +1257,7 @@
                 children.push(heading("3. Distribución por Género y Tipo de Curso"));
                 children.push(dataTable(
                     ["Categoría", "Hombres", "Mujeres", "Total"],
-                    [
-                        ["Inscripciones por género", String(trimData.hombres), String(trimData.mujeres), String(trimData.totalInscripciones)],
-                    ],
+                    [["Inscripciones por género", String(trimData.hombres), String(trimData.mujeres), String(trimData.totalInscripciones)]],
                     [3600, 1920, 1920, 1920]
                 ));
                 children.push(new Paragraph({ spacing: { before: 120, after: 80 } }));
@@ -1232,9 +1272,9 @@
                 ));
                 children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
 
-                // ── SECCIÓN 4: Top Cursos del trimestre ────────────────────
+                // ── SECCIÓN 4: Top 10 Cursos del trimestre ─────────────────
                 if (statsData.topCursos?.length) {
-                    children.push(heading("4. Cursos Más Demandados en el Trimestre"));
+                    children.push(heading(`4. Cursos Más Demandados — ${tituloTrim}`));
                     children.push(dataTable(
                         ["#", "Nombre del Curso", "Inscripciones"],
                         statsData.topCursos.slice(0, 10).map(([nombre, n], i) => [`${i+1}`, nombre, n]),
@@ -1243,26 +1283,18 @@
                     children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
                 }
 
-                // ── SECCIÓN 5: Docentes sin participación ──────────────────
+                // ── SECCIÓN 5: Docentes sin participación (solo cifras) ───
                 children.push(heading("5. Docentes sin Participación"));
                 children.push(kpiTable([
                     ["Total sin participación", trimData.sinTotal],
                     ["Hombres",                 trimData.sinHombres],
                     ["Mujeres",                 trimData.sinMujeres],
                 ]));
-                if (statsData.docentesNoParticiparon?.lista?.length > 0) {
-                    children.push(new Paragraph({ spacing: { before: 160, after: 80 }, children: [new TextRun({ text: "Listado de docentes sin participación:", bold: true, font: "Arial", size: 22, color: "374151" })] }));
-                    children.push(dataTable(
-                        ["#", "Nombre del Docente", "Departamento"],
-                        statsData.docentesNoParticiparon.lista.map((d, i) => [`${i+1}`, d.nombre, d.departamento]),
-                        [500, 5500, 3360]
-                    ));
-                }
                 children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
 
                 // ── CIERRE ─────────────────────────────────────────────────
                 children.push(para(
-                    "Los indicadores muestran una participación relevante en las actividades de actualización docente, alcanzando una cobertura del " + trimData.porcentaje + "%. No obstante, se identifican " + trimData.sinTotal + " docentes sin participación, lo que representa una oportunidad para fortalecer estrategias de inclusión y ampliar la cobertura en próximos periodos.",
+                    `Los indicadores muestran una participación relevante en las actividades de actualización docente, alcanzando una cobertura del ${trimData.porcentaje}%. No obstante, se identifican ${trimData.sinTotal} docentes sin participación, lo que representa una oportunidad para fortalecer estrategias de inclusión y ampliar la cobertura en próximos periodos.`,
                     { after: 320 }
                 ));
                 children.push(para("A T E N T A M E N T E", { bold: true, align: AlignmentType.CENTER, before: 200, after: 40 }));
@@ -1275,7 +1307,7 @@
 
                 const doc = new Document({
                     creator: "ITD - Desarrollo Académico",
-                    title: "Informe Trimestral de Actualización Docente",
+                    title: `Informe Trimestral de Actualización Docente — ${tituloTrim}`,
                     styles: { default: { document: { run: { font: "Arial", size: 22 } } } },
                     sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } } }, children }]
                 });
@@ -1283,7 +1315,7 @@
                 const blob = await Packer.toBlob(doc);
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
-                a.href = url; a.download = `Informe_Trimestral_1er_Trim_2026.docx`;
+                a.href = url; a.download = nombreArchivo;
                 document.body.appendChild(a); a.click();
                 document.body.removeChild(a); URL.revokeObjectURL(url);
 
