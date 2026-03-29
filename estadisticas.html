@@ -1193,14 +1193,20 @@
                 }
 
                 // KPIs globales del periodo (el servidor ya devuelve solo el periodo ACTUAL)
+                // Leer claves de género dinámicamente (el servidor puede devolver "Hombre","Hombres","H", etc.)
+                const _gKeys = Object.keys(statsData.distribucionGenero || {});
+                const _kH = _gKeys.find(k => /hombre|masculino/i.test(k)) || _gKeys[0];
+                const _kM = _gKeys.find(k => /mujer|femenino/i.test(k))   || _gKeys[1];
+                const _gData = statsData.distribucionGenero || {};
+
                 const trimData = {
                     totalInscripciones: statsData.totalInscripciones ?? "—",
                     actualizados:       statsData.coberturaDocente?.actualizados ?? "—",
                     porcentaje:         statsData.coberturaDocente?.porcentaje   ?? "—",
-                    hombres:  statsData.distribucionGenero?.Hombres  ?? statsData.distribucionGenero?.hombres  ?? "—",
-                    mujeres:  statsData.distribucionGenero?.Mujeres  ?? statsData.distribucionGenero?.mujeres  ?? "—",
-                    profesional: statsData.distribucionTipo?.Profesional ?? statsData.distribucionTipo?.profesional ?? "—",
-                    docente:     statsData.distribucionTipo?.Docente     ?? statsData.distribucionTipo?.docente     ?? "—",
+                    hombres:  _kH ? (_gData[_kH] ?? "—") : "—",
+                    mujeres:  _kM ? (_gData[_kM] ?? "—") : "—",
+                    profesional: (() => { const t = statsData.distribucionTipo||{}; const k = Object.keys(t).find(k=>/profesional/i.test(k)); return k ? t[k] : "—"; })(),
+                    docente:     (() => { const t = statsData.distribucionTipo||{}; const k = Object.keys(t).find(k=>/docente/i.test(k));     return k ? t[k] : "—"; })(),
                     sinTotal:    statsData.docentesNoParticiparon?.total   ?? "—",
                     sinHombres:  statsData.docentesNoParticiparon?.hombres ?? "—",
                     sinMujeres:  statsData.docentesNoParticiparon?.mujeres ?? "—",
@@ -1272,19 +1278,8 @@
                 ));
                 children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
 
-                // ── SECCIÓN 4: Top 10 Cursos del trimestre ─────────────────
-                if (statsData.topCursos?.length) {
-                    children.push(heading(`4. Cursos Más Demandados — ${tituloTrim}`));
-                    children.push(dataTable(
-                        ["#", "Nombre del Curso", "Inscripciones"],
-                        statsData.topCursos.slice(0, 10).map(([nombre, n], i) => [`${i+1}`, nombre, n]),
-                        [600, 6960, 1800]
-                    ));
-                    children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
-                }
-
-                // ── SECCIÓN 5: Docentes sin participación (solo cifras) ───
-                children.push(heading("5. Docentes sin Participación"));
+                // ── SECCIÓN 4: Docentes sin participación (solo cifras) ───
+                children.push(heading("4. Docentes sin Participación"));
                 children.push(kpiTable([
                     ["Total sin participación", trimData.sinTotal],
                     ["Hombres",                 trimData.sinHombres],
