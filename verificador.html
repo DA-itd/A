@@ -45,7 +45,7 @@
     // ============================================================================
     // CONSTANTS & TYPES
     // ============================================================================
-    const DATABASE_URL = 'https://raw.githubusercontent.com/DA-itd/web2/main/database.xlsx';
+    const SPREADSHEET_ID = '1CVXtvWAQSSL2efNBxfJH6SrLE2McmNXLlS-58-beScQ';
     const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web2/main/image.jpg';
     const TECNM_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web2/main/TecNM_logo.jpg';
     const VALIDATION_URL = 'https://da-itd.github.io/web2'; // URL Base para el QR
@@ -342,56 +342,108 @@
     };
 
     // ============================================================================
-    // DATABASE SERVICE
+    // DATABASE SERVICE — Lee desde Google Sheets (CSV export)
     // ============================================================================
-    const loadDatabase = async () => {
-      const cacheBustingUrl = `${DATABASE_URL}?v=${new Date().getTime()}`;
-      const response = await fetch(cacheBustingUrl);
-      if (!response.ok) throw new Error('No se pudo cargar la base de datos.');
-      
-      const arrayBuffer = await response.arrayBuffer();
-      const data = new Uint8Array(arrayBuffer);
 
-      if (data.length < 4 || data[0] !== 0x50 || data[1] !== 0x4B) {
-        throw new Error('El archivo descargado no es un Excel (.xlsx) válido. Verifique la URL.');
-      }
+    // Parsea un CSV exportado por Google Sheets de forma robusta (maneja comas dentro de comillas)
+    const parseCsv = (text) => {
+      const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+      if (lines.length === 0) return [];
 
-      const workbook = XLSX.read(data, { type: 'array' });
-      let allData = [];
-
-      workbook.SheetNames.forEach(sheetName => {
-        const worksheet = workbook.Sheets[sheetName];
-        if (!worksheet || !worksheet['!ref']) return;
-        
-        const dataAoA = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false });
-        if (dataAoA.length === 0) return;
-
-        let headerRowIndex = -1;
-        for (let i = 0; i < dataAoA.length; i++) {
-          if (Array.isArray(dataAoA[i]) && dataAoA[i].some(cell => POTENTIAL_FOLIO_HEADERS.includes(String(cell || '').trim().toLowerCase()))) {
-            headerRowIndex = i;
-            break;
+      const parseRow = (line) => {
+        const cols = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
+            else { inQuotes = !inQuotes; }
+          } else if (ch === ',' && !inQuotes) {
+            cols.push(current); current = '';
+          } else {
+            current += ch;
           }
         }
-        if (headerRowIndex === -1) return;
+        cols.push(current);
+        return cols;
+      };
 
-        const headers = dataAoA[headerRowIndex].map(h => (h ? String(h).trim() : ''));
-        const dataRows = dataAoA.slice(headerRowIndex + 1);
+      const rows = lines.map(parseRow);
+      return rows;
+    };
 
-        const sheetJson = dataRows
-          .filter(row => Array.isArray(row) && row.some(cell => String(cell || '').trim() !== ''))
-          .map(row => {
-            const record = headers.reduce((acc, header, i) => {
-              if (header && i < row.length && row[i] !== undefined && row[i] !== null) {
-                acc[header] = row[i];
-              }
-              return acc;
-            }, {});
-            return record;
-          });
-          
-        allData = allData.concat(sheetJson);
-      });
+    // Convierte array de arrays (con encabezados en primera fila) a array de objetos
+    const aoa2json = (dataAoA) => {
+      let headerRowIndex = -1;
+      for (let i = 0; i < dataAoA.length; i++) {
+        if (Array.isArray(dataAoA[i]) && dataAoA[i].some(
+          cell => POTENTIAL_FOLIO_HEADERS.map(h => h.toLowerCase()).includes(String(cell || '').trim().toLowerCase())
+        )) {
+          headerRowIndex = i;
+          break;
+        }
+      }
+      if (headerRowIndex === -1) return [];
+
+      const headers = dataAoA[headerRowIndex].map(h => (h ? String(h).trim() : ''));
+      const dataRows = dataAoA.slice(headerRowIndex + 1);
+
+      return dataRows
+        .filter(row => Array.isArray(row) && row.some(cell => String(cell || '').trim() !== ''))
+        .map(row => headers.reduce((acc, header, i) => {
+          if (header && i < row.length && row[i] !== undefined && row[i] !== null && String(row[i]).trim() !== '') {
+            acc[header] = row[i];
+          }
+          return acc;
+        }, {}));
+    };
+
+    // Obtiene los gids (IDs de hojas) disponibles en el spreadsheet
+    const fetchSheetGids = async (spreadsheetId) => {
+      // La URL de la página HTML del spreadsheet lista los gid en el DOM
+      // Usamos el endpoint de exportación completa para descubrir las hojas vía XML feed
+      const metaUrl = `https://spreadsheets.google.com/feeds/worksheets/${spreadsheetId}/public/basic?alt=json&t=${Date.now()}`;
+      try {
+        const res = await fetch(metaUrl);
+        if (!res.ok) throw new Error('meta');
+        const json = await res.json();
+        const entries = json.feed.entry || [];
+        return entries.map(entry => {
+          const link = entry.link.find(l => l.rel === 'http://schemas.google.com/spreadsheets/2006#cellsfeed');
+          if (!link) return null;
+          const match = link.href.match(/\/([^/]+)\/public/);
+          return match ? match[1] : null;
+        }).filter(Boolean);
+      } catch {
+        // Si falla el meta feed, intentar con gid=0 (hoja 1) solamente
+        return ['0'];
+      }
+    };
+
+    const loadDatabase = async () => {
+      const gids = await fetchSheetGids(SPREADSHEET_ID);
+      let allData = [];
+
+      for (const gid of gids) {
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=${gid}&t=${Date.now()}`;
+        try {
+          const res = await fetch(csvUrl);
+          if (!res.ok) continue;
+          const text = await res.text();
+          if (!text || text.trim() === '') continue;
+          const aoa = parseCsv(text);
+          const records = aoa2json(aoa);
+          allData = allData.concat(records);
+        } catch (e) {
+          console.warn(`No se pudo leer la hoja gid=${gid}:`, e.message);
+        }
+      }
+
+      if (allData.length === 0) {
+        throw new Error('No se encontraron registros en Google Sheets. Asegúrese de que el archivo sea público ("Cualquier persona con el enlace puede ver").');
+      }
+
       return allData;
     };
 
