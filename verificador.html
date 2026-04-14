@@ -681,7 +681,9 @@
 
               const found = db.find(record => {
                 const folio = getFlexibleProperty(record, POTENTIAL_FOLIO_HEADERS);
-                return folio && String(folio).trim().toLowerCase().endsWith(cleanedSuffix);
+                const recordStatus = getFlexibleProperty(record, ['status', 'Status', 'STATUS']) || '';
+                return folio && String(folio).trim().toLowerCase().endsWith(cleanedSuffix)
+                  && String(recordStatus).trim().toUpperCase() === 'VALIDO';
               });
 
               if (found) {
@@ -721,7 +723,9 @@
 
           found = certificateData.find(record => {
             const folio = getFlexibleProperty(record, POTENTIAL_FOLIO_HEADERS);
-            return folio && String(folio).trim().toLowerCase().endsWith(cleanedSuffix);
+            const recordStatus = getFlexibleProperty(record, ['status', 'Status', 'STATUS']) || '';
+            return folio && String(folio).trim().toLowerCase().endsWith(cleanedSuffix)
+              && String(recordStatus).trim().toUpperCase() === 'VALIDO';
           });
 
           if (found) {
@@ -739,7 +743,10 @@
           
           found = certificateData.find(record => {
             let folioValue = getFlexibleProperty(record, POTENTIAL_FOLIO_HEADERS);
-            if (!folioValue) return false; 
+            if (!folioValue) return false;
+
+            const recordStatus = getFlexibleProperty(record, ['status', 'Status', 'STATUS']) || '';
+            if (String(recordStatus).trim().toUpperCase() !== 'VALIDO') return false;
             
             folioValue = String(folioValue).trim().toUpperCase();
             let fullFolio;
