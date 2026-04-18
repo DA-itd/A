@@ -844,13 +844,14 @@ if (e.target === this) cerrarModalCursos();
   }
 
   try {
-    const res  = await fetch(APPS_URL + '?action=getStatisticsData&period=ACTUAL');
+    const currentYear = new Date().getFullYear();
+    const res  = await fetch(APPS_URL + '?action=getStatisticsData&period=' + currentYear);
     const json = await res.json();
     const label = document.getElementById('stats-period-label');
 
     if (json.success && json.data) {
       renderKPIs(json.data);
-      if (label) label.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-green-400 mr-1"></span>Periodo Actual 2026';
+      if (label) label.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-green-400 mr-1"></span>Periodo Actual ' + currentYear;
     } else {
       if (label) label.textContent = 'Sin datos';
       document.getElementById('stats-kpi-grid').innerHTML =
