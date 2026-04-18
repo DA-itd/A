@@ -399,33 +399,44 @@
         }, {}));
     };
 
-    // Obtiene los gids (IDs de hojas) disponibles en el spreadsheet
-    const fetchSheetGids = async (spreadsheetId) => {
-      // La URL de la página HTML del spreadsheet lista los gid en el DOM
-      // Usamos el endpoint de exportación completa para descubrir las hojas vía XML feed
+    // Obtiene las hojas cuyo nombre contiene "validation" (insensible a mayúsculas)
+    // Retorna array de objetos { gid, name }
+    const fetchValidationSheets = async (spreadsheetId) => {
       const metaUrl = `https://spreadsheets.google.com/feeds/worksheets/${spreadsheetId}/public/basic?alt=json&t=${Date.now()}`;
       try {
         const res = await fetch(metaUrl);
         if (!res.ok) throw new Error('meta');
         const json = await res.json();
         const entries = json.feed.entry || [];
-        return entries.map(entry => {
+
+        const sheets = entries.map(entry => {
           const link = entry.link.find(l => l.rel === 'http://schemas.google.com/spreadsheets/2006#cellsfeed');
           if (!link) return null;
           const match = link.href.match(/\/([^/]+)\/public/);
-          return match ? match[1] : null;
+          const gid = match ? match[1] : null;
+          // El nombre de la hoja viene en entry.title.$t
+          const name = entry.title ? entry.title.$t : '';
+          return gid ? { gid, name } : null;
         }).filter(Boolean);
+
+        // Solo hojas cuyo nombre contenga "validation" (ej: "validation 2025", "validation 2026", etc.)
+        const validationSheets = sheets.filter(s => s.name.toLowerCase().includes('validation'));
+
+        console.log('Hojas de validación encontradas:', validationSheets.map(s => s.name));
+
+        // Si no encuentra ninguna con ese nombre, usar todas como respaldo
+        return validationSheets.length > 0 ? validationSheets : sheets;
       } catch {
         // Si falla el meta feed, intentar con gid=0 (hoja 1) solamente
-        return ['0'];
+        return [{ gid: '0', name: 'hoja1' }];
       }
     };
 
     const loadDatabase = async () => {
-      const gids = await fetchSheetGids(SPREADSHEET_ID);
+      const sheets = await fetchValidationSheets(SPREADSHEET_ID);
       let allData = [];
 
-      for (const gid of gids) {
+      for (const { gid, name } of sheets) {
         const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=${gid}&t=${Date.now()}`;
         try {
           const res = await fetch(csvUrl);
@@ -434,14 +445,15 @@
           if (!text || text.trim() === '') continue;
           const aoa = parseCsv(text);
           const records = aoa2json(aoa);
+          console.log(`Hoja "${name}": ${records.length} registros cargados.`);
           allData = allData.concat(records);
         } catch (e) {
-          console.warn(`No se pudo leer la hoja gid=${gid}:`, e.message);
+          console.warn(`No se pudo leer la hoja "${name}" (gid=${gid}):`, e.message);
         }
       }
 
       if (allData.length === 0) {
-        throw new Error('No se encontraron registros en Google Sheets. Asegúrese de que el archivo sea público ("Cualquier persona con el enlace puede ver").');
+        throw new Error('No se encontraron registros en las hojas de validación. Asegúrese de que el archivo de Google Sheets sea público ("Cualquier persona con el enlace puede ver") y que las hojas se llamen "validation YYYY".');
       }
 
       return allData;
