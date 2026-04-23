@@ -358,10 +358,11 @@
                                         </div>
 
                                         {isRegistryOpen ? (
-                                            <a href={REGISTRO_URL} target="_blank" rel="noopener noreferrer"
-                                               className="btn-hero block w-full text-white font-bold py-3.5 px-4 rounded-xl text-center text-base flex items-center justify-center gap-2">
+                                            <button
+                                               onClick={() => { window.location.href = REGISTRO_URL; }}
+                                               className="btn-hero block w-full text-white font-bold py-3.5 px-4 rounded-xl text-center text-base flex items-center justify-center gap-2 cursor-pointer border-0">
                                                 <span>🚀</span> Abrir Plataforma de Registro
-                                            </a>
+                                            </button>
                                         ) : (
                                             <button disabled
                                                className="block w-full bg-white bg-opacity-10 text-white text-opacity-50 font-bold py-3.5 px-4 rounded-xl text-center cursor-not-allowed flex items-center justify-center gap-2">
