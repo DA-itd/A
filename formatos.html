@@ -294,12 +294,31 @@
             };
             
             // ── 5. RENDER ─────────────────────────────────────────────────────────────
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
             return (
                 <main className="container mx-auto px-4 py-8 sm:py-12">
                     <div className="max-w-4xl mx-auto">
                         <a href="index.html" className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline mb-6 text-sm sm:text-base">
                             ← Volver al Portal Principal
                         </a>
+
+                        {/* ── AVISO SAFARI ── */}
+                        {isSafari && (
+                            <div className="flex items-start gap-4 bg-amber-50 border-l-4 border-amber-400 rounded-xl p-4 mb-6 shadow-sm animate-fadeIn">
+                                <div className="text-3xl flex-shrink-0">⚠️</div>
+                                <div>
+                                    <p className="font-bold text-amber-800 text-sm sm:text-base mb-1">
+                                        Estás usando Safari — puede haber problemas para acceder al Registro
+                                    </p>
+                                    <p className="text-amber-700 text-xs sm:text-sm leading-relaxed">
+                                        Safari bloquea el acceso a la Plataforma de Registro por sus restricciones de privacidad.
+                                        Para una mejor experiencia usa <strong>Google Chrome</strong>. Si no tienes Chrome,
+                                        descárgalo gratis en <a href="https://www.google.com/chrome/" target="_blank" className="underline font-semibold">google.com/chrome</a>.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Banner */}
                         <div className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl shadow-xl p-6 sm:p-8 text-white mb-8 animate-fadeIn">
