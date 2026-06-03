@@ -295,15 +295,7 @@
             50%       { transform: translateY(-8px); }
         }
 
-        /* ── FRASE MOTIVACIONAL ── */
-        .quote-container {
-            background: linear-gradient(135deg, rgba(107,30,46,0.06) 0%, rgba(226,190,130,0.12) 100%);
-            border-left: 3px solid rgba(107,30,46,0.45);
-        }
-        .dark .quote-container {
-            background: linear-gradient(135deg, rgba(61,10,24,0.5) 0%, rgba(45,26,30,0.6) 100%);
-            border-left: 3px solid rgba(244,168,184,0.4);
-        }
+
 
         /* ── BANNER ── */
         #announcement-banner {
@@ -459,26 +451,32 @@
 
     <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
         
-        <!-- Frase -->
+        <!-- Estadísticas -->
         <section class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
-            <div id="quote-container" class="quote-container rounded-lg p-6 text-center transition-opacity duration-500 ease-in-out">
-                <!-- Quote injected -->
+          <a href="estadisticas.html" class="block no-underline group">
+            <div class="bg-white dark:bg-dark-card rounded-2xl shadow-lg p-4 sm:p-5 border-t-4 border-guinda-600 dark:border-guinda-400 transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">📊</span>
+                  <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200">Estadísticas — Último Periodo</h3>
+                </div>
+                <span id="stats-period-label" class="text-xs bg-guinda-50 dark:bg-guinda-900/40 text-guinda-700 dark:text-guinda-300 font-semibold px-3 py-1 rounded-full flex items-center gap-1"><span class="animate-pulse inline-block w-2 h-2 rounded-full bg-guinda-400"></span>Cargando...</span>
+              </div>
+              <div id="stats-kpi-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
+                <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
+                <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
+                <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
+              </div>
             </div>
+          </a>
         </section>
         
         <!-- Servicios -->
-        <div id="servicios" class="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32">
-            <div class="flex items-baseline justify-center gap-4 sm:gap-6 mb-4">
-                <div class="inline-block animate-pulse-slow">
-                    <img src="https://raw.githubusercontent.com/DA-itd/A/main/pola.png" alt="Servicios" class="h-16 sm:h-20 md:h-24 object-contain">
-                </div>
-                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-bold text-guinda-900 dark:text-guinda-100 transition-colors">
-                    Servicios Disponibles
-                </h2>
-            </div>
-            <p class="text-base sm:text-lg md:text-xl text-gray-500 dark:text-guinda-200/70 max-w-3xl mx-auto px-4 transition-colors">
-                Seleccione la opción que necesite para acceder a los diferentes servicios
-            </p>
+        <div id="servicios" class="text-center mb-6 sm:mb-8 animate-fadeInUp scroll-mt-32">
+            <h2 class="inline-block text-lg sm:text-xl font-display font-semibold text-guinda-800 dark:text-guinda-200 border-b-2 border-guinda-200 dark:border-guinda-800 pb-1">
+                Servicios Disponibles
+            </h2>
         </div>
 
         <!-- Grid -->
@@ -985,24 +983,7 @@
             } else { showWeather(durangoLat, durangoLon); }
         }
 
-        // Quotes
-        const inspirationalQuotes = [
-            { quote: "La educación es el arma más poderosa que puedes usar para cambiar el mundo.", author: "Nelson Mandela" },
-            { quote: "La ciencia es una forma de pensar mucho más que un cuerpo de conocimientos.", author: "Carl Sagan" },
-            { quote: "La educación no es preparación para la vida; la educación es la vida misma.", author: "John Dewey" },
-            { quote: "La mente que se abre a una nueva idea jamás volverá a su tamaño original.", author: "Albert Einstein" },
-            { quote: "El objetivo de la educación es la virtud y el deseo de convertirse en un buen ciudadano.", author: "Platón" }
-        ];
-        function rotateQuotes() {
-            const qc = document.getElementById('quote-container');
-            if (!qc) return;
-            const q = inspirationalQuotes[Math.floor(Math.random() * inspirationalQuotes.length)];
-            qc.style.opacity = 0;
-            setTimeout(() => {
-                qc.innerHTML = `<p class="text-base sm:text-lg italic text-gray-700 dark:text-gray-300 leading-relaxed">"${q.quote}"</p><p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 text-right mt-2">- ${q.author}</p>`;
-                qc.style.opacity = 1;
-            }, 500);
-        }
+
 
         // Banner
         const announcementBanner = document.getElementById('announcement-banner');
@@ -1065,7 +1046,6 @@
 
         window.addEventListener('load', function() {
             startClock(); updateDate(); updateWeather(); updateYears();
-            rotateQuotes(); setInterval(rotateQuotes, 15000);
 
             // Consultar estado desde el servidor (visible igual para todos)
             fetchInscriptionState().then(isOpen => updateUI(isOpen));
@@ -1294,6 +1274,99 @@
     document.getElementById('modal-cursos').addEventListener('click', function(e) {
         if (e.target === this) cerrarModalCursos();
     });
+</script>
+
+<script>
+// ── Mini estadísticas del último periodo en la página principal ──
+(async function loadHomeStats() {
+  const APPS_URL = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
+
+  function renderKPIs(d) {
+    const sinTotal = d.docentesNoParticiparon ? d.docentesNoParticiparon.total : 0;
+    const sinH     = d.docentesNoParticiparon ? d.docentesNoParticiparon.hombres : 0;
+    const sinM     = d.docentesNoParticiparon ? d.docentesNoParticiparon.mujeres : 0;
+    const cobertura = d.coberturaDocente ? d.coberturaDocente.porcentaje : 0;
+    const unicos    = d.coberturaDocente ? d.coberturaDocente.actualizados : 0;
+
+    const kpis = [
+      {
+        label: 'TOTAL INSCRIPCIONES',
+        value: d.totalInscripciones ?? 0,
+        icon: '📝',
+        color: 'guinda',
+        border: 'border-guinda-400',
+        bg: 'bg-guinda-50 dark:bg-guinda-900/20',
+        text: 'text-guinda-700 dark:text-guinda-300',
+        sub: null
+      },
+      {
+        label: 'DOCENTES ÚNICOS',
+        value: unicos,
+        icon: '👥',
+        color: 'crema',
+        border: 'border-crema-400',
+        bg: 'bg-crema-50 dark:bg-guinda-900/20',
+        text: 'text-crema-600 dark:text-crema-300',
+        sub: null
+      },
+      {
+        label: 'COBERTURA PLANTILLA',
+        value: cobertura + '%',
+        icon: '🏫',
+        color: 'yellow',
+        border: 'border-yellow-400',
+        bg: 'bg-yellow-50 dark:bg-yellow-900/20',
+        text: 'text-yellow-700 dark:text-yellow-500',
+        sub: null
+      },
+      {
+        label: 'SIN PARTICIPAR',
+        value: sinTotal,
+        icon: '🚫',
+        color: 'red',
+        border: 'border-red-400',
+        bg: 'bg-red-50 dark:bg-red-900/20',
+        text: 'text-red-600 dark:text-red-400',
+        sub: sinTotal > 0 ? 'H: ' + sinH + ' | M: ' + sinM : null
+      }
+    ];
+
+    const grid = document.getElementById('stats-kpi-grid');
+    if (!grid) return;
+    grid.innerHTML = kpis.map(k => `
+      <div class="rounded-xl border-2 ${k.border} ${k.bg} p-3 flex items-center justify-between gap-2 transition-colors">
+        <div class="min-w-0">
+          <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide leading-tight mb-1">${k.label}</p>
+          <p class="text-2xl sm:text-3xl font-extrabold ${k.text} leading-none">${k.value}</p>
+          ${k.sub ? `<p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1">${k.sub}</p>` : ''}
+        </div>
+        <span class="text-2xl sm:text-3xl opacity-60 flex-shrink-0">${k.icon}</span>
+      </div>
+    `).join('');
+  }
+
+  try {
+    const currentYear = new Date().getFullYear();
+    const res  = await fetch(APPS_URL + '?action=getStatisticsData&period=' + currentYear);
+    const json = await res.json();
+    const label = document.getElementById('stats-period-label');
+
+    if (json.success && json.data) {
+      renderKPIs(json.data);
+      if (label) label.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-green-400 mr-1"></span>Periodo Actual ' + currentYear;
+    } else {
+      if (label) label.textContent = 'Sin datos';
+      document.getElementById('stats-kpi-grid').innerHTML =
+        '<div class="col-span-4 text-center text-sm text-gray-400 py-4">No se pudieron cargar las estadísticas.</div>';
+    }
+  } catch(e) {
+    const label = document.getElementById('stats-period-label');
+    if (label) label.textContent = 'Error';
+    const grid = document.getElementById('stats-kpi-grid');
+    if (grid) grid.innerHTML =
+      '<div class="col-span-4 text-center text-sm text-gray-400 py-4">Error al cargar estadísticas.</div>';
+  }
+})();
 </script>
 </body>
 </html>
