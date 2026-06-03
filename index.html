@@ -302,7 +302,8 @@
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
         }
-        #announcement-banner.hidden-banner {
+        #announcement-banner.hidden-banner,
+        #banner-estadisticas.hidden-stats {
             opacity: 0; height: 0 !important; padding: 0 !important; margin: 0 !important;
         }
 
@@ -456,7 +457,7 @@
     <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
         
         <!-- Estadísticas -->
-        <section class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
+        <section id="banner-estadisticas" class="max-w-4xl mx-auto mb-8 animate-fadeInUp transition-all duration-1000 overflow-hidden origin-top">
             <div class="bg-white dark:bg-dark-card rounded-2xl shadow-lg border-t-4 border-guinda-600 dark:border-guinda-400 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <a href="estadisticas.html" class="block no-underline group p-4 sm:p-5">
                 <div class="flex items-center justify-between mb-3">
@@ -697,6 +698,14 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
+                        <!-- ADMIN TRIGGER: Click on Logo -->
+                        <img 
+                            id="admin-trigger"
+                            src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
+                            alt="ITD Admin Access" 
+                            class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity bg-white/20 p-1 rounded"
+                            title="Acceso Administrativo"
+                        />
                         <a href="mailto:alejandro.calderon@itdurango.edu.mx" class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md cursor-pointer">
                             <span class="mr-2">📧</span> Enviar Email
                         </a>
@@ -723,6 +732,9 @@
             <div class="mt-4 pt-4 border-t border-white/10 flex flex-col sm:flex-row justify-center items-center gap-4">
                 <a href="aviso.html" class="text-xs text-white/60 hover:text-white transition-colors underline">
                     Aviso de Privacidad
+                </a>
+                <a href="admin.html" class="text-xs text-white/40 hover:text-white/80 transition-colors flex items-center gap-1">
+                    <span>🔒</span> Acceso Administrativo
                 </a>
             </div>
         </div>
@@ -980,7 +992,7 @@
 
 
 
-        // Banner
+        // Banner and Stats Auto-hide
         const announcementBanner = document.getElementById('announcement-banner');
         if (announcementBanner) {
             let bannerHidden = false;
@@ -994,6 +1006,13 @@
             setTimeout(hideBanner, 10000);
             window.addEventListener('scroll', hideBanner, { once: true });
             announcementBanner.addEventListener('click', hideBanner);
+        }
+
+        const statsBanner = document.getElementById('banner-estadisticas');
+        if (statsBanner) {
+            setTimeout(() => {
+                statsBanner.classList.add('hidden-stats');
+            }, 15000);
         }
 
         // Dark Mode Toggle Logic
