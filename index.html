@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth" style="visibility: hidden; opacity: 0;">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta name="google-site-verification" content="no3sRtXHiydJtG7sAE69l-JoUZRF4z6EPipOGbJ1jkE" />
     <script src="ga.js"></script>
@@ -103,47 +103,14 @@
         }
     </script>
 
-    <!-- SOLUCIÓN SAFARI, ESTILOS & MODO OSCURO -->
+    <!-- ESTILOS & MODO OSCURO -->
     <script>
-        // 0. Aplicar tema oscuro inmediatamente antes de pintar
+        // Aplicar tema oscuro inmediatamente antes de pintar para evitar FOUC
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
-
-        // 1. Hack para desactivar bfcache en Safari
-        window.onunload = function() {};
-
-        // 2. Función para mostrar la página solo cuando esté lista
-        function safeReveal() {
-            var body = document.body;
-            var computed = window.getComputedStyle(body);
-            var hasStyles = computed.backgroundImage && computed.backgroundImage.includes('gradient');
-            var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
-            if (isSafari && !hasStyles) {
-                console.log('Recargando por estilos faltantes...');
-                window.location.reload();
-                return;
-            }
-
-            document.documentElement.style.transition = 'opacity 0.3s ease-in';
-            document.documentElement.style.visibility = 'visible';
-            document.documentElement.style.opacity = '1';
-        }
-
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                window.location.reload();
-            } else {
-                setTimeout(safeReveal, 150);
-            }
-        });
-        
-        window.addEventListener('load', function() {
-            setTimeout(safeReveal, 150);
-        });
     </script>
 
     <!-- Google tag (gtag.js) -->
