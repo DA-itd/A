@@ -1354,13 +1354,14 @@
     if (deptDiv && d.docentesNoParticiparon) {
        let deptData = d.docentesNoParticiparon.porDepartamento || d.docentesNoParticiparon.departamentos || d.docentesNoParticiparon.carreras;
        
-       if (!deptData) {
-         for (const key in d.docentesNoParticiparon) {
-            if (typeof d.docentesNoParticiparon[key] === 'object' && d.docentesNoParticiparon[key] !== null) {
-               deptData = d.docentesNoParticiparon[key];
-               break;
+       if (!deptData && Array.isArray(d.docentesNoParticiparon.lista)) {
+         deptData = {};
+         d.docentesNoParticiparon.lista.forEach(docente => {
+            const depto = docente.departamento && docente.departamento.trim() !== '' ? docente.departamento : 'No registrado';
+            if (depto.toLowerCase() !== 'departamento') { // Ignore header row if accidentally included
+                deptData[depto] = (deptData[depto] || 0) + 1;
             }
-         }
+         });
        }
 
        if (deptData && Object.keys(deptData).length > 0) {
