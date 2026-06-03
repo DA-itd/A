@@ -457,25 +457,25 @@
         
         <!-- Estadísticas -->
         <section class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
-          <a href="estadisticas.html" class="block no-underline group">
-            <div class="bg-white dark:bg-dark-card rounded-2xl shadow-lg p-4 sm:p-5 border-t-4 border-guinda-600 dark:border-guinda-400 transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                  <span class="text-lg">📊</span>
-                  <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200">Estadísticas — Último Periodo</h3>
+            <div class="bg-white dark:bg-dark-card rounded-2xl shadow-lg border-t-4 border-guinda-600 dark:border-guinda-400 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <a href="estadisticas.html" class="block no-underline group p-4 sm:p-5">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg">📊</span>
+                    <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200">Estadísticas — Último Periodo</h3>
+                  </div>
+                  <span id="stats-period-label" class="text-xs bg-guinda-50 dark:bg-guinda-900/40 text-guinda-700 dark:text-guinda-300 font-semibold px-3 py-1 rounded-full flex items-center gap-1"><span class="animate-pulse inline-block w-2 h-2 rounded-full bg-guinda-400"></span>Cargando...</span>
                 </div>
-                <span id="stats-period-label" class="text-xs bg-guinda-50 dark:bg-guinda-900/40 text-guinda-700 dark:text-guinda-300 font-semibold px-3 py-1 rounded-full flex items-center gap-1"><span class="animate-pulse inline-block w-2 h-2 rounded-full bg-guinda-400"></span>Cargando...</span>
-              </div>
-              <div id="stats-kpi-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
-                <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
-                <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
-                <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
-              </div>
+                <div id="stats-kpi-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
+                  <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
+                  <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
+                  <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
+                </div>
+              </a>
               <!-- DETALLE DEPARTAMENTOS -->
-              <div id="stats-dept-breakdown" class="hidden mt-4 pt-3 border-t border-gray-100 dark:border-gray-800/60"></div>
+              <div id="stats-dept-breakdown" class="hidden px-4 pb-4 sm:px-5 sm:pb-5 mt-1 border-t border-gray-100 dark:border-gray-800/60 cursor-default"></div>
             </div>
-          </a>
         </section>
         
         <!-- Servicios -->
@@ -697,14 +697,6 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <!-- ADMIN TRIGGER: Click on Logo -->
-                        <img 
-                            id="admin-trigger"
-                            src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
-                            alt="ITD Admin Access" 
-                            class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity bg-white/20 p-1 rounded"
-                            title="Acceso Administrativo"
-                        />
                         <a href="mailto:alejandro.calderon@itdurango.edu.mx" class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md cursor-pointer">
                             <span class="mr-2">📧</span> Enviar Email
                         </a>
@@ -731,9 +723,6 @@
             <div class="mt-4 pt-4 border-t border-white/10 flex flex-col sm:flex-row justify-center items-center gap-4">
                 <a href="aviso.html" class="text-xs text-white/60 hover:text-white transition-colors underline">
                     Aviso de Privacidad
-                </a>
-                <a href="admin.html" class="text-xs text-white/40 hover:text-white/80 transition-colors flex items-center gap-1">
-                    <span>🔒</span> Acceso Administrativo
                 </a>
             </div>
         </div>
@@ -1194,8 +1183,8 @@
         function parseFechaOrden(fecha) {
             if (!fecha) return 9999;
             const upper = fecha.toUpperCase();
-            const mesMatch = upper.match(/(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE|ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)/);
-            const diaMatch = upper.match(/(\d{1,2})/);
+            const mesMatch = upper.match(/\s*(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE|ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\s*/);
+            const diaMatch = upper.match(/\s*(\d{1,2})\s*/);
             const mes = mesMatch ? (MESES[mesMatch[1]] || 99) : 99;
             const dia = diaMatch ? parseInt(diaMatch[1]) : 99;
             return mes * 100 + dia;
