@@ -1,15 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 
-// Fix: Add global declarations for window properties to avoid TypeScript errors.
-declare global {
-    interface Window {
-        google: any;
-        CONFIG?: {
-            APPS_SCRIPT_URL: string;
-        };
-    }
-}
+const COURSES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv';
+const TEACHERS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
 
 // ============================================================================
 // === TYPE DEFINITIONS for InscripcionesApp ==================================
@@ -45,16 +39,14 @@ interface FormData {
 // === INSCRIPCIONES APP ======================================================
 // ============================================================================
 const InscripcionesApp = () => {
-    const COURSES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv';
-    const TEACHERS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv';
     const CURP_REGEX = /^[A-Z]{4}\d{6}[HM][A-Z]{5}[0-9A-Z]\d$/;
     const MOCK_DEPARTMENTS = [ "DEPARTAMENTO DE SISTEMAS Y COMPUTACION", "DEPARTAMENTO DE INGENIERÍA ELÉCTRICA Y ELECTRÓNICA", "DEPARTAMENTO DE CIENCIAS ECONOMICO-ADMINISTRATIVAS", "DEPARTAMENTO DE INGENIERÍA QUÍMICA-BIOQUÍMICA", "DEPARTAMENTO DE CIENCIAS DE LA TIERRA", "DEPARTAMENTO DE CIENCIAS BASICAS", "DEPARTAMENTO DE METAL-MECÁNICA", "DEPARTAMENTO DE INGENIERÍA INDUSTRIAL", "DIVISION DE ESTUDIOS DE POSGRADO E INVESTIGACION", "ADMINISTRATIVO", "EXTERNO" ];
 
-    const removeAccents = (text) => {
+    const removeAccents = (text: string) => {
         if (!text) return '';
         return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     };
-    const parseCSVLine = (line) => {
+    const parseCSVLine = (line: string) => {
         const result = []; let current = ''; let inQuotes = false;
         for (let i = 0; i < line.length; i++) {
             const char = line[i];
@@ -64,7 +56,7 @@ const InscripcionesApp = () => {
         }
         result.push(current.trim()); return result;
     };
-    const cleanCSVValue = (val) => {
+    const cleanCSVValue = (val: string) => {
         let cleaned = val.trim();
         if (cleaned.startsWith('"') && cleaned.endsWith('"')) { cleaned = cleaned.substring(1, cleaned.length - 1).replace(/""/g, '"'); }
         return cleaned;
@@ -74,10 +66,10 @@ const InscripcionesApp = () => {
             const response = await fetch(`${TEACHERS_CSV_URL}&_=${Date.now()}`);
             if (!response.ok) throw new Error('Error al cargar docentes');
             const csvText = await response.text(); const lines = csvText.trim().split(/\r?\n/);
-            return lines.slice(1).filter(line => line.trim()).map(line => {
+            return lines.slice(1).filter((line: string) => line.trim()).map((line: string) => {
                 const values = parseCSVLine(line); if (values.length < 3) return null;
                 return { nombreCompleto: cleanCSVValue(values[0]), curp: cleanCSVValue(values[1]), email: cleanCSVValue(values[2]) };
-            }).filter((teacher): teacher is Teacher => teacher !== null);
+            }).filter((teacher: any): teacher is Teacher => teacher !== null);
         } catch (error) { console.error("Error al obtener docentes:", error); return []; }
     };
     const getCourses = async (): Promise<Course[]> => {
@@ -85,16 +77,18 @@ const InscripcionesApp = () => {
             const response = await fetch(`${COURSES_CSV_URL}&_=${Date.now()}`);
             if (!response.ok) throw new Error('Error al cargar cursos');
             const csvText = await response.text(); const lines = csvText.trim().split(/\r?\n/);
-            return lines.slice(1).filter(line => line.trim()).map(line => {
+            return lines.slice(1).filter((line: string) => line.trim()).map((line: string) => {
                 const values = parseCSVLine(line); if (values.length < 8) return null;
                 const hours = parseInt(cleanCSVValue(values[4]), 10);
                 return { id: cleanCSVValue(values[0]), name: cleanCSVValue(values[1]), dates: cleanCSVValue(values[2]), period: cleanCSVValue(values[3]), hours: isNaN(hours) ? 30 : hours, location: cleanCSVValue(values[5]), schedule: cleanCSVValue(values[6]), type: cleanCSVValue(values[7]) };
-            }).filter((course): course is Course => course !== null);
+            }).filter((course: any): course is Course => course !== null);
         } catch (error) { console.error("Error al obtener cursos:", error); return []; }
     };
     const getDepartments = () => Promise.resolve(MOCK_DEPARTMENTS);
-    const getRegistrationByCurp = async (curp) => {
-        const APPS_SCRIPT_URL = window.CONFIG?.APPS_SCRIPT_URL; if (!APPS_SCRIPT_URL) throw new Error("URL no configurada");
+    
+    // NOTE: This now hits APPS_SCRIPT_URL (with GET not POST for lookup logic) 
+    const getRegistrationByCurp = async (curp: string) => {
+        if (!APPS_SCRIPT_URL) throw new Error("URL no configurada");
         try {
             const url = new URL(APPS_SCRIPT_URL);
             url.searchParams.append('action', 'lookupByCurp'); url.searchParams.append('curp', curp.toUpperCase()); url.searchParams.append('_', Date.now().toString());
@@ -104,20 +98,20 @@ const InscripcionesApp = () => {
             return [];
         } catch (error) { console.error("Error al buscar CURP:", error); return []; }
     };
-    const submitRegistration = async (submission) => {
-        const APPS_SCRIPT_URL = window.CONFIG?.APPS_SCRIPT_URL; if (!APPS_SCRIPT_URL) throw new Error("URL de configuración no disponible");
+    const submitRegistration = async (submission: any) => {
+        if (!APPS_SCRIPT_URL) throw new Error("URL de configuración no disponible");
         try {
             const response = await fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'cors', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(submission) });
             const result = await response.json();
-            if (result?.success) { return result.data; } else { throw new Error(result.message || 'Error en el servidor'); }
+            if (result?.success) { return result; } else { throw new Error(result.message || 'Error en el servidor'); }
         } catch (error) {
             console.error("Error al enviar registro:", error);
             if (error instanceof Error && error.message !== 'Failed to fetch') { throw error; }
             throw new Error("No se pudo comunicar con el servidor.\n\nPosibles causas:\n1. URL del script incorrecta\n2. Script sin permisos públicos\n3. Problema de conexión");
         }
     };
-    const cancelSingleCourse = async (payload) => {
-        const APPS_SCRIPT_URL = window.CONFIG?.APPS_SCRIPT_URL; if (!APPS_SCRIPT_URL) throw new Error("URL no disponible");
+    const cancelSingleCourse = async (payload: any) => {
+        if (!APPS_SCRIPT_URL) throw new Error("URL no disponible");
         try {
             const response = await fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'cors', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ ...payload, action: 'cancelSingle' }) });
             const result = await response.json();
@@ -126,10 +120,10 @@ const InscripcionesApp = () => {
     };
     
     // Components start here
-    const Stepper = ({ currentStep, steps }) => (
+    const Stepper = ({ currentStep, steps }: any) => (
         <div className='w-full max-w-5xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8'>
             <div className='flex items-start overflow-x-auto pb-2'>
-                {steps.map((step, index) => {
+                {steps.map((step: any, index: number) => {
                     const isCompleted = index < currentStep - 1;
                     const isActive = index === currentStep - 1;
                     return (
@@ -151,9 +145,9 @@ const InscripcionesApp = () => {
             </div>
         </div>
     );
-    const ExistingRegistrationModal = ({ isOpen, courses, onModify, onClose, onDeleteCourse, deletingCourseId, onCancelAll }) => {
+    const ExistingRegistrationModal = ({ isOpen, courses, onModify, onClose, onDeleteCourse, deletingCourseId, onCancelAll }: any) => {
         useEffect(() => {
-            const handleEsc = (event) => { if (event.key === 'Escape') onClose(); };
+            const handleEsc = (event: any) => { if (event.key === 'Escape') onClose(); };
             if (isOpen) { window.addEventListener('keydown', handleEsc); }
             return () => { window.removeEventListener('keydown', handleEsc); };
         }, [isOpen, onClose]);
@@ -165,14 +159,14 @@ const InscripcionesApp = () => {
                     <div className='mt-4'>
                         <p className='text-sm sm:text-base text-gray-600'>Hemos detectado que ya estás inscrito en los siguientes cursos. ¿Qué te gustaría hacer?</p>
                         <div className='mt-4 space-y-2 bg-gray-50 p-4 rounded-md border'>
-                            {courses.length > 0 ? courses.map(course => (
+                            {courses.length > 0 ? courses.map((course: any) => (
                                 <div key={course.id} className='flex items-center justify-between py-1 gap-2'>
                                     <span className='font-semibold text-sm sm:text-base text-gray-700 flex-1 pr-2'>{course.name}</span>
                                     <button onClick={() => onDeleteCourse(course.id)} disabled={!!deletingCourseId} className='p-2 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-700 transition-colors disabled:opacity-50 flex-shrink-0' aria-label={`Eliminar curso ${course.name}`}>
                                         {deletingCourseId === course.id ? '⏳' : '🗑️'}
                                     </button>
                                 </div>
-                            )) : <p className='text-gray-500 italic text-sm'>No tiene cursos registrados.</p>}
+                            )) : <p className='text-gray-500 italic text-sm'>Aún no se pueden mostrar los detalles, pero registramos un movimiento previo.</p>}
                         </div>
                         <p className='text-sm sm:text-base text-gray-600 mt-6'>Puede modificar su selección o cancelar toda su inscripción.</p>
                     </div>
@@ -197,9 +191,9 @@ const InscripcionesApp = () => {
         required?: boolean;
     }
     const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ teachers, onSelect, value, onChange, name, placeholder, required = false }) => {
-        const [suggestions, setSuggestions] = useState<Teacher[]>([]); const [showSuggestions, setShowSuggestions] = useState(false); const containerRef = useRef(null);
+        const [suggestions, setSuggestions] = useState<Teacher[]>([]); const [showSuggestions, setShowSuggestions] = useState(false); const containerRef = useRef<HTMLDivElement | null>(null);
         useEffect(() => {
-            const handleClickOutside = (event) => { if (containerRef.current && !containerRef.current.contains(event.target)) { setShowSuggestions(false); } };
+            const handleClickOutside = (event: any) => { if (containerRef.current && !containerRef.current.contains(event.target)) { setShowSuggestions(false); } };
             document.addEventListener('mousedown', handleClickOutside);
             return () => document.removeEventListener('mousedown', handleClickOutside);
         }, []);
@@ -228,28 +222,57 @@ const InscripcionesApp = () => {
             </div>
         );
     };
-    const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCourses, setSelectedCourses, setOriginalSelectedCourses, onNext, onGoToStep }) => {
+    const Step1PersonalInfo = ({ formData, setFormData, departments, teachers, allCourses, setSelectedCourses, setOriginalSelectedCourses, onNext, onGoToStep }: any) => {
         // Fix: Type state for errors to avoid property access errors.
         const [errors, setErrors] = useState<{ [key: string]: string }>({}); const [isCheckingCurp, setIsCheckingCurp] = useState(false); const [isModalOpen, setIsModalOpen] = useState(false); const [existingCourses, setExistingCourses] = useState<Course[]>([]); const [deletingCourseId, setDeletingCourseId] = useState(null); const lastCheckedCurp = useRef('');
+        
+        // Use a ref to track if we've successfully verified registration state for this CURP
+        const verifiedCurpRef = useRef('');
+        
         useEffect(() => {
             const checkForRegistration = async () => {
                 setIsCheckingCurp(true);
                 try {
                     const registeredCourseIds = await getRegistrationByCurp(formData.curp);
                     if (formData.curp === lastCheckedCurp.current) {
+                        verifiedCurpRef.current = formData.curp;
                         if (registeredCourseIds.length > 0) {
-                            const preSelectedCourses = allCourses.filter(c => registeredCourseIds.includes(c.id));
-                            if (preSelectedCourses.length > 0) { setExistingCourses(preSelectedCourses); setOriginalSelectedCourses(preSelectedCourses); setIsModalOpen(true); }
-                        } else { setExistingCourses([]); setOriginalSelectedCourses([]); setIsModalOpen(false); }
+                            const preSelectedCourses = allCourses.filter((c: any) => registeredCourseIds.includes(c.id));
+                            // Even if it maps to zero courses right now, we know they have IDs registered
+                            setExistingCourses(preSelectedCourses);
+                            setOriginalSelectedCourses(preSelectedCourses);
+                            setIsModalOpen(true);
+                        } else { 
+                            setExistingCourses([]); 
+                            setOriginalSelectedCourses([]); 
+                            setIsModalOpen(false); 
+                        }
                     }
-                } catch (error) { console.error("Error al verificar registro:", error); } finally { if (formData.curp === lastCheckedCurp.current) { setIsCheckingCurp(false); } }
+                } catch (error) { 
+                    console.error("Error al verificar registro:", error); 
+                } finally { 
+                    if (formData.curp === lastCheckedCurp.current) { 
+                        setIsCheckingCurp(false); 
+                    } 
+                }
             };
-            if (formData.curp.length === 18 && lastCheckedCurp.current !== formData.curp) { lastCheckedCurp.current = formData.curp; checkForRegistration(); } else if (formData.curp.length !== 18) { lastCheckedCurp.current = ''; setIsModalOpen(false); }
+
+            if (formData.curp.length === 18 && lastCheckedCurp.current !== formData.curp) { 
+                lastCheckedCurp.current = formData.curp; 
+                checkForRegistration(); 
+            } else if (formData.curp.length !== 18) { 
+                lastCheckedCurp.current = ''; 
+                verifiedCurpRef.current = '';
+                setIsModalOpen(false); 
+                setExistingCourses([]);
+            }
         }, [formData.curp, allCourses, setOriginalSelectedCourses]);
+        
         const handleCloseModal = () => setIsModalOpen(false);
         const handleModifyRegistration = () => { setSelectedCourses(existingCourses); setOriginalSelectedCourses(existingCourses); setIsModalOpen(false); onNext(); };
         const handleCancelAllRegistration = () => { setSelectedCourses([]); setOriginalSelectedCourses(existingCourses); setIsModalOpen(false); onGoToStep(3); };
-        const handleDeleteCourse = async (courseIdToDelete) => {
+        
+        const handleDeleteCourse = async (courseIdToDelete: any) => {
             setDeletingCourseId(courseIdToDelete);
             try {
                 const courseToDelete = existingCourses.find(c => c.id === courseIdToDelete);
@@ -260,6 +283,7 @@ const InscripcionesApp = () => {
                 if (updatedCourses.length === 0) setIsModalOpen(false);
             } catch (error) { alert(`Error: ${error instanceof Error ? error.message : "Error al eliminar"}`); } finally { setDeletingCourseId(null); }
         };
+        
         const validate = () => {
             // Fix: Type newErrors object to allow dynamic property assignment.
             const newErrors: { [key: string]: string } = {};
@@ -267,24 +291,40 @@ const InscripcionesApp = () => {
             if (!formData.curp) { newErrors.curp = "Campo obligatorio"; } else if (formData.curp.length !== 18) { newErrors.curp = "CURP debe tener 18 caracteres"; } else if (!CURP_REGEX.test(formData.curp.toUpperCase())) { newErrors.curp = "CURP inválido (formato incorrecto)"; }
             if (!formData.email) { newErrors.email = "Campo obligatorio"; } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) { newErrors.email = "Email inválido"; }
             if (!formData.department) { newErrors.department = "Campo obligatorio"; }
+            
+            // If the modal was closed but they still have existing courses, prevent proceeding without "Modificar"
+            if (verifiedCurpRef.current === formData.curp && existingCourses.length > 0) {
+                newErrors.curp = "Ya cuentas con un registro activo. Modifica o cancela desde el aviso que aparece al escribir tu CURP.";
+                setIsModalOpen(true); // Pop the modal open again to force them to choose.
+            }
+
             setErrors(newErrors); return Object.keys(newErrors).length === 0;
         };
-        const handleSubmit = (e) => { e.preventDefault(); if (validate()) onNext(); };
+        
+        const handleSubmit = (e: any) => { 
+            e.preventDefault(); 
+            // Don't submit if we are still fetching
+            if (isCheckingCurp) return;
+            if (validate()) onNext(); 
+        };
+        
         const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
             const { name, value } = e.target; let finalValue = value;
             if (name === 'email') finalValue = value.toLowerCase(); else if (name === 'curp' || name === 'fullName') finalValue = value.toUpperCase();
-            setFormData(prev => {
+            setFormData((prev: any) => {
                 const newState = { ...prev, [name]: finalValue };
                 if (name === 'curp' && finalValue.length >= 11) { const genderChar = finalValue.charAt(10).toUpperCase(); if (genderChar === 'H') newState.gender = 'Hombre'; else if (genderChar === 'M') newState.gender = 'Mujer'; }
                 return newState;
             });
         };
+        
         const handleTeacherSelect = (teacher: Teacher) => {
             const { nombreCompleto, curp, email } = teacher; const upperCurp = (curp || '').toUpperCase();
             let inferredGender = 'Mujer';
             if (upperCurp.length >= 11) { const genderChar = upperCurp.charAt(10).toUpperCase(); if (genderChar === 'H') inferredGender = 'Hombre'; else if (genderChar === 'M') inferredGender = 'Mujer'; }
             setFormData({ ...formData, fullName: (nombreCompleto || '').toUpperCase(), curp: upperCurp, email: (email || '').toLowerCase(), gender: inferredGender, });
         };
+        
         return (
             <React.Fragment>
                 <ExistingRegistrationModal isOpen={isModalOpen} courses={existingCourses} onModify={handleModifyRegistration} onClose={handleCloseModal} onDeleteCourse={handleDeleteCourse} deletingCourseId={deletingCourseId} onCancelAll={handleCancelAllRegistration} />
@@ -295,20 +335,23 @@ const InscripcionesApp = () => {
                             <div>
                                 <label className='block text-sm font-medium text-gray-700'>Nombre Completo *</label>
                                 <AutocompleteInput teachers={teachers} onSelect={handleTeacherSelect} value={formData.fullName} onChange={handleChange} name='fullName' required={true} />
-                                {errors.fullName && <p className='text-red-500 text-xs mt-1'>{errors.fullName}</p>}
+                                {errors.fullName && <p className='text-red-500 text-xs mt-1 font-bold'>{errors.fullName}</p>}
                             </div>
                             <div>
                                 <label className='block text-sm font-medium text-gray-700'>CURP *</label>
                                 <div className='relative'>
-                                    <input type='text' name='curp' value={formData.curp} onChange={handleChange} className='mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base' placeholder='18 caracteres' maxLength={18} required={true} />
+                                    <input type='text' name='curp' value={formData.curp} onChange={handleChange} className={`mt-1 block w-full px-3 py-2 bg-white border ${errors.curp ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base uppercase`} placeholder='18 caracteres' maxLength={18} required={true} />
                                     {isCheckingCurp && <div className='absolute inset-y-0 right-0 flex items-center pr-3'><div className='animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900'></div></div>}
                                 </div>
-                                {errors.curp && <p className='text-red-500 text-xs mt-1'>{errors.curp}</p>}
+                                {errors.curp && <p className='text-red-500 text-sm mt-2 font-bold'>{errors.curp}</p>}
+                                {existingCourses.length > 0 && verifiedCurpRef.current === formData.curp && !errors.curp && (
+                                    <p className='text-red-500 text-sm mt-2 font-bold'>⚠️ Ya tienes una solicitud registrada con esta CURP. Abre el aviso para modificarla.</p>
+                                )}
                             </div>
                             <div>
                                 <label className='block text-sm font-medium text-gray-700'>Email Institucional *</label>
                                 <input type='email' name='email' value={formData.email} onChange={handleChange} className='mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base' placeholder='email@itdurango.edu.mx' required={true} />
-                                {errors.email && <p className='text-red-500 text-xs mt-1'>{errors.email}</p>}
+                                {errors.email && <p className='text-red-500 text-xs mt-1 font-bold'>{errors.email}</p>}
                             </div>
                             <div>
                                 <label className='block text-sm font-medium text-gray-700'>Género *</label>
@@ -322,40 +365,44 @@ const InscripcionesApp = () => {
                                     <option value=''>Seleccione un departamento</option>
                                     {departments.map(dep => <option key={dep} value={dep}>{dep}</option>)}
                                 </select>
-                                {errors.department && <p className='text-red-500 text-xs mt-1'>{errors.department}</p>}
+                                {errors.department && <p className='text-red-500 text-xs mt-1 font-bold'>{errors.department}</p>}
                             </div>
                         </div>
                         <div className='mt-8 flex justify-end'>
-                            <button type='submit' className='w-full sm:w-auto bg-blue-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800'>Continuar</button>
+                            {existingCourses.length > 0 && verifiedCurpRef.current === formData.curp ? (
+                                <button type='button' onClick={() => setIsModalOpen(true)} className={'w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg'}>Revisar Registro</button>
+                            ) : (
+                                <button type='submit' disabled={isCheckingCurp} className={`w-full sm:w-auto text-white font-bold py-2 px-6 rounded-lg ${isCheckingCurp ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-700 hover:bg-blue-800'}`}>Continuar</button>
+                            )}
                         </div>
                     </form>
                 </div>
             </React.Fragment>
         );
     };
-    const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, originalSelectedCourses, onNext, onBack }) => {
-        const [error, setError] = useState(null); const [searchTerm, setSearchTerm] = useState(''); const [filterPeriod, setFilterPeriod] = useState('all'); const [filterType, setFilterType] = useState('all');
-        const availablePeriods = useMemo(() => [...new Set(courses.map(c => c.period).filter(Boolean))], [courses]);
-        const availableTypes = useMemo(() => [...new Set(courses.map(c => c.type).filter(Boolean))], [courses]);
-        const schedulesOverlap = (course1, course2) => {
+    const Step2CourseSelection = ({ courses, selectedCourses, setSelectedCourses, originalSelectedCourses, onNext, onBack }: any) => {
+        const [error, setError] = useState<string | null>(null); const [searchTerm, setSearchTerm] = useState(''); const [filterPeriod, setFilterPeriod] = useState('all'); const [filterType, setFilterType] = useState('all');
+        const availablePeriods = useMemo(() => [...new Set(courses.map((c: any) => c.period).filter(Boolean))], [courses]);
+        const availableTypes = useMemo(() => [...new Set(courses.map((c: any) => c.type).filter(Boolean))], [courses]);
+        const schedulesOverlap = (course1: any, course2: any) => {
             if (!course1.dates || !course2.dates || course1.dates !== course2.dates) return false;
             if (!course1.schedule || !course2.schedule) return false;
-            const parseTime = (schedule) => { const matches = schedule.match(/(\d{1,2}:\d{2})/g); if (!matches || matches.length < 2) return null; return [parseInt(matches[0].replace(':', ''), 10), parseInt(matches[1].replace(':', ''), 10)]; };
+            const parseTime = (schedule: string) => { const matches = schedule.match(/(\d{1,2}:\d{2})/g); if (!matches || matches.length < 2) return null; return [parseInt(matches[0].replace(':', ''), 10), parseInt(matches[1].replace(':', ''), 10)]; };
             const time1 = parseTime(course1.schedule); const time2 = parseTime(course2.schedule); if (!time1 || !time2) return false;
             return time1[0] < time2[1] && time2[0] < time1[1];
         };
-        const handleSelectCourse = (course) => {
-            const isSelected = selectedCourses.some(c => c.id === course.id); let newSelection = [...selectedCourses]; setError(null);
-            if (isSelected) { newSelection = newSelection.filter(c => c.id !== course.id); } else {
+        const handleSelectCourse = (course: any) => {
+            const isSelected = selectedCourses.some((c: any) => c.id === course.id); let newSelection = [...selectedCourses]; setError(null);
+            if (isSelected) { newSelection = newSelection.filter((c: any) => c.id !== course.id); } else {
                 if (selectedCourses.length >= 3) { setError("No puede seleccionar más de 3 cursos."); return; }
-                if (selectedCourses.some(selected => schedulesOverlap(selected, course))) { setError("El horario de este curso se solapa con otra selección."); return; }
+                if (selectedCourses.some((selected: any) => schedulesOverlap(selected, course))) { setError("El horario de este curso se solapa con otra selección."); return; }
                 newSelection.push(course);
             }
             setSelectedCourses(newSelection);
         };
-        const handleSubmit = (e) => { e.preventDefault(); const isTotalCancellation = selectedCourses.length === 0 && originalSelectedCourses && originalSelectedCourses.length > 0; if (selectedCourses.length > 0 || isTotalCancellation) { onNext(); } else { setError("Debe seleccionar al menos un curso."); } };
+        const handleSubmit = (e: any) => { e.preventDefault(); const isTotalCancellation = selectedCourses.length === 0 && originalSelectedCourses && originalSelectedCourses.length > 0; if (selectedCourses.length > 0 || isTotalCancellation) { onNext(); } else { setError("Debe seleccionar al menos un curso."); } };
         const filteredCourses = useMemo(() => {
-            return courses.filter(course => {
+            return courses.filter((course: any) => {
                 const searchMatch = removeAccents(course.name.toLowerCase()).includes(removeAccents(searchTerm.toLowerCase()));
                 const periodMatch = filterPeriod === 'all' || course.period === filterPeriod;
                 const typeMatch = filterType === 'all' || course.type === filterType;
@@ -373,21 +420,19 @@ const InscripcionesApp = () => {
                             <input type='text' placeholder='🔍 Buscar por nombre...' className='sm:col-span-3 lg:col-span-1 w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm' value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                             <select className='w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm' value={filterPeriod} onChange={e => setFilterPeriod(e.target.value)}>
                                 <option value='all'>Todos los Periodos</option>{
-                                    // Fix: Explicitly convert mapped period to string to handle 'unknown' type and allow string operations.
                                     availablePeriods.map(p => <option key={String(p)} value={String(p)}>{String(p).replace(/_/g, ' ')}</option>)
                                 }
                             </select>
                             <select className='w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm' value={filterType} onChange={e => setFilterType(e.target.value)}>
                                 <option value='all'>Todos los Tipos</option>{
-                                    // Fix: Explicitly convert mapped type to string to handle 'unknown' type.
                                     availableTypes.map(t => <option key={String(t)} value={String(t)}>{String(t)}</option>)
                                 }
                             </select>
                         </div>
                         {error && <div className='bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md' role='alert'><p className='text-sm sm:text-base'>{error}</p></div>}
                         {filteredCourses.length > 0 ? <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                            {filteredCourses.map(course => {
-                                const isSelected = selectedCourses.some(c => c.id === course.id); const hasConflict = !isSelected && selectedCourses.some(selected => schedulesOverlap(selected, course)); const hasReachedMax = !isSelected && selectedCourses.length >= 3; const isDisabled = hasConflict || hasReachedMax;
+                            {filteredCourses.map((course: any) => {
+                                const isSelected = selectedCourses.some((c: any) => c.id === course.id); const hasConflict = !isSelected && selectedCourses.some((selected: any) => schedulesOverlap(selected, course)); const hasReachedMax = !isSelected && selectedCourses.length >= 3; const isDisabled = hasConflict || hasReachedMax;
                                 const baseStyles = course.period === 'PERIODO_1' ? 'border-teal-300 bg-teal-50' : 'border-indigo-300 bg-indigo-50';
                                 const checkedStyles = isSelected ? (course.period === 'PERIODO_1' ? 'ring-2 ring-offset-2 ring-teal-500' : 'ring-2 ring-offset-2 ring-indigo-500') : 'hover:shadow-md';
                                 return (
@@ -418,7 +463,7 @@ const InscripcionesApp = () => {
                         <div className='sticky top-24 bg-gray-50 p-4 rounded-lg shadow-inner border'>
                             <h3 className='text-lg font-bold text-gray-800 border-b pb-2 mb-3'>{`Tu Selección (${selectedCourses.length} / 3)`}</h3>
                             {selectedCourses.length > 0 ? <ul className='space-y-3'>
-                                {selectedCourses.map(course => <li key={course.id} className='bg-white p-3 rounded-md shadow-sm flex justify-between items-center text-sm'><span className='font-semibold text-gray-700 pr-2'>{course.name}</span><button onClick={() => handleSelectCourse(course)} className='text-red-500 hover:text-red-700 font-bold text-lg' aria-label={`Quitar ${course.name}`}>×</button></li>)}
+                                {selectedCourses.map((course: any) => <li key={course.id} className='bg-white p-3 rounded-md shadow-sm flex justify-between items-center text-sm'><span className='font-semibold text-gray-700 pr-2'>{course.name}</span><button onClick={() => handleSelectCourse(course)} className='text-red-500 hover:text-red-700 font-bold text-lg' aria-label={`Quitar ${course.name}`}>×</button></li>)}
                             </ul> : <p className='text-sm text-gray-500 p-4 text-center'>Selecciona hasta 3 cursos de la lista.</p>}
                         </div>
                     </div>
@@ -432,13 +477,33 @@ const InscripcionesApp = () => {
             </div>
         );
     };
-    const Step3Confirmation = ({ formData, courses, originalCourses, onBack, onSubmit }) => {
+    const Step3Confirmation = ({ formData, courses, originalCourses, onBack, onSubmit }: any) => {
         const [isSubmitting, setIsSubmitting] = useState(false);
+        const [submitError, setSubmitError] = useState<string | null>(null);
         const isCancellation = courses.length === 0 && originalCourses.length > 0;
-        const handleSubmit = async () => { setIsSubmitting(true); try { await onSubmit(); } catch (error) { console.error("Error de envío:", error); } finally { setIsSubmitting(false); } };
+        
+        const handleSubmit = async () => { 
+            setIsSubmitting(true); 
+            setSubmitError(null);
+            try { 
+                await onSubmit(); 
+            } catch (error: any) { 
+                console.error("Error de envío:", error); 
+                setSubmitError(error.message || "Error al completar el trámite. Verifica que no te estés inscribiendo a un curso que ya tienes activo.");
+            } finally { 
+                setIsSubmitting(false); 
+            } 
+        };
+        
         return (
             <div className='bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md w-full max-w-4xl mx-auto'>
                 <h2 className='text-xl sm:text-2xl font-bold mb-6 text-gray-800'>{isCancellation ? 'Confirmar Cancelación' : 'Confirmación de Registro'}</h2>
+                
+                {submitError && <div className='bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md w-full max-w-4xl mx-auto' role='alert'>
+                        <p className='font-bold'>Error al Enviar</p>
+                        <p className='whitespace-pre-wrap'>{submitError}</p>
+                </div>}
+
                 <div className='border border-gray-200 rounded-lg p-4 sm:p-6 mb-6'>
                     <h3 className='text-base sm:text-lg font-semibold text-gray-700 mb-4'>Resumen de su Registro</h3>
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
@@ -451,9 +516,9 @@ const InscripcionesApp = () => {
                     {isCancellation ? <div className='border border-yellow-400 bg-yellow-50 text-yellow-800 rounded-lg p-4'>
                         <p className='font-bold'>Atención: Está a punto de cancelar su inscripción.</p>
                         <p className='mt-2 text-sm'>{`Al confirmar, se eliminará su registro de ${originalCourses.length} curso(s).`}</p>
-                        <ul className='list-disc list-inside mt-2 space-y-1 text-sm'>{originalCourses.map(course => <li key={course.id}>{course.name}</li>)}</ul>
+                        <ul className='list-disc list-inside mt-2 space-y-1 text-sm'>{originalCourses.map((course: any) => <li key={course.id}>{course.name}</li>)}</ul>
                     </div> : courses.length > 0 ? <div className='space-y-4'>
-                        {courses.map(course => <div key={course.id} className='border border-gray-200 rounded-lg p-4'>
+                        {courses.map((course: any) => <div key={course.id} className='border border-gray-200 rounded-lg p-4'>
                             <h4 className='font-bold text-sm sm:text-base text-gray-800'>{course.name}</h4>
                             <div className='grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 mt-2 text-xs sm:text-sm text-gray-600'>
                                 <div><strong>Horario: </strong>{course.schedule || 'N/A'}</div><div><strong>Lugar: </strong>{course.location || 'N/A'}</div><div><strong>Fechas: </strong>{course.dates}</div><div><strong>Horas: </strong>{course.hours || 30}</div>
@@ -470,7 +535,7 @@ const InscripcionesApp = () => {
             </div>
         );
     };
-    const Step4Success = ({ registrationResult, applicantName, selectedCourses, submissionType, emailSent, emailError }) => {
+    const Step4Success = ({ registrationResult, applicantName, selectedCourses, submissionType, emailSent, emailError }: any) => {
         const isCancellation = submissionType === 'cancellation';
         const hasResult = registrationResult && registrationResult.length > 0;
         const coursesToDisplay = hasResult ? registrationResult : selectedCourses;
@@ -486,7 +551,7 @@ const InscripcionesApp = () => {
                 {!isCancellation && coursesToDisplay && coursesToDisplay.length > 0 && <div className='mt-6 text-left border border-gray-200 rounded-lg p-4 sm:p-6'>
                     <h3 className='text-base sm:text-lg font-semibold text-gray-700 mb-4'>Detalles de la Inscripción:</h3>
                     <ul className='space-y-3'>
-                        {coursesToDisplay.map((result) => <li key={result.registrationId || result.id} className={`p-3 rounded-md border ${result.error ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'}`}>
+                        {coursesToDisplay.map((result: any) => <li key={result.registrationId || result.id} className={`p-3 rounded-md border ${result.error ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'}`}>
                             <div className='flex flex-col sm:flex-row sm:justify-between gap-2'>
                                 <span className='font-semibold text-sm sm:text-base text-gray-800'>{(result.courseName || result.name)}{result.dates && ` (${result.dates})`}</span>
                                 {result.folio && <span className='text-xs sm:text-sm'>Folio: <strong className={`font-mono px-2 py-1 rounded ${result.error ? 'bg-red-200 text-red-800' : 'bg-gray-200'}`}>{result.folio}</strong></span>}
@@ -496,14 +561,13 @@ const InscripcionesApp = () => {
                     </ul>
                 </div>}
                 <div className='mt-8 border-t pt-6'>
-                    <div className='flex justify-center'><a href='index.html' className='bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-lg transition-colors inline-block'>← Volver al Portal Principal</a></div>
+                    <div className='flex justify-center'><a href='/' className='bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-lg transition-colors inline-block'>← Volver al Portal Principal</a></div>
                 </div>
             </div>
         );
     };
 
     const [currentStep, setCurrentStep] = useState(1);
-    // Fix: Add explicit types for states to ensure type safety.
     const [formData, setFormData] = useState<FormData>({ fullName: '', curp: '', email: '', gender: 'Mujer', department: '', selectedCourses: [] });
     const [allCourses, setAllCourses] = useState<Course[]>([]);
     const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -515,7 +579,7 @@ const InscripcionesApp = () => {
     const [error, setError] = useState<string | null>(null);
     const [submissionType, setSubmissionType] = useState('enrollment');
     const [emailSent, setEmailSent] = useState(true);
-    const [emailError, setEmailError] = useState(null);
+    const [emailError, setEmailError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -534,26 +598,21 @@ const InscripcionesApp = () => {
     const goToStep = (step: number) => { if (step > 0 && step <= studentSteps.length) setCurrentStep(step); };
     const handleSubmit = async () => {
         setError(null);
-        try {
-            const isCancellation = selectedCourses.length === 0 && originalSelectedCourses.length > 0;
-            setSubmissionType(isCancellation ? 'cancellation' : 'enrollment');
-            const submissionData = {
-                action: 'enrollStudent', timestamp: new Date().toISOString(), fullName: formData.fullName, curp: formData.curp, email: formData.email, gender: formData.gender, DepartamentoSeleccionado: formData.department,
-                selectedCourses: selectedCourses.map(c => ({ id: c.id, name: c.name, dates: c.dates, location: c.location, schedule: c.schedule })),
-                previousRegistrationIds: originalSelectedCourses.map(c => c.id)
-            };
-            const result = await submitRegistration(submissionData);
-            const registrationResultsArray = result.results || [];
-            const augmentedResult = registrationResultsArray.map((reg) => {
-                const courseDetails = selectedCourses.find(c => c.id === reg.registrationId);
-                return { ...reg, dates: courseDetails ? courseDetails.dates : 'Fechas no disponibles' };
-            });
-            setRegistrationResult(augmentedResult); setEmailSent(result.emailSent !== false); setEmailError(result.emailError);
-            handleNext();
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : "Error desconocido";
-            setError(errorMessage); setCurrentStep(3);
-        }
+        const isCancellation = selectedCourses.length === 0 && originalSelectedCourses.length > 0;
+        setSubmissionType(isCancellation ? 'cancellation' : 'enrollment');
+        const submissionData = {
+            action: 'enrollStudent', timestamp: new Date().toISOString(), fullName: formData.fullName, curp: formData.curp, email: formData.email, gender: formData.gender, DepartamentoSeleccionado: formData.department,
+            selectedCourses: selectedCourses.map(c => ({ id: c.id, name: c.name, dates: c.dates, location: c.location, schedule: c.schedule })),
+            previousRegistrationIds: originalSelectedCourses.map(c => c.id)
+        };
+        const result = await submitRegistration(submissionData);
+        const registrationResultsArray = result.results || [];
+        const augmentedResult = registrationResultsArray.map((reg: any) => {
+            const courseDetails = selectedCourses.find(c => c.id === reg.registrationId);
+            return { ...reg, dates: courseDetails ? courseDetails.dates : 'Fechas no disponibles' };
+        });
+        setRegistrationResult(augmentedResult); setEmailSent(result.emailSent !== false); setEmailError(result.emailError);
+        handleNext();
     };
     
     const renderContent = () => {
@@ -573,10 +632,6 @@ const InscripcionesApp = () => {
             <main className='flex-grow'>
                 <Stepper currentStep={currentStep} steps={studentSteps} />
                 <div className='container mx-auto px-4 sm:px-6 lg:px-8 pb-8'>
-                    {error && currentStep === 3 && <div className='bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md w-full max-w-4xl mx-auto' role='alert'>
-                        <p className='font-bold'>Error al Enviar</p>
-                        <p className='whitespace-pre-wrap'>{error}</p>
-                    </div>}
                     {renderContent()}
                 </div>
             </main>
@@ -584,8 +639,4 @@ const InscripcionesApp = () => {
     );
 };
 
-const rootElement = document.getElementById('root');
-if (rootElement) {
-    const root = ReactDOM.createRoot(rootElement);
-    root.render(<React.StrictMode><InscripcionesApp /></React.StrictMode>);
-}
+export default InscripcionesApp;
