@@ -2,14 +2,19 @@
 <html lang="es">
 <head>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-V2V4CT2C69"></script>
-<script src="ga.js"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-V2V4CT2C69');
+    </script>
     
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Validador de Constancias ITD</title>
     <meta name="description" content="Valida la autenticidad de constancias y reconocimientos emitidos por el área de Desarrollo Académico del ITD. Ingresa el folio para verificar.">
     <meta name="keywords" content="validar constancia ITD, verificador de documentos, constancias oficiales, autenticidad folio, TecNM">
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web2/main/image.jpg" />
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -18,15 +23,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-JH1X2720VL');
-    </script>
 
     <style>
         @keyframes fade-in {
@@ -42,13 +38,10 @@
     <div id="root"></div>
 
     <script type="text/babel">
-    // ============================================================================
-    // CONSTANTS & TYPES
-    // ============================================================================
     const SPREADSHEET_ID = '1CVXtvWAQSSL2efNBxfJH6SrLE2McmNXLlS-58-beScQ';
     const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web2/main/image.jpg';
     const TECNM_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web2/main/TecNM_logo.jpg';
-    const VALIDATION_URL = 'https://da-itd.github.io/web2'; // URL Base para el QR
+    const VALIDATION_URL = 'https://da-itd.github.io/web2'; 
 
     const POTENTIAL_FOLIO_HEADERS = [
         'Folio', 'ID', 'Folio del certificado', 'Folio de la constancia',
@@ -62,9 +55,6 @@
         ERROR: 'error',
     };
 
-    // ============================================================================
-    // UTILS
-    // ============================================================================
     const getProperty = (obj, keyName) => {
         if (!obj || typeof obj !== 'object' || !keyName) return undefined;
         const keyToFind = keyName.toLowerCase();
@@ -121,9 +111,6 @@
         sound.play().catch(error => console.warn(`Advertencia al reproducir sonido (${id}):`, error.message));
     };
 
-    // ============================================================================
-    // PDF SERVICE
-    // ============================================================================
     const getImageDataFromURL = (url) => {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -256,37 +243,28 @@
         doc.line(20, y, 190, y);
         y += 7; 
 
-        // ==================================================================
-        // ===== SECCIÓN DEL SELLO DIGITAL (MODIFICADA PARA USAR QR) =====
-        // ==================================================================
         doc.setFontSize(9);
         doc.setTextColor(100, 100, 100);
         doc.setFont("helvetica", "bold");
         doc.text("SELLO DE VERIFICACIÓN DIGITAL", 20, y);
 
         try {
-            // 1. Generar datos del QR y Sello
             const fullFolio = data['Folio'] || 'N/A';
-            // Extraer solo el sufijo para la URL, ej: 93-2025-17
             const folioSuffix = fullFolio.replace('TNM-054-', ''); 
             const qrContent = `${VALIDATION_URL}?folio=${folioSuffix}`;
             
-            // 2. Generar el DataURL del QR
-            // window.QRious ya existe gracias al script que añadimos
             const qr = new QRious({ 
                 value: qrContent,
-                level: 'M', // Nivel de corrección de errores (Medium)
-                size: 150 // Resolución interna del QR
+                level: 'M', 
+                size: 150 
             });
-            const qrDataURL = qr.toDataURL(); // Esto es un string 'data:image/png;base64,...'
+            const qrDataURL = qr.toDataURL(); 
 
-            // 3. Dibujar el QR en el PDF
-            const qrSize = 30; // 30mm x 30mm
+            const qrSize = 30; 
             const qrX = 20;
             const qrY = y + 3;
             doc.addImage(qrDataURL, 'PNG', qrX, qrY, qrSize, qrSize);
 
-            // 4. Generar código de verificación (sello)
             const verificationData = {
                 folio: fullFolio,
                 nombre: data['Nombre del Titular'] || '',
@@ -295,9 +273,8 @@
             const hash = generateVerificationHash(verificationData);
             const verificationCode = formatVerificationCode(hash, fullFolio);
             
-            // 5. Dibujar el texto al lado del QR
-            const textX = qrX + qrSize + 5; // Inicia después del QR
-            let textY = qrY + 5; // Alineado con el QR
+            const textX = qrX + qrSize + 5; 
+            let textY = qrY + 5; 
             
             doc.setFontSize(8);
             doc.setTextColor(150, 150, 150);
@@ -310,7 +287,6 @@
             doc.text(`Generado: ${now.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`, textX, textY + 10);
             doc.text(`Hora: ${now.toLocaleTimeString('es-ES')}`, textX, textY + 14);
             
-            // Código de verificación (destacado)
             textY += 20;
             doc.setFontSize(7);
             doc.setTextColor(100, 100, 100);
@@ -322,7 +298,6 @@
             doc.setFont("courier", "bold");
             doc.text(verificationCode, textX, textY + 4);
             
-            // Nota de verificación
             doc.setFontSize(7);
             doc.setTextColor(120, 120, 120);
             doc.setFont("helvetica", "italic");
@@ -334,18 +309,10 @@
             doc.setTextColor(255, 0, 0);
             doc.text("Error al crear sello digital.", 20, y + 15);
         }
-        // ==================================================================
-        // ===== FIN DE LA SECCIÓN MODIFICADA =====
-        // ==================================================================
 
         doc.save(`Validacion-${data['Folio']}.pdf`);
     };
 
-    // ============================================================================
-    // DATABASE SERVICE — Lee desde Google Sheets (CSV export)
-    // ============================================================================
-
-    // Parsea un CSV exportado por Google Sheets de forma robusta (maneja comas dentro de comillas)
     const parseCsv = (text) => {
       const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
       if (lines.length === 0) return [];
@@ -373,7 +340,6 @@
       return rows;
     };
 
-    // Convierte array de arrays (con encabezados en primera fila) a array de objetos
     const aoa2json = (dataAoA) => {
       let headerRowIndex = -1;
       for (let i = 0; i < dataAoA.length; i++) {
@@ -399,8 +365,6 @@
         }, {}));
     };
 
-    // Obtiene las hojas cuyo nombre contiene "validation" (insensible a mayúsculas)
-    // Retorna array de objetos { gid, name }
     const fetchValidationSheets = async (spreadsheetId) => {
       const metaUrl = `https://spreadsheets.google.com/feeds/worksheets/${spreadsheetId}/public/basic?alt=json&t=${Date.now()}`;
       try {
@@ -414,20 +378,13 @@
           if (!link) return null;
           const match = link.href.match(/\/([^/]+)\/public/);
           const gid = match ? match[1] : null;
-          // El nombre de la hoja viene en entry.title.$t
           const name = entry.title ? entry.title.$t : '';
           return gid ? { gid, name } : null;
         }).filter(Boolean);
 
-        // Solo hojas cuyo nombre contenga "validation" (ej: "validation 2025", "validation 2026", etc.)
         const validationSheets = sheets.filter(s => s.name.toLowerCase().includes('validation'));
-
-        console.log('Hojas de validación encontradas:', validationSheets.map(s => s.name));
-
-        // Si no encuentra ninguna con ese nombre, usar todas como respaldo
         return validationSheets.length > 0 ? validationSheets : sheets;
       } catch {
-        // Si falla el meta feed, intentar con gid=0 (hoja 1) solamente
         return [{ gid: '0', name: 'hoja1' }];
       }
     };
@@ -445,7 +402,6 @@
           if (!text || text.trim() === '') continue;
           const aoa = parseCsv(text);
           const records = aoa2json(aoa);
-          console.log(`Hoja "${name}": ${records.length} registros cargados.`);
           allData = allData.concat(records);
         } catch (e) {
           console.warn(`No se pudo leer la hoja "${name}" (gid=${gid}):`, e.message);
@@ -453,15 +409,12 @@
       }
 
       if (allData.length === 0) {
-        throw new Error('No se encontraron registros en las hojas de validación. Asegúrese de que el archivo de Google Sheets sea público ("Cualquier persona con el enlace puede ver") y que las hojas se llamen "validation YYYY".');
+        throw new Error('No se encontraron registros en las hojas de validación.');
       }
 
       return allData;
     };
 
-    // ============================================================================
-    // REACT COMPONENTS
-    // ============================================================================
     const { useState, useEffect, useCallback } = React;
 
     const SpinnerIcon = (props) => (
@@ -481,10 +434,10 @@
     );
 
     const Footer = () => (
-        <footer className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-auto">
+        <footer className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-auto w-full">
             <div className="container mx-auto px-4">
                 <p className="font-semibold text-sm sm:text-base mb-2">
-                    © Coordinación de Actualización Docente
+                    © Coordinación de Actualización Docente 
                 </p>
                 <p className="text-xs sm:text-sm opacity-90">
                     M.C. Alejandro Calderón Rentería
@@ -672,7 +625,7 @@
       const [query, setQuery] = useState('');
       const [status, setStatus] = useState(ValidationStatus.IDLE);
       const [result, setResult] = useState(null);
-      const [mode, setMode] = useState('folio'); // 'folio' or 'code'
+      const [mode, setMode] = useState('folio');
 
       useEffect(() => {
         (async () => {
@@ -728,9 +681,6 @@
         const inputQuery = searchQuery.trim().toUpperCase(); 
 
         if (mode === 'folio') {
-          // ===============================================
-          // MODO FOLIO
-          // ===============================================
           const cleanedSuffix = inputQuery.toLowerCase();
 
           found = certificateData.find(record => {
@@ -748,9 +698,6 @@
           }
 
         } else if (mode === 'code') {
-          // ===============================================
-          // MODO CÓDIGO
-          // ===============================================
           const inputCode = inputQuery.replace(/-/g, '');
           
           found = certificateData.find(record => {
@@ -825,9 +772,7 @@
                   mode={mode}
                   setMode={setMode}
                 />
-                
                 <ValidationResult status={status} result={result} mode={mode} />
-            
             </React.Fragment>
         );
       };
@@ -848,19 +793,18 @@
       );
     };
 
-    window.addEventListener('load', () => {
-      const rootElement = document.getElementById('root');
-      if (rootElement) {
-        const root = ReactDOM.createRoot(rootElement);
-        root.render(
-          <React.StrictMode>
-            <App />
-          </React.StrictMode>
-        );
-      } else {
-        console.error('No se encontró el elemento root');
-      }
-    });
+    // Remove window.addEventListener('load') because babel transpiles this script later
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      const root = ReactDOM.createRoot(rootElement);
+      root.render(
+        <React.StrictMode>
+          <App />
+        </React.StrictMode>
+      );
+    } else {
+      console.error('No se encontró el elemento root');
+    }
     </script>
 </body>
 </html>
