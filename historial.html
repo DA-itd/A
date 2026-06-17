@@ -7,7 +7,6 @@
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -16,7 +15,6 @@
 <style>
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } 
     .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-    .debug-box { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 12px; margin: 8px 0; font-family: monospace; font-size: 12px; white-space: pre-wrap; max-height: 300px; overflow: auto; }
 </style>
 </head>
 <body class="bg-slate-50 min-h-screen font-sans text-slate-900 pb-20">
@@ -43,7 +41,6 @@
 </header>
 
 <div id="root"></div>
-<div id="debug-container" class="container mx-auto px-4 max-w-4xl mt-4"></div>
 
 <footer class="bg-slate-900 text-white text-center py-8 mt-12">
     <div class="container mx-auto px-4">
@@ -53,35 +50,18 @@
     </div>
 </footer>
 
-<script type="text/babel">
+<script>
+    // ============================================================
+    // 1. REACT
+    // ============================================================
+    const React = window.React;
+    const ReactDOM = window.ReactDOM;
     const { useState, useEffect, useRef } = React;
     const { createRoot } = ReactDOM;
+    const h = React.createElement;
 
     // ============================================================
-    // FUNCIÓN DE DEPURACIÓN - MUESTRA DATOS EN PANTALLA
-    // ============================================================
-    function showDebug(message, data) {
-        const container = document.getElementById('debug-container');
-        if (!container) return;
-        
-        const div = document.createElement('div');
-        div.className = 'debug-box';
-        const timestamp = new Date().toLocaleTimeString();
-        let content = `[${timestamp}] ${message}\n`;
-        if (data !== undefined) {
-            try {
-                content += JSON.stringify(data, null, 2);
-            } catch(e) {
-                content += String(data);
-            }
-        }
-        div.textContent = content;
-        container.appendChild(div);
-        container.scrollTop = container.scrollHeight;
-    }
-
-    // ============================================================
-    // 1. CONFIGURACIÓN
+    // 2. CONFIGURACIÓN
     // ============================================================
     const CONFIG = {
         GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
@@ -91,95 +71,85 @@
     const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
 
     // ============================================================
-    // 2. UTILIDADES
+    // 3. UTILIDADES
     // ============================================================
-    const getImageDataFromURL = (url) => {
-        return new Promise((resolve) => {
-            const img = new Image(); 
-            img.crossOrigin = 'Anonymous';
-            img.onload = () => {
-                const canvas = document.createElement('canvas'); 
-                canvas.width = img.width; 
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d'); 
-                ctx.drawImage(img, 0, 0);
-                try { resolve(canvas.toDataURL('image/png')); } 
-                catch (e) { resolve(null); }
-            };
-            img.onerror = () => resolve(null); 
-            img.src = url;
-        });
-    };
-    
-    const drawLogo = (doc, logoData, x, y, targetWidth) => {
-        if (!logoData) return;
-        try {
-            const props = doc.getImageProperties(logoData);
-            const targetHeight = (props.height * targetWidth) / props.width;
-            doc.addImage(logoData, 'PNG', x, y, targetWidth, targetHeight);
-        } catch (e) { 
-            doc.addImage(logoData, 'PNG', x, y, targetWidth, targetWidth); 
-        }
-    };
-
-    const cleanValue = (val) => {
+    const cleanValue = function(val) {
         if (!val) return '';
-        let cleaned = val.trim();
+        var cleaned = val.trim();
         if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
             cleaned = cleaned.substring(1, cleaned.length - 1).replace(/""/g, '"');
         }
         return cleaned;
     };
 
-    const normalize = (str) => {
-        if (!str) return '';
-        return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    const getImageDataFromURL = function(url) {
+        return new Promise(function(resolve) {
+            var img = new Image(); 
+            img.crossOrigin = 'Anonymous';
+            img.onload = function() {
+                var canvas = document.createElement('canvas'); 
+                canvas.width = img.width; 
+                canvas.height = img.height;
+                var ctx = canvas.getContext('2d'); 
+                ctx.drawImage(img, 0, 0);
+                try { resolve(canvas.toDataURL('image/png')); } 
+                catch (e) { resolve(null); }
+            };
+            img.onerror = function() { resolve(null); }; 
+            img.src = url;
+        });
     };
-
-    // ============================================================
-    // 3. OBTENER HISTORIAL CON DEPURACIÓN
-    // ============================================================
-    const getTeacherHistory = async (idToken) => {
-        showDebug('📥 Solicitando historial al Apps Script...');
-        showDebug('🔑 Token ID (primeros 20 chars):', idToken.substring(0, 20) + '...');
-        
+    
+    var drawLogo = function(doc, logoData, x, y, targetWidth) {
+        if (!logoData) return;
         try {
-            const url = `${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${encodeURIComponent(idToken)}&t=${Date.now()}`;
-            showDebug('🔗 URL de petición:', url);
-            
-            const response = await fetch(url);
-            showDebug('📊 Status HTTP:', response.status);
-            
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            
-            const result = await response.json();
-            showDebug('📦 Respuesta completa del servidor:', result);
-            
-            if (result.success) {
-                showDebug('✅ Éxito! Datos recibidos:', result.data);
-                return result;
-            } else {
-                showDebug('❌ Error en la respuesta:', result.message || 'Sin mensaje');
-                throw new Error(result.message || 'Error al obtener el historial');
-            }
-        } catch (error) {
-            showDebug('❌ Error en la petición:', error.message);
-            throw error;
+            var props = doc.getImageProperties(logoData);
+            var targetHeight = (props.height * targetWidth) / props.width;
+            doc.addImage(logoData, 'PNG', x, y, targetWidth, targetHeight);
+        } catch (e) { 
+            doc.addImage(logoData, 'PNG', x, y, targetWidth, targetWidth); 
         }
     };
 
     // ============================================================
-    // 4. COMPONENTE LOGIN
+    // 4. OBTENER HISTORIAL
     // ============================================================
-    const LoginScreen = ({ onLogin }) => {
-        const googleBtnRef = useRef(null);
+    var getTeacherHistory = function(idToken) {
+        return new Promise(function(resolve, reject) {
+            var url = CONFIG.APPS_SCRIPT_URL + '?action=getTeacherHistory&id_token=' + encodeURIComponent(idToken) + '&t=' + Date.now();
+            console.log('📥 Solicitando historial...');
+            
+            fetch(url)
+                .then(function(response) {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.json();
+                })
+                .then(function(result) {
+                    console.log('📊 Respuesta:', result);
+                    if (result.success) {
+                        resolve(result);
+                    } else {
+                        reject(new Error(result.message || 'Error al obtener el historial'));
+                    }
+                })
+                .catch(function(error) {
+                    console.error('❌ Error:', error);
+                    reject(error);
+                });
+        });
+    };
+
+    // ============================================================
+    // 5. COMPONENTES
+    // ============================================================
+    var LoginScreen = function(props) {
+        var onLogin = props.onLogin;
+        var googleBtnRef = useRef(null);
         
-        useEffect(() => {
-            showDebug('🔐 Inicializando botón de Google...');
-            const interval = setInterval(() => {
+        useEffect(function() {
+            var interval = setInterval(function() {
                 if (window.google && window.google.accounts && googleBtnRef.current) {
                     clearInterval(interval);
-                    showDebug('✅ Google Identity Services cargado');
                     try {
                         window.google.accounts.id.initialize({ 
                             client_id: CONFIG.GOOGLE_CLIENT_ID, 
@@ -191,67 +161,54 @@
                             text: "continue_with", 
                             shape: "pill" 
                         });
-                        showDebug('✅ Botón de Google renderizado');
                     } catch (e) { 
-                        showDebug('❌ Error al renderizar botón:', e.message);
                         console.error("Error rendering Google Button", e); 
                     }
                 }
             }, 500);
-            return () => clearInterval(interval);
+            return function() { clearInterval(interval); };
         }, [onLogin]);
 
-        return React.createElement('div', { className: 'min-h-[60vh] flex items-center justify-center animate-fadeIn' },
-            React.createElement('div', { className: 'bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-4 border-orange-500' },
-                React.createElement('div', { className: 'text-5xl mb-4' }, '📚'),
-                React.createElement('h2', { className: 'text-2xl font-bold mb-2 text-slate-800' }, 'Acceso a Historial'),
-                React.createElement('p', { className: 'text-slate-500 mb-8' }, 'Inicia sesión con tu cuenta institucional para ver tu kardex de cursos.'),
-                React.createElement('div', { className: 'flex justify-center min-h-[50px]', ref: googleBtnRef })
+        return h('div', { className: 'min-h-[60vh] flex items-center justify-center animate-fadeIn' },
+            h('div', { className: 'bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-4 border-orange-500' },
+                h('div', { className: 'text-5xl mb-4' }, '📚'),
+                h('h2', { className: 'text-2xl font-bold mb-2 text-slate-800' }, 'Acceso a Historial'),
+                h('p', { className: 'text-slate-500 mb-8' }, 'Inicia sesión con tu cuenta institucional para ver tu kardex de cursos.'),
+                h('div', { className: 'flex justify-center min-h-[50px]', ref: googleBtnRef })
             )
         );
     };
 
     // ============================================================
-    // 5. COMPONENTE DASHBOARD (simplificado para depuración)
+    // 6. DASHBOARD
     // ============================================================
-    const Dashboard = ({ user, data, onLogout }) => {
-        const [exporting, setExporting] = React.useState(false);
+    var Dashboard = function(props) {
+        var user = props.user;
+        var data = props.data;
+        var onLogout = props.onLogout;
+        var _exporting = useState(false);
+        var exporting = _exporting[0];
+        var setExporting = _exporting[1];
         
-        // Mostrar en depuración
-        showDebug('📊 Dashboard montado con datos:', data);
-        
-        if (!data) {
-            showDebug('⚠️ data es null o undefined');
-            return React.createElement('div', { className: 'container mx-auto px-4 py-10 max-w-3xl' },
-                React.createElement('div', { className: 'bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-r-xl shadow-sm' },
-                    React.createElement('h3', { className: 'text-lg font-bold text-yellow-800' }, '⏳ Sin datos'),
-                    React.createElement('p', { className: 'text-yellow-700' }, 'No se recibieron datos del servidor.')
+        if (!data || !data.teacher) {
+            return h('div', { className: 'container mx-auto px-4 py-10 max-w-3xl' },
+                h('div', { className: 'bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-r-xl shadow-sm' },
+                    h('h3', { className: 'text-lg font-bold text-yellow-800' }, '⏳ Cargando datos...'),
+                    h('p', { className: 'text-yellow-700' }, 'Estamos obteniendo tu información académica.')
                 )
             );
         }
         
-        if (!data.teacher) {
-            showDebug('⚠️ data.teacher es null o undefined', data);
-            return React.createElement('div', { className: 'container mx-auto px-4 py-10 max-w-3xl' },
-                React.createElement('div', { className: 'bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-r-xl shadow-sm' },
-                    React.createElement('h3', { className: 'text-lg font-bold text-yellow-800' }, '⏳ Cargando datos...'),
-                    React.createElement('p', { className: 'text-yellow-700' }, 'Estamos obteniendo tu información académica.')
-                )
-            );
-        }
+        var teacher = data.teacher;
+        var courses = data.courses || [];
         
-        const { teacher, courses = [] } = data;
-        showDebug('👤 Docente:', teacher);
-        showDebug('📚 Cursos:', courses.length);
-        
-        const exportToPdf = async () => {
+        var exportToPdf = function() {
             setExporting(true);
-            try {
-                const { jsPDF } = window.jspdf; 
-                const doc = new jsPDF('p', 'mm', 'letter');
-                const pageWidth = doc.internal.pageSize.getWidth();
+            var { jsPDF } = window.jspdf; 
+            var doc = new jsPDF('p', 'mm', 'letter');
+            var pageWidth = doc.internal.pageSize.getWidth();
 
-                const itdLogo = await getImageDataFromURL(ITD_LOGO_URL); 
+            getImageDataFromURL(ITD_LOGO_URL).then(function(itdLogo) {
                 if (itdLogo) drawLogo(doc, itdLogo, pageWidth - 35, 10, 25);
 
                 doc.setFont("helvetica", "bold"); 
@@ -272,21 +229,23 @@
                 doc.setFont("helvetica", "normal");
                 doc.text(teacher.name || 'No especificado', 35, 50);
 
-                const today = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+                var today = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
                 doc.setFont("helvetica", "bold");
                 doc.text("Fecha de emisión:", 14, 55);
                 doc.setFont("helvetica", "normal");
                 doc.text(today, 50, 55);
                 
-                const tableBody = courses.length > 0 ? courses.map(c => [
-                    c.year || 'N/A', 
-                    c.folio || 'N/A', 
-                    c.courseName || c.nombre || 'N/A', 
-                    c.datesText || c.fecha || 'N/A', 
-                    c.hours || c.duracion || 'N/A', 
-                    c.type || c.tipo || 'N/A', 
-                    c.deptOrigin || c.departamento || teacher.dept || 'N/A'
-                ]) : [['N/A', 'N/A', 'Sin cursos registrados', 'N/A', 'N/A', 'N/A', 'N/A']];
+                var tableBody = courses.length > 0 ? courses.map(function(c) {
+                    return [
+                        c.year || 'N/A', 
+                        c.folio || 'N/A', 
+                        c.courseName || c.nombre || 'N/A', 
+                        c.datesText || c.fecha || 'N/A', 
+                        c.hours || c.duracion || 'N/A', 
+                        c.type || c.tipo || 'N/A', 
+                        c.deptOrigin || c.departamento || teacher.dept || 'N/A'
+                    ];
+                }) : [['N/A', 'N/A', 'Sin cursos registrados', 'N/A', 'N/A', 'N/A', 'N/A']];
 
                 doc.autoTable({ 
                     head: [['Año', 'Folio', 'Curso', 'Fechas', 'Hrs', 'Tipo', 'Depto. Origen']], 
@@ -306,131 +265,138 @@
                     }
                 });
                 
-                const pageCount = doc.internal.getNumberOfPages();
+                var pageCount = doc.internal.getNumberOfPages();
                 doc.setFontSize(8); 
                 doc.setTextColor(150);
-                doc.text(`Página 1 de ${pageCount}`, pageWidth/2, doc.internal.pageSize.getHeight() - 10, { align: "center" });
+                doc.text("Página 1 de " + pageCount, pageWidth/2, doc.internal.pageSize.getHeight() - 10, { align: "center" });
 
-                doc.save(`Kardex_${teacher.name || 'docente'}.pdf`);
-            } catch (error) {
+                doc.save("Kardex_" + (teacher.name || 'docente') + ".pdf");
+                setExporting(false);
+            }).catch(function(error) {
                 console.error('Error al exportar PDF:', error);
                 alert('Error al generar el PDF. Intente nuevamente.');
-            } finally {
                 setExporting(false);
-            }
+            });
         };
         
-        const years = [...new Set(courses.map(c => c.year))].sort().reverse();
+        var years = courses.map(function(c) { return c.year; }).filter(function(v, i, a) { return a.indexOf(v) === i; }).sort().reverse();
         
-        return React.createElement('div', { className: 'animate-fadeIn container mx-auto px-4 py-8 max-w-5xl' },
-            React.createElement('div', { className: 'bg-white rounded-2xl shadow-lg p-6 mb-8 border-l-8 border-orange-500 flex flex-col sm:flex-row justify-between items-center gap-4' },
-                React.createElement('div', null,
-                    React.createElement('p', { className: 'text-xs font-bold text-gray-400 uppercase tracking-widest' }, 'Bienvenido'),
-                    React.createElement('h2', { className: 'text-2xl font-bold text-slate-800' }, user.name || 'Usuario'),
-                    React.createElement('p', { className: 'text-sm text-slate-500' }, user.email)
+        return h('div', { className: 'animate-fadeIn container mx-auto px-4 py-8 max-w-5xl' },
+            h('div', { className: 'bg-white rounded-2xl shadow-lg p-6 mb-8 border-l-8 border-orange-500 flex flex-col sm:flex-row justify-between items-center gap-4' },
+                h('div', null,
+                    h('p', { className: 'text-xs font-bold text-gray-400 uppercase tracking-widest' }, 'Bienvenido'),
+                    h('h2', { className: 'text-2xl font-bold text-slate-800' }, user.name || 'Usuario'),
+                    h('p', { className: 'text-sm text-slate-500' }, user.email)
                 ),
-                React.createElement('button', { 
+                h('button', { 
                     onClick: onLogout, 
                     className: 'bg-slate-100 text-slate-600 px-6 py-2 rounded-full font-bold hover:bg-slate-200 hover:text-slate-800 transition-colors'
                 }, 'Cerrar Sesión')
             ),
             
-            React.createElement('div', { className: 'bg-white rounded-2xl shadow-md p-8 mb-10 relative border border-slate-100' },
-                React.createElement('div', { className: 'absolute top-0 right-0 p-6' },
-                    React.createElement('button', { 
+            h('div', { className: 'bg-white rounded-2xl shadow-md p-8 mb-10 relative border border-slate-100' },
+                h('div', { className: 'absolute top-0 right-0 p-6' },
+                    h('button', { 
                         onClick: exportToPdf, 
                         disabled: exporting || courses.length === 0,
                         className: 'bg-red-50 text-red-600 px-4 py-2 rounded-lg font-bold hover:bg-red-100 transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed'
                     },
-                        React.createElement('span', null, exporting ? '⏳' : '📄'),
+                        h('span', null, exporting ? '⏳' : '📄'),
                         exporting ? 'Generando...' : 'Descargar PDF'
                     )
                 ),
-                React.createElement('div', { className: 'mt-4 sm:mt-0' },
-                    React.createElement('p', { className: 'text-xs font-bold text-orange-500 uppercase tracking-wider mb-1' }, 'Historial Académico'),
-                    React.createElement('h2', { className: 'text-3xl font-bold text-slate-800 mb-1' }, teacher.name || 'Docente'),
-                    React.createElement('p', { className: 'text-slate-500 font-medium' }, teacher.dept || 'Departamento no especificado'),
-                    teacher.curp && teacher.curp !== 'N/A' && React.createElement('p', { className: 'text-xs text-slate-400 mt-1' }, 'CURP: ', teacher.curp),
-                    React.createElement('p', { className: 'text-xs text-slate-400 mt-1' }, 'Total de cursos: ', courses.length)
+                h('div', { className: 'mt-4 sm:mt-0' },
+                    h('p', { className: 'text-xs font-bold text-orange-500 uppercase tracking-wider mb-1' }, 'Historial Académico'),
+                    h('h2', { className: 'text-3xl font-bold text-slate-800 mb-1' }, teacher.name || 'Docente'),
+                    h('p', { className: 'text-slate-500 font-medium' }, teacher.dept || 'Departamento no especificado'),
+                    teacher.curp && teacher.curp !== 'N/A' && h('p', { className: 'text-xs text-slate-400 mt-1' }, 'CURP: ', teacher.curp),
+                    h('p', { className: 'text-xs text-slate-400 mt-1' }, 'Total de cursos: ', courses.length)
                 )
             ),
 
             courses.length === 0 ? 
-                React.createElement('div', { className: 'text-center py-12 bg-white rounded-xl shadow' },
-                    React.createElement('div', { className: 'text-6xl mb-4' }, '📭'),
-                    React.createElement('p', { className: 'text-slate-500 font-medium' }, 'No se encontraron cursos registrados.'),
-                    React.createElement('p', { className: 'text-slate-400 text-sm mt-2' }, 'Si has tomado cursos, verifica que estén registrados en el sistema.')
+                h('div', { className: 'text-center py-12 bg-white rounded-xl shadow' },
+                    h('div', { className: 'text-6xl mb-4' }, '📭'),
+                    h('p', { className: 'text-slate-500 font-medium' }, 'No se encontraron cursos registrados.'),
+                    h('p', { className: 'text-slate-400 text-sm mt-2' }, 'Si has tomado cursos, verifica que estén registrados en el sistema.')
                 ) :
-                years.map(year => {
-                    const yearCourses = courses.filter(c => String(c.year) === String(year));
-                    return React.createElement('div', { key: year, className: 'mb-10' },
-                        React.createElement('div', { className: 'flex items-center mb-6' },
-                            React.createElement('div', { className: `px-6 py-2 rounded-full text-sm font-bold shadow-md ${String(year) === '2026' ? 'bg-orange-600 text-white' : 'bg-slate-700 text-white'}` },
+                years.map(function(year) {
+                    var yearCourses = courses.filter(function(c) { return String(c.year) === String(year); });
+                    return h('div', { key: year, className: 'mb-10' },
+                        h('div', { className: 'flex items-center mb-6' },
+                            h('div', { className: 'px-6 py-2 rounded-full text-sm font-bold shadow-md ' + (String(year) === '2026' ? 'bg-orange-600 text-white' : 'bg-slate-700 text-white') },
                                 String(year) === '2026' ? '📌 Periodo Actual' : year
                             ),
-                            React.createElement('div', { className: 'h-px bg-slate-200 flex-grow ml-4' }),
-                            React.createElement('span', { className: 'text-xs text-slate-400 ml-4 font-medium' }, yearCourses.length, ' curso', yearCourses.length !== 1 ? 's' : '')
+                            h('div', { className: 'h-px bg-slate-200 flex-grow ml-4' }),
+                            h('span', { className: 'text-xs text-slate-400 ml-4 font-medium' }, yearCourses.length, ' curso', yearCourses.length !== 1 ? 's' : '')
                         ),
-                        React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-2 gap-6' },
-                            yearCourses.map((c, i) => 
-                                React.createElement('div', { key: i, className: 'bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all hover:-translate-y-1 group' },
-                                    React.createElement('div', { className: 'flex justify-between items-start mb-3' },
-                                        React.createElement('span', { className: `text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide ${c.type && c.type.toUpperCase().includes('PROFESIONAL') ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}` },
+                        h('div', { className: 'grid grid-cols-1 lg:grid-cols-2 gap-6' },
+                            yearCourses.map(function(c, i) {
+                                return h('div', { key: i, className: 'bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all hover:-translate-y-1 group' },
+                                    h('div', { className: 'flex justify-between items-start mb-3' },
+                                        h('span', { className: 'text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide ' + (c.type && c.type.toUpperCase().includes('PROFESIONAL') ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700') },
                                             c.type || 'Curso'
                                         ),
-                                        React.createElement('span', { className: 'text-xs font-mono font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded' }, c.folio || 'N/A')
+                                        h('span', { className: 'text-xs font-mono font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded' }, c.folio || 'N/A')
                                     ),
-                                    React.createElement('h3', { className: 'font-bold text-lg text-slate-800 mb-3 leading-tight group-hover:text-orange-600 transition-colors' }, c.courseName || c.nombre || 'Curso sin nombre'),
-                                    React.createElement('div', { className: 'space-y-2 pt-3 border-t border-slate-50' },
-                                        React.createElement('div', { className: 'flex items-center text-sm text-slate-600' },
-                                            React.createElement('span', { className: 'w-6 text-center mr-2' }, '📅'),
+                                    h('h3', { className: 'font-bold text-lg text-slate-800 mb-3 leading-tight group-hover:text-orange-600 transition-colors' }, c.courseName || c.nombre || 'Curso sin nombre'),
+                                    h('div', { className: 'space-y-2 pt-3 border-t border-slate-50' },
+                                        h('div', { className: 'flex items-center text-sm text-slate-600' },
+                                            h('span', { className: 'w-6 text-center mr-2' }, '📅'),
                                             c.datesText || c.fecha || 'Fechas no especificadas'
                                         ),
-                                        React.createElement('div', { className: 'flex items-center text-sm text-slate-600' },
-                                            React.createElement('span', { className: 'w-6 text-center mr-2' }, '⏱️'),
+                                        h('div', { className: 'flex items-center text-sm text-slate-600' },
+                                            h('span', { className: 'w-6 text-center mr-2' }, '⏱️'),
                                             c.hours || c.duracion || 'N/A', ' horas'
                                         ),
-                                        React.createElement('div', { className: 'flex items-center text-sm text-slate-500 italic' },
-                                            React.createElement('span', { className: 'w-6 text-center mr-2' }, '🏛️'),
+                                        h('div', { className: 'flex items-center text-sm text-slate-500 italic' },
+                                            h('span', { className: 'w-6 text-center mr-2' }, '🏛️'),
                                             c.deptOrigin || c.departamento || teacher.dept || 'Desarrollo Académico'
                                         )
                                     )
-                                )
-                            )
+                                );
+                            })
                         )
                     );
                 }),
             
-            React.createElement('div', { className: 'text-center text-xs text-slate-400 mt-8' },
-                React.createElement('p', null, 'Los cursos registrados hasta la fecha son mostrados en este historial.'),
-                React.createElement('p', null, 'Para cualquier corrección, contacta a la Coordinación de Actualización Docente.')
+            h('div', { className: 'text-center text-xs text-slate-400 mt-8' },
+                h('p', null, 'Los cursos registrados hasta la fecha son mostrados en este historial.'),
+                h('p', null, 'Para cualquier corrección, contacta a la Coordinación de Actualización Docente.')
             )
         );
     };
 
     // ============================================================
-    // 6. APP PRINCIPAL
+    // 7. APP
     // ============================================================
-    const App = () => {
-        const [user, setUser] = useState(null);
-        const [data, setData] = useState(null);
-        const [loading, setLoading] = useState(false);
-        const [error, setError] = useState(null);
+    var App = function() {
+        var _user = useState(null);
+        var user = _user[0];
+        var setUser = _user[1];
+        
+        var _data = useState(null);
+        var data = _data[0];
+        var setData = _data[1];
+        
+        var _loading = useState(false);
+        var loading = _loading[0];
+        var setLoading = _loading[1];
+        
+        var _error = useState(null);
+        var error = _error[0];
+        var setError = _error[1];
 
-        showDebug('🚀 App iniciada');
-
-        const handleLogin = (response) => {
+        var handleLogin = function(response) {
             setLoading(true);
             setError(null);
-            showDebug('🔑 Login recibido');
             try {
-                const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                showDebug('👤 Usuario autenticado:', payload.email);
+                var payload = JSON.parse(atob(response.credential.split('.')[1]));
+                console.log('👤 Usuario autenticado:', payload.email);
                 
                 getTeacherHistory(response.credential)
-                    .then(res => {
-                        if(res.success) {
-                            showDebug('✅ Login exitoso, datos recibidos');
+                    .then(function(res) {
+                        if (res.success) {
                             setUser({ 
                                 name: payload.name, 
                                 email: payload.email, 
@@ -440,79 +406,79 @@
                             setData(res.data);
                             setError(null);
                         } else {
-                            showDebug('❌ Error en respuesta:', res);
                             setError(res.message || 'Error al obtener el historial');
                         }
                     })
-                    .catch(err => {
-                        showDebug('❌ Error en petición:', err.message);
+                    .catch(function(err) {
+                        console.error('Error:', err);
                         setError(err.message || 'Error al cargar los datos');
                     })
-                    .finally(() => setLoading(false));
+                    .finally(function() { setLoading(false); });
             } catch(e) { 
-                showDebug('❌ Error en login:', e.message);
+                console.error('Error en login:', e);
                 setLoading(false);
                 setError('Error al procesar la autenticación');
             }
         };
 
-        const handleLogout = () => { 
-            showDebug('👋 Cerrando sesión');
+        var handleLogout = function() { 
             setUser(null); 
             setData(null);
             setError(null);
         };
 
-        if(loading) return React.createElement('div', { className: 'flex flex-col justify-center items-center h-screen bg-slate-50' },
-            React.createElement('div', { className: 'animate-spin h-12 w-12 border-4 border-orange-500 rounded-full border-t-transparent mb-4' }),
-            React.createElement('p', { className: 'text-slate-500 font-bold animate-pulse' }, 'Cargando tu historial...')
-        );
+        if (loading) {
+            return h('div', { className: 'flex flex-col justify-center items-center h-screen bg-slate-50' },
+                h('div', { className: 'animate-spin h-12 w-12 border-4 border-orange-500 rounded-full border-t-transparent mb-4' }),
+                h('p', { className: 'text-slate-500 font-bold animate-pulse' }, 'Cargando tu historial...')
+            );
+        }
         
-        if(error) return React.createElement('div', { className: 'container mx-auto px-4 py-10 max-w-3xl' },
-            React.createElement('div', { className: 'bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-sm' },
-                React.createElement('h3', { className: 'text-lg font-bold text-red-800' }, '❌ Error'),
-                React.createElement('p', { className: 'text-red-700' }, error),
-                React.createElement('button', { 
-                    onClick: () => { window.location.reload(); }, 
-                    className: 'mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors'
-                }, 'Recargar página')
-            )
-        );
+        if (error) {
+            return h('div', { className: 'container mx-auto px-4 py-10 max-w-3xl' },
+                h('div', { className: 'bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-sm' },
+                    h('h3', { className: 'text-lg font-bold text-red-800' }, '❌ Error'),
+                    h('p', { className: 'text-red-700' }, error),
+                    h('button', { 
+                        onClick: function() { window.location.reload(); }, 
+                        className: 'mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors'
+                    }, 'Recargar página')
+                )
+            );
+        }
         
-        if(!user || !data) return React.createElement('div', { className: 'container mx-auto px-4 pt-10' }, 
-            React.createElement(LoginScreen, { onLogin: handleLogin })
-        );
+        if (!user || !data) {
+            return h('div', { className: 'container mx-auto px-4 pt-10' }, 
+                h(LoginScreen, { onLogin: handleLogin })
+            );
+        }
         
-        return React.createElement(Dashboard, { user: user, data: data, onLogout: handleLogout });
+        return h(Dashboard, { user: user, data: data, onLogout: handleLogout });
     };
 
     // ============================================================
-    // 7. MONTAJE
+    // 8. MONTAJE
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
-        showDebug('📄 DOM cargado');
-        const rootEl = document.getElementById('root');
+        var rootEl = document.getElementById('root');
         if (rootEl) {
             try {
-                const root = createRoot(rootEl);
-                root.render(React.createElement(App, null));
-                showDebug('✅ React montado correctamente');
+                var root = createRoot(rootEl);
+                root.render(h(App, null));
+                console.log('✅ Historial ITD - App montada correctamente');
             } catch(e) {
-                showDebug('❌ Error al montar React:', e.message);
-                rootEl.innerHTML = `
-                    <div class="container mx-auto px-4 py-10 max-w-3xl">
-                        <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-sm">
-                            <h3 class="text-lg font-bold text-red-800">⚠️ Error de carga</h3>
-                            <p class="text-red-700">No se pudo cargar la aplicación. Error: ${e.message}</p>
-                            <button onclick="location.reload()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                                Recargar página
-                            </button>
-                        </div>
-                    </div>
-                `;
+                console.error('❌ Error al montar la app:', e);
+                rootEl.innerHTML = 
+                    '<div class="container mx-auto px-4 py-10 max-w-3xl">' +
+                        '<div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-sm">' +
+                            '<h3 class="text-lg font-bold text-red-800">⚠️ Error de carga</h3>' +
+                            '<p class="text-red-700">No se pudo cargar la aplicación. Error: ' + e.message + '</p>' +
+                            '<button onclick="location.reload()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">Recargar página</button>' +
+                        '</div>' +
+                    '</div>';
             }
         } else {
-            showDebug('❌ No se encontró el elemento root');
+            console.error('❌ No se encontró el elemento root');
         }
     });
 </script>
