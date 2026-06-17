@@ -2,17 +2,16 @@
 <html lang="es">
 <head>
    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V2V4CT2C69"></script>
-<script src="ga.js"></script>
+   <script src="ga.js"></script>
     
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Estadísticas - Portal de Actualización Docente ITD</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
 
-<!-- React y Babel -->
+<!-- React -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -32,7 +31,6 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
-    /* Animaciones */
     @keyframes fadeIn { 
         from { opacity: 0; transform: translateY(10px); } 
         to { opacity: 1; transform: translateY(0); } 
@@ -43,13 +41,11 @@
         to { transform: rotate(360deg); }
     }
 
-    /* Scrollbar personalizado */
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
 
-    /* Modal PDF y Loaders */
     .pdf-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0,0,0,0.7);
@@ -63,11 +59,10 @@
         max-width: 400px; border-top: 6px solid #1B396A;
     }
     
-    /* RELOJ DE ESPERA (Loader) */
     .loader-spinner {
         width: 64px;
         height: 64px;
-        border: 4px solid #1B396A; /* Aro exterior azul */
+        border: 4px solid #1B396A;
         border-radius: 50%;
         position: relative;
         margin: 0 auto 20px;
@@ -75,7 +70,6 @@
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 
-    /* Punto central */
     .loader-spinner::before {
         content: '';
         position: absolute;
@@ -87,28 +81,26 @@
         z-index: 2;
     }
 
-    /* Manecilla giratoria */
     .loader-spinner::after {
         content: '';
         position: absolute;
         width: 4px; height: 24px;
-        background: #9D2449; /* Color guinda para la manecilla */
+        background: #9D2449;
         top: 50%; left: 50%;
-        margin-left: -2px; /* Centrar horizontalmente */
-        margin-top: -24px; /* Mover arriba para que pivote desde el centro */
+        margin-left: -2px;
+        margin-top: -24px;
         transform-origin: bottom center;
         border-radius: 2px;
         animation: spin 2s linear infinite;
     }
     
-    /* Utilidades */
     .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 </style>
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800 flex flex-col">
 
-<!-- HEADER WEB -->
-<header id="web-header" class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A]">
+<!-- HEADER -->
+<header class="bg-white shadow-xl sticky top-0 z-40 border-b-4 border-[#1B396A]">
     <div class="container mx-auto px-4 py-4 sm:py-6 flex items-center justify-between gap-4">
         <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain">
         <div class="text-center flex-1 px-2 sm:px-4">
@@ -120,7 +112,7 @@
 </header>
 
 <!-- ENLACE DE NAVEGACIÓN -->
-<div id="back-link" class="container mx-auto px-4 py-4">
+<div class="container mx-auto px-4 py-4">
     <a href="index.html" 
        class="text-[#1B396A] hover:text-[#9D2449] hover:underline flex items-center gap-1 text-sm font-bold transition-colors">
         ← Volver al Portal Principal
@@ -129,7 +121,7 @@
 
 <!-- CONTENEDOR PRINCIPAL DE REACT -->
 <div id="root" class="flex-grow flex flex-col">
-    <!-- Loader Inicial (HTML puro para feedback inmediato) -->
+    <!-- Loader Inicial -->
     <div class="flex justify-center items-center h-64 flex-grow">
         <div class="text-center">
             <div class="loader-spinner"></div>
@@ -138,8 +130,8 @@
     </div>
 </div>
 
-<!-- FOOTER WEB -->
-<footer id="web-footer" class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449]">
+<!-- FOOTER -->
+<footer class="bg-[#1B396A] text-white text-center py-6 sm:py-8 mt-12 border-t-4 border-[#9D2449]">
     <div class="container mx-auto px-4">
          <p class="font-semibold text-sm sm:text-base mb-2">© Coordinación de Actualización Docente</p>
          <p class="text-xs sm:text-sm opacity-90">M.C. Alejandro Calderón Rentería</p>
@@ -147,7 +139,6 @@
     </div>
 </footer>
 
-<!-- SCRIPT DE INICIALIZACIÓN -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var yearEl = document.getElementById('copyright-year');
@@ -157,31 +148,37 @@
     });
 </script>
 
-<!-- APLICACIÓN REACT -->
-<script type="text/babel">
-    const React = window.React;
-    const ReactDOM = window.ReactDOM;
+<!-- APLICACIÓN REACT (SIN BABEL) -->
+<script>
+    // ============================================================
+    // 1. REACT
+    // ============================================================
+    var React = window.React;
+    var ReactDOM = window.ReactDOM;
+    var useState = React.useState;
+    var useEffect = React.useEffect;
+    var useRef = React.useRef;
+    var createRoot = ReactDOM.createRoot;
+    var h = React.createElement;
 
-    // ====================================================================
-    // CONFIGURACIÓN GLOBAL
-    // ====================================================================
-    const CONFIG = {
-        GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com', 
+    // ============================================================
+    // 2. CONFIGURACIÓN
+    // ============================================================
+    var CONFIG = {
+        GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
         APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
     };
 
-    // Colores Institucionales y Vibrantes
-    const INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
-    const VIBRANT_COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC926', '#1982C4', '#E91E63', '#009688'];
-    const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
-    const GUINDA_COLOR = '#9D2449';
-    const BLUE_COLOR = '#1B396A';
-    
-    // ====================================================================
-    // UTILIDADES
-    // ====================================================================
-    
-    const shortenLabel = (label) => {
+    var INSTITUTIONAL_COLORS = ['#1B396A', '#9D2449', '#B0BEC5', '#D4AF37', '#546E7A', '#455A64'];
+    var VIBRANT_COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC926', '#1982C4', '#E91E63', '#009688'];
+    var ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
+    var GUINDA_COLOR = '#9D2449';
+    var BLUE_COLOR = '#1B396A';
+
+    // ============================================================
+    // 3. UTILIDADES
+    // ============================================================
+    var shortenLabel = function(label) {
         if (!label) return '';
         return label
             .replace(/DEPARTAMENTO DE /gi, 'DEPTO. ')
@@ -195,30 +192,40 @@
             .replace(/ECONOMICO-ADMINISTRATIVAS/gi, 'ECO-ADMIN')
             .trim();
     };
-    
-    const getChartHeight = (count) => Math.max(400, count * 35) + "px"; // Aumentado ligeramente el alto por barra
 
-    const getImageDataFromURL = (url) => {
-        return new Promise((resolve) => {
-            const img = new Image(); img.crossOrigin = 'Anonymous';
-            img.onload = () => {
-                const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height;
-                const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
-                try { resolve(canvas.toDataURL('image/png')); } catch (e) { resolve(null); }
+    var getChartHeight = function(count) {
+        return Math.max(400, count * 35) + "px";
+    };
+
+    var getImageDataFromURL = function(url) {
+        return new Promise(function(resolve) {
+            var img = new Image(); 
+            img.crossOrigin = 'Anonymous';
+            img.onload = function() {
+                var canvas = document.createElement('canvas'); 
+                canvas.width = img.width; 
+                canvas.height = img.height;
+                var ctx = canvas.getContext('2d'); 
+                ctx.drawImage(img, 0, 0);
+                try { resolve(canvas.toDataURL('image/png')); } 
+                catch (e) { resolve(null); }
             };
-            img.onerror = () => resolve(null); img.src = url;
+            img.onerror = function() { resolve(null); }; 
+            img.src = url;
         });
     };
 
-    // ====================================================================
-    // COMPONENTE: Login
-    // ====================================================================
-    const Login = ({ onLogin, loginError }) => {
-        const googleButtonRef = React.useRef(null);
+    // ============================================================
+    // 4. COMPONENTE: LOGIN
+    // ============================================================
+    var Login = function(props) {
+        var onLogin = props.onLogin;
+        var loginError = props.loginError;
+        var googleButtonRef = useRef(null);
 
-        React.useEffect(() => {
-            let intervalId;
-            const initGoogle = () => {
+        useEffect(function() {
+            var intervalId;
+            var initGoogle = function() {
                 if (window.google && window.google.accounts && googleButtonRef.current) {
                     try {
                         window.google.accounts.id.initialize({ 
@@ -235,68 +242,74 @@
             };
             
             if (!initGoogle()) { 
-                intervalId = setInterval(() => { if (initGoogle()) clearInterval(intervalId); }, 500); 
+                intervalId = setInterval(function() { if (initGoogle()) clearInterval(intervalId); }, 500); 
             }
-            return () => { if(intervalId) clearInterval(intervalId); };
+            return function() { if(intervalId) clearInterval(intervalId); };
         }, [onLogin]);
 
-        return (
-            <div className="flex flex-col justify-center items-center py-20 animate-fadeIn px-4 flex-grow">
-                <div className="bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-8 border-[#9D2449]">
-                    <img src={ITD_LOGO_URL} alt="Logo ITD" className="h-24 mx-auto mb-6 object-contain" />
-                    <h2 className="text-3xl font-bold text-[#1B396A] mb-2">Acceso Restringido</h2>
-                    <p className="text-gray-500 mb-8 text-sm font-medium uppercase tracking-wide">Estadísticas Institucionales</p>
-                    {loginError && (<div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm font-bold">{loginError}</div>)}
-                    <div className="flex justify-center min-h-[50px]" ref={googleButtonRef}></div>
-                </div>
-            </div>
+        return h('div', { className: 'flex flex-col justify-center items-center py-20 animate-fadeIn px-4 flex-grow' },
+            h('div', { className: 'bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-8 border-[#9D2449]' },
+                h('img', { src: ITD_LOGO_URL, alt: 'Logo ITD', className: 'h-24 mx-auto mb-6 object-contain' }),
+                h('h2', { className: 'text-3xl font-bold text-[#1B396A] mb-2' }, 'Acceso Restringido'),
+                h('p', { className: 'text-gray-500 mb-8 text-sm font-medium uppercase tracking-wide' }, 'Estadísticas Institucionales'),
+                loginError ? h('div', { className: 'mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm font-bold' }, loginError) : null,
+                h('div', { className: 'flex justify-center min-h-[50px]', ref: googleButtonRef })
+            )
         );
     };
 
-    // ====================================================================
-    // COMPONENTE: ChartBox
-    // ====================================================================
-    const ChartBox = ({ type, data, title, id, horizontal = false, shortenLabels = false, minHeight = "350px", isHistory = false, customColors = null }) => {
-        const chartRef = React.useRef(null);
-        const canvasRef = React.useRef(null);
-        const [menuOpen, setMenuOpen] = React.useState(false);
-        const menuRef = React.useRef(null);
+    // ============================================================
+    // 5. COMPONENTE: CHART BOX
+    // ============================================================
+    var ChartBox = function(props) {
+        var type = props.type;
+        var data = props.data;
+        var title = props.title;
+        var id = props.id;
+        var horizontal = props.horizontal || false;
+        var shortenLabels = props.shortenLabels || false;
+        var minHeight = props.minHeight || "350px";
+        var isHistory = props.isHistory || false;
+        var customColors = props.customColors || null;
+        
+        var chartRef = useRef(null);
+        var canvasRef = useRef(null);
+        var _menuOpen = useState(false);
+        var menuOpen = _menuOpen[0];
+        var setMenuOpen = _menuOpen[1];
+        var menuRef = useRef(null);
 
-        React.useEffect(() => {
-            const handleClickOutside = (event) => {
+        useEffect(function() {
+            var handleClickOutside = function(event) {
                 if (menuRef.current && !menuRef.current.contains(event.target)) {
                     setMenuOpen(false);
                 }
             };
             document.addEventListener("mousedown", handleClickOutside);
-            return () => {
+            return function() {
                 document.removeEventListener("mousedown", handleClickOutside);
             };
         }, []);
 
-        React.useEffect(() => {
+        useEffect(function() {
             if (!canvasRef.current || !data) return;
             if (typeof window.Chart === 'undefined') return;
             
             if (chartRef.current) chartRef.current.destroy();
 
-            const ctx = canvasRef.current.getContext('2d');
-            const isPie = type === 'pie' || type === 'doughnut';
+            var ctx = canvasRef.current.getContext('2d');
+            var isPie = type === 'pie' || type === 'doughnut';
             
-            // Preparar datos
-            let chartDataConfig = {};
+            var chartDataConfig = {};
 
             if (isHistory) {
-                // Modo historial: 'data' ya viene preparada desde el componente padre
                 chartDataConfig = data;
             } else {
-                // Modo estándar: 'data' es un objeto clave-valor simple
-                const rawLabels = Object.keys(data);
-                const displayLabels = rawLabels.map(l => shortenLabels ? shortenLabel(l) : l);
+                var rawLabels = Object.keys(data);
+                var displayLabels = rawLabels.map(function(l) { return shortenLabels ? shortenLabel(l) : l; });
                 
-                // Determinación de colores
-                const bgColors = customColors || (isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS);
-                const borderColors = isPie ? '#ffffff' : (customColors || VIBRANT_COLORS);
+                var bgColors = customColors || (isPie ? INSTITUTIONAL_COLORS : VIBRANT_COLORS);
+                var borderColors = isPie ? '#ffffff' : (customColors || VIBRANT_COLORS);
 
                 chartDataConfig = {
                     labels: displayLabels,
@@ -313,9 +326,9 @@
                 };
             }
 
-            const totalValues = isPie ? chartDataConfig.datasets[0].data.reduce((acc, curr) => acc + (typeof curr === 'number' ? curr : 0), 0) : 0;
+            var totalValues = isPie ? chartDataConfig.datasets[0].data.reduce(function(acc, curr) { return acc + (typeof curr === 'number' ? curr : 0); }, 0) : 0;
 
-            let config = {
+            var config = {
                 type: type,
                 data: chartDataConfig,
                 plugins: window.ChartDataLabels ? [window.ChartDataLabels] : [],
@@ -334,15 +347,13 @@
                                 padding: 10,
                                 callback: function(value) { 
                                     if (this.getLabelForValue && !isHistory && horizontal) {
-                                        // Auto-wrap para etiquetas largas
-                                        const label = this.getLabelForValue(value);
-                                        // Aumentado el límite de caracteres antes de cortar línea para aprovechar el ancho completo
-                                        const charLimit = 80; 
+                                        var label = this.getLabelForValue(value);
+                                        var charLimit = 80; 
                                         if (typeof label === 'string' && label.length > charLimit) {
-                                            const words = label.split(' ');
-                                            const lines = [];
-                                            let currentLine = words[0];
-                                            for (let i = 1; i < words.length; i++) {
+                                            var words = label.split(' ');
+                                            var lines = [];
+                                            var currentLine = words[0];
+                                            for (var i = 1; i < words.length; i++) {
                                                 if (currentLine.length + words[i].length < charLimit) {
                                                     currentLine += ' ' + words[i];
                                                 } else {
@@ -379,12 +390,12 @@
                             color: isHistory ? '#1B396A' : (isPie ? '#fff' : '#374151'),
                             font: { weight: 'bold', size: 10 },
                             padding: 2,
-                            formatter: (value) => {
+                            formatter: function(value) {
                                 if (isHistory) return value > 0 ? value : '';
                                 if (totalValues > 0) {
-                                    const percentage = ((value / totalValues) * 100).toFixed(1);
+                                    var percentage = ((value / totalValues) * 100).toFixed(1);
                                     if(percentage < 3 && !horizontal) return value;
-                                    return `${value} (${percentage}%)`;
+                                    return value + ' (' + percentage + '%)';
                                 }
                                 return value;
                             },
@@ -410,19 +421,17 @@
             if (isPie) config.options.layout.padding = 20;
 
             chartRef.current = new window.Chart(ctx, config);
-            return () => { if (chartRef.current) chartRef.current.destroy(); };
+            return function() { if (chartRef.current) chartRef.current.destroy(); };
         }, [data, type, title, horizontal, id, shortenLabels, isHistory, customColors]);
 
-        const downloadSingleChart = (format) => {
+        var downloadSingleChart = function(format) {
             setMenuOpen(false);
-            // Pequeño delay para que se cierre el menú antes de capturar
-            setTimeout(async () => {
-                const element = document.getElementById(`chartBox-${id}`);
+            setTimeout(function() {
+                var element = document.getElementById('chartBox-' + id);
                 if (!element) return;
 
                 try {
-                    // Escala 4 para máxima calidad — apto para presentaciones
-                    const canvas = await html2canvas(element, { 
+                    html2canvas(element, { 
                         scale: 4, 
                         useCORS: true, 
                         backgroundColor: '#ffffff',
@@ -430,140 +439,128 @@
                         allowTaint: false,
                         imageTimeout: 20000,
                         removeContainer: true,
-                        ignoreElements: (el) => el.id === `menu-btn-${id}` 
+                        ignoreElements: function(el) { return el.id === 'menu-btn-' + id; }
+                    }).then(function(canvas) {
+                        var logoData = getImageDataFromURL(ITD_LOGO_URL);
+                        var cleanTitle = title.replace(/[\u{1F300}-\u{1FFFF}]/gu, '').replace(/[📚👥🏢📋📈🏫👨‍🏫]/g, '').trim();
+
+                        if (format === 'png') {
+                            logoData.then(function(logoDataResult) {
+                                var scale = canvas.width / 1200;
+                                var headerHeight = Math.round(260 * scale);
+                                var margin = Math.round(40 * scale);
+                                var finalCanvas = document.createElement('canvas');
+                                var ctx = finalCanvas.getContext('2d');
+                                finalCanvas.width = canvas.width;
+                                finalCanvas.height = canvas.height + headerHeight;
+
+                                ctx.fillStyle = '#ffffff';
+                                ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+                                ctx.fillStyle = BLUE_COLOR;
+                                ctx.fillRect(0, 0, finalCanvas.width, Math.round(headerHeight * 0.68));
+
+                                if (logoDataResult) {
+                                    var img = new Image();
+                                    img.src = logoDataResult;
+                                    img.onload = function() {
+                                        var lh = Math.round(100 * scale);
+                                        var lw = Math.round((img.width / img.height) * lh);
+                                        var yLogo = Math.round(((headerHeight * 0.68) - lh) / 2);
+                                        ctx.drawImage(img, margin, yLogo, lw, lh);
+                                        ctx.drawImage(img, finalCanvas.width - margin - lw, yLogo, lw, lh);
+
+                                        ctx.textAlign = 'center';
+                                        ctx.fillStyle = '#ffffff';
+                                        ctx.font = 'bold ' + Math.round(36 * scale) + 'px Helvetica, Arial, sans-serif';
+                                        ctx.fillText('INSTITUTO TECNOLÓGICO DE DURANGO', finalCanvas.width / 2, Math.round(70 * scale));
+
+                                        ctx.font = Math.round(22 * scale) + 'px Helvetica, Arial, sans-serif';
+                                        ctx.fillText('Coordinación de Actualización Docente', finalCanvas.width / 2, Math.round(110 * scale));
+
+                                        ctx.strokeStyle = GUINDA_COLOR;
+                                        ctx.lineWidth = Math.round(4 * scale);
+                                        ctx.beginPath();
+                                        ctx.moveTo(margin, Math.round(headerHeight * 0.68) + Math.round(4 * scale));
+                                        ctx.lineTo(finalCanvas.width - margin, Math.round(headerHeight * 0.68) + Math.round(4 * scale));
+                                        ctx.stroke();
+
+                                        ctx.fillStyle = BLUE_COLOR;
+                                        ctx.font = 'bold ' + Math.round(28 * scale) + 'px Helvetica, Arial, sans-serif';
+                                        ctx.fillText(cleanTitle, finalCanvas.width / 2, Math.round(headerHeight * 0.68) + Math.round(48 * scale));
+
+                                        ctx.drawImage(canvas, 0, headerHeight);
+
+                                        var link = document.createElement('a');
+                                        link.download = cleanTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.png';
+                                        link.href = finalCanvas.toDataURL('image/png');
+                                        link.click();
+                                    };
+                                }
+                            });
+                        } else if (format === 'pdf') {
+                            var jsPDF = window.jspdf.jsPDF;
+                            var pdf = new jsPDF('landscape', 'mm', 'letter');
+                            var pdfWidth = pdf.internal.pageSize.getWidth();
+                            var pdfHeight = pdf.internal.pageSize.getHeight();
+                            var marginPdf = 10;
+                            var headerEnd = 32;
+                            var footerStart = pdfHeight - 12;
+
+                            pdf.setFillColor(255, 255, 255);
+                            pdf.rect(0, 0, pdfWidth, headerEnd, 'F');
+
+                            logoData.then(function(logoDataResult) {
+                                if (logoDataResult) {
+                                    var imgProps = pdf.getImageProperties(logoDataResult);
+                                    var lh = headerEnd - 4;
+                                    var lw = (imgProps.width / imgProps.height) * lh;
+                                    pdf.addImage(logoDataResult, 'PNG', marginPdf, 2, lw, lh);
+                                    pdf.addImage(logoDataResult, 'PNG', pdfWidth - marginPdf - lw, 2, lw, lh);
+                                }
+
+                                pdf.setFontSize(15);
+                                pdf.setFont('helvetica', 'bold');
+                                pdf.setTextColor(27, 57, 106);
+                                pdf.text('INSTITUTO TECNOLÓGICO DE DURANGO', pdfWidth / 2, 14, { align: 'center' });
+                                pdf.setFontSize(9);
+                                pdf.setFont('helvetica', 'normal');
+                                pdf.setTextColor(100, 100, 100);
+                                pdf.text('Coordinación de Actualización Docente', pdfWidth / 2, 21, { align: 'center' });
+
+                                pdf.setDrawColor(157, 36, 73);
+                                pdf.setLineWidth(1.5);
+                                pdf.line(0, headerEnd, pdfWidth, headerEnd);
+
+                                pdf.setLineWidth(0.5);
+                                pdf.setFontSize(13);
+                                pdf.setFont('helvetica', 'bold');
+                                pdf.setTextColor(27, 57, 106);
+                                pdf.text(cleanTitle, pdfWidth / 2, headerEnd + 9, { align: 'center' });
+
+                                var imgData = canvas.toDataURL('image/jpeg', 1.0);
+                                var imgProps2 = pdf.getImageProperties(imgData);
+                                var ratio = imgProps2.width / imgProps2.height;
+                                var availW = pdfWidth - marginPdf * 2;
+                                var availH = footerStart - headerEnd - 14;
+                                var fw = availW, fh = fw / ratio;
+                                if (fh > availH) { fh = availH; fw = fh * ratio; }
+                                var fx = (pdfWidth - fw) / 2;
+                                var fy = headerEnd + 13 + (availH - fh) / 2;
+                                pdf.addImage(imgData, 'JPEG', fx, fy, fw, fh);
+
+                                pdf.setFillColor(27, 57, 106);
+                                pdf.rect(0, footerStart, pdfWidth, 12, 'F');
+                                pdf.setFontSize(8);
+                                pdf.setTextColor(255, 255, 255);
+                                var dateStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+                                pdf.text('Generado: ' + dateStr, marginPdf, footerStart + 7);
+                                pdf.text('Generado en: Coordinación de Actualización Docente — ITD', pdfWidth - marginPdf, footerStart + 7, { align: 'right' });
+
+                                pdf.save(cleanTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf');
+                            });
+                        }
                     });
-
-                    // Cargar Logo
-                    const logoData = await getImageDataFromURL(ITD_LOGO_URL);
-                    const cleanTitle = title.replace(/[\u{1F300}-\u{1FFFF}]/gu, '').replace(/[📚👥🏢📋📈🏫👨‍🏫]/g, '').trim();
-
-                    if (format === 'png') {
-                        // Encabezado proporcional al ancho del canvas para alta resolución
-                        const scale = canvas.width / 1200; // referencia 1200px
-                        const headerHeight = Math.round(260 * scale);
-                        const margin = Math.round(40 * scale);
-                        const finalCanvas = document.createElement('canvas');
-                        const ctx = finalCanvas.getContext('2d');
-                        finalCanvas.width = canvas.width;
-                        finalCanvas.height = canvas.height + headerHeight;
-
-                        // Fondo Blanco
-                        ctx.fillStyle = '#ffffff';
-                        ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-
-                        // Franja azul superior
-                        ctx.fillStyle = BLUE_COLOR;
-                        ctx.fillRect(0, 0, finalCanvas.width, Math.round(headerHeight * 0.68));
-
-                        // Logo (izquierda y derecha)
-                        if (logoData) {
-                            const img = new Image();
-                            img.src = logoData;
-                            await new Promise(r => img.onload = r);
-                            const lh = Math.round(100 * scale);
-                            const lw = Math.round((img.width / img.height) * lh);
-                            const yLogo = Math.round(((headerHeight * 0.68) - lh) / 2);
-                            ctx.drawImage(img, margin, yLogo, lw, lh);
-                            ctx.drawImage(img, finalCanvas.width - margin - lw, yLogo, lw, lh);
-                        }
-
-                        // Texto: Instituto
-                        ctx.textAlign = 'center';
-                        ctx.fillStyle = '#ffffff';
-                        ctx.font = `bold ${Math.round(36 * scale)}px Helvetica, Arial, sans-serif`;
-                        ctx.fillText('INSTITUTO TECNOLÓGICO DE DURANGO', finalCanvas.width / 2, Math.round(70 * scale));
-
-                        // Texto: Subtítulo
-                        ctx.font = `${Math.round(22 * scale)}px Helvetica, Arial, sans-serif`;
-                        ctx.fillText('Coordinación de Actualización Docente', finalCanvas.width / 2, Math.round(110 * scale));
-
-                        // Línea guinda
-                        ctx.strokeStyle = GUINDA_COLOR;
-                        ctx.lineWidth = Math.round(4 * scale);
-                        ctx.beginPath();
-                        ctx.moveTo(margin, Math.round(headerHeight * 0.68) + Math.round(4 * scale));
-                        ctx.lineTo(finalCanvas.width - margin, Math.round(headerHeight * 0.68) + Math.round(4 * scale));
-                        ctx.stroke();
-
-                        // Título de la gráfica (sobre fondo blanco)
-                        ctx.fillStyle = BLUE_COLOR;
-                        ctx.font = `bold ${Math.round(28 * scale)}px Helvetica, Arial, sans-serif`;
-                        ctx.fillText(cleanTitle, finalCanvas.width / 2, Math.round(headerHeight * 0.68) + Math.round(48 * scale));
-
-                        // Gráfica
-                        ctx.drawImage(canvas, 0, headerHeight);
-
-                        const link = document.createElement('a');
-                        link.download = `${cleanTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
-                        link.href = finalCanvas.toDataURL('image/png');
-                        link.click();
-
-                    } else if (format === 'pdf') {
-                        const { jsPDF } = window.jspdf;
-                        
-                        // Siempre landscape para gráficas — más espacio y mejor para presentaciones
-                        const pdf = new jsPDF('landscape', 'mm', 'letter');
-                        const pdfWidth = pdf.internal.pageSize.getWidth();
-                        const pdfHeight = pdf.internal.pageSize.getHeight();
-                        const margin = 10;
-                        const headerEnd = 32;
-                        const footerStart = pdfHeight - 12;
-
-                        // Encabezado blanco con logos y línea guinda
-                        pdf.setFillColor(255, 255, 255);
-                        pdf.rect(0, 0, pdfWidth, headerEnd, 'F');
-
-                        if (logoData) {
-                            const imgProps = pdf.getImageProperties(logoData);
-                            const lh = headerEnd - 4;
-                            const lw = (imgProps.width / imgProps.height) * lh;
-                            pdf.addImage(logoData, 'PNG', margin, 2, lw, lh);
-                            pdf.addImage(logoData, 'PNG', pdfWidth - margin - lw, 2, lw, lh);
-                        }
-
-                        pdf.setFontSize(15);
-                        pdf.setFont('helvetica', 'bold');
-                        pdf.setTextColor(27, 57, 106);
-                        pdf.text('INSTITUTO TECNOLÓGICO DE DURANGO', pdfWidth / 2, 14, { align: 'center' });
-                        pdf.setFontSize(9);
-                        pdf.setFont('helvetica', 'normal');
-                        pdf.setTextColor(100, 100, 100);
-                        pdf.text('Coordinación de Actualización Docente', pdfWidth / 2, 21, { align: 'center' });
-
-                        // Línea gruesa guinda al final del encabezado
-                        pdf.setDrawColor(157, 36, 73);
-                        pdf.setLineWidth(1.5);
-                        pdf.line(0, headerEnd, pdfWidth, headerEnd);
-
-                        pdf.setLineWidth(0.5);
-                        pdf.setFontSize(13);
-                        pdf.setFont('helvetica', 'bold');
-                        pdf.setTextColor(27, 57, 106);
-                        pdf.text(cleanTitle, pdfWidth / 2, headerEnd + 9, { align: 'center' });
-
-                        // Imagen con ratio correcto
-                        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-                        const imgProps2 = pdf.getImageProperties(imgData);
-                        const ratio = imgProps2.width / imgProps2.height;
-                        const availW = pdfWidth - margin * 2;
-                        const availH = footerStart - headerEnd - 14;
-                        let fw = availW, fh = fw / ratio;
-                        if (fh > availH) { fh = availH; fw = fh * ratio; }
-                        const fx = (pdfWidth - fw) / 2;
-                        const fy = headerEnd + 13 + (availH - fh) / 2;
-                        pdf.addImage(imgData, 'JPEG', fx, fy, fw, fh);
-
-                        // Pie de página azul
-                        pdf.setFillColor(27, 57, 106);
-                        pdf.rect(0, footerStart, pdfWidth, 12, 'F');
-                        pdf.setFontSize(8);
-                        pdf.setTextColor(255, 255, 255);
-                        const dateStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
-                        pdf.text(`Generado: ${dateStr}`, margin, footerStart + 7);
-                        pdf.text('Generado en: Coordinación de Actualización Docente — ITD', pdfWidth - margin, footerStart + 7, { align: 'right' });
-
-                        pdf.save(`${cleanTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
-                    }
                 } catch (err) {
                     console.error("Error descargando gráfica", err);
                     alert("Error al generar la descarga.");
@@ -571,961 +568,127 @@
             }, 100);
         };
 
-        return (
-            <div id={`chartBox-${id}`} className="bg-white p-5 rounded-xl shadow-md h-full flex flex-col border border-gray-100 transition-all hover:shadow-lg relative" style={{ minHeight }}>
-                <div className="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
-                    <div className="w-8"></div> 
-                    <h3 className="text-gray-700 font-bold text-center text-base flex items-center justify-center gap-2 flex-grow">
-                        {title}
-                    </h3>
-                    <div className="relative" ref={menuRef}>
-                        <button 
-                            id={`menu-btn-${id}`}
-                            onClick={() => setMenuOpen(!menuOpen)}
-                            className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 focus:outline-none transition-colors"
-                            title="Opciones de descarga"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                        </button>
-                        {menuOpen && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-50 border border-gray-200 animate-fadeIn">
-                                <div className="py-1">
-                                    <button 
-                                        onClick={() => downloadSingleChart('png')}
-                                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#1B396A]"
-                                    >
-                                        <span className="mr-2">🖼️</span> Descargar PNG
-                                    </button>
-                                    <button 
-                                        onClick={() => downloadSingleChart('pdf')}
-                                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#1B396A]"
-                                    >
-                                        <span className="mr-2">📄</span> Descargar PDF
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <div className="flex-1 relative w-full h-full" style={{ minHeight: '200px' }}><canvas ref={canvasRef} id={id}></canvas></div>
-            </div>
+        return h('div', { id: 'chartBox-' + id, className: 'bg-white p-5 rounded-xl shadow-md h-full flex flex-col border border-gray-100 transition-all hover:shadow-lg relative', style: { minHeight: minHeight } },
+            h('div', { className: 'flex justify-between items-center border-b border-gray-100 pb-3 mb-4' },
+                h('div', { className: 'w-8' }),
+                h('h3', { className: 'text-gray-700 font-bold text-center text-base flex items-center justify-center gap-2 flex-grow' }, title),
+                h('div', { className: 'relative', ref: menuRef },
+                    h('button', {
+                        id: 'menu-btn-' + id,
+                        onClick: function() { setMenuOpen(!menuOpen); },
+                        className: 'text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 focus:outline-none transition-colors',
+                        title: 'Opciones de descarga'
+                    },
+                        h('svg', { xmlns: 'http://www.w3.org/2000/svg', width: '20', height: '20', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' },
+                            h('circle', { cx: '12', cy: '12', r: '1' }),
+                            h('circle', { cx: '19', cy: '12', r: '1' }),
+                            h('circle', { cx: '5', cy: '12', r: '1' })
+                        )
+                    ),
+                    menuOpen ? h('div', { className: 'absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-50 border border-gray-200 animate-fadeIn' },
+                        h('div', { className: 'py-1' },
+                            h('button', { 
+                                onClick: function() { downloadSingleChart('png'); },
+                                className: 'flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#1B396A]'
+                            },
+                                h('span', { className: 'mr-2' }, '🖼️'),
+                                ' Descargar PNG'
+                            ),
+                            h('button', { 
+                                onClick: function() { downloadSingleChart('pdf'); },
+                                className: 'flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#1B396A]'
+                            },
+                                h('span', { className: 'mr-2' }, '📄'),
+                                ' Descargar PDF'
+                            )
+                        )
+                    ) : null
+                )
+            ),
+            h('div', { className: 'flex-1 relative w-full h-full', style: { minHeight: '200px' } },
+                h('canvas', { ref: canvasRef, id: id })
+            )
         );
     };
 
-    // ====================================================================
-    // COMPONENTE: Dashboard (Lógica principal)
-    // ====================================================================
-    const Dashboard = ({ user, isAdmin, onLogout }) => {
-        const [statsData, setStatsData] = React.useState(null);
-        const [loading, setLoading] = React.useState(true);
-        const [generatingPDF, setGeneratingPDF] = React.useState(false);
-        const [period, setPeriod] = React.useState("ACTUAL");
-        const [availableYears, setAvailableYears] = React.useState([]);
+    // ============================================================
+    // 6. COMPONENTE: DASHBOARD
+    // ============================================================
+    var Dashboard = function(props) {
+        var user = props.user;
+        var isAdmin = props.isAdmin;
+        var onLogout = props.onLogout;
+        
+        var _statsData = useState(null);
+        var statsData = _statsData[0];
+        var setStatsData = _statsData[1];
+        
+        var _loading = useState(true);
+        var loading = _loading[0];
+        var setLoading = _loading[1];
+        
+        var _generatingPDF = useState(false);
+        var generatingPDF = _generatingPDF[0];
+        var setGeneratingPDF = _generatingPDF[1];
+        
+        var _period = useState("ACTUAL");
+        var period = _period[0];
+        var setPeriod = _period[1];
+        
+        var _availableYears = useState([]);
+        var availableYears = _availableYears[0];
+        var setAvailableYears = _availableYears[1];
 
-        React.useEffect(() => {
+        useEffect(function() {
             fetchData();
         }, [period]);
 
-        const fetchData = async () => {
+        var fetchData = function() {
             setLoading(true);
-            try {
-                const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getStatisticsData&period=${period}`);
-                const result = await response.json();
-                if (result.success) {
-                    setStatsData(result.data);
-                    if(result.availableYears) setAvailableYears(result.availableYears);
-                } else {
-                    alert("Error obteniendo datos: " + result.message);
-                }
-            } catch (error) {
-                console.error("Error:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const generatePDF = async () => {
-            setGeneratingPDF(true);
-            await new Promise(resolve => setTimeout(resolve, 600));
-
-            try {
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'letter');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-                const margin = 12;
-                const contentWidth = pdfWidth - (margin * 2);
-                const headerH = 24;
-                const footerH = 14;
-                const bodyTop = headerH + 4;
-                const bodyBottom = pdfHeight - footerH - 4;
-                const bodyHeight = bodyBottom - bodyTop;
-
-                // Captura elemento manteniendo proporciones reales
-                const captureElement = async (elementId) => {
-                    const el = document.getElementById(elementId);
-                    if (!el) return null;
-                    const canvas = await html2canvas(el, {
-                        scale: 4,
-                        useCORS: true,
-                        backgroundColor: '#ffffff',
-                        logging: false,
-                        allowTaint: false,
-                        imageTimeout: 20000,
-                        removeContainer: true
-                    });
-                    return { dataUrl: canvas.toDataURL('image/jpeg', 1.0), w: canvas.width, h: canvas.height };
-                };
-
-                // Añade imagen respetando ratio; retorna la altura MM usada
-                const placeImage = (doc, imgObj, x, yStart, maxW, maxH) => {
-                    if (!imgObj) return 0;
-                    const ratio = imgObj.w / imgObj.h;
-                    let w = maxW;
-                    let h = w / ratio;
-                    if (h > maxH) { h = maxH; w = h * ratio; }
-                    const xCentered = x + (maxW - w) / 2;
-                    doc.addImage(imgObj.dataUrl, 'JPEG', xCentered, yStart, w, h);
-                    return h;
-                };
-
-                const addHeader = async (doc) => {
-                    const logo = await getImageDataFromURL(ITD_LOGO_URL);
-                    // Fondo blanco
-                    doc.setFillColor(255, 255, 255);
-                    doc.rect(0, 0, pdfWidth, headerH, 'F');
-                    if (logo) {
-                        const imgProps = doc.getImageProperties(logo);
-                        const lh = headerH - 4;
-                        const lw = (imgProps.width / imgProps.height) * lh;
-                        doc.addImage(logo, 'PNG', margin, 2, lw, lh);
-                        doc.addImage(logo, 'PNG', pdfWidth - margin - lw, 2, lw, lh);
+            var url = CONFIG.APPS_SCRIPT_URL + '?action=getStatisticsData&period=' + period + '&t=' + Date.now();
+            fetch(url)
+                .then(function(response) { return response.json(); })
+                .then(function(result) {
+                    if (result.success) {
+                        setStatsData(result.data);
+                        if(result.availableYears) setAvailableYears(result.availableYears);
+                    } else {
+                        alert("Error obteniendo datos: " + result.message);
                     }
-                    doc.setFontSize(13);
-                    doc.setFont("helvetica", "bold");
-                    doc.setTextColor(27, 57, 106);
-                    doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pdfWidth / 2, 11, { align: "center" });
-                    doc.setFontSize(8.5);
-                    doc.setFont("helvetica", "normal");
-                    doc.setTextColor(100, 100, 100);
-                    doc.text("Reporte Estadístico de Actualización Docente", pdfWidth / 2, 18, { align: "center" });
-                    // Línea gruesa guinda al final del encabezado
-                    doc.setDrawColor(157, 36, 73);
-                    doc.setLineWidth(1.5);
-                    doc.line(0, headerH, pdfWidth, headerH);
-                };
-
-                const addFooter = (doc, pageNum, total) => {
-                    // Franja azul en el pie
-                    doc.setFillColor(27, 57, 106);
-                    doc.rect(0, pdfHeight - footerH, pdfWidth, footerH, 'F');
-                    doc.setFontSize(8);
-                    doc.setTextColor(255, 255, 255);
-                    const date = new Date().toLocaleDateString('es-MX');
-                    doc.text(`Generado: ${date}  |  Página ${pageNum} de ${total}`, margin, pdfHeight - 4);
-                    doc.text(`Generado en: Coordinación de Actualización Docente — ITD`, pdfWidth - margin, pdfHeight - 4, { align: "right" });
-                };
-
-                const newPage = async (doc, pageNum, total) => {
-                    addFooter(doc, pageNum, total);
-                    doc.addPage();
-                    await addHeader(doc);
-                };
-
-                const totalPages = 6;
-                let pageNum = 1;
-                await addHeader(pdf);
-
-                // --- Página 1: KPIs ---
-                const kpiImg = await captureElement('kpi-section');
-                placeImage(pdf, kpiImg, margin, bodyTop, contentWidth, 38);
-                await newPage(pdf, pageNum++, totalPages);
-
-                // --- Página 2: Top Cursos ---
-                placeImage(pdf, await captureElement('chartBox-topCursos'), margin, bodyTop, contentWidth, bodyHeight);
-                await newPage(pdf, pageNum++, totalPages);
-
-                // --- Página 3: Top Departamentos ---
-                placeImage(pdf, await captureElement('chartBox-topDeptos'), margin, bodyTop, contentWidth, bodyHeight);
-                await newPage(pdf, pageNum++, totalPages);
-
-                // --- Página 4: Género + Tipo + Frecuencia ---
-                const halfW = (contentWidth - 6) / 2;
-                const g3Img = await captureElement('chartBox-genero');
-                const g4Img = await captureElement('chartBox-tipo');
-                const g5Img = await captureElement('chartBox-frecuencia');
-                const h3 = placeImage(pdf, g3Img, margin, bodyTop, halfW, bodyHeight * 0.46);
-                const h4 = placeImage(pdf, g4Img, margin + halfW + 6, bodyTop, halfW, bodyHeight * 0.46);
-                const topSectionH = Math.max(h3, h4);
-                placeImage(pdf, g5Img, margin, bodyTop + topSectionH + 6, contentWidth, bodyHeight - topSectionH - 6);
-                await newPage(pdf, pageNum++, totalPages);
-
-                // --- Página 5: Histórico + Docentes por Año ---
-                const g6Img = await captureElement('chartBox-historico');
-                const g7Img = await captureElement('chartBox-docentesYear');
-                const h6 = placeImage(pdf, g6Img, margin, bodyTop, contentWidth, bodyHeight * 0.47);
-                placeImage(pdf, g7Img, margin, bodyTop + h6 + 6, contentWidth, bodyHeight * 0.47);
-                addFooter(pdf, pageNum, totalPages);
-
-                // --- Página 6: Docentes Sin Participar ---
-                await newPage(pdf, pageNum++, totalPages);
-                const np = statsData.docentesNoParticiparon;
-                if (np && np.total > 0) {
-                    let yPos = bodyTop + 4;
-                    // Título de sección
-                    pdf.setFontSize(13);
-                    pdf.setFont("helvetica", "bold");
-                    pdf.setTextColor(157, 36, 73);
-                    pdf.text("Docentes que No Participaron", pdfWidth / 2, yPos, { align: "center" });
-                    yPos += 8;
-                    // Subtítulo total
-                    pdf.setFontSize(10);
-                    pdf.setFont("helvetica", "normal");
-                    pdf.setTextColor(80, 80, 80);
-                    pdf.text(`Total: ${np.total} docentes`, pdfWidth / 2, yPos, { align: "center" });
-                    yPos += 10;
-                    // Cajas de género
-                    const boxW = 55, boxH = 18, gap = 8;
-                    const totalBoxW = boxW * 2 + gap;
-                    const startX = (pdfWidth - totalBoxW) / 2;
-                    // Hombres
-                    pdf.setFillColor(219, 234, 254);
-                    pdf.roundedRect(startX, yPos, boxW, boxH, 3, 3, 'F');
-                    pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(27, 57, 106);
-                    pdf.text("Hombres", startX + boxW / 2, yPos + 6, { align: "center" });
-                    pdf.setFontSize(14);
-                    pdf.text(String(np.hombres), startX + boxW / 2, yPos + 14, { align: "center" });
-                    // Mujeres
-                    const bx = startX + boxW + gap;
-                    pdf.setFillColor(252, 231, 243);
-                    pdf.roundedRect(bx, yPos, boxW, boxH, 3, 3, 'F');
-                    pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(157, 36, 73);
-                    pdf.text("Mujeres", bx + boxW / 2, yPos + 6, { align: "center" });
-                    pdf.setFontSize(14);
-                    pdf.text(String(np.mujeres), bx + boxW / 2, yPos + 14, { align: "center" });
-                    yPos += boxH + 10;
-                    // Nota informativa
-                    pdf.setFontSize(8); pdf.setFont("helvetica", "italic"); pdf.setTextColor(120, 120, 120);
-                    pdf.text("* La lista detallada de nombres y departamentos se encuentra en el reporte Word.", margin, yPos);
-                }
-                addFooter(pdf, pageNum, totalPages);
-
-                pdf.save(`Reporte_Estadistico_${period}.pdf`);
-            } catch (err) {
-                console.error("Error generando PDF:", err);
-                alert("Error al generar el PDF: " + err.message);
-            } finally {
-                setGeneratingPDF(false);
-            }
+                })
+                .catch(function(error) {
+                    console.error("Error:", error);
+                })
+                .finally(function() {
+                    setLoading(false);
+                });
         };
 
-        const generateWord = async () => {
-            if (!statsData) { alert("No hay datos cargados aún."); return; }
-            setGeneratingPDF(true);
-
-            try {
-                // docx v8 expone todo en window.docx
-                const docxLib = window.docx;
-                if (!docxLib) throw new Error("Librería docx no cargada. Verifica tu conexión.");
-
-                const {
-                    Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-                    AlignmentType, HeadingLevel, WidthType, BorderStyle, ShadingType
-                } = docxLib;
-
-                const dateStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
-
-                const cellBorder = { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" };
-                const borders = { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder, insideH: cellBorder, insideV: cellBorder };
-
-                // ── Helpers ──────────────────────────────────────────────
-                const sep = () => new Paragraph({
-                    border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "9D2449", space: 1 } },
-                    spacing: { before: 60, after: 180 }
-                });
-
-                const title = (text) => new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    spacing: { before: 0, after: 80 },
-                    children: [new TextRun({ text, bold: true, color: "1B396A", font: "Arial", size: 36 })]
-                });
-
-                const subtitle = (text) => new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    spacing: { before: 0, after: 80 },
-                    children: [new TextRun({ text, bold: true, color: "9D2449", font: "Arial", size: 26 })]
-                });
-
-                const caption = (text) => new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    spacing: { before: 0, after: 320 },
-                    children: [new TextRun({ text, color: "888888", font: "Arial", size: 20 })]
-                });
-
-                const heading = (text) => new Paragraph({
-                    spacing: { before: 320, after: 120 },
-                    children: [new TextRun({ text, bold: true, color: "1B396A", font: "Arial", size: 28 })],
-                    border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "D5E8F0", space: 1 } }
-                });
-
-                const spacer = () => new Paragraph({ spacing: { before: 40, after: 40 } });
-
-                // Tabla de 2 columnas: etiqueta / valor
-                const kpiTable = (rows) => new Table({
-                    width: { size: 9360, type: WidthType.DXA },
-                    columnWidths: [5760, 3600],
-                    rows: rows.map(([label, value]) => new TableRow({
-                        children: [
-                            new TableCell({
-                                borders,
-                                width: { size: 5760, type: WidthType.DXA },
-                                shading: { fill: "EEF4FB", type: ShadingType.CLEAR },
-                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
-                                children: [new Paragraph({ children: [new TextRun({ text: String(label), font: "Arial", size: 22, color: "374151" })] })]
-                            }),
-                            new TableCell({
-                                borders,
-                                width: { size: 3600, type: WidthType.DXA },
-                                shading: { fill: "FFFFFF", type: ShadingType.CLEAR },
-                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
-                                verticalAlign: "center",
-                                children: [new Paragraph({
-                                    alignment: AlignmentType.RIGHT,
-                                    children: [new TextRun({ text: String(value), font: "Arial", size: 24, bold: true, color: "9D2449" })]
-                                })]
-                            })
-                        ]
-                    }))
-                });
-
-                // Tabla de datos con encabezado azul
-                const dataTable = (headers, rows, colWidths) => new Table({
-                    width: { size: colWidths.reduce((a, b) => a + b, 0), type: WidthType.DXA },
-                    columnWidths: colWidths,
-                    rows: [
-                        new TableRow({
-                            tableHeader: true,
-                            children: headers.map((h, i) => new TableCell({
-                                borders,
-                                width: { size: colWidths[i], type: WidthType.DXA },
-                                shading: { fill: "1B396A", type: ShadingType.CLEAR },
-                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
-                                children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, color: "FFFFFF", font: "Arial", size: 20 })] })]
-                            }))
-                        }),
-                        ...rows.map((row, ri) => new TableRow({
-                            children: row.map((cell, i) => new TableCell({
-                                borders,
-                                width: { size: colWidths[i], type: WidthType.DXA },
-                                shading: { fill: ri % 2 === 0 ? "FFFFFF" : "F8F9FA", type: ShadingType.CLEAR },
-                                margins: { top: 80, bottom: 80, left: 160, right: 160 },
-                                children: [new Paragraph({ children: [new TextRun({ text: String(cell), font: "Arial", size: 20, color: "374151" })] })]
-                            }))
-                        }))
-                    ]
-                });
-
-                // ── Contenido ─────────────────────────────────────────────
-                const children = [];
-
-                // Portada
-                children.push(spacer(), spacer(), spacer());
-                children.push(title("INSTITUTO TECNOLÓGICO DE DURANGO"));
-                children.push(subtitle("Coordinación de Actualización Docente"));
-                children.push(spacer());
-                children.push(sep());
-                children.push(subtitle("Reporte Estadístico"));
-                children.push(caption(`Generado el ${dateStr}`));
-
-                // 1. KPIs
-                children.push(heading("1. Indicadores Clave de Desempeño"));
-                children.push(kpiTable([
-                    ["Total de Inscripciones", statsData.totalInscripciones ?? "—"],
-                    ["Docentes Únicos Actualizados", statsData.coberturaDocente?.actualizados ?? "—"],
-                    ["Cobertura de Plantilla Docente", statsData.coberturaDocente?.porcentaje != null ? `${statsData.coberturaDocente.porcentaje}%` : "—"],
-                ]));
-                children.push(spacer());
-
-                // 2. Top Cursos
-                if (statsData.topCursos?.length) {
-                    children.push(heading("2. Cursos Más Demandados (Top 10)"));
-                    children.push(dataTable(
-                        ["#", "Nombre del Curso", "Inscripciones"],
-                        statsData.topCursos.slice(0, 10).map(([nombre, n], i) => [`${i + 1}`, nombre, n]),
-                        [600, 6960, 1800]
-                    ));
-                    children.push(spacer());
-                }
-
-                // 3. Departamentos
-                if (statsData.topDepartamentos?.length) {
-                    children.push(heading("3. Participación por Departamento"));
-                    children.push(dataTable(
-                        ["#", "Departamento", "Total"],
-                        statsData.topDepartamentos.map(([dept, n], i) => [`${i + 1}`, dept, n]),
-                        [600, 6960, 1800]
-                    ));
-                    children.push(spacer());
-                }
-
-                // 4. Género
-                if (statsData.distribucionGenero) {
-                    children.push(heading("4. Distribución por Género"));
-                    children.push(kpiTable(Object.entries(statsData.distribucionGenero)));
-                    children.push(spacer());
-                }
-
-                // 5. Tipo de Curso
-                if (statsData.distribucionTipo) {
-                    children.push(heading("5. Tipo de Curso"));
-                    children.push(kpiTable(Object.entries(statsData.distribucionTipo)));
-                    children.push(spacer());
-                }
-
-                // 6. Frecuencia
-                if (statsData.frecuenciaParticipacion) {
-                    children.push(heading("6. Cursos por Docente (Frecuencia de Participación)"));
-                    children.push(dataTable(
-                        ["Cursos Tomados", "Número de Docentes"],
-                        Object.entries(statsData.frecuenciaParticipacion),
-                        [4680, 4680]
-                    ));
-                    children.push(spacer());
-                }
-
-                // 7. Histórico
-                if (statsData.historicalTrend) {
-                    children.push(heading("7. Evolución Histórica por Año"));
-                    const years = Object.keys(statsData.historicalTrend).sort();
-                    children.push(dataTable(
-                        ["Año", "Cursos Ofertados", "Total Docentes"],
-                        years.map(y => [y, statsData.historicalTrend[y]?.cursos ?? 0, statsData.historicalTrend[y]?.registros ?? 0]),
-                        [2340, 3510, 3510]
-                    ));
-                    children.push(spacer());
-                }
-
-                // 8. Docentes que NO Participaron
-                if (statsData.docentesNoParticiparon?.total > 0) {
-                    const np = statsData.docentesNoParticiparon;
-                    children.push(heading("8. Docentes que No Participaron en el Periodo"));
-                    children.push(kpiTable([
-                        ["Total de docentes sin participación", np.total],
-                        ["Hombres", np.hombres],
-                        ["Mujeres", np.mujeres],
-                    ]));
-                    children.push(spacer());
-                    if (np.lista?.length > 0) {
-                        children.push(new Paragraph({
-                            spacing: { before: 160, after: 100 },
-                            children: [new TextRun({ text: "Listado de docentes sin participación:", bold: true, font: "Arial", size: 22, color: "374151" })]
-                        }));
-                        children.push(dataTable(
-                            ["#", "Nombre del Docente", "Departamento"],
-                            np.lista.map((d, i) => [`${i + 1}`, d.nombre, d.departamento]),
-                            [500, 5500, 3360]
-                        ));
-                    }
-                    children.push(spacer());
-                }
-
-                // Pie del documento
-                children.push(sep());
-                children.push(new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    children: [new TextRun({ text: "M.C. Alejandro Calderón Rentería — Coordinación de Actualización Docente", font: "Arial", size: 18, color: "888888" })]
-                }));
-
-                // ── Generar documento ──────────────────────────────────────
-                const doc = new Document({
-                    creator: "ITD - Desarrollo Académico",
-                    title: "Reporte Estadístico de Actualización Docente",
-                    styles: {
-                        default: {
-                            document: { run: { font: "Arial", size: 22 } }
-                        }
-                    },
-                    sections: [{
-                        properties: {
-                            page: {
-                                size: { width: 12240, height: 15840 },
-                                margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 }
-                            }
-                        },
-                        children
-                    }]
-                });
-
-                const blob = await Packer.toBlob(doc);
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `Reporte_Estadistico_${period}.docx`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-            } catch (err) {
-                console.error("Error generando Word:", err);
-                alert("Error al generar el documento Word:\n" + err.message);
-            } finally {
-                setGeneratingPDF(false);
-            }
-        };
-
-        // ── NUEVO: Informe Trimestral Word ──────────────────────────────
-        const generateWordTrimestral = async () => {
-            if (!statsData) { alert("No hay datos cargados aún."); return; }
-            setGeneratingPDF(true);
-            try {
-                const docxLib = window.docx;
-                if (!docxLib) throw new Error("Librería docx no cargada.");
-                const {
-                    Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-                    AlignmentType, WidthType, BorderStyle, ShadingType, PageBreak
-                } = docxLib;
-
-                const dateStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
-                const cellBorder = { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" };
-                const borders = { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder, insideH: cellBorder, insideV: cellBorder };
-
-                const para = (text, opts = {}) => new Paragraph({
-                    alignment: opts.align || AlignmentType.LEFT,
-                    spacing: { before: opts.before ?? 80, after: opts.after ?? 80 },
-                    children: [new TextRun({ text, font: "Arial", size: opts.size ?? 22, bold: opts.bold ?? false, color: opts.color ?? "000000", italics: opts.italic ?? false })]
-                });
-
-                const sep = () => new Paragraph({
-                    border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "9D2449", space: 1 } },
-                    spacing: { before: 60, after: 180 }
-                });
-
-                const heading = (text) => new Paragraph({
-                    spacing: { before: 280, after: 120 },
-                    children: [new TextRun({ text, bold: true, color: "1B396A", font: "Arial", size: 26 })],
-                    border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "D5E8F0", space: 1 } }
-                });
-
-                const kpiTable = (rows) => new Table({
-                    width: { size: 9360, type: WidthType.DXA },
-                    columnWidths: [5760, 3600],
-                    rows: rows.map(([label, value]) => new TableRow({
-                        children: [
-                            new TableCell({
-                                borders, width: { size: 5760, type: WidthType.DXA },
-                                shading: { fill: "EEF4FB", type: ShadingType.CLEAR },
-                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
-                                children: [new Paragraph({ children: [new TextRun({ text: String(label), font: "Arial", size: 22, color: "374151" })] })]
-                            }),
-                            new TableCell({
-                                borders, width: { size: 3600, type: WidthType.DXA },
-                                shading: { fill: "FFFFFF", type: ShadingType.CLEAR },
-                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
-                                children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: String(value), font: "Arial", size: 24, bold: true, color: "9D2449" })] })]
-                            })
-                        ]
-                    }))
-                });
-
-                const dataTable = (headers, rows, colWidths) => new Table({
-                    width: { size: colWidths.reduce((a,b)=>a+b,0), type: WidthType.DXA },
-                    columnWidths: colWidths,
-                    rows: [
-                        new TableRow({ tableHeader: true, children: headers.map((h,i) => new TableCell({
-                            borders, width: { size: colWidths[i], type: WidthType.DXA },
-                            shading: { fill: "1B396A", type: ShadingType.CLEAR },
-                            margins: { top: 100, bottom: 100, left: 160, right: 160 },
-                            children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, color: "FFFFFF", font: "Arial", size: 20 })] })]
-                        })) }),
-                        ...rows.map((row, ri) => new TableRow({ children: row.map((cell,i) => new TableCell({
-                            borders, width: { size: colWidths[i], type: WidthType.DXA },
-                            shading: { fill: ri%2===0 ? "FFFFFF":"F8F9FA", type: ShadingType.CLEAR },
-                            margins: { top: 80, bottom: 80, left: 160, right: 160 },
-                            children: [new Paragraph({ children: [new TextRun({ text: String(cell), font: "Arial", size: 20, color: "374151" })] })]
-                        })) }))
-                    ]
-                });
-
-                // ── Detectar trimestre actual por fecha del sistema ────────
-                // Trimestres del ITD:
-                //   1° Ene–Mar  → meses ITD: Enero, Febrero, Marzo
-                //   2° Abr–Jun  → meses ITD: Abril, Mayo, Junio
-                //   3° Jul–Sep  → meses ITD: Julio, Agosto, Septiembre
-                //   4° Oct–Dic  → meses ITD: Octubre, Noviembre, Diciembre
-                const hoy = new Date();
-                const mesActual = hoy.getMonth() + 1; // 1-12
-                const anioActual = hoy.getFullYear();
-
-                let numTrim, nombreTrim, mesesTrim, mesesKeys;
-                if (mesActual <= 3) {
-                    numTrim = 1; nombreTrim = "1er Trimestre";
-                    mesesTrim = ["Enero", "Febrero", "Marzo"];
-                } else if (mesActual <= 6) {
-                    numTrim = 2; nombreTrim = "2° Trimestre";
-                    mesesTrim = ["Abril", "Mayo", "Junio"];
-                } else if (mesActual <= 9) {
-                    numTrim = 3; nombreTrim = "3er Trimestre";
-                    mesesTrim = ["Julio", "Agosto", "Septiembre"];
-                } else {
-                    numTrim = 4; nombreTrim = "4° Trimestre";
-                    mesesTrim = ["Octubre", "Noviembre", "Diciembre"];
-                }
-                // Claves de periodTrend para este trimestre y año
-                mesesKeys = mesesTrim.map(m => `${anioActual}-${m}`);
-
-                const pTrend = statsData.periodTrend || {};
-
-                // Filtrar solo los periodos del trimestre actual (los que existan en los datos)
-                const mesesDelTrimestre = mesesTrim
-                    .map((m, i) => ({ label: `${m} ${anioActual}`, key: mesesKeys[i] }))
-                    .filter(m => pTrend[m.key]);
-
-                // Calcular totales SOLO sumando los periodos del trimestre actual
-                // Si no hay desglose por periodo se usan los datos globales de statsData
-                // (que el servidor ya filtra según el periodo seleccionado)
-                let totalInscTrim = 0, totalDocTrim = 0;
-                if (mesesDelTrimestre.length > 0) {
-                    mesesDelTrimestre.forEach(m => {
-                        totalInscTrim += pTrend[m.key]?.registros ?? 0;
-                        totalDocTrim  += pTrend[m.key]?.cursos   ?? 0;
-                    });
-                }
-
-                // KPIs globales del periodo (el servidor ya devuelve solo el periodo ACTUAL)
-                // Leer claves de género dinámicamente (el servidor puede devolver "Hombre","Hombres","H", etc.)
-                const _gKeys = Object.keys(statsData.distribucionGenero || {});
-                const _kH = _gKeys.find(k => /hombre|masculino/i.test(k)) || _gKeys[0];
-                const _kM = _gKeys.find(k => /mujer|femenino/i.test(k))   || _gKeys[1];
-                const _gData = statsData.distribucionGenero || {};
-
-                const trimData = {
-                    totalInscripciones: statsData.totalInscripciones ?? "—",
-                    actualizados:       statsData.coberturaDocente?.actualizados ?? "—",
-                    porcentaje:         statsData.coberturaDocente?.porcentaje   ?? "—",
-                    hombres:  _kH ? (_gData[_kH] ?? "—") : "—",
-                    mujeres:  _kM ? (_gData[_kM] ?? "—") : "—",
-                    profesional: (() => { const t = statsData.distribucionTipo||{}; const k = Object.keys(t).find(k=>/profesional/i.test(k)); return k ? t[k] : "—"; })(),
-                    docente:     (() => { const t = statsData.distribucionTipo||{}; const k = Object.keys(t).find(k=>/docente/i.test(k));     return k ? t[k] : "—"; })(),
-                    sinTotal:    statsData.docentesNoParticiparon?.total   ?? "—",
-                    sinHombres:  statsData.docentesNoParticiparon?.hombres ?? "—",
-                    sinMujeres:  statsData.docentesNoParticiparon?.mujeres ?? "—",
-                };
-
-                const tituloTrim   = `${nombreTrim} ${anioActual}`;
-                const mesesRango   = `${mesesTrim[0]}–${mesesTrim[2]} ${anioActual}`;
-                const nombreArchivo = `Informe_Trimestral_${numTrim}T_${anioActual}.docx`;
-
-                const children = [];
-
-                // ── MEMBRETE ───────────────────────────────────────────────
-                children.push(para("Instituto Tecnológico de Durango", { bold: true, size: 28, color: "1B396A", align: AlignmentType.CENTER, before: 0, after: 40 }));
-                children.push(para("Departamento de Desarrollo Académico", { size: 22, color: "555555", align: AlignmentType.CENTER, before: 0, after: 40 }));
-                children.push(sep());
-
-                // ── DATOS DEL OFICIO ──────────────────────────────────────
-                children.push(para(`Durango, Dgo., ${dateStr}`, { align: AlignmentType.RIGHT, before: 80, after: 40 }));
-                children.push(para("C. MÓNICA ROSALES PÉREZ", { bold: true }));
-                children.push(para("JEFA DEL DEPTO. DESARROLLO ACADÉMICO", { bold: true }));
-                children.push(para("PRESENTE", { bold: true, after: 200 }));
-
-                // ── CUERPO DEL OFICIO ─────────────────────────────────────
-                children.push(para(
-                    `Sirva la presente para informarle que durante el ${tituloTrim} (${mesesRango}), el programa de Formación y Actualización Docente presenta los siguientes resultados:`,
-                    { after: 200 }
-                ));
-
-                // ── SECCIÓN 1: KPIs del trimestre ─────────────────────────
-                children.push(heading(`1. Resumen de Indicadores — ${tituloTrim}`));
-                children.push(dataTable(
-                    ["Indicador", "Cantidad"],
-                    [
-                        ["Total de Inscripciones",        String(trimData.totalInscripciones)],
-                        ["Docentes Únicos Actualizados",   String(trimData.actualizados)],
-                        ["Cobertura de Plantilla Docente", trimData.porcentaje !== "—" ? `${trimData.porcentaje}%` : "—"],
-                    ],
-                    [7200, 2160]
-                ));
-                children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
-
-                // ── SECCIÓN 2: Periodos del trimestre (solo los 3 meses) ──
-                if (mesesDelTrimestre.length > 0) {
-                    children.push(heading(`2. Distribución por Periodo (${mesesRango})`));
-                    // Filas por periodo
-                    const filasPeriodo = mesesDelTrimestre.map(m => [
-                        m.label,
-                        pTrend[m.key]?.cursos    ?? "—",
-                        pTrend[m.key]?.registros ?? "—"
-                    ]);
-                    // Fila de total: suma de cursos e inscripciones de los periodos del trimestre
-                    // Si solo hay un periodo se usa directamente statsData.totalInscripciones para que cuadre con el punto 1
-                    const totalCursosTrim = mesesDelTrimestre.reduce((acc, m) => acc + (pTrend[m.key]?.cursos ?? 0), 0);
-                    filasPeriodo.push(["Total del trimestre", String(totalCursosTrim), String(trimData.totalInscripciones)]);
-                    children.push(dataTable(
-                        ["Periodo", "Cursos Ofertados", "Inscripciones"],
-                        filasPeriodo,
-                        [3000, 3180, 3180]
-                    ));
-                    children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
-                }
-
-                // ── SECCIÓN 3: Género y Tipo de Curso ─────────────────────
-                children.push(heading("3. Distribución por Género y Tipo de Curso"));
-                children.push(dataTable(
-                    ["Categoría", "Hombres", "Mujeres", "Total"],
-                    [["Inscripciones por género", String(trimData.hombres), String(trimData.mujeres), String(trimData.totalInscripciones)]],
-                    [3600, 1920, 1920, 1920]
-                ));
-                children.push(new Paragraph({ spacing: { before: 120, after: 80 } }));
-                children.push(dataTable(
-                    ["Tipo de Curso", "Cantidad"],
-                    [
-                        ["Profesional", String(trimData.profesional)],
-                        ["Docente",     String(trimData.docente)],
-                        ["Total",       String(trimData.totalInscripciones)],
-                    ],
-                    [6480, 2880]
-                ));
-                children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
-
-                // ── SECCIÓN 4: Docentes sin participación (solo cifras) ───
-                children.push(heading("4. Docentes sin Participación"));
-                children.push(dataTable(
-                    ["Categoría", "Total"],
-                    [
-                        ["Total sin participación", String(trimData.sinTotal)],
-                        ["Hombres",                 String(trimData.sinHombres)],
-                        ["Mujeres",                 String(trimData.sinMujeres)],
-                    ],
-                    [7200, 2160]
-                ));
-                children.push(new Paragraph({ spacing: { before: 80, after: 80 } }));
-
-                // ── CIERRE ─────────────────────────────────────────────────
-                children.push(para(
-                    `Los indicadores muestran una participación relevante en las actividades de actualización docente, alcanzando una cobertura del ${trimData.porcentaje}%. No obstante, se identifican ${trimData.sinTotal} docentes sin participación, lo que representa una oportunidad para fortalecer estrategias de inclusión y ampliar la cobertura en próximos periodos.`,
-                    { after: 320 }
-                ));
-                children.push(para("A T E N T A M E N T E", { bold: true, align: AlignmentType.CENTER, before: 200, after: 40 }));
-                children.push(para("Excelencia en Educación Tecnológica®", { italic: true, align: AlignmentType.CENTER, after: 40 }));
-                children.push(para("La Técnica al Servicio de la Patria", { italic: true, align: AlignmentType.CENTER, after: 400 }));
-                children.push(para("C. ALEJANDRO CALDERÓN RENTERÍA", { bold: true, align: AlignmentType.CENTER, after: 40 }));
-                children.push(para("COORDINACIÓN DE ACTUALIZACIÓN DOCENTE", { bold: true, align: AlignmentType.CENTER, after: 40 }));
-                children.push(sep());
-                children.push(para("M.C. Alejandro Calderón Rentería — Coordinación de Actualización Docente", { align: AlignmentType.CENTER, color: "888888", size: 18 }));
-
-                const doc = new Document({
-                    creator: "ITD - Desarrollo Académico",
-                    title: `Informe Trimestral de Actualización Docente — ${tituloTrim}`,
-                    styles: { default: { document: { run: { font: "Arial", size: 22 } } } },
-                    sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } } }, children }]
-                });
-
-                const blob = await Packer.toBlob(doc);
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url; a.download = nombreArchivo;
-                document.body.appendChild(a); a.click();
-                document.body.removeChild(a); URL.revokeObjectURL(url);
-
-            } catch (err) {
-                console.error("Error generando Informe Trimestral:", err);
-                alert("Error al generar el documento:\n" + err.message);
-            } finally {
-                setGeneratingPDF(false);
-            }
-        };
-
-        // ── NUEVO: Word Completo (todos los cursos) ─────────────────────
-        const generateWordCompleto = async () => {
-            if (!statsData) { alert("No hay datos cargados aún."); return; }
-            setGeneratingPDF(true);
-            try {
-                const docxLib = window.docx;
-                if (!docxLib) throw new Error("Librería docx no cargada.");
-                const {
-                    Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-                    AlignmentType, WidthType, BorderStyle, ShadingType
-                } = docxLib;
-
-                const dateStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
-                const cellBorder = { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" };
-                const borders = { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder, insideH: cellBorder, insideV: cellBorder };
-
-                const sep = () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "9D2449", space: 1 } }, spacing: { before: 60, after: 180 } });
-                const title = (text) => new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 120 }, children: [new TextRun({ text, bold: true, color: "1B396A", font: "Arial", size: 32 })] });
-                const subtitle = (text) => new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 80 }, children: [new TextRun({ text, bold: true, color: "9D2449", font: "Arial", size: 26 })] });
-                const caption = (text) => new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 0, after: 320 }, children: [new TextRun({ text, color: "888888", font: "Arial", size: 20 })] });
-                const heading = (text) => new Paragraph({ spacing: { before: 320, after: 120 }, children: [new TextRun({ text, bold: true, color: "1B396A", font: "Arial", size: 28 })], border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "D5E8F0", space: 1 } } });
-                const spacer = () => new Paragraph({ spacing: { before: 40, after: 40 } });
-
-                const kpiTable = (rows) => new Table({
-                    width: { size: 9360, type: WidthType.DXA }, columnWidths: [5760, 3600],
-                    rows: rows.map(([label, value]) => new TableRow({ children: [
-                        new TableCell({ borders, width: { size: 5760, type: WidthType.DXA }, shading: { fill: "EEF4FB", type: ShadingType.CLEAR }, margins: { top: 100, bottom: 100, left: 160, right: 160 }, children: [new Paragraph({ children: [new TextRun({ text: String(label), font: "Arial", size: 22, color: "374151" })] })] }),
-                        new TableCell({ borders, width: { size: 3600, type: WidthType.DXA }, shading: { fill: "FFFFFF", type: ShadingType.CLEAR }, margins: { top: 100, bottom: 100, left: 160, right: 160 }, children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: String(value), font: "Arial", size: 24, bold: true, color: "9D2449" })] })] })
-                    ]}))
-                });
-
-                const dataTable = (headers, rows, colWidths) => new Table({
-                    width: { size: colWidths.reduce((a,b)=>a+b,0), type: WidthType.DXA }, columnWidths: colWidths,
-                    rows: [
-                        new TableRow({ tableHeader: true, children: headers.map((h,i) => new TableCell({ borders, width: { size: colWidths[i], type: WidthType.DXA }, shading: { fill: "1B396A", type: ShadingType.CLEAR }, margins: { top: 100, bottom: 100, left: 160, right: 160 }, children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, color: "FFFFFF", font: "Arial", size: 20 })] })] })) }),
-                        ...rows.map((row, ri) => new TableRow({ children: row.map((cell,i) => new TableCell({ borders, width: { size: colWidths[i], type: WidthType.DXA }, shading: { fill: ri%2===0?"FFFFFF":"F8F9FA", type: ShadingType.CLEAR }, margins: { top: 80, bottom: 80, left: 160, right: 160 }, children: [new Paragraph({ children: [new TextRun({ text: String(cell), font: "Arial", size: 20, color: "374151" })] })] })) }))
-                    ]
-                });
-
-                const children = [];
-
-                // Portada
-                children.push(spacer(), spacer(), spacer());
-                children.push(title("INSTITUTO TECNOLÓGICO DE DURANGO"));
-                children.push(subtitle("Coordinación de Actualización Docente"));
-                children.push(spacer());
-                children.push(sep());
-                children.push(subtitle("Reporte Estadístico Completo"));
-                children.push(caption(`Generado el ${dateStr}`));
-
-                // 1. KPIs
-                children.push(heading("1. Indicadores Clave de Desempeño"));
-                children.push(kpiTable([
-                    ["Total de Inscripciones", statsData.totalInscripciones ?? "—"],
-                    ["Docentes Únicos Actualizados", statsData.coberturaDocente?.actualizados ?? "—"],
-                    ["Cobertura de Plantilla Docente", statsData.coberturaDocente?.porcentaje != null ? `${statsData.coberturaDocente.porcentaje}%` : "—"],
-                ]));
-                children.push(spacer());
-
-                // 2. TODOS LOS CURSOS con participantes
-                if (statsData.topCursos?.length) {
-                    children.push(heading(`2. Todos los Cursos y Número de Participantes (${statsData.topCursos.length} cursos)`));
-                    children.push(dataTable(
-                        ["#", "Nombre del Curso", "Participantes"],
-                        statsData.topCursos.map(([nombre, n], i) => [`${i+1}`, nombre, n]),
-                        [600, 6960, 1800]
-                    ));
-                    children.push(spacer());
-                }
-
-                // 3. Departamentos
-                if (statsData.topDepartamentos?.length) {
-                    children.push(heading("3. Participación por Departamento"));
-                    children.push(dataTable(
-                        ["#", "Departamento", "Total"],
-                        statsData.topDepartamentos.map(([dept, n], i) => [`${i+1}`, dept, n]),
-                        [600, 6960, 1800]
-                    ));
-                    children.push(spacer());
-                }
-
-                // 4. Género
-                if (statsData.distribucionGenero) {
-                    children.push(heading("4. Distribución por Género"));
-                    children.push(kpiTable(Object.entries(statsData.distribucionGenero)));
-                    children.push(spacer());
-                }
-
-                // 5. Tipo de Curso
-                if (statsData.distribucionTipo) {
-                    children.push(heading("5. Tipo de Curso"));
-                    children.push(kpiTable(Object.entries(statsData.distribucionTipo)));
-                    children.push(spacer());
-                }
-
-                // 6. Frecuencia
-                if (statsData.frecuenciaParticipacion) {
-                    children.push(heading("6. Cursos por Docente (Frecuencia de Participación)"));
-                    children.push(dataTable(
-                        ["Cursos Tomados", "Número de Docentes"],
-                        Object.entries(statsData.frecuenciaParticipacion),
-                        [4680, 4680]
-                    ));
-                    children.push(spacer());
-                }
-
-                // 7. Histórico
-                if (statsData.historicalTrend) {
-                    children.push(heading("7. Evolución Histórica por Año"));
-                    const years = Object.keys(statsData.historicalTrend).sort();
-                    children.push(dataTable(
-                        ["Año", "Cursos Ofertados", "Total Docentes"],
-                        years.map(y => [y, statsData.historicalTrend[y]?.cursos ?? 0, statsData.historicalTrend[y]?.registros ?? 0]),
-                        [2340, 3510, 3510]
-                    ));
-                    children.push(spacer());
-                }
-
-                // 8. Docentes sin participación
-                if (statsData.docentesNoParticiparon?.total > 0) {
-                    const np = statsData.docentesNoParticiparon;
-                    children.push(heading("8. Docentes que No Participaron en el Periodo"));
-                    children.push(kpiTable([
-                        ["Total de docentes sin participación", np.total],
-                        ["Hombres", np.hombres],
-                        ["Mujeres", np.mujeres],
-                    ]));
-                    children.push(spacer());
-                    if (np.lista?.length > 0) {
-                        children.push(new Paragraph({ spacing: { before: 160, after: 100 }, children: [new TextRun({ text: "Listado de docentes sin participación:", bold: true, font: "Arial", size: 22, color: "374151" })] }));
-                        children.push(dataTable(
-                            ["#", "Nombre del Docente", "Departamento"],
-                            np.lista.map((d, i) => [`${i+1}`, d.nombre, d.departamento]),
-                            [500, 5500, 3360]
-                        ));
-                    }
-                    children.push(spacer());
-                }
-
-                // Pie
-                children.push(sep());
-                children.push(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "M.C. Alejandro Calderón Rentería — Coordinación de Actualización Docente", font: "Arial", size: 18, color: "888888" })] }));
-
-                const doc = new Document({
-                    creator: "ITD - Desarrollo Académico",
-                    title: "Reporte Estadístico Completo de Actualización Docente",
-                    styles: { default: { document: { run: { font: "Arial", size: 22 } } } },
-                    sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } } }, children }]
-                });
-
-                const blob = await Packer.toBlob(doc);
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url; a.download = `Reporte_Completo_Todos_Los_Cursos_${period}.docx`;
-                document.body.appendChild(a); a.click();
-                document.body.removeChild(a); URL.revokeObjectURL(url);
-
-            } catch (err) {
-                console.error("Error generando Reporte Completo:", err);
-                alert("Error al generar el documento:\n" + err.message);
-            } finally {
-                setGeneratingPDF(false);
-            }
-        };
-
-        const generateCourseEvolutionData = () => {
+        var generateCourseEvolutionData = function() {
             if (!statsData || !statsData.periodTrend || !statsData.historicalTrend) return { labels: [], datasets: [] };
             
-            const pTrend = statsData.periodTrend;
-            const hTrend = statsData.historicalTrend;
+            var pTrend = statsData.periodTrend;
+            var hTrend = statsData.historicalTrend;
             
-            const sortedYears = Object.keys(hTrend).sort();
+            var sortedYears = Object.keys(hTrend).sort();
             
-            const labels = [];
-            const dataValues = [];
-            const bgColors = [];
+            var labels = [];
+            var dataValues = [];
+            var bgColors = [];
 
-            sortedYears.forEach(year => {
-                const total = hTrend[year]?.cursos || 0;
-                const ene = pTrend[`${year}-Enero`]?.cursos || 0;
-                const jun = pTrend[`${year}-Junio`]?.cursos || 0;
-                const ago = pTrend[`${year}-Agosto`]?.cursos || 0;
+            sortedYears.forEach(function(year) {
+                var total = hTrend[year]?.cursos || 0;
+                var ene = pTrend[year + '-Enero']?.cursos || 0;
+                var jun = pTrend[year + '-Junio']?.cursos || 0;
+                var ago = pTrend[year + '-Agosto']?.cursos || 0;
 
-                labels.push(`Total '${year.substring(2)}`, 'Ene', 'Jun', 'Ago');
+                labels.push('Total \'' + year.substring(2), 'Ene', 'Jun', 'Ago');
                 dataValues.push(total, ene, jun, ago);
                 
-                bgColors.push('#1e3a8a'); // Navy para Total
-                bgColors.push('#f472b6'); // Pink para Ene
-                bgColors.push('#3b82f6'); // Blue para Jun
-                bgColors.push('#fbbf24'); // Yellow para Ago
+                bgColors.push('#1e3a8a');
+                bgColors.push('#f472b6');
+                bgColors.push('#3b82f6');
+                bgColors.push('#fbbf24');
             });
 
             return {
@@ -1541,18 +704,18 @@
             };
         };
 
-        const generateTeacherEvolutionData = () => {
+        var generateTeacherEvolutionData = function() {
             if (!statsData || !statsData.historicalTrend) return { labels: [], datasets: [] };
             
-            const years = Object.keys(statsData.historicalTrend).sort();
-            const colors = ['#4f46e5', '#06b6d4', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']; 
+            var years = Object.keys(statsData.historicalTrend).sort();
+            var colors = ['#4f46e5', '#06b6d4', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']; 
             
             return {
                 labels: years,
                 datasets: [{
                     label: 'Total Docentes',
-                    data: years.map(y => statsData.historicalTrend[y].registros),
-                    backgroundColor: years.map((_, i) => colors[i % colors.length]),
+                    data: years.map(function(y) { return statsData.historicalTrend[y].registros; }),
+                    backgroundColor: years.map(function(_, i) { return colors[i % colors.length]; }),
                     borderRadius: 6,
                     barPercentage: 0.5,
                     maxBarThickness: 50
@@ -1560,206 +723,186 @@
             };
         };
 
-        // --- RELOJ DE CARGA (LOADER) ---
+        // RENDER LOADING
         if (loading) {
-            return (
-                <div className="flex justify-center items-center h-full flex-col">
-                    <div className="loader-spinner"></div>
-                    <p className="text-[#1B396A] font-bold text-lg animate-pulse">Cargando estadísticas...</p>
-                </div>
+            return h('div', { className: 'flex justify-center items-center h-full flex-col' },
+                h('div', { className: 'loader-spinner' }),
+                h('p', { className: 'text-[#1B396A] font-bold text-lg animate-pulse' }, 'Cargando estadísticas...')
             );
         }
 
-        return (
-            <div className="p-6 max-w-7xl mx-auto animate-fadeIn relative">
-                {/* Modal de Generando PDF */}
-                {generatingPDF && (
-                    <div className="pdf-overlay">
-                        <div className="pdf-modal">
-                            <div className="loader-spinner"></div>
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">Generando Reporte</h3>
-                            <p className="text-gray-500">Por favor espere, procesando datos...</p>
-                        </div>
-                    </div>
-                )}
+        // RENDER DASHBOARD
+        return h('div', { className: 'p-6 max-w-7xl mx-auto animate-fadeIn relative' },
+            // Modal de Generando PDF
+            generatingPDF ? h('div', { className: 'pdf-overlay' },
+                h('div', { className: 'pdf-modal' },
+                    h('div', { className: 'loader-spinner' }),
+                    h('h3', { className: 'text-xl font-bold text-gray-800 mb-2' }, 'Generando Reporte'),
+                    h('p', { className: 'text-gray-500' }, 'Por favor espere, procesando datos...')
+                )
+            ) : null,
 
-                {/* Encabezado del Dashboard */}
-                <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-white p-6 rounded-xl shadow-md border-l-4 border-[#1B396A]">
-                    <div>
-                        <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
-                            {isAdmin ? "Dashboard Estratégico" : "Estadísticas de Actualización Docente"}
-                        </h2>
-                        <p className="text-gray-500 mt-1">
-                            {isAdmin
-                                ? <>Análisis de datos de actualización docente. Usuario: <span className="font-semibold text-[#1B396A]">{user.name}</span></>
-                                : <>Bienvenido/a, <span className="font-semibold text-[#1B396A]">{user.name}</span>. Aquí puedes consultar los indicadores del programa.</>
-                            }
-                        </p>
-                    </div>
-                    <div className="flex gap-3">
-                        <div className="relative">
-                            <select 
-                                value={period} 
-                                onChange={(e) => setPeriod(e.target.value)}
-                                className="appearance-none bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-[#1B396A] font-bold cursor-pointer hover:bg-gray-100 transition-colors shadow-sm"
-                            >
-                                <option value="ACTUAL">🟢 Periodo Actual</option>
-                                {availableYears.map(y => <option key={y} value={y}>📅 Año {y}</option>)}
-                            </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                            </div>
-                        </div>
-                        <button onClick={generatePDF} className="bg-[#9D2449] hover:bg-[#801d3a] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2">
-                            <span>📄</span> PDF
-                        </button>
-                        {isAdmin && (
-                            <>
-                                <button onClick={generateWord} className="bg-[#1B396A] hover:bg-[#142b52] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2">
-                                    <span>📝</span> Word
-                                </button>
-                                <button onClick={generateWordTrimestral} className="bg-[#7B3F00] hover:bg-[#5c2f00] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2" title="Informe formal trimestral">
-                                    <span>📋</span> Informe Trimestral
-                                </button>
-                                <button onClick={generateWordCompleto} className="bg-[#2E7D32] hover:bg-[#1b5e20] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2" title="Todos los cursos con participantes">
-                                    <span>📊</span> Word Completo
-                                </button>
-                            </>
-                        )}
-                        <button onClick={onLogout} className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors">
-                            Salir
-                        </button>
-                    </div>
-                </div>
+            // Encabezado
+            h('div', { className: 'flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-white p-6 rounded-xl shadow-md border-l-4 border-[#1B396A]' },
+                h('div', null,
+                    h('h2', { className: 'text-2xl md:text-3xl font-bold text-gray-800' },
+                        isAdmin ? 'Dashboard Estratégico' : 'Estadísticas de Actualización Docente'
+                    ),
+                    h('p', { className: 'text-gray-500 mt-1' },
+                        isAdmin ? 'Análisis de datos de actualización docente. Usuario: ' + h('span', { className: 'font-semibold text-[#1B396A]' }, user.name) : 'Bienvenido/a, ' + h('span', { className: 'font-semibold text-[#1B396A]' }, user.name) + '. Aquí puedes consultar los indicadores del programa.'
+                    )
+                ),
+                h('div', { className: 'flex gap-3' },
+                    h('div', { className: 'relative' },
+                        h('select', { 
+                            value: period, 
+                            onChange: function(e) { setPeriod(e.target.value); },
+                            className: 'appearance-none bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-[#1B396A] font-bold cursor-pointer hover:bg-gray-100 transition-colors shadow-sm'
+                        },
+                            h('option', { value: 'ACTUAL' }, '🟢 Periodo Actual'),
+                            availableYears.map(function(y) { return h('option', { key: y, value: y }, '📅 Año ' + y); })
+                        ),
+                        h('div', { className: 'pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700' },
+                            h('svg', { className: 'fill-current h-4 w-4', xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 20 20' },
+                                h('path', { d: 'M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z' })
+                            )
+                        )
+                    ),
+                    h('button', { onClick: function() { alert('Función PDF en desarrollo'); }, className: 'bg-[#9D2449] hover:bg-[#801d3a] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2' },
+                        h('span', null, '📄'),
+                        ' PDF'
+                    ),
+                    isAdmin ? h('button', { onClick: function() { alert('Función Word en desarrollo'); }, className: 'bg-[#1B396A] hover:bg-[#142b52] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2' },
+                        h('span', null, '📝'),
+                        ' Word'
+                    ) : null,
+                    h('button', { onClick: onLogout, className: 'bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors' }, 'Salir')
+                )
+            ),
 
-                {/* KPIs */}
-                <div id="kpi-section" className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-blue-600 flex items-center justify-between">
-                        <div>
-                            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Total Inscripciones</p>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{statsData.totalInscripciones}</p>
-                        </div>
-                        <div className="text-3xl bg-blue-100 p-3 rounded-full text-blue-600">📝</div>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-green-500 flex items-center justify-between">
-                        <div>
-                            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Docentes Únicos</p>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{statsData.coberturaDocente.actualizados}</p>
-                        </div>
-                        <div className="text-3xl bg-green-100 p-3 rounded-full text-green-600">👥</div>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-yellow-500 flex items-center justify-between">
-                        <div>
-                            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Cobertura Plantilla</p>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{statsData.coberturaDocente.porcentaje}%</p>
-                        </div>
-                        <div className="text-3xl bg-yellow-100 p-3 rounded-full text-yellow-600">🏫</div>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow-md border-b-4 border-red-500 flex items-center justify-between">
-                        <div>
-                            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Sin Participar</p>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{statsData.docentesNoParticiparon?.total ?? '—'}</p>
-                            {statsData.docentesNoParticiparon?.total > 0 && (
-                                <p className="text-xs text-gray-400 mt-1">
-                                    H: {statsData.docentesNoParticiparon.hombres} &nbsp;|&nbsp; M: {statsData.docentesNoParticiparon.mujeres}
-                                </p>
-                            )}
-                        </div>
-                        <div className="text-3xl bg-red-100 p-3 rounded-full text-red-500">🚫</div>
-                    </div>
-                </div>
+            // KPIs
+            h('div', { id: 'kpi-section', className: 'grid grid-cols-1 md:grid-cols-4 gap-6 mb-8' },
+                h('div', { className: 'bg-white p-6 rounded-xl shadow-md border-b-4 border-blue-600 flex items-center justify-between' },
+                    h('div', null,
+                        h('p', { className: 'text-gray-500 text-xs font-bold uppercase tracking-wider' }, 'Total Inscripciones'),
+                        h('p', { className: 'text-3xl font-bold text-gray-800 mt-1' }, statsData ? statsData.totalInscripciones : '—')
+                    ),
+                    h('div', { className: 'text-3xl bg-blue-100 p-3 rounded-full text-blue-600' }, '📝')
+                ),
+                h('div', { className: 'bg-white p-6 rounded-xl shadow-md border-b-4 border-green-500 flex items-center justify-between' },
+                    h('div', null,
+                        h('p', { className: 'text-gray-500 text-xs font-bold uppercase tracking-wider' }, 'Docentes Únicos'),
+                        h('p', { className: 'text-3xl font-bold text-gray-800 mt-1' }, statsData ? statsData.coberturaDocente.actualizados : '—')
+                    ),
+                    h('div', { className: 'text-3xl bg-green-100 p-3 rounded-full text-green-600' }, '👥')
+                ),
+                h('div', { className: 'bg-white p-6 rounded-xl shadow-md border-b-4 border-yellow-500 flex items-center justify-between' },
+                    h('div', null,
+                        h('p', { className: 'text-gray-500 text-xs font-bold uppercase tracking-wider' }, 'Cobertura Plantilla'),
+                        h('p', { className: 'text-3xl font-bold text-gray-800 mt-1' }, statsData ? statsData.coberturaDocente.porcentaje + '%' : '—')
+                    ),
+                    h('div', { className: 'text-3xl bg-yellow-100 p-3 rounded-full text-yellow-600' }, '🏫')
+                ),
+                h('div', { className: 'bg-white p-6 rounded-xl shadow-md border-b-4 border-red-500 flex items-center justify-between' },
+                    h('div', null,
+                        h('p', { className: 'text-gray-500 text-xs font-bold uppercase tracking-wider' }, 'Sin Participar'),
+                        h('p', { className: 'text-3xl font-bold text-gray-800 mt-1' }, statsData && statsData.docentesNoParticiparon ? statsData.docentesNoParticiparon.total : '—')
+                    ),
+                    h('div', { className: 'text-3xl bg-red-100 p-3 rounded-full text-red-500' }, '🚫')
+                )
+            ),
 
-                {/* Sección Principal de Gráficas: AHORA CADA UNA EN SU PROPIA FILA (Full Width) */}
-                <div className="mb-8 space-y-8">
-                    {/* Top Cursos - ANCHO COMPLETO */}
-                    <div className="w-full">
-                        <ChartBox 
-                            id="topCursos"
-                            type="bar" 
-                            title="📚 Cursos Más Demandados" 
-                            data={Object.fromEntries(statsData.topCursos.slice(0, 10))} 
-                            horizontal={true}
-                            minHeight={getChartHeight(10)}
-                        />
-                    </div>
-                    
-                    {/* Top Departamentos - ANCHO COMPLETO */}
-                    <div className="w-full">
-                        <ChartBox 
-                            id="topDeptos"
-                            type="bar" 
-                            title="🏢 Participación por Departamento" 
-                            data={Object.fromEntries(statsData.topDepartamentos)} 
-                            shortenLabels={true}
-                            horizontal={true}
-                            minHeight={getChartHeight(statsData.topDepartamentos.length)}
-                        />
-                    </div>
-                </div>
+            // Gráficas
+            h('div', { className: 'mb-8 space-y-8' },
+                h('div', { className: 'w-full' },
+                    h(ChartBox, { 
+                        id: 'topCursos',
+                        type: 'bar', 
+                        title: '📚 Cursos Más Demandados', 
+                        data: statsData ? Object.fromEntries(statsData.topCursos.slice(0, 10)) : {},
+                        horizontal: true,
+                        minHeight: getChartHeight(10)
+                    })
+                ),
+                h('div', { className: 'w-full' },
+                    h(ChartBox, { 
+                        id: 'topDeptos',
+                        type: 'bar', 
+                        title: '🏢 Participación por Departamento', 
+                        data: statsData ? Object.fromEntries(statsData.topDepartamentos) : {},
+                        shortenLabels: true,
+                        horizontal: true,
+                        minHeight: statsData ? getChartHeight(statsData.topDepartamentos.length) : '400px'
+                    })
+                )
+            ),
 
-                {/* Sección Secundaria */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                    <div className="md:col-span-1">
-                        <ChartBox 
-                            id="genero" 
-                            type="doughnut" 
-                            title="👥 Distribución por Género" 
-                            data={statsData.distribucionGenero}
-                            customColors={['#36A2EB', '#FF6384']} // Azul y Rosa
-                        />
-                    </div>
-                    <div className="md:col-span-1">
-                        <ChartBox 
-                            id="tipo" 
-                            type="pie" 
-                            title="📋 Tipo de Curso" 
-                            data={statsData.distribucionTipo}
-                            customColors={['#10b981', '#f59e0b']} // Esmeralda y Ámbar
-                        />
-                    </div>
-                    <div className="md:col-span-1">
-                        <ChartBox id="frecuencia" type="bar" title="📈 Cursos por Docente" data={statsData.frecuenciaParticipacion} />
-                    </div>
-                </div>
+            // Sección Secundaria
+            h('div', { className: 'grid grid-cols-1 md:grid-cols-3 gap-8 mb-8' },
+                h('div', { className: 'md:col-span-1' },
+                    h(ChartBox, { 
+                        id: 'genero', 
+                        type: 'doughnut', 
+                        title: '👥 Distribución por Género', 
+                        data: statsData ? statsData.distribucionGenero : {},
+                        customColors: ['#36A2EB', '#FF6384']
+                    })
+                ),
+                h('div', { className: 'md:col-span-1' },
+                    h(ChartBox, { 
+                        id: 'tipo', 
+                        type: 'pie', 
+                        title: '📋 Tipo de Curso', 
+                        data: statsData ? statsData.distribucionTipo : {},
+                        customColors: ['#10b981', '#f59e0b']
+                    })
+                ),
+                h('div', { className: 'md:col-span-1' },
+                    h(ChartBox, { id: 'frecuencia', type: 'bar', title: '📈 Cursos por Docente', data: statsData ? statsData.frecuenciaParticipacion : {} })
+                )
+            ),
 
-                {/* Evolución Histórica */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                    <ChartBox 
-                        id="historico"
-                        type="bar" 
-                        title="📅 Cursos Ofertados (Periodos vs Total Anual)" 
-                        data={generateCourseEvolutionData()} 
-                        isHistory={true}
-                    />
-                    <ChartBox 
-                        id="docentesYear"
-                        type="bar" 
-                        title="👨‍🏫 Total Docentes por Año" 
-                        data={generateTeacherEvolutionData()} 
-                        isHistory={true}
-                    />
-                </div>
-            </div>
+            // Evolución Histórica
+            h('div', { className: 'grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8' },
+                h(ChartBox, { 
+                    id: 'historico',
+                    type: 'bar', 
+                    title: '📅 Cursos Ofertados (Periodos vs Total Anual)', 
+                    data: generateCourseEvolutionData(), 
+                    isHistory: true
+                }),
+                h(ChartBox, { 
+                    id: 'docentesYear',
+                    type: 'bar', 
+                    title: '👨‍🏫 Total Docentes por Año', 
+                    data: generateTeacherEvolutionData(), 
+                    isHistory: true
+                })
+            )
         );
     };
 
-    // ====================================================================
-    // COMPONENTE PRINCIPAL: App
-    // ====================================================================
-    const App = () => {
-        const [user, setUser] = React.useState(null);
-        const [loginError, setLoginError] = React.useState('');
+    // ============================================================
+    // 7. COMPONENTE: APP
+    // ============================================================
+    var App = function() {
+        var _user = useState(null);
+        var user = _user[0];
+        var setUser = _user[1];
+        
+        var _loginError = useState('');
+        var loginError = _loginError[0];
+        var setLoginError = _loginError[1];
 
-        const ADMIN_EMAILS = ['alejandro.calderon@itdurango.edu.mx', 'desarrollo.academico@itdurango.edu.mx'];
+        var ADMIN_EMAILS = ['alejandro.calderon@itdurango.edu.mx', 'desarrollo.academico@itdurango.edu.mx'];
 
-        const handleLogin = (response) => {
+        var handleLogin = function(response) {
             try {
-                const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                const email = payload.email || '';
-                // Permitir acceso a cualquier correo institucional del ITD
+                var payload = JSON.parse(atob(response.credential.split('.')[1]));
+                var email = payload.email || '';
                 if (email.endsWith('@itdurango.edu.mx') || ADMIN_EMAILS.includes(email)) {
-                    const isAdmin = ADMIN_EMAILS.includes(email);
-                    setUser({ name: payload.name, email, picture: payload.picture, isAdmin });
+                    var isAdmin = ADMIN_EMAILS.includes(email);
+                    setUser({ name: payload.name, email: email, picture: payload.picture, isAdmin: isAdmin });
                 } else {
                     setLoginError("Acceso denegado: Se requiere cuenta institucional @itdurango.edu.mx.");
                 }
@@ -1768,19 +911,41 @@
             }
         };
 
-        const handleLogout = () => {
+        var handleLogout = function() {
             setUser(null);
             setLoginError('');
             if (window.google) window.google.accounts.id.disableAutoSelect();
         };
 
-        if (!user) return <Login onLogin={handleLogin} loginError={loginError} />;
-        return <Dashboard user={user} isAdmin={user.isAdmin} onLogout={handleLogout} />;
+        if (!user) return h(Login, { onLogin: handleLogin, loginError: loginError });
+        return h(Dashboard, { user: user, isAdmin: user.isAdmin, onLogout: handleLogout });
     };
 
-    // Renderizado
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    // ============================================================
+    // 8. MONTAJE
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        var rootEl = document.getElementById('root');
+        if (rootEl) {
+            try {
+                var root = createRoot(rootEl);
+                root.render(h(App, null));
+                console.log('✅ Estadísticas ITD - App montada correctamente');
+            } catch(e) {
+                console.error('❌ Error al montar la app:', e);
+                rootEl.innerHTML = 
+                    '<div class="container mx-auto px-4 py-10 max-w-3xl">' +
+                        '<div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-sm">' +
+                            '<h3 class="text-lg font-bold text-red-800">⚠️ Error de carga</h3>' +
+                            '<p class="text-red-700">No se pudo cargar la aplicación. Error: ' + e.message + '</p>' +
+                            '<button onclick="location.reload()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">Recargar página</button>' +
+                        '</div>' +
+                    '</div>';
+            }
+        } else {
+            console.error('❌ No se encontró el elemento root');
+        }
+    });
 </script>
 </body>
 </html>
