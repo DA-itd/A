@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Validador de Constancias ITD</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
 </head>
 <body>
     <div id="root"></div>
-    <script type="text/babel">
+    <script>
     // ============================================================
     // 1. CONFIGURACIÓN
     // ============================================================
@@ -19,33 +18,57 @@
     const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web2/main/image.jpg';
     
     // ============================================================
-    // 2. FUNCIONES DE UTILIDAD
+    // 2. REACT
     // ============================================================
-    const getFlexibleProperty = (obj, keys) => {
-        if (!obj || typeof obj !== 'object' || !Array.isArray(keys)) return undefined;
-        for (const key of keys) {
-            const keyToFind = key.toLowerCase().trim();
-            const foundKey = Object.keys(obj).find(k => k.toLowerCase().trim() === keyToFind);
-            if (foundKey && obj[foundKey] !== undefined && obj[foundKey] !== null && String(obj[foundKey]).trim() !== '') {
-                return obj[foundKey];
+    const React = window.React;
+    const ReactDOM = window.ReactDOM;
+    const { useState, useEffect } = React;
+    const { createRoot } = ReactDOM;
+    const h = React.createElement;
+
+    // ============================================================
+    // 3. FUNCIONES DE UTILIDAD
+    // ============================================================
+    const getProperty = function(obj, keyName) {
+        if (!obj || typeof obj !== 'object' || !keyName) return undefined;
+        var keyToFind = keyName.toLowerCase().trim();
+        var keys = Object.keys(obj);
+        for (var i = 0; i < keys.length; i++) {
+            if (keys[i].toLowerCase().trim() === keyToFind) {
+                return obj[keys[i]];
             }
         }
         return undefined;
     };
 
-    const parseCsv = (text) => {
-        const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+    const getFlexibleProperty = function(obj, keys) {
+        if (!obj || typeof obj !== 'object' || !Array.isArray(keys)) return undefined;
+        for (var i = 0; i < keys.length; i++) {
+            var value = getProperty(obj, keys[i]);
+            if (value !== undefined && value !== null && String(value).trim() !== '') {
+                return value;
+            }
+        }
+        return undefined;
+    };
+
+    const parseCsv = function(text) {
+        var lines = text.split(/\r?\n/).filter(function(l) { return l.trim() !== ''; });
         if (lines.length === 0) return [];
 
-        const parseRow = (line) => {
-            const cols = [];
-            let current = '';
-            let inQuotes = false;
-            for (let i = 0; i < line.length; i++) {
-                const ch = line[i];
+        var parseRow = function(line) {
+            var cols = [];
+            var current = '';
+            var inQuotes = false;
+            for (var i = 0; i < line.length; i++) {
+                var ch = line[i];
                 if (ch === '"') {
-                    if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
-                    else { inQuotes = !inQuotes; }
+                    if (inQuotes && line[i + 1] === '"') {
+                        current += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
                 } else if (ch === ',' && !inQuotes) {
                     cols.push(current.trim());
                     current = '';
@@ -60,17 +83,20 @@
         return lines.map(parseRow);
     };
 
-    const aoa2json = (dataAoA) => {
+    const aoa2json = function(dataAoA) {
         if (!dataAoA || dataAoA.length === 0) return [];
 
-        let headerRowIndex = -1;
-        for (let i = 0; i < dataAoA.length; i++) {
+        var headerRowIndex = -1;
+        for (var i = 0; i < dataAoA.length; i++) {
             if (Array.isArray(dataAoA[i])) {
-                const row = dataAoA[i].map(c => String(c || '').toLowerCase().trim());
-                if (row.some(c => c === 'folio' || c === 'nombre' || c === 'status' || c === 'año')) {
-                    headerRowIndex = i;
-                    break;
+                var row = dataAoA[i].map(function(c) { return String(c || '').toLowerCase().trim(); });
+                for (var j = 0; j < row.length; j++) {
+                    if (row[j] === 'folio' || row[j] === 'nombre' || row[j] === 'status' || row[j] === 'año') {
+                        headerRowIndex = i;
+                        break;
+                    }
                 }
+                if (headerRowIndex !== -1) break;
             }
         }
 
@@ -78,16 +104,16 @@
             headerRowIndex = 0;
         }
 
-        const headers = dataAoA[headerRowIndex].map(h => String(h || '').trim());
-        const dataRows = dataAoA.slice(headerRowIndex + 1);
+        var headers = dataAoA[headerRowIndex].map(function(h) { return String(h || '').trim(); });
+        var dataRows = dataAoA.slice(headerRowIndex + 1);
 
         return dataRows
-            .filter(row => Array.isArray(row) && row.some(cell => String(cell || '').trim() !== ''))
-            .map(row => {
-                const obj = {};
-                headers.forEach((header, i) => {
-                    if (header && i < row.length && row[i] !== undefined && row[i] !== null) {
-                        const value = String(row[i]).trim();
+            .filter(function(row) { return Array.isArray(row) && row.some(function(cell) { return String(cell || '').trim() !== ''; }); })
+            .map(function(row) {
+                var obj = {};
+                headers.forEach(function(header, idx) {
+                    if (header && idx < row.length && row[idx] !== undefined && row[idx] !== null) {
+                        var value = String(row[idx]).trim();
                         if (value !== '') {
                             obj[header] = value;
                         }
@@ -95,75 +121,214 @@
                 });
                 return obj;
             })
-            .filter(obj => Object.keys(obj).length > 0);
+            .filter(function(obj) { return Object.keys(obj).length > 0; });
     };
 
     // ============================================================
-    // 3. CARGA DE DATOS
+    // 4. CARGA DE DATOS
     // ============================================================
-    const loadDatabase = async () => {
+    var loadDatabase = function() {
         console.log('🚀 Iniciando carga de datos...');
-        const gid = '1849431809'; // validation 2025
-        const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=${gid}&t=${Date.now()}`;
+        var gid = '1849431809';
+        var csvUrl = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/export?format=csv&gid=' + gid + '&t=' + Date.now();
         
         console.log('📥 URL:', csvUrl);
         
-        try {
-            const res = await fetch(csvUrl);
-            console.log('📊 Status:', res.status);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            
-            const text = await res.text();
-            console.log('📄 Longitud:', text.length);
-            console.log('📄 Primeros 300 chars:', text.substring(0, 300));
-            
-            const aoa = parseCsv(text);
-            console.log('📊 Filas:', aoa.length);
-            
-            const records = aoa2json(aoa);
-            console.log('📊 Registros:', records.length);
-            
-            if (records.length > 0) {
-                console.log('📊 Columnas:', Object.keys(records[0]));
-                console.log('📊 Primer registro:', records[0]);
-            }
-            
-            return records;
-        } catch (error) {
-            console.error('❌ Error:', error.message);
-            throw error;
-        }
+        return fetch(csvUrl)
+            .then(function(res) {
+                console.log('📊 Status:', res.status);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.text();
+            })
+            .then(function(text) {
+                console.log('📄 Longitud:', text.length);
+                if (text.length === 0) throw new Error('CSV vacío');
+                console.log('📄 Primeros 300 chars:', text.substring(0, 300));
+                
+                var aoa = parseCsv(text);
+                console.log('📊 Filas:', aoa.length);
+                
+                var records = aoa2json(aoa);
+                console.log('📊 Registros:', records.length);
+                
+                if (records.length > 0) {
+                    console.log('📊 Columnas:', Object.keys(records[0]));
+                    console.log('📊 Primer registro:', records[0]);
+                }
+                
+                return records;
+            })
+            .catch(function(error) {
+                console.error('❌ Error:', error.message);
+                throw error;
+            });
     };
 
     // ============================================================
-    // 4. COMPONENTES REACT
+    // 5. COMPONENTES
     // ============================================================
-    const { useState, useEffect } = React;
+    var Spinner = function() {
+        return h('div', { className: 'animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4' });
+    };
 
-    const App = () => {
-        const [loading, setLoading] = useState(true);
-        const [error, setError] = useState(null);
-        const [data, setData] = useState([]);
-        const [query, setQuery] = useState('');
-        const [result, setResult] = useState(null);
-        const [status, setStatus] = useState('idle');
+    var Header = function() {
+        return h('header', { className: 'bg-white shadow-sm' },
+            h('div', { className: 'container mx-auto px-6 py-4 flex items-center' },
+                h('img', { src: ITD_LOGO_URL, alt: 'Logo ITD', className: 'h-16 mr-4' }),
+                h('h1', { className: 'text-lg sm:text-xl font-bold text-gray-800' }, 'Validador de Constancias ITD')
+            )
+        );
+    };
 
-        useEffect(() => {
+    var Footer = function() {
+        return h('footer', { className: 'bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 mt-auto' },
+            h('div', { className: 'container mx-auto px-4' },
+                h('p', { className: 'font-semibold text-sm' }, '© Coordinación de Actualización Docente'),
+                h('p', { className: 'text-xs opacity-90' }, 'M.C. Alejandro Calderón Rentería')
+            )
+        );
+    };
+
+    var SearchForm = function(props) {
+        var query = props.query;
+        var setQuery = props.setQuery;
+        var onSearch = props.onSearch;
+        var onClear = props.onClear;
+
+        var handleKeyDown = function(e) {
+            if (e.key === 'Enter') onSearch();
+        };
+
+        return h('div', { className: 'bg-white p-6 sm:p-8 rounded-xl shadow-md w-full max-w-2xl' },
+            h('h2', { className: 'text-xl font-bold text-gray-800 mb-4' }, 'Buscar Constancia'),
+            h('p', { className: 'text-gray-600 mb-4' }, 'Ingrese el folio completo (ej: TNM-054-01-2026) o solo el número final'),
+            
+            h('div', { className: 'flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4' },
+                h('div', { className: 'flex-grow w-full' },
+                    h('div', { className: 'flex w-full border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 overflow-hidden' },
+                        h('span', { className: 'px-3 text-gray-500 bg-gray-50 border-r border-gray-300 flex items-center whitespace-nowrap text-sm' }, 'TNM-054-'),
+                        h('input', {
+                            type: 'text',
+                            className: 'w-full pl-4 pr-4 py-2 border-none focus:outline-none bg-transparent',
+                            placeholder: '01-2026',
+                            value: query,
+                            onChange: function(e) { setQuery(e.target.value.toUpperCase()); },
+                            onKeyDown: handleKeyDown,
+                            autoFocus: true
+                        })
+                    )
+                ),
+                h('div', { className: 'flex space-x-2 w-full sm:w-auto flex-shrink-0' },
+                    h('button', {
+                        onClick: onSearch,
+                        className: 'flex-1 sm:flex-none px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700'
+                    }, 'Verificar'),
+                    h('button', {
+                        onClick: onClear,
+                        className: 'flex-1 sm:flex-none px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-md hover:bg-gray-300'
+                    }, 'Borrar')
+                )
+            )
+        );
+    };
+
+    var Resultado = function(props) {
+        var status = props.status;
+        var result = props.result;
+
+        if (status === 'idle') return null;
+
+        if (status === 'not_found') {
+            return h('div', { className: 'mt-6 p-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow w-full max-w-2xl' },
+                h('h3', { className: 'text-lg font-bold text-red-800' }, '❌ Documento no Encontrado'),
+                h('p', { className: 'text-red-700' }, 'El folio ingresado no fue encontrado o no está vigente.'),
+                h('div', { className: 'mt-4 pt-4 border-t border-red-200 text-center' },
+                    h('a', { href: 'index.html', className: 'text-sm text-blue-600 hover:underline' }, '← Volver al Portal Principal')
+                )
+            );
+        }
+
+        if (status === 'success' && result) {
+            var fields = [
+                { key: 'folio', label: 'Folio' },
+                { key: 'nombre', label: 'Nombre' },
+                { key: 'curso', label: 'Curso' },
+                { key: 'fecha', label: 'Fecha' },
+                { key: 'departamento', label: 'Departamento' },
+                { key: 'duracion', label: 'Duración' },
+                { key: 'tipo', label: 'Tipo' },
+            ];
+
+            var items = fields.map(function(field) {
+                var value = getFlexibleProperty(result, [field.key]);
+                if (!value) return null;
+                return h('div', { key: field.key },
+                    h('p', { className: 'text-gray-500' }, field.label),
+                    h('p', { className: 'font-bold text-gray-800 break-words' }, String(value).toUpperCase())
+                );
+            }).filter(function(item) { return item !== null; });
+
+            return h('div', { className: 'mt-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow w-full max-w-2xl' },
+                h('div', { className: 'p-6' },
+                    h('h3', { className: 'text-lg font-bold text-green-800' }, '✅ Documento Válido'),
+                    h('p', { className: 'text-green-700 text-sm' }, 'Este documento ha sido verificado en la base de datos oficial del ITD.')
+                ),
+                h('div', { className: 'bg-white p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm border-t border-green-200' },
+                    items
+                ),
+                h('div', { className: 'bg-white p-4 text-center border-t border-gray-100 rounded-b-lg' },
+                    h('a', { href: 'index.html', className: 'text-sm text-blue-600 hover:underline' }, '← Volver al Portal Principal')
+                )
+            );
+        }
+
+        return null;
+    };
+
+    // ============================================================
+    // 6. APP
+    // ============================================================
+    var App = function() {
+        var _loading = useState(true);
+        var loading = _loading[0];
+        var setLoading = _loading[1];
+        
+        var _error = useState(null);
+        var error = _error[0];
+        var setError = _error[1];
+        
+        var _data = useState([]);
+        var data = _data[0];
+        var setData = _data[1];
+        
+        var _query = useState('');
+        var query = _query[0];
+        var setQuery = _query[1];
+        
+        var _status = useState('idle');
+        var status = _status[0];
+        var setStatus = _status[1];
+        
+        var _result = useState(null);
+        var result = _result[0];
+        var setResult = _result[1];
+
+        useEffect(function() {
             console.log('🔍 Componente montado');
             loadDatabase()
-                .then(db => {
+                .then(function(db) {
                     console.log('✅ Datos cargados:', db.length);
                     setData(db);
                     setLoading(false);
                 })
-                .catch(err => {
+                .catch(function(err) {
                     console.error('❌ Error:', err);
                     setError(err.message);
                     setLoading(false);
                 });
         }, []);
 
-        const handleSearch = () => {
+        var handleSearch = function() {
             console.log('🔍 Buscando:', query);
             if (!query || data.length === 0) {
                 setStatus('idle');
@@ -171,20 +336,27 @@
                 return;
             }
 
-            const cleanedQuery = query.trim().toUpperCase().replace('TNM-054-', '');
+            var cleanedQuery = query.trim().toUpperCase().replace('TNM-054-', '');
             
-            const found = data.find(record => {
-                const folio = getFlexibleProperty(record, ['folio']);
-                const statusVal = getFlexibleProperty(record, ['status']) || '';
-                return folio && String(folio).trim().toLowerCase().endsWith(cleanedQuery.toLowerCase())
-                    && String(statusVal).trim().toUpperCase() === 'VALIDO';
-            });
+            var found = null;
+            for (var i = 0; i < data.length; i++) {
+                var record = data[i];
+                var folio = getFlexibleProperty(record, ['folio']);
+                var statusVal = getFlexibleProperty(record, ['status']) || '';
+                if (folio && String(folio).trim().toLowerCase().endsWith(cleanedQuery.toLowerCase())
+                    && String(statusVal).trim().toUpperCase() === 'VALIDO') {
+                    found = record;
+                    break;
+                }
+            }
 
             console.log('🔍 Encontrado:', found);
             
             if (found) {
-                const fullFolio = `TNM-054-${cleanedQuery}`;
-                setResult({ ...found, 'folio': fullFolio });
+                var fullFolio = 'TNM-054-' + cleanedQuery;
+                var resultObj = Object.assign({}, found);
+                resultObj.folio = fullFolio;
+                setResult(resultObj);
                 setStatus('success');
             } else {
                 setResult(null);
@@ -192,155 +364,63 @@
             }
         };
 
-        const handleClear = () => {
+        var handleClear = function() {
             setQuery('');
             setStatus('idle');
             setResult(null);
         };
 
-        if (loading) {
-            return (
-                <div className="min-h-screen flex items-center justify-center bg-slate-100">
-                    <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Cargando base de datos...</p>
-                        <p className="text-xs text-gray-400 mt-2">Revisa la consola (F12) para ver logs</p>
-                    </div>
-                </div>
-            );
-        }
+        var loadingContent = h('div', { className: 'flex flex-col items-center justify-center min-h-screen bg-slate-100' },
+            h(Spinner, null),
+            h('p', { className: 'text-gray-600 mt-4' }, 'Cargando base de datos...'),
+            h('p', { className: 'text-xs text-gray-400 mt-2' }, 'Revisa la consola (F12) para ver logs')
+        );
+
+        if (loading) return loadingContent;
 
         if (error) {
-            return (
-                <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-                    <div className="bg-white rounded-xl shadow-lg p-8 max-w-lg w-full">
-                        <div className="text-red-500 text-6xl text-center mb-4">❌</div>
-                        <h2 className="text-xl font-bold text-center text-red-700 mb-2">Error al cargar datos</h2>
-                        <p className="text-gray-600 text-center">{error}</p>
-                        <p className="text-xs text-gray-400 text-center mt-4">Revisa la consola (F12) para más detalles</p>
-                    </div>
-                </div>
+            return h('div', { className: 'flex items-center justify-center min-h-screen bg-slate-100 p-4' },
+                h('div', { className: 'bg-white rounded-xl shadow-lg p-8 max-w-lg w-full text-center' },
+                    h('div', { className: 'text-red-500 text-6xl mb-4' }, '❌'),
+                    h('h2', { className: 'text-xl font-bold text-red-700 mb-2' }, 'Error al cargar datos'),
+                    h('p', { className: 'text-gray-600' }, error),
+                    h('p', { className: 'text-xs text-gray-400 mt-4' }, 'Revisa la consola (F12) para más detalles')
+                )
             );
         }
 
-        const renderResult = () => {
-            if (status === 'idle') return null;
+        return h('div', { className: 'min-h-screen bg-slate-100 flex flex-col' },
+            h(Header, null),
             
-            if (status === 'not_found') {
-                return (
-                    <div className="mt-6 p-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow">
-                        <h3 className="text-lg font-bold text-red-800">❌ Documento no Encontrado</h3>
-                        <p className="text-red-700">El folio ingresado no fue encontrado o no está vigente.</p>
-                    </div>
-                );
-            }
+            h('main', { className: 'flex-grow container mx-auto p-4 sm:p-6 flex flex-col items-center' },
+                h('div', { className: 'w-full max-w-2xl mb-4' },
+                    h('a', { href: 'index.html', className: 'inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline' },
+                        '← Volver al Portal Principal'
+                    )
+                ),
+                h(SearchForm, {
+                    query: query,
+                    setQuery: setQuery,
+                    onSearch: handleSearch,
+                    onClear: handleClear
+                }),
+                h(Resultado, {
+                    status: status,
+                    result: result
+                })
+            ),
             
-            if (status === 'success' && result) {
-                const fields = [
-                    { key: 'folio', label: 'Folio' },
-                    { key: 'nombre', label: 'Nombre' },
-                    { key: 'curso', label: 'Curso' },
-                    { key: 'fecha', label: 'Fecha' },
-                    { key: 'departamento', label: 'Departamento' },
-                    { key: 'duracion', label: 'Duración' },
-                    { key: 'tipo', label: 'Tipo' },
-                ];
-                
-                return (
-                    <div className="mt-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow">
-                        <div className="p-6">
-                            <h3 className="text-lg font-bold text-green-800">✅ Documento Válido</h3>
-                            <p className="text-green-700 text-sm">Este documento ha sido verificado en la base de datos oficial del ITD.</p>
-                        </div>
-                        <div className="bg-white p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm border-t border-green-200">
-                            {fields.map(({ key, label }) => {
-                                const value = getFlexibleProperty(result, [key]);
-                                return value ? (
-                                    <div key={key}>
-                                        <p className="text-gray-500">{label}</p>
-                                        <p className="font-bold text-gray-800 break-words">{String(value).toUpperCase()}</p>
-                                    </div>
-                                ) : null;
-                            })}
-                        </div>
-                        <div className="bg-white p-4 text-center border-t border-gray-100 rounded-b-lg">
-                            <a href="index.html" className="text-sm text-blue-600 hover:underline">← Volver al Portal Principal</a>
-                        </div>
-                    </div>
-                );
-            }
-            
-            return null;
-        };
-
-        return (
-            <div className="min-h-screen bg-slate-100 flex flex-col">
-                <header className="bg-white shadow-sm">
-                    <div className="container mx-auto px-6 py-4 flex items-center">
-                        <img src={ITD_LOGO_URL} alt="Logo ITD" className="h-16 mr-4" />
-                        <h1 className="text-lg sm:text-xl font-bold text-gray-800">Validador de Constancias ITD</h1>
-                    </div>
-                </header>
-                
-                <main className="flex-grow container mx-auto p-4 sm:p-6 flex flex-col items-center">
-                    <div className="w-full max-w-2xl">
-                        <a href="index.html" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-6">
-                            ← Volver al Portal Principal
-                        </a>
-                    </div>
-                    
-                    <div className="bg-white p-6 sm:p-8 rounded-xl shadow-md w-full max-w-2xl">
-                        <h2 className="text-xl font-bold text-gray-800 mb-4">Buscar Constancia</h2>
-                        <p className="text-gray-600 mb-4">Ingrese el folio completo (ej: TNM-054-01-2026) o solo el número final</p>
-                        
-                        <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                            <div className="flex-grow w-full">
-                                <div className="flex w-full border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 overflow-hidden">
-                                    <span className="px-3 text-gray-500 bg-gray-50 border-r border-gray-300 flex items-center whitespace-nowrap text-sm">
-                                        TNM-054-
-                                    </span>
-                                    <input
-                                        type="text"
-                                        className="w-full pl-4 pr-4 py-2 border-none focus:outline-none bg-transparent"
-                                        placeholder="01-2026"
-                                        value={query}
-                                        onChange={e => setQuery(e.target.value.toUpperCase())}
-                                        onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                                        autoFocus
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex space-x-2 w-full sm:w-auto flex-shrink-0">
-                                <button onClick={handleSearch} className="flex-1 sm:flex-none px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">
-                                    Verificar
-                                </button>
-                                <button onClick={handleClear} className="flex-1 sm:flex-none px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-md hover:bg-gray-300">
-                                    Borrar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {renderResult()}
-                </main>
-                
-                <footer className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 mt-auto">
-                    <div className="container mx-auto px-4">
-                        <p className="font-semibold text-sm">© Coordinación de Actualización Docente</p>
-                        <p className="text-xs opacity-90">M.C. Alejandro Calderón Rentería</p>
-                    </div>
-                </footer>
-            </div>
+            h(Footer, null)
         );
     };
 
     // ============================================================
-    // 5. MONTAJE
+    // 7. MONTAJE
     // ============================================================
-    const rootElement = document.getElementById('root');
+    var rootElement = document.getElementById('root');
     if (rootElement) {
-        const root = ReactDOM.createRoot(rootElement);
-        root.render(<App />);
+        var root = createRoot(rootElement);
+        root.render(h(App, null));
         console.log('✅ React montado');
     } else {
         console.error('❌ No se encontró #root');
