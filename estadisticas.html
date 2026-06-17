@@ -206,7 +206,503 @@
     };
 
     // ============================================================
-    // 4. COMPONENTE: LOGIN
+    // 4. FUNCIONES DE GENERACIÓN DE REPORTES
+    // ============================================================
+    
+    // --- GENERAR PDF COMPLETO ---
+    var generatePDF = function(statsData, period, setGeneratingPDF) {
+        setGeneratingPDF(true);
+        setTimeout(function() {
+            try {
+                var jsPDF = window.jspdf.jsPDF;
+                var pdf = new jsPDF('p', 'mm', 'letter');
+                var pdfWidth = pdf.internal.pageSize.getWidth();
+                var margin = 12;
+                
+                // Encabezado
+                pdf.setFillColor(27, 57, 106);
+                pdf.rect(0, 0, pdfWidth, 20, 'F');
+                pdf.setFontSize(14);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(255, 255, 255);
+                pdf.text('INSTITUTO TECNOLÓGICO DE DURANGO', pdfWidth / 2, 12, { align: 'center' });
+                pdf.setFontSize(9);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text('Coordinación de Actualización Docente', pdfWidth / 2, 18, { align: 'center' });
+                
+                // Título
+                pdf.setFontSize(16);
+                pdf.setTextColor(157, 36, 73);
+                pdf.text('REPORTE ESTADÍSTICO', pdfWidth / 2, 35, { align: 'center' });
+                pdf.setFontSize(10);
+                pdf.setTextColor(80, 80, 80);
+                pdf.text('Periodo: ' + period, pdfWidth / 2, 42, { align: 'center' });
+                
+                // Fecha
+                var today = new Date().toLocaleDateString('es-MX');
+                pdf.setFontSize(8);
+                pdf.setTextColor(120, 120, 120);
+                pdf.text('Generado: ' + today, pdfWidth - margin, 50, { align: 'right' });
+                
+                // KPIs
+                var y = 60;
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(27, 57, 106);
+                pdf.text('INDICADORES CLAVE', margin, y);
+                y += 6;
+                
+                var kpis = [
+                    ['Total Inscripciones', statsData.totalInscripciones || 0],
+                    ['Docentes Únicos', statsData.coberturaDocente?.actualizados || 0],
+                    ['Cobertura', (statsData.coberturaDocente?.porcentaje || 0) + '%'],
+                    ['Sin Participar', statsData.docentesNoParticiparon?.total || 0]
+                ];
+                
+                pdf.setFontSize(9);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(60, 60, 60);
+                kpis.forEach(function(kpi) {
+                    pdf.text(kpi[0] + ':', margin + 10, y);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(157, 36, 73);
+                    pdf.text(String(kpi[1]), margin + 60, y);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setTextColor(60, 60, 60);
+                    y += 6;
+                });
+                
+                // Top Cursos
+                y += 6;
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(27, 57, 106);
+                pdf.text('CURSOS MÁS DEMANDADOS', margin, y);
+                y += 6;
+                
+                pdf.setFontSize(8);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(60, 60, 60);
+                var topCursos = statsData.topCursos || [];
+                topCursos.slice(0, 10).forEach(function(curso, i) {
+                    pdf.text((i + 1) + '. ' + curso[0], margin + 10, y);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(157, 36, 73);
+                    pdf.text(String(curso[1]), margin + 130, y);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setTextColor(60, 60, 60);
+                    y += 5;
+                });
+                
+                // Departamento
+                y += 6;
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(27, 57, 106);
+                pdf.text('PARTICIPACIÓN POR DEPARTAMENTO', margin, y);
+                y += 6;
+                
+                pdf.setFontSize(8);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(60, 60, 60);
+                var deptos = statsData.topDepartamentos || [];
+                deptos.slice(0, 10).forEach(function(depto) {
+                    pdf.text(depto[0], margin + 10, y);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(157, 36, 73);
+                    pdf.text(String(depto[1]), margin + 130, y);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setTextColor(60, 60, 60);
+                    y += 5;
+                });
+                
+                // Pie de página
+                var pageCount = pdf.internal.getNumberOfPages();
+                for (var i = 1; i <= pageCount; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(7);
+                    pdf.setTextColor(150, 150, 150);
+                    pdf.text('Página ' + i + ' de ' + pageCount, pdfWidth / 2, pdf.internal.pageSize.getHeight() - 8, { align: 'center' });
+                }
+                
+                pdf.save('Reporte_Estadistico_' + period + '.pdf');
+                alert('✅ PDF generado correctamente');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al generar PDF: ' + error.message);
+            }
+            setGeneratingPDF(false);
+        }, 600);
+    };
+
+    // --- GENERAR WORD (Informe Completo) ---
+    var generateWord = function(statsData, period) {
+        try {
+            var docxLib = window.docx;
+            if (!docxLib) throw new Error('Librería docx no cargada');
+            
+            var Document = docxLib.Document;
+            var Packer = docxLib.Packer;
+            var Paragraph = docxLib.Paragraph;
+            var TextRun = docxLib.TextRun;
+            var Table = docxLib.Table;
+            var TableRow = docxLib.TableRow;
+            var TableCell = docxLib.TableCell;
+            var AlignmentType = docxLib.AlignmentType;
+            var WidthType = docxLib.WidthType;
+            var BorderStyle = docxLib.BorderStyle;
+            
+            var cellBorder = { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' };
+            var borders = { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder, insideH: cellBorder, insideV: cellBorder };
+            
+            var children = [];
+            
+            // Título
+            children.push(new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 200, after: 100 },
+                children: [new TextRun({ text: 'INSTITUTO TECNOLÓGICO DE DURANGO', bold: true, color: '1B396A', font: 'Arial', size: 32 })]
+            }));
+            children.push(new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 0, after: 80 },
+                children: [new TextRun({ text: 'Coordinación de Actualización Docente', bold: true, color: '9D2449', font: 'Arial', size: 24 })]
+            }));
+            
+            // Fecha
+            var today = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+            children.push(new Paragraph({
+                alignment: AlignmentType.RIGHT,
+                spacing: { before: 40, after: 80 },
+                children: [new TextRun({ text: 'Generado: ' + today, color: '888888', font: 'Arial', size: 18 })]
+            }));
+            
+            // KPIs
+            children.push(new Paragraph({
+                spacing: { before: 120, after: 80 },
+                children: [new TextRun({ text: '1. INDICADORES CLAVE', bold: true, color: '1B396A', font: 'Arial', size: 24 })]
+            }));
+            
+            var kpiRows = [
+                ['Total Inscripciones', String(statsData.totalInscripciones || 0)],
+                ['Docentes Únicos', String(statsData.coberturaDocente?.actualizados || 0)],
+                ['Cobertura de Plantilla', (statsData.coberturaDocente?.porcentaje || 0) + '%'],
+                ['Sin Participar', String(statsData.docentesNoParticiparon?.total || 0)]
+            ];
+            
+            children.push(new Table({
+                width: { size: 9360, type: WidthType.DXA },
+                columnWidths: [5760, 3600],
+                rows: kpiRows.map(function(row) {
+                    return new TableRow({
+                        children: [
+                            new TableCell({
+                                borders: borders,
+                                width: { size: 5760, type: WidthType.DXA },
+                                shading: { fill: 'EEF4FB' },
+                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
+                                children: [new Paragraph({ children: [new TextRun({ text: row[0], font: 'Arial', size: 20 })] })]
+                            }),
+                            new TableCell({
+                                borders: borders,
+                                width: { size: 3600, type: WidthType.DXA },
+                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
+                                children: [new Paragraph({
+                                    alignment: AlignmentType.RIGHT,
+                                    children: [new TextRun({ text: row[1], font: 'Arial', size: 20, bold: true, color: '9D2449' })]
+                                })]
+                            })
+                        ]
+                    });
+                })
+            }));
+            
+            // Top Cursos
+            children.push(new Paragraph({
+                spacing: { before: 200, after: 80 },
+                children: [new TextRun({ text: '2. CURSOS MÁS DEMANDADOS', bold: true, color: '1B396A', font: 'Arial', size: 24 })]
+            }));
+            
+            var topCursos = statsData.topCursos || [];
+            var cursoRows = topCursos.slice(0, 10).map(function(curso, i) {
+                return [(i + 1) + '.', curso[0], String(curso[1])];
+            });
+            
+            children.push(new Table({
+                width: { size: 9360, type: WidthType.DXA },
+                columnWidths: [600, 6960, 1800],
+                rows: [
+                    new TableRow({
+                        tableHeader: true,
+                        children: ['#', 'Nombre del Curso', 'Inscripciones'].map(function(h) {
+                            return new TableCell({
+                                borders: borders,
+                                shading: { fill: '1B396A' },
+                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
+                                children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, color: 'FFFFFF', font: 'Arial', size: 18 })] })]
+                            });
+                        })
+                    })
+                ].concat(cursoRows.map(function(row, ri) {
+                    return new TableRow({
+                        children: row.map(function(cell) {
+                            return new TableCell({
+                                borders: borders,
+                                shading: { fill: ri % 2 === 0 ? 'FFFFFF' : 'F8F9FA' },
+                                margins: { top: 80, bottom: 80, left: 160, right: 160 },
+                                children: [new Paragraph({ children: [new TextRun({ text: String(cell), font: 'Arial', size: 18 })] })]
+                            });
+                        })
+                    });
+                }))
+            }));
+            
+            // Departamento
+            children.push(new Paragraph({
+                spacing: { before: 200, after: 80 },
+                children: [new TextRun({ text: '3. PARTICIPACIÓN POR DEPARTAMENTO', bold: true, color: '1B396A', font: 'Arial', size: 24 })]
+            }));
+            
+            var deptos = statsData.topDepartamentos || [];
+            var deptoRows = deptos.map(function(depto, i) {
+                return [(i + 1) + '.', depto[0], String(depto[1])];
+            });
+            
+            children.push(new Table({
+                width: { size: 9360, type: WidthType.DXA },
+                columnWidths: [600, 6960, 1800],
+                rows: [
+                    new TableRow({
+                        tableHeader: true,
+                        children: ['#', 'Departamento', 'Total'].map(function(h) {
+                            return new TableCell({
+                                borders: borders,
+                                shading: { fill: '1B396A' },
+                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
+                                children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, color: 'FFFFFF', font: 'Arial', size: 18 })] })]
+                            });
+                        })
+                    })
+                ].concat(deptoRows.map(function(row, ri) {
+                    return new TableRow({
+                        children: row.map(function(cell) {
+                            return new TableCell({
+                                borders: borders,
+                                shading: { fill: ri % 2 === 0 ? 'FFFFFF' : 'F8F9FA' },
+                                margins: { top: 80, bottom: 80, left: 160, right: 160 },
+                                children: [new Paragraph({ children: [new TextRun({ text: String(cell), font: 'Arial', size: 18 })] })]
+                            });
+                        })
+                    });
+                }))
+            }));
+            
+            // Pie
+            children.push(new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 400, after: 80 },
+                children: [new TextRun({ text: 'M.C. Alejandro Calderón Rentería — Coordinación de Actualización Docente', font: 'Arial', size: 16, color: '888888' })]
+            }));
+            
+            var doc = new Document({
+                creator: 'ITD - Desarrollo Académico',
+                title: 'Reporte Estadístico de Actualización Docente',
+                styles: { default: { document: { run: { font: 'Arial', size: 20 } } } },
+                sections: [{ properties: { page: { margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } } }, children: children }]
+            });
+            
+            Packer.toBlob(doc).then(function(blob) {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'Reporte_Estadistico_' + period + '.docx';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                alert('✅ Word generado correctamente');
+            });
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al generar Word: ' + error.message);
+        }
+    };
+
+    // --- GENERAR INFORME TRIMESTRAL ---
+    var generateWordTrimestral = function(statsData, period) {
+        try {
+            var docxLib = window.docx;
+            if (!docxLib) throw new Error('Librería docx no cargada');
+            
+            var Document = docxLib.Document;
+            var Packer = docxLib.Packer;
+            var Paragraph = docxLib.Paragraph;
+            var TextRun = docxLib.TextRun;
+            var Table = docxLib.Table;
+            var TableRow = docxLib.TableRow;
+            var TableCell = docxLib.TableCell;
+            var AlignmentType = docxLib.AlignmentType;
+            var WidthType = docxLib.WidthType;
+            var BorderStyle = docxLib.BorderStyle;
+            
+            var cellBorder = { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' };
+            var borders = { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder, insideH: cellBorder, insideV: cellBorder };
+            
+            var today = new Date();
+            var mesActual = today.getMonth() + 1;
+            var anioActual = today.getFullYear();
+            var trimestre = mesActual <= 3 ? '1er' : (mesActual <= 6 ? '2°' : (mesActual <= 9 ? '3er' : '4°'));
+            var meses = mesActual <= 3 ? ['Enero', 'Febrero', 'Marzo'] : (mesActual <= 6 ? ['Abril', 'Mayo', 'Junio'] : (mesActual <= 9 ? ['Julio', 'Agosto', 'Septiembre'] : ['Octubre', 'Noviembre', 'Diciembre']));
+            
+            var children = [];
+            
+            // Encabezado
+            children.push(new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 200, after: 40 },
+                children: [new TextRun({ text: 'INSTITUTO TECNOLÓGICO DE DURANGO', bold: true, color: '1B396A', font: 'Arial', size: 32 })]
+            }));
+            children.push(new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 0, after: 80 },
+                children: [new TextRun({ text: 'Departamento de Desarrollo Académico', color: '555555', font: 'Arial', size: 22 })]
+            }));
+            
+            // Fecha
+            var fechaStr = today.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+            children.push(new Paragraph({
+                alignment: AlignmentType.RIGHT,
+                spacing: { before: 40, after: 80 },
+                children: [new TextRun({ text: 'Durango, Dgo., ' + fechaStr, color: '888888', font: 'Arial', size: 18 })]
+            }));
+            
+            // Destinatario
+            children.push(new Paragraph({
+                spacing: { before: 40, after: 40 },
+                children: [new TextRun({ text: 'C. MÓNICA ROSALES PÉREZ', bold: true, font: 'Arial', size: 20 })]
+            }));
+            children.push(new Paragraph({
+                spacing: { before: 0, after: 40 },
+                children: [new TextRun({ text: 'JEFA DEL DEPTO. DESARROLLO ACADÉMICO', bold: true, font: 'Arial', size: 20 })]
+            }));
+            children.push(new Paragraph({
+                spacing: { before: 0, after: 80 },
+                children: [new TextRun({ text: 'PRESENTE', bold: true, font: 'Arial', size: 20 })]
+            }));
+            
+            // Cuerpo
+            var tituloTrim = trimestre + ' Trimestre ' + anioActual;
+            var rangoMeses = meses[0] + '–' + meses[2] + ' ' + anioActual;
+            children.push(new Paragraph({
+                spacing: { before: 80, after: 80 },
+                children: [new TextRun({ text: 'Sirva la presente para informarle que durante el ' + tituloTrim + ' (' + rangoMeses + '), el programa de Formación y Actualización Docente presenta los siguientes resultados:', font: 'Arial', size: 20 })]
+            }));
+            
+            // KPIs
+            children.push(new Paragraph({
+                spacing: { before: 120, after: 60 },
+                children: [new TextRun({ text: '1. Resumen de Indicadores — ' + tituloTrim, bold: true, color: '1B396A', font: 'Arial', size: 22 })]
+            }));
+            
+            var kpiRows = [
+                ['Total de Inscripciones', String(statsData.totalInscripciones || 0)],
+                ['Docentes Únicos Actualizados', String(statsData.coberturaDocente?.actualizados || 0)],
+                ['Cobertura de Plantilla', (statsData.coberturaDocente?.porcentaje || 0) + '%'],
+                ['Sin Participar', String(statsData.docentesNoParticiparon?.total || 0)]
+            ];
+            
+            children.push(new Table({
+                width: { size: 9360, type: WidthType.DXA },
+                columnWidths: [5760, 3600],
+                rows: kpiRows.map(function(row) {
+                    return new TableRow({
+                        children: [
+                            new TableCell({
+                                borders: borders,
+                                width: { size: 5760, type: WidthType.DXA },
+                                shading: { fill: 'EEF4FB' },
+                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
+                                children: [new Paragraph({ children: [new TextRun({ text: row[0], font: 'Arial', size: 18 })] })]
+                            }),
+                            new TableCell({
+                                borders: borders,
+                                width: { size: 3600, type: WidthType.DXA },
+                                margins: { top: 100, bottom: 100, left: 160, right: 160 },
+                                children: [new Paragraph({
+                                    alignment: AlignmentType.RIGHT,
+                                    children: [new TextRun({ text: row[1], font: 'Arial', size: 18, bold: true, color: '9D2449' })]
+                                })]
+                            })
+                        ]
+                    });
+                })
+            }));
+            
+            // Cierre
+            children.push(new Paragraph({
+                spacing: { before: 200, after: 80 },
+                children: [new TextRun({ text: 'Los indicadores muestran una participación relevante en las actividades de actualización docente, alcanzando una cobertura del ' + (statsData.coberturaDocente?.porcentaje || 0) + '%.', font: 'Arial', size: 20 })]
+            }));
+            
+            children.push(new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 200, after: 40 },
+                children: [new TextRun({ text: 'A T E N T A M E N T E', bold: true, font: 'Arial', size: 20 })]
+            }));
+            children.push(new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 0, after: 40 },
+                children: [new TextRun({ text: 'Excelencia en Educación Tecnológica®', italic: true, font: 'Arial', size: 18 })]
+            }));
+            children.push(new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 0, after: 80 },
+                children: [new TextRun({ text: 'La Técnica al Servicio de la Patria', italic: true, font: 'Arial', size: 18 })]
+            }));
+            children.push(new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 0, after: 40 },
+                children: [new TextRun({ text: 'C. ALEJANDRO CALDERÓN RENTERÍA', bold: true, font: 'Arial', size: 20 })]
+            }));
+            children.push(new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 0, after: 80 },
+                children: [new TextRun({ text: 'COORDINACIÓN DE ACTUALIZACIÓN DOCENTE', bold: true, font: 'Arial', size: 20 })]
+            }));
+            
+            var doc = new Document({
+                creator: 'ITD - Desarrollo Académico',
+                title: 'Informe Trimestral de Actualización Docente',
+                styles: { default: { document: { run: { font: 'Arial', size: 20 } } } },
+                sections: [{ properties: { page: { margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } } }, children: children }]
+            });
+            
+            Packer.toBlob(doc).then(function(blob) {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'Informe_Trimestral_' + trimestre + 'T_' + anioActual + '.docx';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                alert('✅ Informe Trimestral generado correctamente');
+            });
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al generar Informe Trimestral: ' + error.message);
+        }
+    };
+
+    // --- GENERAR WORD COMPLETO ---
+    var generateWordCompleto = function(statsData, period) {
+        alert('📊 Función Word Completo en desarrollo.\nGenerará un informe con todos los cursos y participantes.');
+    };
+
+    // ============================================================
+    // 5. COMPONENTE: LOGIN
     // ============================================================
     var Login = function(props) {
         var onLogin = props.onLogin;
@@ -249,7 +745,7 @@
     };
 
     // ============================================================
-    // 5. COMPONENTE: CHART BOX (VERSIÓN COMPLETA)
+    // 6. COMPONENTE: CHART BOX
     // ============================================================
     var ChartBox = function(props) {
         var type = props.type;
@@ -414,204 +910,15 @@
             return function() { if (chartRef.current) chartRef.current.destroy(); };
         }, [data, type, title, horizontal, id, shortenLabels, isHistory, customColors]);
 
-        var downloadSingleChart = function(format) {
-            setMenuOpen(false);
-            setTimeout(function() {
-                var element = document.getElementById('chartBox-' + id);
-                if (!element) return;
-
-                try {
-                    html2canvas(element, { 
-                        scale: 4, 
-                        useCORS: true, 
-                        backgroundColor: '#ffffff',
-                        logging: false,
-                        allowTaint: false,
-                        imageTimeout: 20000,
-                        removeContainer: true,
-                        ignoreElements: function(el) { return el.id === 'menu-btn-' + id; }
-                    }).then(function(canvas) {
-                        var logoData = getImageDataFromURL(ITD_LOGO_URL);
-                        var cleanTitle = title.replace(/[\u{1F300}-\u{1FFFF}]/gu, '').replace(/[📚👥🏢📋📈🏫👨‍🏫]/g, '').trim();
-
-                        if (format === 'png') {
-                            logoData.then(function(logoDataResult) {
-                                var scale = canvas.width / 1200;
-                                var headerHeight = Math.round(260 * scale);
-                                var margin = Math.round(40 * scale);
-                                var finalCanvas = document.createElement('canvas');
-                                var ctx = finalCanvas.getContext('2d');
-                                finalCanvas.width = canvas.width;
-                                finalCanvas.height = canvas.height + headerHeight;
-
-                                ctx.fillStyle = '#ffffff';
-                                ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-
-                                ctx.fillStyle = BLUE_COLOR;
-                                ctx.fillRect(0, 0, finalCanvas.width, Math.round(headerHeight * 0.68));
-
-                                if (logoDataResult) {
-                                    var img = new Image();
-                                    img.src = logoDataResult;
-                                    img.onload = function() {
-                                        var lh = Math.round(100 * scale);
-                                        var lw = Math.round((img.width / img.height) * lh);
-                                        var yLogo = Math.round(((headerHeight * 0.68) - lh) / 2);
-                                        ctx.drawImage(img, margin, yLogo, lw, lh);
-                                        ctx.drawImage(img, finalCanvas.width - margin - lw, yLogo, lw, lh);
-
-                                        ctx.textAlign = 'center';
-                                        ctx.fillStyle = '#ffffff';
-                                        ctx.font = 'bold ' + Math.round(36 * scale) + 'px Helvetica, Arial, sans-serif';
-                                        ctx.fillText('INSTITUTO TECNOLÓGICO DE DURANGO', finalCanvas.width / 2, Math.round(70 * scale));
-
-                                        ctx.font = Math.round(22 * scale) + 'px Helvetica, Arial, sans-serif';
-                                        ctx.fillText('Coordinación de Actualización Docente', finalCanvas.width / 2, Math.round(110 * scale));
-
-                                        ctx.strokeStyle = GUINDA_COLOR;
-                                        ctx.lineWidth = Math.round(4 * scale);
-                                        ctx.beginPath();
-                                        ctx.moveTo(margin, Math.round(headerHeight * 0.68) + Math.round(4 * scale));
-                                        ctx.lineTo(finalCanvas.width - margin, Math.round(headerHeight * 0.68) + Math.round(4 * scale));
-                                        ctx.stroke();
-
-                                        ctx.fillStyle = BLUE_COLOR;
-                                        ctx.font = 'bold ' + Math.round(28 * scale) + 'px Helvetica, Arial, sans-serif';
-                                        ctx.fillText(cleanTitle, finalCanvas.width / 2, Math.round(headerHeight * 0.68) + Math.round(48 * scale));
-
-                                        ctx.drawImage(canvas, 0, headerHeight);
-
-                                        var link = document.createElement('a');
-                                        link.download = cleanTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.png';
-                                        link.href = finalCanvas.toDataURL('image/png');
-                                        link.click();
-                                    };
-                                }
-                            });
-                        } else if (format === 'pdf') {
-                            var jsPDF = window.jspdf.jsPDF;
-                            var pdf = new jsPDF('landscape', 'mm', 'letter');
-                            var pdfWidth = pdf.internal.pageSize.getWidth();
-                            var pdfHeight = pdf.internal.pageSize.getHeight();
-                            var marginPdf = 10;
-                            var headerEnd = 32;
-                            var footerStart = pdfHeight - 12;
-
-                            pdf.setFillColor(255, 255, 255);
-                            pdf.rect(0, 0, pdfWidth, headerEnd, 'F');
-
-                            logoData.then(function(logoDataResult) {
-                                if (logoDataResult) {
-                                    var imgProps = pdf.getImageProperties(logoDataResult);
-                                    var lh = headerEnd - 4;
-                                    var lw = (imgProps.width / imgProps.height) * lh;
-                                    pdf.addImage(logoDataResult, 'PNG', marginPdf, 2, lw, lh);
-                                    pdf.addImage(logoDataResult, 'PNG', pdfWidth - marginPdf - lw, 2, lw, lh);
-                                }
-
-                                pdf.setFontSize(15);
-                                pdf.setFont('helvetica', 'bold');
-                                pdf.setTextColor(27, 57, 106);
-                                pdf.text('INSTITUTO TECNOLÓGICO DE DURANGO', pdfWidth / 2, 14, { align: 'center' });
-                                pdf.setFontSize(9);
-                                pdf.setFont('helvetica', 'normal');
-                                pdf.setTextColor(100, 100, 100);
-                                pdf.text('Coordinación de Actualización Docente', pdfWidth / 2, 21, { align: 'center' });
-
-                                pdf.setDrawColor(157, 36, 73);
-                                pdf.setLineWidth(1.5);
-                                pdf.line(0, headerEnd, pdfWidth, headerEnd);
-
-                                pdf.setLineWidth(0.5);
-                                pdf.setFontSize(13);
-                                pdf.setFont('helvetica', 'bold');
-                                pdf.setTextColor(27, 57, 106);
-                                pdf.text(cleanTitle, pdfWidth / 2, headerEnd + 9, { align: 'center' });
-
-                                var imgData = canvas.toDataURL('image/jpeg', 1.0);
-                                var imgProps2 = pdf.getImageProperties(imgData);
-                                var ratio = imgProps2.width / imgProps2.height;
-                                var availW = pdfWidth - marginPdf * 2;
-                                var availH = footerStart - headerEnd - 14;
-                                var fw = availW, fh = fw / ratio;
-                                if (fh > availH) { fh = availH; fw = fh * ratio; }
-                                var fx = (pdfWidth - fw) / 2;
-                                var fy = headerEnd + 13 + (availH - fh) / 2;
-                                pdf.addImage(imgData, 'JPEG', fx, fy, fw, fh);
-
-                                pdf.setFillColor(27, 57, 106);
-                                pdf.rect(0, footerStart, pdfWidth, 12, 'F');
-                                pdf.setFontSize(8);
-                                pdf.setTextColor(255, 255, 255);
-                                var dateStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
-                                pdf.text('Generado: ' + dateStr, marginPdf, footerStart + 7);
-                                pdf.text('Generado en: Coordinación de Actualización Docente — ITD', pdfWidth - marginPdf, footerStart + 7, { align: 'right' });
-
-                                pdf.save(cleanTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf');
-                            });
-                        }
-                    });
-                } catch (err) {
-                    console.error("Error descargando gráfica", err);
-                    alert("Error al generar la descarga.");
-                }
-            }, 100);
-        };
-
         return h('div', { id: 'chartBox-' + id, className: 'bg-white p-5 rounded-xl shadow-md h-full flex flex-col border border-gray-100 transition-all hover:shadow-lg relative', style: { minHeight: minHeight } },
             h('div', { className: 'flex justify-between items-center border-b border-gray-100 pb-3 mb-4' },
                 h('div', { className: 'w-8' }),
-                h('h3', { className: 'text-gray-700 font-bold text-center text-base flex items-center justify-center gap-2 flex-grow' }, title),
-                h('div', { className: 'relative', ref: menuRef },
-                    h('button', {
-                        id: 'menu-btn-' + id,
-                        onClick: function() { setMenuOpen(!menuOpen); },
-                        className: 'text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 focus:outline-none transition-colors',
-                        title: 'Opciones de descarga'
-                    },
-                        h('svg', { xmlns: 'http://www.w3.org/2000/svg', width: '20', height: '20', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' },
-                            h('circle', { cx: '12', cy: '12', r: '1' }),
-                            h('circle', { cx: '19', cy: '12', r: '1' }),
-                            h('circle', { cx: '5', cy: '12', r: '1' })
-                        )
-                    ),
-                    menuOpen ? h('div', { className: 'absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-50 border border-gray-200 animate-fadeIn' },
-                        h('div', { className: 'py-1' },
-                            h('button', { 
-                                onClick: function() { downloadSingleChart('png'); },
-                                className: 'flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#1B396A]'
-                            },
-                                h('span', { className: 'mr-2' }, '🖼️'),
-                                ' Descargar PNG'
-                            ),
-                            h('button', { 
-                                onClick: function() { downloadSingleChart('pdf'); },
-                                className: 'flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#1B396A]'
-                            },
-                                h('span', { className: 'mr-2' }, '📄'),
-                                ' Descargar PDF'
-                            )
-                        )
-                    ) : null
-                )
+                h('h3', { className: 'text-gray-700 font-bold text-center text-base flex items-center justify-center gap-2 flex-grow' }, title)
             ),
             h('div', { className: 'flex-1 relative w-full h-full', style: { minHeight: '200px' } },
                 h('canvas', { ref: canvasRef, id: id })
             )
         );
-    };
-
-    // ============================================================
-    // 6. FUNCIONES DE GENERACIÓN DE REPORTES
-    // ============================================================
-    var generateWordCompleto = function(statsData, period) {
-        // Implementación simplificada - genera un informe básico en Word
-        // En la versión completa, esto genera un documento con todos los cursos
-        alert('📊 Función Word Completo en desarrollo.\nGenerará un informe con todos los cursos y participantes.');
-    };
-
-    var generateWordTrimestral = function(statsData, period) {
-        alert('📋 Función Informe Trimestral en desarrollo.\nGenerará un informe formal del trimestre actual.');
     };
 
     // ============================================================
@@ -665,19 +972,6 @@
                 .finally(function() {
                     setLoading(false);
                 });
-        };
-
-        // Función para generar PDF completo del dashboard
-        var generatePDF = function() {
-            setGeneratingPDF(true);
-            setTimeout(function() {
-                alert('📄 Función PDF en desarrollo.\nGenerará un reporte completo con todas las gráficas y KPIs.');
-                setGeneratingPDF(false);
-            }, 600);
-        };
-
-        var generateWord = function() {
-            alert('📝 Función Word en desarrollo.\nGenerará un documento con las estadísticas completas.');
         };
 
         var generateCourseEvolutionData = function() {
@@ -784,19 +1078,31 @@
                             )
                         )
                     ),
-                    h('button', { onClick: generatePDF, className: 'bg-[#9D2449] hover:bg-[#801d3a] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2' },
+                    h('button', { 
+                        onClick: function() { generatePDF(statsData, period, setGeneratingPDF); }, 
+                        className: 'bg-[#9D2449] hover:bg-[#801d3a] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2'
+                    },
                         h('span', null, '📄'),
                         ' PDF'
                     ),
-                    isAdmin ? h('button', { onClick: generateWord, className: 'bg-[#1B396A] hover:bg-[#142b52] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2' },
+                    isAdmin ? h('button', { 
+                        onClick: function() { generateWord(statsData, period); }, 
+                        className: 'bg-[#1B396A] hover:bg-[#142b52] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2'
+                    },
                         h('span', null, '📝'),
                         ' Word'
                     ) : null,
-                    isAdmin ? h('button', { onClick: function() { generateWordTrimestral(statsData, period); }, className: 'bg-[#7B3F00] hover:bg-[#5c2f00] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2' },
+                    isAdmin ? h('button', { 
+                        onClick: function() { generateWordTrimestral(statsData, period); }, 
+                        className: 'bg-[#7B3F00] hover:bg-[#5c2f00] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2'
+                    },
                         h('span', null, '📋'),
                         ' Informe Trimestral'
                     ) : null,
-                    isAdmin ? h('button', { onClick: function() { generateWordCompleto(statsData, period); }, className: 'bg-[#2E7D32] hover:bg-[#1b5e20] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2' },
+                    isAdmin ? h('button', { 
+                        onClick: function() { generateWordCompleto(statsData, period); }, 
+                        className: 'bg-[#2E7D32] hover:bg-[#1b5e20] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2'
+                    },
                         h('span', null, '📊'),
                         ' Word Completo'
                     ) : null,
