@@ -16,6 +16,7 @@
 <style>
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } 
     .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+    .debug-box { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 12px; margin: 8px 0; font-family: monospace; font-size: 12px; white-space: pre-wrap; max-height: 300px; overflow: auto; }
 </style>
 </head>
 <body class="bg-slate-50 min-h-screen font-sans text-slate-900 pb-20">
@@ -42,6 +43,7 @@
 </header>
 
 <div id="root"></div>
+<div id="debug-container" class="container mx-auto px-4 max-w-4xl mt-4"></div>
 
 <footer class="bg-slate-900 text-white text-center py-8 mt-12">
     <div class="container mx-auto px-4">
@@ -53,7 +55,34 @@
 
 <script type="text/babel">
     const { useState, useEffect, useRef } = React;
+    const { createRoot } = ReactDOM;
 
+    // ============================================================
+    // FUNCIÓN DE DEPURACIÓN - MUESTRA DATOS EN PANTALLA
+    // ============================================================
+    function showDebug(message, data) {
+        const container = document.getElementById('debug-container');
+        if (!container) return;
+        
+        const div = document.createElement('div');
+        div.className = 'debug-box';
+        const timestamp = new Date().toLocaleTimeString();
+        let content = `[${timestamp}] ${message}\n`;
+        if (data !== undefined) {
+            try {
+                content += JSON.stringify(data, null, 2);
+            } catch(e) {
+                content += String(data);
+            }
+        }
+        div.textContent = content;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // ============================================================
+    // 1. CONFIGURACIÓN
+    // ============================================================
     const CONFIG = {
         GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
         APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
@@ -61,15 +90,24 @@
 
     const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
 
+    // ============================================================
+    // 2. UTILIDADES
+    // ============================================================
     const getImageDataFromURL = (url) => {
         return new Promise((resolve) => {
-            const img = new Image(); img.crossOrigin = 'Anonymous';
+            const img = new Image(); 
+            img.crossOrigin = 'Anonymous';
             img.onload = () => {
-                const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height;
-                const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
-                try { resolve(canvas.toDataURL('image/png')); } catch (e) { resolve(null); }
+                const canvas = document.createElement('canvas'); 
+                canvas.width = img.width; 
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d'); 
+                ctx.drawImage(img, 0, 0);
+                try { resolve(canvas.toDataURL('image/png')); } 
+                catch (e) { resolve(null); }
             };
-            img.onerror = () => resolve(null); img.src = url;
+            img.onerror = () => resolve(null); 
+            img.src = url;
         });
     };
     
@@ -79,34 +117,9 @@
             const props = doc.getImageProperties(logoData);
             const targetHeight = (props.height * targetWidth) / props.width;
             doc.addImage(logoData, 'PNG', x, y, targetWidth, targetHeight);
-        } catch (e) { doc.addImage(logoData, 'PNG', x, y, targetWidth, targetWidth); }
-    };
-
-    // ============================================================
-    // FUNCIONES DE UTILIDAD PARA PROCESAR CSV
-    // ============================================================
-    const parseCSVLine = (line) => {
-        const result = [];
-        let current = '';
-        let inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-            if (char === '"') {
-                if (inQuotes && line[i + 1] === '"') {
-                    current += '"';
-                    i++;
-                } else {
-                    inQuotes = !inQuotes;
-                }
-            } else if (char === ',' && !inQuotes) {
-                result.push(current.trim());
-                current = '';
-            } else {
-                current += char;
-            }
+        } catch (e) { 
+            doc.addImage(logoData, 'PNG', x, y, targetWidth, targetWidth); 
         }
-        result.push(current.trim());
-        return result;
     };
 
     const cleanValue = (val) => {
@@ -124,121 +137,49 @@
     };
 
     // ============================================================
-    // FUNCIÓN MEJORADA PARA OBTENER EL HISTORIAL
+    // 3. OBTENER HISTORIAL CON DEPURACIÓN
     // ============================================================
     const getTeacherHistory = async (idToken) => {
+        showDebug('📥 Solicitando historial al Apps Script...');
+        showDebug('🔑 Token ID (primeros 20 chars):', idToken.substring(0, 20) + '...');
+        
         try {
             const url = `${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${encodeURIComponent(idToken)}&t=${Date.now()}`;
-            console.log('📥 Solicitando historial...');
+            showDebug('🔗 URL de petición:', url);
             
             const response = await fetch(url);
+            showDebug('📊 Status HTTP:', response.status);
+            
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             
             const result = await response.json();
-            console.log('📊 Respuesta del servidor:', result);
+            showDebug('📦 Respuesta completa del servidor:', result);
             
             if (result.success) {
-                // Verificar si los datos vienen directamente o si necesitan ser procesados
-                if (result.data && result.data.teacher && result.data.courses) {
-                    return result;
-                } else if (result.data && result.data.length > 0) {
-                    // Si los datos vienen como array, procesarlos
-                    console.warn('⚠️ Datos en formato array, procesando...');
-                    return processRawData(result.data);
-                } else {
-                    throw new Error('No se encontraron datos del historial');
-                }
+                showDebug('✅ Éxito! Datos recibidos:', result.data);
+                return result;
             } else {
+                showDebug('❌ Error en la respuesta:', result.message || 'Sin mensaje');
                 throw new Error(result.message || 'Error al obtener el historial');
             }
         } catch (error) {
-            console.error('❌ Error al obtener historial:', error);
+            showDebug('❌ Error en la petición:', error.message);
             throw error;
         }
     };
 
-    // Función para procesar datos en bruto si el Apps Script devuelve un array
-    const processRawData = (rawData) => {
-        // Buscar la fila de encabezados
-        let headerRowIndex = -1;
-        for (let i = 0; i < rawData.length; i++) {
-            if (Array.isArray(rawData[i])) {
-                const rowStr = rawData[i].join(' ').toLowerCase();
-                if (rowStr.includes('nombre') || rowStr.includes('email') || rowStr.includes('curp')) {
-                    headerRowIndex = i;
-                    break;
-                }
-            }
-        }
-        
-        if (headerRowIndex === -1) {
-            console.warn('⚠️ No se encontraron encabezados, usando fila 0');
-            headerRowIndex = 0;
-        }
-        
-        const headers = rawData[headerRowIndex].map(h => cleanValue(h).toLowerCase());
-        console.log('📋 Encabezados detectados:', headers);
-        
-        // Buscar índices de columnas importantes
-        const findCol = (keywords) => {
-            return headers.findIndex(h => keywords.some(k => normalize(h).includes(normalize(k))));
-        };
-        
-        const idx = {
-            nombre: findCol(['nombre', 'nombrecompleto', 'docente', 'participante']),
-            curp: findCol(['curp']),
-            email: findCol(['email', 'correo', 'emailaddress']),
-            departamento: findCol(['departamento', 'depto', 'carrera']),
-            nivel: findCol(['nivel', 'tipo']),
-            genero: findCol(['genero', 'sexo'])
-        };
-        
-        console.log('🔍 Índices encontrados:', idx);
-        
-        // Extraer datos del docente (tomando el primer registro válido)
-        let teacherData = null;
-        for (let i = headerRowIndex + 1; i < rawData.length; i++) {
-            const row = rawData[i];
-            if (Array.isArray(row) && row.length > 0) {
-                const nombre = idx.nombre !== -1 ? cleanValue(row[idx.nombre]) : '';
-                if (nombre && nombre.length > 2) {
-                    teacherData = {
-                        name: nombre,
-                        curp: idx.curp !== -1 ? cleanValue(row[idx.curp]) : 'N/A',
-                        email: idx.email !== -1 ? cleanValue(row[idx.email]) : '',
-                        dept: idx.departamento !== -1 ? cleanValue(row[idx.departamento]) : 'No especificado',
-                        nivel: idx.nivel !== -1 ? cleanValue(row[idx.nivel]) : '',
-                        genero: idx.genero !== -1 ? cleanValue(row[idx.genero]) : ''
-                    };
-                    break;
-                }
-            }
-        }
-        
-        if (!teacherData) {
-            throw new Error('No se encontraron datos del docente');
-        }
-        
-        console.log('👤 Datos del docente:', teacherData);
-        
-        // En este punto, los cursos deberían venir del Apps Script
-        // Si no hay cursos, retornar un array vacío
-        return {
-            teacher: teacherData,
-            courses: []
-        };
-    };
-
     // ============================================================
-    // COMPONENTE LOGIN
+    // 4. COMPONENTE LOGIN
     // ============================================================
     const LoginScreen = ({ onLogin }) => {
         const googleBtnRef = useRef(null);
         
         useEffect(() => {
+            showDebug('🔐 Inicializando botón de Google...');
             const interval = setInterval(() => {
                 if (window.google && window.google.accounts && googleBtnRef.current) {
                     clearInterval(interval);
+                    showDebug('✅ Google Identity Services cargado');
                     try {
                         window.google.accounts.id.initialize({ 
                             client_id: CONFIG.GOOGLE_CLIENT_ID, 
@@ -250,7 +191,9 @@
                             text: "continue_with", 
                             shape: "pill" 
                         });
+                        showDebug('✅ Botón de Google renderizado');
                     } catch (e) { 
+                        showDebug('❌ Error al renderizar botón:', e.message);
                         console.error("Error rendering Google Button", e); 
                     }
                 }
@@ -258,37 +201,48 @@
             return () => clearInterval(interval);
         }, [onLogin]);
 
-        return (
-            <div className="min-h-[60vh] flex items-center justify-center animate-fadeIn">
-                <div className="bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-4 border-orange-500">
-                    <div className="text-5xl mb-4">📚</div>
-                    <h2 className="text-2xl font-bold mb-2 text-slate-800">Acceso a Historial</h2>
-                    <p className="text-slate-500 mb-8">Inicia sesión con tu cuenta institucional para ver tu kardex de cursos.</p>
-                    <div className="flex justify-center min-h-[50px]" ref={googleBtnRef}></div>
-                </div>
-            </div>
+        return React.createElement('div', { className: 'min-h-[60vh] flex items-center justify-center animate-fadeIn' },
+            React.createElement('div', { className: 'bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md w-full border-t-4 border-orange-500' },
+                React.createElement('div', { className: 'text-5xl mb-4' }, '📚'),
+                React.createElement('h2', { className: 'text-2xl font-bold mb-2 text-slate-800' }, 'Acceso a Historial'),
+                React.createElement('p', { className: 'text-slate-500 mb-8' }, 'Inicia sesión con tu cuenta institucional para ver tu kardex de cursos.'),
+                React.createElement('div', { className: 'flex justify-center min-h-[50px]', ref: googleBtnRef })
+            )
         );
     };
 
     // ============================================================
-    // COMPONENTE DASHBOARD
+    // 5. COMPONENTE DASHBOARD (simplificado para depuración)
     // ============================================================
     const Dashboard = ({ user, data, onLogout }) => {
-        const [exporting, setExporting] = useState(false);
+        const [exporting, setExporting] = React.useState(false);
         
-        // Verificar que tenemos datos válidos
-        if (!data || !data.teacher) {
-            return (
-                <div className="container mx-auto px-4 py-10 max-w-3xl">
-                    <div className="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-r-xl shadow-sm">
-                        <h3 className="text-lg font-bold text-yellow-800">⏳ Cargando datos...</h3>
-                        <p className="text-yellow-700">Estamos obteniendo tu información académica. Por favor espera un momento.</p>
-                    </div>
-                </div>
+        // Mostrar en depuración
+        showDebug('📊 Dashboard montado con datos:', data);
+        
+        if (!data) {
+            showDebug('⚠️ data es null o undefined');
+            return React.createElement('div', { className: 'container mx-auto px-4 py-10 max-w-3xl' },
+                React.createElement('div', { className: 'bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-r-xl shadow-sm' },
+                    React.createElement('h3', { className: 'text-lg font-bold text-yellow-800' }, '⏳ Sin datos'),
+                    React.createElement('p', { className: 'text-yellow-700' }, 'No se recibieron datos del servidor.')
+                )
+            );
+        }
+        
+        if (!data.teacher) {
+            showDebug('⚠️ data.teacher es null o undefined', data);
+            return React.createElement('div', { className: 'container mx-auto px-4 py-10 max-w-3xl' },
+                React.createElement('div', { className: 'bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-r-xl shadow-sm' },
+                    React.createElement('h3', { className: 'text-lg font-bold text-yellow-800' }, '⏳ Cargando datos...'),
+                    React.createElement('p', { className: 'text-yellow-700' }, 'Estamos obteniendo tu información académica.')
+                )
             );
         }
         
         const { teacher, courses = [] } = data;
+        showDebug('👤 Docente:', teacher);
+        showDebug('📚 Cursos:', courses.length);
         
         const exportToPdf = async () => {
             setExporting(true);
@@ -368,97 +322,94 @@
         
         const years = [...new Set(courses.map(c => c.year))].sort().reverse();
         
-        return (
-            <div className="animate-fadeIn container mx-auto px-4 py-8 max-w-5xl">
-                <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border-l-8 border-orange-500 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Bienvenido</p>
-                        <h2 className="text-2xl font-bold text-slate-800">{user.name || 'Usuario'}</h2>
-                        <p className="text-sm text-slate-500">{user.email}</p>
-                    </div>
-                    <button onClick={onLogout} className="bg-slate-100 text-slate-600 px-6 py-2 rounded-full font-bold hover:bg-slate-200 hover:text-slate-800 transition-colors">
-                        Cerrar Sesión
-                    </button>
-                </div>
-                
-                <div className="bg-white rounded-2xl shadow-md p-8 mb-10 relative border border-slate-100">
-                    <div className="absolute top-0 right-0 p-6">
-                        <button 
-                            onClick={exportToPdf} 
-                            disabled={exporting || courses.length === 0}
-                            className="bg-red-50 text-red-600 px-4 py-2 rounded-lg font-bold hover:bg-red-100 transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <span>{exporting ? '⏳' : '📄'}</span> 
-                            {exporting ? 'Generando...' : 'Descargar PDF'}
-                        </button>
-                    </div>
-                    <div className="mt-4 sm:mt-0">
-                        <p className="text-xs font-bold text-orange-500 uppercase tracking-wider mb-1">Historial Académico</p>
-                        <h2 className="text-3xl font-bold text-slate-800 mb-1">{teacher.name || 'Docente'}</h2>
-                        <p className="text-slate-500 font-medium">{teacher.dept || 'Departamento no especificado'}</p>
-                        {teacher.curp && teacher.curp !== 'N/A' && <p className="text-xs text-slate-400 mt-1">CURP: {teacher.curp}</p>}
-                        <p className="text-xs text-slate-400 mt-1">Total de cursos: {courses.length}</p>
-                    </div>
-                </div>
+        return React.createElement('div', { className: 'animate-fadeIn container mx-auto px-4 py-8 max-w-5xl' },
+            React.createElement('div', { className: 'bg-white rounded-2xl shadow-lg p-6 mb-8 border-l-8 border-orange-500 flex flex-col sm:flex-row justify-between items-center gap-4' },
+                React.createElement('div', null,
+                    React.createElement('p', { className: 'text-xs font-bold text-gray-400 uppercase tracking-widest' }, 'Bienvenido'),
+                    React.createElement('h2', { className: 'text-2xl font-bold text-slate-800' }, user.name || 'Usuario'),
+                    React.createElement('p', { className: 'text-sm text-slate-500' }, user.email)
+                ),
+                React.createElement('button', { 
+                    onClick: onLogout, 
+                    className: 'bg-slate-100 text-slate-600 px-6 py-2 rounded-full font-bold hover:bg-slate-200 hover:text-slate-800 transition-colors'
+                }, 'Cerrar Sesión')
+            ),
+            
+            React.createElement('div', { className: 'bg-white rounded-2xl shadow-md p-8 mb-10 relative border border-slate-100' },
+                React.createElement('div', { className: 'absolute top-0 right-0 p-6' },
+                    React.createElement('button', { 
+                        onClick: exportToPdf, 
+                        disabled: exporting || courses.length === 0,
+                        className: 'bg-red-50 text-red-600 px-4 py-2 rounded-lg font-bold hover:bg-red-100 transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed'
+                    },
+                        React.createElement('span', null, exporting ? '⏳' : '📄'),
+                        exporting ? 'Generando...' : 'Descargar PDF'
+                    )
+                ),
+                React.createElement('div', { className: 'mt-4 sm:mt-0' },
+                    React.createElement('p', { className: 'text-xs font-bold text-orange-500 uppercase tracking-wider mb-1' }, 'Historial Académico'),
+                    React.createElement('h2', { className: 'text-3xl font-bold text-slate-800 mb-1' }, teacher.name || 'Docente'),
+                    React.createElement('p', { className: 'text-slate-500 font-medium' }, teacher.dept || 'Departamento no especificado'),
+                    teacher.curp && teacher.curp !== 'N/A' && React.createElement('p', { className: 'text-xs text-slate-400 mt-1' }, 'CURP: ', teacher.curp),
+                    React.createElement('p', { className: 'text-xs text-slate-400 mt-1' }, 'Total de cursos: ', courses.length)
+                )
+            ),
 
-                {courses.length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-xl shadow">
-                        <div className="text-6xl mb-4">📭</div>
-                        <p className="text-slate-500 font-medium">No se encontraron cursos registrados.</p>
-                        <p className="text-slate-400 text-sm mt-2">Si has tomado cursos, verifica que estén registrados en el sistema.</p>
-                    </div>
-                ) : (
-                    years.map(year => {
-                        const yearCourses = courses.filter(c => String(c.year) === String(year));
-                        return (
-                            <div key={year} className="mb-10">
-                                <div className="flex items-center mb-6">
-                                    <div className={`px-6 py-2 rounded-full text-sm font-bold shadow-md ${String(year) === '2026' ? 'bg-orange-600 text-white' : 'bg-slate-700 text-white'}`}>
-                                        {String(year) === '2026' ? '📌 Periodo Actual' : year}
-                                    </div>
-                                    <div className="h-px bg-slate-200 flex-grow ml-4"></div>
-                                    <span className="text-xs text-slate-400 ml-4 font-medium">{yearCourses.length} curso{yearCourses.length !== 1 ? 's' : ''}</span>
-                                </div>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    {yearCourses.map((c, i) => (
-                                        <div key={i} className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all hover:-translate-y-1 group">
-                                            <div className="flex justify-between items-start mb-3">
-                                                <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide ${c.type && c.type.toUpperCase().includes('PROFESIONAL') ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                                                    {c.type || 'Curso'}
-                                                </span>
-                                                <span className="text-xs font-mono font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded">{c.folio || 'N/A'}</span>
-                                            </div>
-                                            <h3 className="font-bold text-lg text-slate-800 mb-3 leading-tight group-hover:text-orange-600 transition-colors">{c.courseName || c.nombre || 'Curso sin nombre'}</h3>
-                                            
-                                            <div className="space-y-2 pt-3 border-t border-slate-50">
-                                                <div className="flex items-center text-sm text-slate-600">
-                                                    <span className="w-6 text-center mr-2">📅</span> {c.datesText || c.fecha || 'Fechas no especificadas'}
-                                                </div>
-                                                <div className="flex items-center text-sm text-slate-600">
-                                                    <span className="w-6 text-center mr-2">⏱️</span> {c.hours || c.duracion || 'N/A'} horas
-                                                </div>
-                                                <div className="flex items-center text-sm text-slate-500 italic">
-                                                    <span className="w-6 text-center mr-2">🏛️</span> {c.deptOrigin || c.departamento || teacher.dept || 'Desarrollo Académico'}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })
-                )}
-                
-                <div className="text-center text-xs text-slate-400 mt-8">
-                    <p>Los cursos registrados hasta la fecha son mostrados en este historial.</p>
-                    <p>Para cualquier corrección, contacta a la Coordinación de Actualización Docente.</p>
-                </div>
-            </div>
+            courses.length === 0 ? 
+                React.createElement('div', { className: 'text-center py-12 bg-white rounded-xl shadow' },
+                    React.createElement('div', { className: 'text-6xl mb-4' }, '📭'),
+                    React.createElement('p', { className: 'text-slate-500 font-medium' }, 'No se encontraron cursos registrados.'),
+                    React.createElement('p', { className: 'text-slate-400 text-sm mt-2' }, 'Si has tomado cursos, verifica que estén registrados en el sistema.')
+                ) :
+                years.map(year => {
+                    const yearCourses = courses.filter(c => String(c.year) === String(year));
+                    return React.createElement('div', { key: year, className: 'mb-10' },
+                        React.createElement('div', { className: 'flex items-center mb-6' },
+                            React.createElement('div', { className: `px-6 py-2 rounded-full text-sm font-bold shadow-md ${String(year) === '2026' ? 'bg-orange-600 text-white' : 'bg-slate-700 text-white'}` },
+                                String(year) === '2026' ? '📌 Periodo Actual' : year
+                            ),
+                            React.createElement('div', { className: 'h-px bg-slate-200 flex-grow ml-4' }),
+                            React.createElement('span', { className: 'text-xs text-slate-400 ml-4 font-medium' }, yearCourses.length, ' curso', yearCourses.length !== 1 ? 's' : '')
+                        ),
+                        React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-2 gap-6' },
+                            yearCourses.map((c, i) => 
+                                React.createElement('div', { key: i, className: 'bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all hover:-translate-y-1 group' },
+                                    React.createElement('div', { className: 'flex justify-between items-start mb-3' },
+                                        React.createElement('span', { className: `text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide ${c.type && c.type.toUpperCase().includes('PROFESIONAL') ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}` },
+                                            c.type || 'Curso'
+                                        ),
+                                        React.createElement('span', { className: 'text-xs font-mono font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded' }, c.folio || 'N/A')
+                                    ),
+                                    React.createElement('h3', { className: 'font-bold text-lg text-slate-800 mb-3 leading-tight group-hover:text-orange-600 transition-colors' }, c.courseName || c.nombre || 'Curso sin nombre'),
+                                    React.createElement('div', { className: 'space-y-2 pt-3 border-t border-slate-50' },
+                                        React.createElement('div', { className: 'flex items-center text-sm text-slate-600' },
+                                            React.createElement('span', { className: 'w-6 text-center mr-2' }, '📅'),
+                                            c.datesText || c.fecha || 'Fechas no especificadas'
+                                        ),
+                                        React.createElement('div', { className: 'flex items-center text-sm text-slate-600' },
+                                            React.createElement('span', { className: 'w-6 text-center mr-2' }, '⏱️'),
+                                            c.hours || c.duracion || 'N/A', ' horas'
+                                        ),
+                                        React.createElement('div', { className: 'flex items-center text-sm text-slate-500 italic' },
+                                            React.createElement('span', { className: 'w-6 text-center mr-2' }, '🏛️'),
+                                            c.deptOrigin || c.departamento || teacher.dept || 'Desarrollo Académico'
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    );
+                }),
+            
+            React.createElement('div', { className: 'text-center text-xs text-slate-400 mt-8' },
+                React.createElement('p', null, 'Los cursos registrados hasta la fecha son mostrados en este historial.'),
+                React.createElement('p', null, 'Para cualquier corrección, contacta a la Coordinación de Actualización Docente.')
+            )
         );
     };
 
     // ============================================================
-    // COMPONENTE PRINCIPAL
+    // 6. APP PRINCIPAL
     // ============================================================
     const App = () => {
         const [user, setUser] = useState(null);
@@ -466,16 +417,20 @@
         const [loading, setLoading] = useState(false);
         const [error, setError] = useState(null);
 
+        showDebug('🚀 App iniciada');
+
         const handleLogin = (response) => {
             setLoading(true);
             setError(null);
+            showDebug('🔑 Login recibido');
             try {
                 const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                console.log('👤 Usuario autenticado:', payload.email);
+                showDebug('👤 Usuario autenticado:', payload.email);
                 
                 getTeacherHistory(response.credential)
                     .then(res => {
                         if(res.success) {
+                            showDebug('✅ Login exitoso, datos recibidos');
                             setUser({ 
                                 name: payload.name, 
                                 email: payload.email, 
@@ -485,98 +440,81 @@
                             setData(res.data);
                             setError(null);
                         } else {
+                            showDebug('❌ Error en respuesta:', res);
                             setError(res.message || 'Error al obtener el historial');
                         }
                     })
                     .catch(err => {
-                        console.error('Error:', err);
+                        showDebug('❌ Error en petición:', err.message);
                         setError(err.message || 'Error al cargar los datos');
                     })
                     .finally(() => setLoading(false));
             } catch(e) { 
-                console.error('Error en login:', e);
+                showDebug('❌ Error en login:', e.message);
                 setLoading(false);
                 setError('Error al procesar la autenticación');
             }
         };
 
         const handleLogout = () => { 
+            showDebug('👋 Cerrando sesión');
             setUser(null); 
             setData(null);
             setError(null);
         };
 
-        if(loading) return (
-            <div className="flex flex-col justify-center items-center h-screen bg-slate-50">
-                <div className="animate-spin h-12 w-12 border-4 border-orange-500 rounded-full border-t-transparent mb-4"></div>
-                <p className="text-slate-500 font-bold animate-pulse">Cargando tu historial...</p>
-            </div>
+        if(loading) return React.createElement('div', { className: 'flex flex-col justify-center items-center h-screen bg-slate-50' },
+            React.createElement('div', { className: 'animate-spin h-12 w-12 border-4 border-orange-500 rounded-full border-t-transparent mb-4' }),
+            React.createElement('p', { className: 'text-slate-500 font-bold animate-pulse' }, 'Cargando tu historial...')
         );
         
-        if(error) return (
-            <div className="container mx-auto px-4 py-10 max-w-3xl">
-                <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-sm">
-                    <h3 className="text-lg font-bold text-red-800">❌ Error</h3>
-                    <p className="text-red-700">{error}</p>
-                    <button 
-                        onClick={() => { setError(null); setLoading(true); 
-                            // Reintentar login con el mismo token si existe
-                            if (user && user.token) {
-                                getTeacherHistory(user.token)
-                                    .then(res => {
-                                        if(res.success) {
-                                            setData(res.data);
-                                            setError(null);
-                                        } else {
-                                            setError(res.message || 'Error al obtener el historial');
-                                        }
-                                    })
-                                    .catch(err => setError(err.message))
-                                    .finally(() => setLoading(false));
-                            } else {
-                                setLoading(false);
-                            }
-                        }} 
-                        className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-                    >
-                        Intentar de nuevo
-                    </button>
-                </div>
-            </div>
+        if(error) return React.createElement('div', { className: 'container mx-auto px-4 py-10 max-w-3xl' },
+            React.createElement('div', { className: 'bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-sm' },
+                React.createElement('h3', { className: 'text-lg font-bold text-red-800' }, '❌ Error'),
+                React.createElement('p', { className: 'text-red-700' }, error),
+                React.createElement('button', { 
+                    onClick: () => { window.location.reload(); }, 
+                    className: 'mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors'
+                }, 'Recargar página')
+            )
         );
         
-        if(!user || !data) return <div className="container mx-auto px-4 pt-10"><LoginScreen onLogin={handleLogin} /></div>;
+        if(!user || !data) return React.createElement('div', { className: 'container mx-auto px-4 pt-10' }, 
+            React.createElement(LoginScreen, { onLogin: handleLogin })
+        );
         
-        return <Dashboard user={user} data={data} onLogout={handleLogout} />;
+        return React.createElement(Dashboard, { user: user, data: data, onLogout: handleLogout });
     };
 
     // ============================================================
-    // MONTAJE
+    // 7. MONTAJE
     // ============================================================
-    window.onload = () => {
-         const rootEl = document.getElementById('root');
-         if(rootEl && window.ReactDOM) {
-             try {
-                 window.ReactDOM.createRoot(rootEl).render(<App />);
-                 console.log('✅ Historial ITD - App montada');
-             } catch(e) {
-                 console.error('❌ Error al montar la app:', e);
-                 rootEl.innerHTML = `
-                     <div class="container mx-auto px-4 py-10 max-w-3xl">
-                         <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-sm">
-                             <h3 class="text-lg font-bold text-red-800">⚠️ Error de carga</h3>
-                             <p class="text-red-700">No se pudo cargar la aplicación. Por favor, recarga la página.</p>
-                             <button onclick="location.reload()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                                 Recargar página
-                             </button>
-                         </div>
-                     </div>
-                 `;
-             }
-         } else {
-             console.error('❌ No se encontró el elemento root o ReactDOM');
-         }
-    };
+    document.addEventListener('DOMContentLoaded', function() {
+        showDebug('📄 DOM cargado');
+        const rootEl = document.getElementById('root');
+        if (rootEl) {
+            try {
+                const root = createRoot(rootEl);
+                root.render(React.createElement(App, null));
+                showDebug('✅ React montado correctamente');
+            } catch(e) {
+                showDebug('❌ Error al montar React:', e.message);
+                rootEl.innerHTML = `
+                    <div class="container mx-auto px-4 py-10 max-w-3xl">
+                        <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-sm">
+                            <h3 class="text-lg font-bold text-red-800">⚠️ Error de carga</h3>
+                            <p class="text-red-700">No se pudo cargar la aplicación. Error: ${e.message}</p>
+                            <button onclick="location.reload()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                Recargar página
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        } else {
+            showDebug('❌ No se encontró el elemento root');
+        }
+    });
 </script>
 </body>
 </html>
