@@ -1,153 +1,38 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V2V4CT2C69"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-V2V4CT2C69');
-    </script>
-    
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Validador de Constancias ITD</title>
-    <meta name="description" content="Valida la autenticidad de constancias y reconocimientos emitidos por el área de Desarrollo Académico del ITD.">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-
-    <style>
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .animate-spin { animation: spin 1s linear infinite; }
-    </style>
 </head>
-<body class="bg-slate-100">
+<body>
     <div id="root"></div>
-
     <script type="text/babel">
     // ============================================================
     // 1. CONFIGURACIÓN
     // ============================================================
     const SPREADSHEET_ID = '1CVXtvWAQSSL2efNBxfJH6SrLE2McmNXLlS-58-beScQ';
     const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web2/main/image.jpg';
-    const TECNM_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web2/main/TecNM_logo.jpg';
-    const VALIDATION_URL = 'https://da-itd.github.io/web2/verificador-3.html';
-
-    // Hojas de validación
-    const VALIDATION_SHEETS = [
-        { gid: '1849431809', name: 'validation 2025' },
-        { gid: '0', name: 'validation 2026' }
-    ];
-
+    
     // ============================================================
     // 2. FUNCIONES DE UTILIDAD
     // ============================================================
-    const getProperty = (obj, keyName) => {
-        if (!obj || typeof obj !== 'object' || !keyName) return undefined;
-        const keyToFind = keyName.toLowerCase().trim();
-        const foundKey = Object.keys(obj).find(k => k.toLowerCase().trim() === keyToFind);
-        return foundKey ? obj[foundKey] : undefined;
-    };
-
     const getFlexibleProperty = (obj, keys) => {
         if (!obj || typeof obj !== 'object' || !Array.isArray(keys)) return undefined;
         for (const key of keys) {
-            const value = getProperty(obj, key);
-            if (value !== undefined && value !== null && String(value).trim() !== '') return value;
+            const keyToFind = key.toLowerCase().trim();
+            const foundKey = Object.keys(obj).find(k => k.toLowerCase().trim() === keyToFind);
+            if (foundKey && obj[foundKey] !== undefined && obj[foundKey] !== null && String(obj[foundKey]).trim() !== '') {
+                return obj[foundKey];
+            }
         }
         return undefined;
     };
-    
-    const formatDate = (dateValue) => {
-        if (dateValue === undefined || dateValue === null) return 'N/A';
-        if (typeof dateValue === 'string') {
-            const trimmed = dateValue.trim();
-            if (!isNaN(trimmed) && !isNaN(parseFloat(trimmed))) {
-                let date = new Date((parseFloat(trimmed) - 25569) * 86400 * 1000);
-                date = new Date(date.valueOf() + date.getTimezoneOffset() * 60000);
-                if (isNaN(date.getTime())) return trimmed.toUpperCase();
-                return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).toUpperCase();
-            }
-            return trimmed.toUpperCase();
-        }
-        let date;
-        if (typeof dateValue === 'number') {
-            date = new Date((dateValue - 25569) * 86400 * 1000);
-            date = new Date(date.valueOf() + date.getTimezoneOffset() * 60000);
-        } else {
-            date = new Date(dateValue);
-        }
-        if (!date || isNaN(date.getTime())) return String(dateValue).toUpperCase();
-        return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).toUpperCase();
-    };
 
-    const getPdfDisplayValue = (key, value) => {
-        if (value === null || value === undefined) return 'N/A';
-        let valueStr = String(value).trim();
-        if (key === 'Fecha') return formatDate(value);
-        if (key === 'Duración') {
-            const upperValue = valueStr.toUpperCase();
-            if (upperValue.includes('HORAS')) return upperValue;
-            if (!isNaN(parseFloat(valueStr)) && valueStr !== '') return `${valueStr} HORAS`;
-            return upperValue;
-        }
-        return valueStr.toUpperCase();
-    };
-
-    const generateVerificationHash = (data) => {
-        const folio = data.folio || '';
-        const nombre = data.nombre || '';
-        const fecha = data.fecha || '';
-        const dataString = `${folio}${nombre}${fecha}`.toUpperCase().replace(/\s/g, '');
-        
-        let hash = 0;
-        for (let i = 0; i < dataString.length; i++) {
-            const char = dataString.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash;
-        }
-        return Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
-    };
-
-    const formatVerificationCode = (hash, folio) => {
-        const folioShort = folio.replace('TNM-054-', '').replace(/-/g, '');
-        return `${hash.slice(0, 4)}-${hash.slice(4, 8)}-${folioShort}`;
-    };
-
-    // ============================================================
-    // 3. AUDIO
-    // ============================================================
-    const audioCache = {};
-    const SOUND_URLS = {
-        'beep-success': 'https://github.com/google-gemini/cookbook/raw/main/examples/web/data/success.mp3',
-        'beep-fail': 'https://github.com/google-gemini/cookbook/raw/main/examples/web/data/error.mp3',
-    };
-
-    const playSound = (id) => {
-        let sound = audioCache[id];
-        if (!sound) {
-            const url = SOUND_URLS[id];
-            if (!url) return;
-            sound = new Audio(url);
-            audioCache[id] = sound;
-        }
-        sound.currentTime = 0;
-        sound.play().catch(() => {});
-    };
-
-    // ============================================================
-    // 4. CARGA DE DATOS
-    // ============================================================
     const parseCsv = (text) => {
         const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
         if (lines.length === 0) return [];
@@ -178,7 +63,6 @@
     const aoa2json = (dataAoA) => {
         if (!dataAoA || dataAoA.length === 0) return [];
 
-        // Buscar la fila de encabezados
         let headerRowIndex = -1;
         for (let i = 0; i < dataAoA.length; i++) {
             if (Array.isArray(dataAoA[i])) {
@@ -214,604 +98,252 @@
             .filter(obj => Object.keys(obj).length > 0);
     };
 
+    // ============================================================
+    // 3. CARGA DE DATOS
+    // ============================================================
     const loadDatabase = async () => {
-        let allData = [];
-
-        for (const sheet of VALIDATION_SHEETS) {
-            const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=${sheet.gid}&t=${Date.now()}`;
-            
-            console.log(`📥 Cargando "${sheet.name}"...`);
-            
-            try {
-                const res = await fetch(csvUrl);
-                if (!res.ok) {
-                    console.warn(`⚠️ Error en ${sheet.name}: HTTP ${res.status}`);
-                    continue;
-                }
-                
-                const text = await res.text();
-                if (!text || text.trim() === '') {
-                    console.warn(`⚠️ "${sheet.name}" está vacía`);
-                    continue;
-                }
-                
-                const aoa = parseCsv(text);
-                const records = aoa2json(aoa);
-                
-                console.log(`📊 ${sheet.name}: ${records.length} registros`);
-                if (records.length > 0) {
-                    console.log(`📊 Columnas:`, Object.keys(records[0]));
-                    console.log(`📊 Primer registro:`, records[0]);
-                }
-                
-                allData = allData.concat(records);
-            } catch (error) {
-                console.warn(`❌ Error en ${sheet.name}:`, error.message);
-            }
-        }
-
-        console.log(`📊 Total: ${allData.length} registros`);
-        return allData;
-    };
-
-    // ============================================================
-    // 5. GENERACIÓN DE PDF
-    // ============================================================
-    const getImageDataFromURL = (url) => {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = 'Anonymous';
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    ctx.drawImage(img, 0, 0);
-                    const dataURL = canvas.toDataURL('image/jpeg');
-                    resolve({ dataURL, width: img.width, height: img.height });
-                } else {
-                    reject(new Error('Could not get canvas context.'));
-                }
-            };
-            img.onerror = () => reject(new Error('Error loading image'));
-            img.src = url;
-        });
-    };
-
-    const generatePdf = async (result) => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
+        console.log('🚀 Iniciando carga de datos...');
+        const gid = '1849431809'; // validation 2025
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=${gid}&t=${Date.now()}`;
+        
+        console.log('📥 URL:', csvUrl);
+        
         try {
-            const [itdLogo, tecNmLogo] = await Promise.all([
-                getImageDataFromURL(ITD_LOGO_URL),
-                getImageDataFromURL(TECNM_LOGO_URL)
-            ]);
+            const res = await fetch(csvUrl);
+            console.log('📊 Status:', res.status);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             
-            const itdAspectRatio = itdLogo.width / itdLogo.height;
-            const itdPdfImageHeight = 25;
-            const itdPdfImageWidth = itdPdfImageHeight * itdAspectRatio;
-            doc.addImage(itdLogo.dataURL, 'JPEG', 15, 12, itdPdfImageWidth, itdPdfImageHeight);
-
-            const tecNmAspectRatio = tecNmLogo.width / tecNmLogo.height;
-            const tecNmpdfImageHeight = 20;
-            const tecNmpdfImageWidth = tecNmpdfImageHeight * tecNmAspectRatio;
-            const tecNmXPosition = doc.internal.pageSize.getWidth() - 15 - tecNmpdfImageWidth;
-            doc.addImage(tecNmLogo.dataURL, 'JPEG', tecNmXPosition, 12, tecNmpdfImageWidth, tecNmpdfImageHeight);
-
-        } catch (error) {
-            console.error("No se pudieron cargar los logos:", error);
-        }
-
-        doc.setFontSize(100);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(230, 230, 230);
-        doc.setGState(new doc.GState({opacity: 0.5}));
-        doc.text("VALIDO", 105, 160, { align: 'center', angle: 45 });
-        doc.setGState(new doc.GState({opacity: 1}));
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(0, 0, 0);
-        doc.text("TECNOLÓGICO NACIONAL DE MÉXICO", 105, 20, { align: 'center' });
-        doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", 105, 27, { align: 'center' });
-        
-        const documentTypeRaw = getFlexibleProperty(result, ['tipo']);
-        const documentType = documentTypeRaw ? String(documentTypeRaw).trim().toLowerCase() : '';
-        
-        let titleText = 'Documento de Validez';
-        if (documentType === 'constancia') titleText = 'Constancia de Validez';
-        else if (documentType === 'reconocimiento') titleText = 'Reconocimiento de Validez';
-
-        doc.setFontSize(18);
-        doc.text(titleText, 105, 45, { align: 'center' });
-        
-        const data = {
-            'Folio': getFlexibleProperty(result, ['folio']),
-            'Nombre del Titular': getFlexibleProperty(result, ['nombre']),
-            'Curso/Taller': getFlexibleProperty(result, ['curso']),
-            'Fecha': getFlexibleProperty(result, ['fecha']),
-            'Departamento': getFlexibleProperty(result, ['departamento']),
-            'Duración': getFlexibleProperty(result, ['duracion']),
-        };
-        
-        let y = 65;
-        doc.setFontSize(11);
-        Object.entries(data).forEach(([key, value]) => {
-            if (value === undefined || value === null) return;
-            doc.setFont("helvetica", "bold");
-            doc.text(`${key}:`, 20, y);
-            doc.setFont("helvetica", "normal");
-            const displayValue = getPdfDisplayValue(key, value);
-            const lines = doc.splitTextToSize(displayValue, 120);
-            doc.text(lines, 70, y);
-            y += (lines.length * 7) + 5;
-        });
-
-        y += 5;
-        doc.setLineWidth(0.2);
-        doc.line(20, y, 190, y);
-        y += 7;
-
-        try {
-            const fullFolio = data['Folio'] || 'N/A';
-            const folioShort = fullFolio.replace('TNM-054-', '');
-            const qrContent = `${VALIDATION_URL}?folio=${folioShort}`;
+            const text = await res.text();
+            console.log('📄 Longitud:', text.length);
+            console.log('📄 Primeros 300 chars:', text.substring(0, 300));
             
-            const qr = new QRious({
-                value: qrContent,
-                level: 'M',
-                size: 150
-            });
-            const qrDataURL = qr.toDataURL();
-
-            const qrSize = 30;
-            const qrX = 20;
-            const qrY = y + 3;
-            doc.addImage(qrDataURL, 'PNG', qrX, qrY, qrSize, qrSize);
-
-            const verificationData = {
-                folio: fullFolio,
-                nombre: data['Nombre del Titular'] || '',
-                fecha: data['Fecha'] || ''
-            };
-            const hash = generateVerificationHash(verificationData);
-            const verificationCode = formatVerificationCode(hash, fullFolio);
+            const aoa = parseCsv(text);
+            console.log('📊 Filas:', aoa.length);
             
-            const textX = qrX + qrSize + 5;
-            let textY = qrY + 5;
+            const records = aoa2json(aoa);
+            console.log('📊 Registros:', records.length);
             
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            doc.setFont("helvetica", "normal");
-            
-            doc.text("Este documento ha sido verificado digitalmente", textX, textY);
-            doc.text("por el Instituto Tecnológico de Durango.", textX, textY + 4);
-            
-            const now = new Date();
-            doc.text(`Generado: ${now.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`, textX, textY + 10);
-            doc.text(`Hora: ${now.toLocaleTimeString('es-ES')}`, textX, textY + 14);
-            
-            textY += 20;
-            doc.setFontSize(7);
-            doc.setTextColor(100, 100, 100);
-            doc.setFont("helvetica", "bold");
-            doc.text("CÓDIGO DE VERIFICACIÓN:", textX, textY);
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 139);
-            doc.setFont("courier", "bold");
-            doc.text(verificationCode, textX, textY + 4);
-            
-            doc.setFontSize(7);
-            doc.setTextColor(120, 120, 120);
-            doc.setFont("helvetica", "italic");
-            doc.text("Valide este documento escaneando el QR.", textX, textY + 9);
-            
-        } catch (error) {
-            console.error("Error al generar QR:", error);
-            doc.setFontSize(8);
-            doc.setTextColor(255, 0, 0);
-            doc.text("Error al crear sello digital.", 20, y + 15);
-        }
-
-        doc.save(`Validacion-${data['Folio']}.pdf`);
-    };
-
-    // ============================================================
-    // 6. COMPONENTES REACT
-    // ============================================================
-    const { useState, useEffect, useCallback } = React;
-
-    const ValidationStatus = {
-        IDLE: 'idle',
-        SUCCESS: 'success',
-        NOT_FOUND: 'not_found',
-        ERROR: 'error',
-    };
-
-    const SpinnerIcon = (props) => (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" {...props}>
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-    );
-    
-    const Header = () => (
-        <header className="bg-white shadow-sm w-full">
-            <div className="container mx-auto px-6 py-4 flex items-center">
-                <img src={ITD_LOGO_URL} alt="Logo ITD" className="h-16 mr-4" />
-                <h1 className="text-lg sm:text-xl font-bold text-gray-800">Validador de Constancias y Reconocimientos del ITD</h1>
-            </div>
-        </header>
-    );
-
-    const Footer = () => (
-        <footer className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-auto w-full">
-            <div className="container mx-auto px-4">
-                <p className="font-semibold text-sm sm:text-base mb-2">
-                    © Coordinación de Actualización Docente
-                </p>
-                <p className="text-xs sm:text-sm opacity-90">
-                    M.C. Alejandro Calderón Rentería
-                </p>
-                <p className="text-xs sm:text-sm opacity-75 mt-1">
-                    Todos los derechos reservados {new Date().getFullYear()}
-                </p>
-            </div>
-        </footer>
-    );
-
-    const SearchForm = ({ query, setQuery, onSearch, onClear, mode, setMode }) => {
-        const handleSearch = (e) => {
-            e.preventDefault();
-            onSearch(query);
-        };
-
-        return (
-            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-md w-full max-w-2xl mx-auto">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-800">Buscar Constancia</h2>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => setMode('folio')}
-                            className={`px-4 py-2 rounded-md font-semibold text-sm ${
-                                mode === 'folio'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                        >
-                            Por Folio
-                        </button>
-                        <button
-                            onClick={() => setMode('code')}
-                            className={`px-4 py-2 rounded-md font-semibold text-sm ${
-                                mode === 'code'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                        >
-                            Por Código
-                        </button>
-                    </div>
-                </div>
-
-                {mode === 'folio' ? (
-                    <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                        <div className="flex-grow w-full">
-                            <div className="flex w-full border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 overflow-hidden">
-                                <span className="px-3 text-gray-500 bg-gray-50 border-r border-gray-300 flex items-center whitespace-nowrap text-sm">
-                                    TNM-054-
-                                </span>
-                                <input
-                                    type="text"
-                                    className="w-full pl-4 pr-4 py-2 border-none focus:outline-none bg-transparent"
-                                    placeholder="00-YYYY-00"
-                                    value={query}
-                                    onChange={e => setQuery(e.target.value.toUpperCase())}
-                                    autoFocus
-                                />
-                            </div>
-                        </div>
-                        <div className="flex space-x-2 w-full sm:w-auto flex-shrink-0">
-                            <button type="submit" className="flex-1 sm:flex-none px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">Verificar</button>
-                            <button type="button" onClick={onClear} className="flex-1 sm:flex-none px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-md hover:bg-gray-300">Borrar</button>
-                        </div>
-                    </form>
-                ) : (
-                    <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                        <div className="flex-grow w-full">
-                            <input
-                                type="text"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="XXXX-XXXX-XXXXXXXX"
-                                value={query}
-                                onChange={e => setQuery(e.target.value.toUpperCase())}
-                                autoFocus
-                                maxLength="20"
-                            />
-                        </div>
-                        <div className="flex space-x-2 w-full sm:w-auto flex-shrink-0">
-                            <button type="submit" className="flex-1 sm:flex-none px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">Verificar</button>
-                            <button type="button" onClick={onClear} className="flex-1 sm:flex-none px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-md hover:bg-gray-300">Borrar</button>
-                        </div>
-                    </form>
-                )}
-            </div>
-        );
-    };
-
-    const ValidationResult = ({ status, result, mode }) => {
-        const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-
-        const handleDownload = async () => {
-            if (!result) return;
-            setIsGeneratingPdf(true);
-            try {
-                await generatePdf(result);
-            } catch (error) {
-                console.error("Error al generar PDF: ", error);
-                alert("Hubo un error al generar el PDF.");
-            } finally {
-                setIsGeneratingPdf(false);
+            if (records.length > 0) {
+                console.log('📊 Columnas:', Object.keys(records[0]));
+                console.log('📊 Primer registro:', records[0]);
             }
-        };
-
-        if (status === ValidationStatus.IDLE) return null;
-
-        if (status === ValidationStatus.NOT_FOUND) {
-            return (
-                <div className="w-full max-w-2xl mx-auto mt-8 p-6 bg-red-50 border-l-4 border-red-500 animate-fade-in rounded-r-lg shadow">
-                    <h3 className="text-lg font-bold text-red-800">Documento no Encontrado</h3>
-                    <p className="text-red-700">El folio o código ingresado no fue encontrado en las bases de validación (2025 o 2026). Verifique que el folio sea correcto.</p>
-                    <div className="mt-6 border-t border-red-200 pt-4 text-center">
-                        <a href="index.html" className="text-sm text-blue-600 hover:underline">
-                            ← Volver al Portal Principal
-                        </a>
-                    </div>
-                </div>
-            );
+            
+            return records;
+        } catch (error) {
+            console.error('❌ Error:', error.message);
+            throw error;
         }
-        
-        if (status === ValidationStatus.SUCCESS && result) {
-            const data = {
-                'Folio': getFlexibleProperty(result, ['folio']),
-                'Nombre del Titular': getFlexibleProperty(result, ['nombre']),
-                'Curso/Taller': getFlexibleProperty(result, ['curso']),
-                'Fecha': formatDate(getFlexibleProperty(result, ['fecha'])),
-                'Departamento': getFlexibleProperty(result, ['departamento']),
-                'Duración': getPdfDisplayValue('Duración', getFlexibleProperty(result, ['duracion'])),
-            };
-
-            const tipo = getFlexibleProperty(result, ['tipo']) || 'Documento';
-            const title = tipo === 'PROFESIONAL' ? 'Documento Válido' : 'Documento Válido';
-
-            return (
-                <div className="w-full max-w-2xl mx-auto mt-8 bg-green-50 border-l-4 border-green-500 animate-fade-in rounded-r-lg shadow">
-                    <div className="p-6 flex justify-between items-center">
-                        <h3 className="text-lg font-bold text-green-800">{title}</h3>
-                        
-                        {mode === 'folio' && (
-                            <button
-                                onClick={handleDownload}
-                                disabled={isGeneratingPdf}
-                                className="flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:bg-blue-400"
-                            >
-                                {isGeneratingPdf ? <SpinnerIcon className="animate-spin mr-2 h-5 w-5" /> : null}
-                                {isGeneratingPdf ? 'Generando...' : 'Descargar Validación'}
-                            </button>
-                        )}
-                    </div>
-                    <div className="bg-white p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm border-t border-green-200">
-                        {Object.entries(data).map(([key, value]) => value ? (
-                            <div key={key}>
-                                <p className="text-gray-500">{key}</p>
-                                <p className="font-bold text-gray-800 break-words">{String(value).toUpperCase()}</p>
-                            </div>
-                        ) : null)}
-                    </div>
-                    <div className="bg-white p-4 text-center border-t border-gray-100 rounded-b-lg">
-                        <a href="index.html" className="text-sm text-blue-600 hover:underline">
-                            ← Volver al Portal Principal
-                        </a>
-                    </div>
-                </div>
-            );
-        }
-        return null;
     };
 
     // ============================================================
-    // 7. APP PRINCIPAL
+    // 4. COMPONENTES REACT
     // ============================================================
+    const { useState, useEffect } = React;
+
     const App = () => {
         const [loading, setLoading] = useState(true);
         const [error, setError] = useState(null);
-        const [certificateData, setCertificateData] = useState([]);
+        const [data, setData] = useState([]);
         const [query, setQuery] = useState('');
-        const [status, setStatus] = useState(ValidationStatus.IDLE);
         const [result, setResult] = useState(null);
-        const [mode, setMode] = useState('folio');
+        const [status, setStatus] = useState('idle');
 
         useEffect(() => {
-            (async () => {
-                try {
-                    setError(null);
-                    setLoading(true);
-                    const db = await loadDatabase();
-                    setCertificateData(db);
-
-                    // Verificar folio en URL (QR)
-                    const params = new URLSearchParams(window.location.search);
-                    const folioFromUrl = params.get('folio');
-                    if (folioFromUrl) {
-                        const inputSuffix = folioFromUrl.trim().toUpperCase().replace('TNM-054-', '');
-                        setQuery(inputSuffix);
-                        setMode('folio');
-                        
-                        const cleanedSuffix = inputSuffix.toLowerCase();
-
-                        const found = db.find(record => {
-                            const folio = getFlexibleProperty(record, ['folio']);
-                            const status = getFlexibleProperty(record, ['status']) || '';
-                            return folio && String(folio).trim().toLowerCase().endsWith(cleanedSuffix)
-                                && String(status).trim().toUpperCase() === 'VALIDO';
-                        });
-
-                        if (found) {
-                            const fullFolio = `TNM-054-${inputSuffix}`;
-                            setResult({ ...found, 'folio': fullFolio });
-                            setStatus(ValidationStatus.SUCCESS);
-                            playSound('beep-success');
-                        } else {
-                            setResult(null);
-                            setStatus(ValidationStatus.NOT_FOUND);
-                            playSound('beep-fail');
-                        }
-                    }
-                } catch (e) {
-                    setError(e.message);
-                } finally {
+            console.log('🔍 Componente montado');
+            loadDatabase()
+                .then(db => {
+                    console.log('✅ Datos cargados:', db.length);
+                    setData(db);
                     setLoading(false);
-                }
-            })();
+                })
+                .catch(err => {
+                    console.error('❌ Error:', err);
+                    setError(err.message);
+                    setLoading(false);
+                });
         }, []);
 
-        const handleSearch = useCallback((searchQuery) => {
-            if (!searchQuery || certificateData.length === 0) {
-                setStatus(ValidationStatus.IDLE);
+        const handleSearch = () => {
+            console.log('🔍 Buscando:', query);
+            if (!query || data.length === 0) {
+                setStatus('idle');
                 setResult(null);
                 return;
             }
 
-            let found = null;
-            const inputQuery = searchQuery.trim().toUpperCase();
+            const cleanedQuery = query.trim().toUpperCase().replace('TNM-054-', '');
+            
+            const found = data.find(record => {
+                const folio = getFlexibleProperty(record, ['folio']);
+                const statusVal = getFlexibleProperty(record, ['status']) || '';
+                return folio && String(folio).trim().toLowerCase().endsWith(cleanedQuery.toLowerCase())
+                    && String(statusVal).trim().toUpperCase() === 'VALIDO';
+            });
 
-            if (mode === 'folio') {
-                const cleanedSuffix = inputQuery.toLowerCase();
-
-                found = certificateData.find(record => {
-                    const folio = getFlexibleProperty(record, ['folio']);
-                    const status = getFlexibleProperty(record, ['status']) || '';
-                    return folio && String(folio).trim().toLowerCase().endsWith(cleanedSuffix)
-                        && String(status).trim().toUpperCase() === 'VALIDO';
-                });
-
-                if (found) {
-                    const fullFolio = `TNM-054-${inputQuery}`;
-                    setResult({ ...found, 'folio': fullFolio });
-                    setStatus(ValidationStatus.SUCCESS);
-                    playSound('beep-success');
-                }
-
-            } else if (mode === 'code') {
-                const inputCode = inputQuery.replace(/-/g, '');
-                
-                found = certificateData.find(record => {
-                    let folioValue = getFlexibleProperty(record, ['folio']);
-                    if (!folioValue) return false;
-
-                    const status = getFlexibleProperty(record, ['status']) || '';
-                    if (String(status).trim().toUpperCase() !== 'VALIDO') return false;
-                    
-                    folioValue = String(folioValue).trim().toUpperCase();
-                    let fullFolio;
-                    if (folioValue.startsWith('TNM-054-')) {
-                        fullFolio = folioValue;
-                    } else {
-                        fullFolio = `TNM-054-${folioValue}`;
-                    }
-
-                    const nombre = getFlexibleProperty(record, ['nombre']) || '';
-                    const fecha = getFlexibleProperty(record, ['fecha']) || '';
-
-                    const verificationData = {
-                        folio: fullFolio,
-                        nombre: nombre,
-                        fecha: fecha
-                    };
-                    
-                    const hash = generateVerificationHash(verificationData);
-                    const recordCode = formatVerificationCode(hash, fullFolio).replace(/-/g, '');
-                    
-                    return recordCode === inputCode;
-                });
-
-                if (found) {
-                    let folioValue = getFlexibleProperty(found, ['folio']);
-                    folioValue = String(folioValue).trim().toUpperCase();
-                    let fullFolio;
-                    if (folioValue.startsWith('TNM-054-')) {
-                        fullFolio = folioValue;
-                    } else {
-                        fullFolio = `TNM-054-${folioValue}`;
-                    }
-                    
-                    setResult({ ...found, 'folio': fullFolio });
-                    setStatus(ValidationStatus.SUCCESS);
-                    playSound('beep-success');
-                }
-            }
-
-            if (!found) {
+            console.log('🔍 Encontrado:', found);
+            
+            if (found) {
+                const fullFolio = `TNM-054-${cleanedQuery}`;
+                setResult({ ...found, 'folio': fullFolio });
+                setStatus('success');
+            } else {
                 setResult(null);
-                setStatus(ValidationStatus.NOT_FOUND);
-                playSound('beep-fail');
+                setStatus('not_found');
             }
-        }, [certificateData, mode]);
+        };
 
-        const handleClear = useCallback(() => {
+        const handleClear = () => {
             setQuery('');
-            setStatus(ValidationStatus.IDLE);
+            setStatus('idle');
             setResult(null);
-        }, []);
+        };
 
-        const renderContent = () => {
-            if (loading) return <p className="text-gray-600 p-8 text-center">Cargando base de datos de validación...</p>;
-            if (error) return <p className="text-red-600 p-8 text-center">{error}</p>;
+        if (loading) {
             return (
-                <React.Fragment>
-                    <SearchForm
-                        query={query}
-                        setQuery={setQuery}
-                        onSearch={handleSearch}
-                        onClear={handleClear}
-                        mode={mode}
-                        setMode={setMode}
-                    />
-                    <ValidationResult status={status} result={result} mode={mode} />
-                </React.Fragment>
+                <div className="min-h-screen flex items-center justify-center bg-slate-100">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Cargando base de datos...</p>
+                        <p className="text-xs text-gray-400 mt-2">Revisa la consola (F12) para ver logs</p>
+                    </div>
+                </div>
             );
+        }
+
+        if (error) {
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
+                    <div className="bg-white rounded-xl shadow-lg p-8 max-w-lg w-full">
+                        <div className="text-red-500 text-6xl text-center mb-4">❌</div>
+                        <h2 className="text-xl font-bold text-center text-red-700 mb-2">Error al cargar datos</h2>
+                        <p className="text-gray-600 text-center">{error}</p>
+                        <p className="text-xs text-gray-400 text-center mt-4">Revisa la consola (F12) para más detalles</p>
+                    </div>
+                </div>
+            );
+        }
+
+        const renderResult = () => {
+            if (status === 'idle') return null;
+            
+            if (status === 'not_found') {
+                return (
+                    <div className="mt-6 p-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow">
+                        <h3 className="text-lg font-bold text-red-800">❌ Documento no Encontrado</h3>
+                        <p className="text-red-700">El folio ingresado no fue encontrado o no está vigente.</p>
+                    </div>
+                );
+            }
+            
+            if (status === 'success' && result) {
+                const fields = [
+                    { key: 'folio', label: 'Folio' },
+                    { key: 'nombre', label: 'Nombre' },
+                    { key: 'curso', label: 'Curso' },
+                    { key: 'fecha', label: 'Fecha' },
+                    { key: 'departamento', label: 'Departamento' },
+                    { key: 'duracion', label: 'Duración' },
+                    { key: 'tipo', label: 'Tipo' },
+                ];
+                
+                return (
+                    <div className="mt-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow">
+                        <div className="p-6">
+                            <h3 className="text-lg font-bold text-green-800">✅ Documento Válido</h3>
+                            <p className="text-green-700 text-sm">Este documento ha sido verificado en la base de datos oficial del ITD.</p>
+                        </div>
+                        <div className="bg-white p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm border-t border-green-200">
+                            {fields.map(({ key, label }) => {
+                                const value = getFlexibleProperty(result, [key]);
+                                return value ? (
+                                    <div key={key}>
+                                        <p className="text-gray-500">{label}</p>
+                                        <p className="font-bold text-gray-800 break-words">{String(value).toUpperCase()}</p>
+                                    </div>
+                                ) : null;
+                            })}
+                        </div>
+                        <div className="bg-white p-4 text-center border-t border-gray-100 rounded-b-lg">
+                            <a href="index.html" className="text-sm text-blue-600 hover:underline">← Volver al Portal Principal</a>
+                        </div>
+                    </div>
+                );
+            }
+            
+            return null;
         };
 
         return (
-            <div className="min-h-screen flex flex-col items-center">
-                <Header />
-                <main className="flex-grow container mx-auto p-4 sm:p-6 w-full flex flex-col items-center">
+            <div className="min-h-screen bg-slate-100 flex flex-col">
+                <header className="bg-white shadow-sm">
+                    <div className="container mx-auto px-6 py-4 flex items-center">
+                        <img src={ITD_LOGO_URL} alt="Logo ITD" className="h-16 mr-4" />
+                        <h1 className="text-lg sm:text-xl font-bold text-gray-800">Validador de Constancias ITD</h1>
+                    </div>
+                </header>
+                
+                <main className="flex-grow container mx-auto p-4 sm:p-6 flex flex-col items-center">
                     <div className="w-full max-w-2xl">
                         <a href="index.html" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-6">
                             ← Volver al Portal Principal
                         </a>
                     </div>
-                    {renderContent()}
+                    
+                    <div className="bg-white p-6 sm:p-8 rounded-xl shadow-md w-full max-w-2xl">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4">Buscar Constancia</h2>
+                        <p className="text-gray-600 mb-4">Ingrese el folio completo (ej: TNM-054-01-2026) o solo el número final</p>
+                        
+                        <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                            <div className="flex-grow w-full">
+                                <div className="flex w-full border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 overflow-hidden">
+                                    <span className="px-3 text-gray-500 bg-gray-50 border-r border-gray-300 flex items-center whitespace-nowrap text-sm">
+                                        TNM-054-
+                                    </span>
+                                    <input
+                                        type="text"
+                                        className="w-full pl-4 pr-4 py-2 border-none focus:outline-none bg-transparent"
+                                        placeholder="01-2026"
+                                        value={query}
+                                        onChange={e => setQuery(e.target.value.toUpperCase())}
+                                        onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                                        autoFocus
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex space-x-2 w-full sm:w-auto flex-shrink-0">
+                                <button onClick={handleSearch} className="flex-1 sm:flex-none px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">
+                                    Verificar
+                                </button>
+                                <button onClick={handleClear} className="flex-1 sm:flex-none px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-md hover:bg-gray-300">
+                                    Borrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {renderResult()}
                 </main>
-                <Footer />
+                
+                <footer className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 mt-auto">
+                    <div className="container mx-auto px-4">
+                        <p className="font-semibold text-sm">© Coordinación de Actualización Docente</p>
+                        <p className="text-xs opacity-90">M.C. Alejandro Calderón Rentería</p>
+                    </div>
+                </footer>
             </div>
         );
     };
 
     // ============================================================
-    // 8. MONTAJE
+    // 5. MONTAJE
     // ============================================================
     const rootElement = document.getElementById('root');
     if (rootElement) {
         const root = ReactDOM.createRoot(rootElement);
-        root.render(
-            <React.StrictMode>
-                <App />
-            </React.StrictMode>
-        );
+        root.render(<App />);
+        console.log('✅ React montado');
+    } else {
+        console.error('❌ No se encontró #root');
     }
     </script>
 </body>
