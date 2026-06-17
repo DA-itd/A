@@ -641,50 +641,113 @@
                 });
         }, []);
 
-        const realizarBusqueda = function(dataSource, queryStr) {
-            if (!queryStr || dataSource.length === 0) {
-                setStatus('idle');
-                setResult(null);
-                return;
-            }
+// ============================================================
+// FUNCIONES PARA NORMALIZAR Y COMPARAR FOLIOS
+// ============================================================
+const normalizarFolio = function(folio) {
+    if (!folio) return '';
+    
+    let limpio = String(folio).toUpperCase().trim();
+    limpio = limpio.replace(/^TNM-054-/, '');
+    
+    const match = limpio.match(/^(\d+)-(\d{4})(?:-(.+))?$/);
+    if (!match) return limpio;
+    
+    const numero = match[1];
+    const año = match[2];
+    const sufijo = match[3] || '';
+    
+    const numeroNormalizado = String(parseInt(numero, 10));
+    
+    let normalizado = numeroNormalizado + '-' + año;
+    if (sufijo) {
+        normalizado += '-' + sufijo.toUpperCase();
+    }
+    
+    return normalizado;
+};
 
-            const cleanedQuery = queryStr.trim().toUpperCase();
-            let found = null;
+const foliosCoinciden = function(folio1, folio2) {
+    if (!folio1 || !folio2) return false;
+    
+    const f1 = normalizarFolio(folio1);
+    const f2 = normalizarFolio(folio2);
+    
+    if (f1 === f2) return true;
+    if (f1.endsWith(f2) || f2.endsWith(f1)) return true;
+    
+    const partes1 = f1.split('-');
+    const partes2 = f2.split('-');
+    
+    // Buscar por número y año sin importar sufijo
+    if (partes2.length === 2 && partes1.length >= 2) {
+        if (partes1[0] === partes2[0] && partes1[1] === partes2[1]) return true;
+    }
+    if (partes1.length === 2 && partes2.length >= 2) {
+        if (partes2[0] === partes1[0] && partes2[1] === partes1[1]) return true;
+    }
+    
+    return false;
+};
+
+// ============================================================
+// FUNCIÓN DE BÚSQUEDA ACTUALIZADA
+// ============================================================
+const realizarBusqueda = function(dataSource, queryStr) {
+    if (!queryStr || dataSource.length === 0) {
+        setStatus('idle');
+        setResult(null);
+        return;
+    }
+
+    const cleanedQuery = queryStr.trim().toUpperCase();
+    let found = null;
+    
+    for (let i = 0; i < dataSource.length; i++) {
+        const record = dataSource[i];
+        const folio = getFlexibleProperty(record, ['folio']);
+        const statusVal = getFlexibleProperty(record, ['status']) || '';
+        
+        if (folio && String(statusVal).trim().toUpperCase() === 'VALIDO') {
+            const folioStr = String(folio).trim().toUpperCase();
             
-            for (let i = 0; i < dataSource.length; i++) {
-                const record = dataSource[i];
-                const folio = getFlexibleProperty(record, ['folio']);
-                const statusVal = getFlexibleProperty(record, ['status']) || '';
-                
-                if (folio && String(statusVal).trim().toUpperCase() === 'VALIDO') {
-                    const folioStr = String(folio).trim().toUpperCase();
-                    if (folioStr.endsWith(cleanedQuery) || folioStr.includes(cleanedQuery)) {
-                        found = record;
-                        break;
-                    }
-                }
+            // Usar la comparación flexible
+            if (foliosCoinciden(folioStr, cleanedQuery)) {
+                found = record;
+                break;
             }
-
-            console.log('🔍 Encontrado:', found);
             
-            if (found) {
-                let folioValue = getFlexibleProperty(found, ['folio']);
-                if (folioValue && !String(folioValue).toUpperCase().startsWith('TNM-054-')) {
-                    folioValue = 'TNM-054-' + String(folioValue);
-                }
-                const resultObj = Object.assign({}, found);
-                resultObj.folio = folioValue || 'TNM-054-' + queryStr;
-                
-                setResult(resultObj);
-                setStatus('success');
-                playSuccessSound();
-            } else {
-                setResult(null);
-                setStatus('not_found');
-                playErrorSound();
+            // También buscar por término parcial
+            const folioNormalizado = normalizarFolio(folioStr);
+            const queryNormalizada = normalizarFolio(cleanedQuery);
+            
+            if (folioNormalizado.includes(queryNormalizada) || 
+                queryNormalizada.includes(folioNormalizado)) {
+                found = record;
+                break;
             }
-        };
+        }
+    }
 
+    console.log('🔍 Encontrado:', found);
+    
+    if (found) {
+        let folioValue = getFlexibleProperty(found, ['folio']);
+        if (folioValue && !String(folioValue).toUpperCase().startsWith('TNM-054-')) {
+            folioValue = 'TNM-054-' + String(folioValue);
+        }
+        const resultObj = Object.assign({}, found);
+        resultObj.folio = folioValue || 'TNM-054-' + queryStr;
+        
+        setResult(resultObj);
+        setStatus('success');
+        playSuccessSound();
+    } else {
+        setResult(null);
+        setStatus('not_found');
+        playErrorSound();
+    }
+};
         const handleSearch = function() {
             if (!query || data.length === 0 || searching) return;
             setSearching(true);
