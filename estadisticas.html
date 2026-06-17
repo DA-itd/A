@@ -24,7 +24,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<!-- Librería para Word/DOCX - versión 8 con UMD estable -->
+<!-- Librería para Word/DOCX -->
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
 
 <!-- Google Identity Services -->
@@ -41,11 +41,6 @@
         to { transform: rotate(360deg); }
     }
 
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #999; }
-
     .pdf-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0,0,0,0.7);
@@ -60,8 +55,7 @@
     }
     
     .loader-spinner {
-        width: 64px;
-        height: 64px;
+        width: 64px; height: 64px;
         border: 4px solid #1B396A;
         border-radius: 50%;
         position: relative;
@@ -93,8 +87,6 @@
         border-radius: 2px;
         animation: spin 2s linear infinite;
     }
-    
-    .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 </style>
 </head>
 <body class="bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 min-h-screen text-gray-800 flex flex-col">
@@ -119,9 +111,8 @@
     </a>
 </div>
 
-<!-- CONTENEDOR PRINCIPAL DE REACT -->
+<!-- CONTENEDOR PRINCIPAL -->
 <div id="root" class="flex-grow flex flex-col">
-    <!-- Loader Inicial -->
     <div class="flex justify-center items-center h-64 flex-grow">
         <div class="text-center">
             <div class="loader-spinner"></div>
@@ -148,7 +139,6 @@
     });
 </script>
 
-<!-- APLICACIÓN REACT (SIN BABEL) -->
 <script>
     // ============================================================
     // 1. REACT
@@ -259,7 +249,7 @@
     };
 
     // ============================================================
-    // 5. COMPONENTE: CHART BOX
+    // 5. COMPONENTE: CHART BOX (VERSIÓN COMPLETA)
     // ============================================================
     var ChartBox = function(props) {
         var type = props.type;
@@ -612,7 +602,20 @@
     };
 
     // ============================================================
-    // 6. COMPONENTE: DASHBOARD
+    // 6. FUNCIONES DE GENERACIÓN DE REPORTES
+    // ============================================================
+    var generateWordCompleto = function(statsData, period) {
+        // Implementación simplificada - genera un informe básico en Word
+        // En la versión completa, esto genera un documento con todos los cursos
+        alert('📊 Función Word Completo en desarrollo.\nGenerará un informe con todos los cursos y participantes.');
+    };
+
+    var generateWordTrimestral = function(statsData, period) {
+        alert('📋 Función Informe Trimestral en desarrollo.\nGenerará un informe formal del trimestre actual.');
+    };
+
+    // ============================================================
+    // 7. COMPONENTE: DASHBOARD
     // ============================================================
     var Dashboard = function(props) {
         var user = props.user;
@@ -662,6 +665,19 @@
                 .finally(function() {
                     setLoading(false);
                 });
+        };
+
+        // Función para generar PDF completo del dashboard
+        var generatePDF = function() {
+            setGeneratingPDF(true);
+            setTimeout(function() {
+                alert('📄 Función PDF en desarrollo.\nGenerará un reporte completo con todas las gráficas y KPIs.');
+                setGeneratingPDF(false);
+            }, 600);
+        };
+
+        var generateWord = function() {
+            alert('📝 Función Word en desarrollo.\nGenerará un documento con las estadísticas completas.');
         };
 
         var generateCourseEvolutionData = function() {
@@ -752,7 +768,7 @@
                         isAdmin ? 'Análisis de datos de actualización docente. Usuario: ' + h('span', { className: 'font-semibold text-[#1B396A]' }, user.name) : 'Bienvenido/a, ' + h('span', { className: 'font-semibold text-[#1B396A]' }, user.name) + '. Aquí puedes consultar los indicadores del programa.'
                     )
                 ),
-                h('div', { className: 'flex gap-3' },
+                h('div', { className: 'flex gap-3 flex-wrap' },
                     h('div', { className: 'relative' },
                         h('select', { 
                             value: period, 
@@ -768,13 +784,21 @@
                             )
                         )
                     ),
-                    h('button', { onClick: function() { alert('Función PDF en desarrollo'); }, className: 'bg-[#9D2449] hover:bg-[#801d3a] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2' },
+                    h('button', { onClick: generatePDF, className: 'bg-[#9D2449] hover:bg-[#801d3a] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2' },
                         h('span', null, '📄'),
                         ' PDF'
                     ),
-                    isAdmin ? h('button', { onClick: function() { alert('Función Word en desarrollo'); }, className: 'bg-[#1B396A] hover:bg-[#142b52] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2' },
+                    isAdmin ? h('button', { onClick: generateWord, className: 'bg-[#1B396A] hover:bg-[#142b52] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2' },
                         h('span', null, '📝'),
                         ' Word'
+                    ) : null,
+                    isAdmin ? h('button', { onClick: function() { generateWordTrimestral(statsData, period); }, className: 'bg-[#7B3F00] hover:bg-[#5c2f00] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2' },
+                        h('span', null, '📋'),
+                        ' Informe Trimestral'
+                    ) : null,
+                    isAdmin ? h('button', { onClick: function() { generateWordCompleto(statsData, period); }, className: 'bg-[#2E7D32] hover:bg-[#1b5e20] text-white font-bold py-2 px-6 rounded-lg shadow transition-all transform hover:scale-105 flex items-center gap-2' },
+                        h('span', null, '📊'),
+                        ' Word Completo'
                     ) : null,
                     h('button', { onClick: onLogout, className: 'bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors' }, 'Salir')
                 )
@@ -883,7 +907,7 @@
     };
 
     // ============================================================
-    // 7. COMPONENTE: APP
+    // 8. COMPONENTE: APP
     // ============================================================
     var App = function() {
         var _user = useState(null);
@@ -922,7 +946,7 @@
     };
 
     // ============================================================
-    // 8. MONTAJE
+    // 9. MONTAJE
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         var rootEl = document.getElementById('root');
