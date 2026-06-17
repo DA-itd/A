@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-V2V4CT2C69"></script>
-<script src="ga.js"></script>
+    <script src="ga.js"></script>
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,6 @@
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -27,7 +26,6 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         
-        /* RELOJ DE ESPERA (Loader) */
         .loader-clock {
             width: 48px;
             height: 48px;
@@ -51,7 +49,7 @@
             content: '';
             position: absolute;
             width: 3px; height: 18px;
-            background: #9D2449; /* Color guinda */
+            background: #9D2449;
             top: 50%; left: 50%;
             margin-left: -1.5px;
             margin-top: -18px;
@@ -68,192 +66,300 @@
 
     <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+    <script>
+    // ============================================================
+    // 1. REACT
+    // ============================================================
+    var React = window.React;
+    var ReactDOM = window.ReactDOM;
+    var useState = React.useState;
+    var useEffect = React.useEffect;
+    var useRef = React.useRef;
+    var createRoot = ReactDOM.createRoot;
+    var h = React.createElement;
 
-        const CONFIG = {
-            GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
-            TEACHERS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv'
-        };
+    // ============================================================
+    // 2. CONFIGURACIÓN
+    // ============================================================
+    var CONFIG = {
+        GOOGLE_CLIENT_ID: '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com',
+        APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
+        TEACHERS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv'
+    };
 
-        const ADMIN_EMAILS = [
-            'alejandro.calderon@itdurango.edu.mx',
-            'desarrollo.academico@itdurango.edu.mx'
-        ];
+    var ADMIN_EMAILS = [
+        'alejandro.calderon@itdurango.edu.mx',
+        'desarrollo.academico@itdurango.edu.mx'
+    ];
 
-        const CHART_LABELS = [
-            "INGENIERIA INDUSTRIAL", 
-            "SISTEMAS Y COMPUTACIÓN", 
-            "CIENCIAS BÁSICAS", 
-            "QUÍMICA BIOQUÍMICA", 
-            "METAL MECÁNICA", 
-            "CIENCIAS ECONÓMICO ADMINISTRATIVAS", 
-            "POSGRADO E INVESTIGACIÓN", 
-            "CIENCIAS DE LA TIERRA", 
-            "ELECTRICA ELECTRÓNICA",
-            "OTRO"
-        ];
+    var CHART_LABELS = [
+        "INGENIERIA INDUSTRIAL", 
+        "SISTEMAS Y COMPUTACIÓN", 
+        "CIENCIAS BÁSICAS", 
+        "QUÍMICA BIOQUÍMICA", 
+        "METAL MECÁNICA", 
+        "CIENCIAS ECONÓMICO ADMINISTRATIVAS", 
+        "POSGRADO E INVESTIGACIÓN", 
+        "CIENCIAS DE LA TIERRA", 
+        "ELECTRICA ELECTRÓNICA",
+        "OTRO"
+    ];
 
-        const ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
+    var ITD_LOGO_URL = 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png';
 
-        // --- UTILIDADES ---
-        const removeAccents = (text) => text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
-        const getImageDataFromURL = (url) => {
-            return new Promise((resolve) => {
-                const img = new Image(); img.crossOrigin = 'Anonymous';
-                img.onload = () => {
-                    const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height;
-                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
-                    try { resolve(canvas.toDataURL('image/png')); } catch (e) { resolve(null); }
-                };
-                img.onerror = () => resolve(null); img.src = url;
-            });
-        };
-        const drawLogo = (doc, logoData, x, y, targetWidth) => {
-            if (!logoData) return;
-            try {
-                const props = doc.getImageProperties(logoData);
-                const targetHeight = (props.height * targetWidth) / props.width;
-                doc.addImage(logoData, 'PNG', x, y, targetWidth, targetHeight);
-            } catch (e) { doc.addImage(logoData, 'PNG', x, y, targetWidth, targetWidth); }
-        };
-        const parseCSVLine = (line) => {
-            const result = []; let current = ''; let inQuotes = false;
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                if (char === '"') { if (inQuotes && line[i + 1] === '"') { current += '"'; i++; } else { inQuotes = !inQuotes; } }
-                else if (char === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
-                else { current += char; }
+    // ============================================================
+    // 3. UTILIDADES
+    // ============================================================
+    var removeAccents = function(text) {
+        return text ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+    };
+
+    var getImageDataFromURL = function(url) {
+        return new Promise(function(resolve) {
+            var img = new Image(); 
+            img.crossOrigin = 'Anonymous';
+            img.onload = function() {
+                var canvas = document.createElement('canvas'); 
+                canvas.width = img.width; 
+                canvas.height = img.height;
+                var ctx = canvas.getContext('2d'); 
+                ctx.drawImage(img, 0, 0);
+                try { resolve(canvas.toDataURL('image/png')); } 
+                catch (e) { resolve(null); }
+            };
+            img.onerror = function() { resolve(null); }; 
+            img.src = url;
+        });
+    };
+
+    var drawLogo = function(doc, logoData, x, y, targetWidth) {
+        if (!logoData) return;
+        try {
+            var props = doc.getImageProperties(logoData);
+            var targetHeight = (props.height * targetWidth) / props.width;
+            doc.addImage(logoData, 'PNG', x, y, targetWidth, targetHeight);
+        } catch (e) { 
+            doc.addImage(logoData, 'PNG', x, y, targetWidth, targetWidth); 
+        }
+    };
+
+    var parseCSVLine = function(line) {
+        var result = []; 
+        var current = ''; 
+        var inQuotes = false;
+        for (var i = 0; i < line.length; i++) {
+            var char = line[i];
+            if (char === '"') { 
+                if (inQuotes && line[i + 1] === '"') { 
+                    current += '"'; 
+                    i++; 
+                } else { 
+                    inQuotes = !inQuotes; 
+                } 
+            } else if (char === ',' && !inQuotes) { 
+                result.push(current.trim()); 
+                current = ''; 
+            } else { 
+                current += char; 
             }
-            result.push(current.trim());
-            return result;
-        };
-        const cleanCSVValue = (val) => { let c = val.trim(); if (c.startsWith('"') && c.endsWith('"')) c = c.substring(1, c.length - 1).replace(/""/g, '"'); return c; };
+        }
+        result.push(current.trim());
+        return result;
+    };
 
-        // ==========================================
-        // LOGIN SCREEN
-        // ==========================================
-        const LoginScreen = ({ onLogin, error }) => {
-            const googleBtnRef = useRef(null);
-            
-            useEffect(() => {
-                const interval = setInterval(() => {
-                    if (window.google && window.google.accounts && googleBtnRef.current) {
-                        clearInterval(interval);
-                        try {
-                            window.google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onLogin });
-                            window.google.accounts.id.renderButton(googleBtnRef.current, { theme: "filled_blue", size: "large", text: "signin_with", shape: "pill" });
-                        } catch (e) { console.error("Error rendering Google Button", e); }
-                    }
-                }, 500);
-                return () => clearInterval(interval);
-            }, [onLogin]);
+    var cleanCSVValue = function(val) { 
+        var c = val.trim(); 
+        if (c.startsWith('"') && c.endsWith('"')) {
+            c = c.substring(1, c.length - 1).replace(/""/g, '"');
+        }
+        return c; 
+    };
 
-            return (
-                <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-                    <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full border-t-4 border-indigo-600 animate-fadeIn">
-                        <img src={ITD_LOGO_URL} className="h-20 mx-auto mb-4 object-contain"/>
-                        <h1 className="text-2xl font-bold text-slate-800 mb-2">Panel Administrativo</h1>
-                        <p className="text-slate-500 mb-6">Actualización Docente ITD</p>
-                        {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm font-bold border border-red-200">{error}</div>}
-                        <div className="flex justify-center min-h-[50px]" ref={googleBtnRef}></div>
-                        <div className="mt-6 text-xs text-slate-400">Acceso exclusivo para Coordinación</div>
-                        <a href="index.html" className="block mt-4 text-indigo-600 text-sm hover:underline font-semibold">← Volver al Portal</a>
-                    </div>
-                </div>
-            );
-        };
+    var mapToChartLabel = function(rawName) {
+        var r = removeAccents(rawName || '').toUpperCase().trim();
+        
+        if(r.includes("INDUSTRIAL")) return "INGENIERIA INDUSTRIAL";
+        if(r.includes("SISTEMAS") || r.includes("COMPUTACIÓN") || r.includes("COMPUTACION") || r.includes("ISC")) return "SISTEMAS Y COMPUTACIÓN";
+        if(r.includes("BÁSICAS") || r.includes("BASICAS") || r.includes("CB")) return "CIENCIAS BÁSICAS";
+        if(r.includes("QUÍMICA") || r.includes("QUIMICA") || r.includes("BIOQUÍMICA")) return "QUÍMICA BIOQUÍMICA";
+        if(r.includes("METAL") || r.includes("MECÁNICA") || r.includes("MECANICA")) return "METAL MECÁNICA";
+        if(r.includes("ECONÓMICO") || r.includes("ECONOMICO") || r.includes("ADMINISTRATIVAS") || r.includes("CEA")) return "CIENCIAS ECONÓMICO ADMINISTRATIVAS";
+        if(r.includes("POSGRADO") || r.includes("INVESTIGACIÓN") || r.includes("INVESTIGACION")) return "POSGRADO E INVESTIGACIÓN";
+        if(r.includes("TIERRA")) return "CIENCIAS DE LA TIERRA";
+        if(r.includes("ELECTRICA") || r.includes("ELECTRÓNICA") || r.includes("ELECTRONICA")) return "ELECTRICA ELECTRÓNICA";
+        
+        return "OTRO";
+    };
 
-        // ==========================================
-        // MÓDULO 1: BUSCADOR
-        // ==========================================
-        const SearchPanel = ({ user }) => {
-            const [query, setQuery] = useState('');
-            const [result, setResult] = useState(null);
-            const [loading, setLoading] = useState(false);
-            const [teachers, setTeachers] = useState([]);
-            const [suggestions, setSuggestions] = useState([]);
-
-            useEffect(() => {
-                const getTeachers = async () => {
+    // ============================================================
+    // 4. COMPONENTE: LOGIN
+    // ============================================================
+    var LoginScreen = function(props) {
+        var onLogin = props.onLogin;
+        var error = props.error;
+        var googleBtnRef = useRef(null);
+        
+        useEffect(function() {
+            var interval = setInterval(function() {
+                if (window.google && window.google.accounts && googleBtnRef.current) {
+                    clearInterval(interval);
                     try {
-                        const response = await fetch(`${CONFIG.TEACHERS_CSV_URL}&_=${Date.now()}`);
-                        const csvText = await response.text();
-                        const list = csvText.trim().split(/\r?\n/).slice(1).map(line => {
-                            const v = parseCSVLine(line);
+                        window.google.accounts.id.initialize({ 
+                            client_id: CONFIG.GOOGLE_CLIENT_ID, 
+                            callback: onLogin 
+                        });
+                        window.google.accounts.id.renderButton(googleBtnRef.current, { 
+                            theme: "filled_blue", 
+                            size: "large", 
+                            text: "signin_with", 
+                            shape: "pill" 
+                        });
+                    } catch (e) { 
+                        console.error("Error rendering Google Button", e); 
+                    }
+                }
+            }, 500);
+            return function() { clearInterval(interval); };
+        }, [onLogin]);
+
+        return h('div', { className: 'min-h-screen flex items-center justify-center bg-slate-100 p-4' },
+            h('div', { className: 'bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full border-t-4 border-indigo-600 animate-fadeIn' },
+                h('img', { src: ITD_LOGO_URL, className: 'h-20 mx-auto mb-4 object-contain' }),
+                h('h1', { className: 'text-2xl font-bold text-slate-800 mb-2' }, 'Panel Administrativo'),
+                h('p', { className: 'text-slate-500 mb-6' }, 'Actualización Docente ITD'),
+                error ? h('div', { className: 'bg-red-100 text-red-700 p-3 rounded mb-4 text-sm font-bold border border-red-200' }, error) : null,
+                h('div', { className: 'flex justify-center min-h-[50px]', ref: googleBtnRef }),
+                h('div', { className: 'mt-6 text-xs text-slate-400' }, 'Acceso exclusivo para Coordinación'),
+                h('a', { href: 'index.html', className: 'block mt-4 text-indigo-600 text-sm hover:underline font-semibold' }, '← Volver al Portal')
+            )
+        );
+    };
+
+    // ============================================================
+    // 5. COMPONENTE: SEARCH PANEL
+    // ============================================================
+    var SearchPanel = function(props) {
+        var user = props.user;
+        var _query = useState('');
+        var query = _query[0];
+        var setQuery = _query[1];
+        
+        var _result = useState(null);
+        var result = _result[0];
+        var setResult = _result[1];
+        
+        var _loading = useState(false);
+        var loading = _loading[0];
+        var setLoading = _loading[1];
+        
+        var _teachers = useState([]);
+        var teachers = _teachers[0];
+        var setTeachers = _teachers[1];
+        
+        var _suggestions = useState([]);
+        var suggestions = _suggestions[0];
+        var setSuggestions = _suggestions[1];
+
+        useEffect(function() {
+            var getTeachers = function() {
+                fetch(CONFIG.TEACHERS_CSV_URL + '&_=' + Date.now())
+                    .then(function(response) { return response.text(); })
+                    .then(function(csvText) {
+                        var list = csvText.trim().split(/\r?\n/).slice(1).map(function(line) {
+                            var v = parseCSVLine(line);
                             return v.length >= 3 ? { nombreCompleto: cleanCSVValue(v[0]), email: cleanCSVValue(v[2]) } : null;
-                        }).filter(Boolean);
+                        }).filter(function(item) { return item !== null; });
                         setTeachers(list);
-                    } catch (e) { console.error("Error docentes", e); }
-                };
-                getTeachers();
-            }, []);
-
-            const handleSuggestion = (e) => {
-                const val = e.target.value; setQuery(val);
-                if (val.length > 2) {
-                    const norm = removeAccents(val.toLowerCase());
-                    setSuggestions(teachers.filter(t => removeAccents(t.nombreCompleto.toLowerCase()).includes(norm)).slice(0, 5));
-                } else setSuggestions([]);
-            };
-
-            const search = (target) => {
-                if(!target.trim()) return; 
-                setLoading(true);
-                setSuggestions([]);
-                setResult(null);
-                setQuery(target);
-                
-                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeacherHistory&id_token=${user.token}&target_email=${encodeURIComponent(target)}`)
-                    .then(r => r.json())
-                    .then(res => {
-                        if(res.success && res.data && res.data.courses.length > 0) {
-                            setResult(res.data);
-                        } else {
-                            alert("No se encontraron registros para este docente.");
-                        }
                     })
-                    .catch(err => alert("Error de conexión: " + err.message))
-                    .finally(() => setLoading(false));
+                    .catch(function(e) { console.error("Error docentes", e); });
             };
+            getTeachers();
+        }, []);
 
-            const exportKardexPdf = async () => {
-                if(!result) return;
-                const { teacher, courses } = result;
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'letter');
-                const pageWidth = doc.internal.pageSize.getWidth();
+        var handleSuggestion = function(e) {
+            var val = e.target.value;
+            setQuery(val);
+            if (val.length > 2) {
+                var norm = removeAccents(val.toLowerCase());
+                var filtered = teachers.filter(function(t) {
+                    return removeAccents(t.nombreCompleto.toLowerCase()).includes(norm);
+                }).slice(0, 5);
+                setSuggestions(filtered);
+            } else {
+                setSuggestions([]);
+            }
+        };
 
-                const itdLogo = await getImageDataFromURL(ITD_LOGO_URL);
+        var search = function(target) {
+            if (!target.trim()) return;
+            setLoading(true);
+            setSuggestions([]);
+            setResult(null);
+            setQuery(target);
+            
+            fetch(CONFIG.APPS_SCRIPT_URL + '?action=getTeacherHistory&id_token=' + encodeURIComponent(user.token) + '&target_email=' + encodeURIComponent(target))
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    if (res.success && res.data && res.data.courses.length > 0) {
+                        setResult(res.data);
+                    } else {
+                        alert("No se encontraron registros para este docente.");
+                    }
+                })
+                .catch(function(err) {
+                    alert("Error de conexión: " + err.message);
+                })
+                .finally(function() {
+                    setLoading(false);
+                });
+        };
+
+        var exportKardexPdf = function() {
+            if (!result) return;
+            var teacher = result.teacher;
+            var courses = result.courses;
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF('p', 'mm', 'letter');
+            var pageWidth = doc.internal.pageSize.getWidth();
+
+            getImageDataFromURL(ITD_LOGO_URL).then(function(itdLogo) {
                 if (itdLogo) drawLogo(doc, itdLogo, pageWidth - 35, 10, 25);
 
-                doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(27, 57, 106);
+                doc.setFont("helvetica", "bold"); 
+                doc.setFontSize(14); 
+                doc.setTextColor(27, 57, 106);
                 doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth/2, 20, { align: "center" });
-                doc.setFontSize(11); doc.setTextColor(100);
+                doc.setFontSize(11); 
+                doc.setTextColor(100);
                 doc.text("Coordinación de Actualización Docente", pageWidth/2, 26, { align: "center" });
-                doc.setFontSize(14); doc.setTextColor(128, 0, 0);
+                doc.setFontSize(14); 
+                doc.setTextColor(128, 0, 0);
                 doc.text("HISTORIAL DE CURSOS", pageWidth/2, 38, { align: "center" });
 
-                doc.setTextColor(0); doc.setFontSize(10); doc.setFont("helvetica", "bold");
+                doc.setTextColor(0); 
+                doc.setFontSize(10); 
+                doc.setFont("helvetica", "bold");
                 doc.text("Docente:", 14, 50);
                 doc.setFont("helvetica", "normal");
                 doc.text(teacher.name, 35, 50);
 
-                const today = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+                var today = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
                 doc.setFont("helvetica", "bold");
                 doc.text("Fecha de emisión:", 14, 55);
                 doc.setFont("helvetica", "normal");
                 doc.text(today, 50, 55);
 
-                const tableBody = courses.map(c => [
-                    c.year, c.folio, c.courseName, c.datesText, c.hours, c.type, c.deptOrigin || teacher.dept
-                ]);
+                var tableBody = courses.map(function(c) {
+                    return [
+                        c.year, c.folio, c.courseName, c.datesText, c.hours, c.type, c.deptOrigin || teacher.dept
+                    ];
+                });
 
                 doc.autoTable({
                     head: [['Año', 'Folio', 'Curso', 'Fechas', 'Hrs', 'Tipo', 'Depto. Origen']],
                     body: tableBody,
-                    startY: 60, theme: 'grid',
+                    startY: 60, 
+                    theme: 'grid',
                     headStyles: { fillColor: [27, 57, 106], textColor: 255, fontSize: 9, halign: 'center' },
                     styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' },
                     columnStyles: {
@@ -265,565 +371,669 @@
                     }
                 });
 
-                doc.save(`Kardex_${teacher.name}.pdf`);
-            };
-
-            const exportKardexExcel = () => {
-                if(!result) return;
-                const { teacher, courses } = result;
-                const rows = courses.map(c => ({
-                    "Año": c.year,
-                    "Folio": c.folio,
-                    "Curso": c.courseName,
-                    "Fechas": c.datesText,
-                    "Horas": c.hours,
-                    "Tipo": c.type,
-                    "Depto. Origen": c.deptOrigin || teacher.dept
-                }));
-                const ws = XLSX.utils.json_to_sheet(rows);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Historial");
-                XLSX.writeFile(wb, `Historial_${teacher.name}.xlsx`);
-            };
-
-            return (
-                <div className="animate-fadeIn p-6">
-                    <div className="max-w-4xl mx-auto">
-                        <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                            <span className="bg-indigo-100 p-2 rounded-lg text-indigo-600">🔍</span> Consultar Historial Docente
-                        </h2>
-                        
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-8">
-                            <div className="relative flex gap-2">
-                                <div className="flex-grow relative">
-                                    <input 
-                                        type="text" 
-                                        value={query} 
-                                        onChange={handleSuggestion} 
-                                        onKeyDown={(e) => e.key === 'Enter' && query.trim() && search(query)}
-                                        placeholder="Escriba el nombre del docente o correo..." 
-                                        className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                                    />
-                                    {suggestions.length > 0 && (
-                                        <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-xl max-h-60 overflow-auto">
-                                            {suggestions.map((t, i) => (
-                                                <li key={i} onClick={() => { setQuery(t.nombreCompleto); setSuggestions([]); search(t.nombreCompleto); }} className="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-100 last:border-0">
-                                                    <div className="font-bold text-slate-800">{t.nombreCompleto}</div>
-                                                    <div className="text-xs text-slate-500">{t.email}</div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </div>
-                                <button 
-                                    onClick={() => search(query)} 
-                                    disabled={loading || !query.trim()} 
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-lg shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                                >
-                                    {loading ? <div className="loader-clock !w-5 !h-5 !border-2"></div> : 'Buscar'}
-                                </button>
-                            </div>
-                        </div>
-
-                        {result && (
-                            <div className="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
-                                <div className="p-6 border-b border-slate-100 flex flex-wrap gap-4 justify-between items-center bg-slate-50">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-slate-800">{result.teacher.name}</h3>
-                                        <p className="text-slate-500 text-sm">{result.teacher.email}</p>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button onClick={exportKardexPdf} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2"><span>📄</span> PDF</button>
-                                        <button onClick={exportKardexExcel} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2"><span>📊</span> Excel</button>
-                                    </div>
-                                </div>
-                                <div className="max-h-[500px] overflow-auto custom-scrollbar">
-                                    <table className="w-full text-sm text-left">
-                                        <thead className="bg-slate-100 text-slate-700 uppercase font-bold text-xs sticky top-0">
-                                            <tr>
-                                                <th className="px-4 py-3">Año</th>
-                                                <th className="px-4 py-3">Curso</th>
-                                                <th className="px-4 py-3">Folio</th>
-                                                <th className="px-4 py-3">Hrs</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-100">
-                                            {result.courses.map((c, i) => (
-                                                <tr key={i} className="hover:bg-slate-50">
-                                                    <td className="px-4 py-3 font-bold text-indigo-700">{c.year}</td>
-                                                    <td className="px-4 py-3 font-medium text-slate-800">{c.courseName}</td>
-                                                    <td className="px-4 py-3 text-slate-500 font-mono text-xs">{c.folio}</td>
-                                                    <td className="px-4 py-3">{c.hours}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
+                doc.save("Kardex_" + teacher.name + ".pdf");
+            });
         };
 
-        // ==========================================
-        // MÓDULO 2: ENCUESTAS (EFICACIA + DOCENTES)
-        // ==========================================
-        const SurveyPanel = () => {
-            const [efficacyStats, setEfficacyStats] = useState(null);
-            const [teacherStats, setTeacherStats] = useState(null);
-            const [loading, setLoading] = useState(true);
-            
-            const chartRef1 = useRef(null);
-            const chartInstance1 = useRef(null);
-            const chartRef2 = useRef(null);
-            const chartInstance2 = useRef(null);
+        var exportKardexExcel = function() {
+            if (!result) return;
+            var teacher = result.teacher;
+            var courses = result.courses;
+            var rows = courses.map(function(c) {
+                var obj = {};
+                obj["Año"] = c.year;
+                obj["Folio"] = c.folio;
+                obj["Curso"] = c.courseName;
+                obj["Fechas"] = c.datesText;
+                obj["Horas"] = c.hours;
+                obj["Tipo"] = c.type;
+                obj["Depto. Origen"] = c.deptOrigin || teacher.dept;
+                return obj;
+            });
+            var ws = XLSX.utils.json_to_sheet(rows);
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Historial");
+            XLSX.writeFile(wb, "Historial_" + teacher.name + ".xlsx");
+        };
 
-            // Mapping function to specific chart labels
-            const mapToChartLabel = (rawName) => {
-                const r = removeAccents(rawName || '').toUpperCase().trim();
+        return h('div', { className: 'animate-fadeIn p-6' },
+            h('div', { className: 'max-w-4xl mx-auto' },
+                h('h2', { className: 'text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2' },
+                    h('span', { className: 'bg-indigo-100 p-2 rounded-lg text-indigo-600' }, '🔍'),
+                    ' Consultar Historial Docente'
+                ),
                 
-                if(r.includes("INDUSTRIAL")) return "INGENIERIA INDUSTRIAL";
-                if(r.includes("SISTEMAS") || r.includes("COMPUTACIÓN") || r.includes("COMPUTACION") || r.includes("ISC")) return "SISTEMAS Y COMPUTACIÓN";
-                if(r.includes("BÁSICAS") || r.includes("BASICAS") || r.includes("CB")) return "CIENCIAS BÁSICAS";
-                if(r.includes("QUÍMICA") || r.includes("QUIMICA") || r.includes("BIOQUÍMICA")) return "QUÍMICA BIOQUÍMICA";
-                if(r.includes("METAL") || r.includes("MECÁNICA") || r.includes("MECANICA")) return "METAL MECÁNICA";
-                if(r.includes("ECONÓMICO") || r.includes("ECONOMICO") || r.includes("ADMINISTRATIVAS") || r.includes("CEA")) return "CIENCIAS ECONÓMICO ADMINISTRATIVAS";
-                if(r.includes("POSGRADO") || r.includes("INVESTIGACIÓN") || r.includes("INVESTIGACION")) return "POSGRADO E INVESTIGACIÓN";
-                if(r.includes("TIERRA")) return "CIENCIAS DE LA TIERRA";
-                if(r.includes("ELECTRICA") || r.includes("ELECTRÓNICA") || r.includes("ELECTRONICA")) return "ELECTRICA ELECTRÓNICA";
-                
-                return "OTRO";
-            };
-
-            useEffect(() => {
-                setLoading(true);
-                Promise.all([
-                    fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getSurveyStats`).then(r => r.json()),
-                    fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getTeacherSurveyStats`).then(r => r.json())
-                ])
-                .then(([res1, res2]) => {
-                    if(res1.success) setEfficacyStats(res1.data);
-                    if(res2.success) setTeacherStats(res2.data);
-                })
-                .catch(e => console.error(e))
-                .finally(() => setLoading(false));
-            }, []);
-
-            // Render Chart 1: Eficacia
-            useEffect(() => {
-                if (!loading && efficacyStats && chartRef1.current) {
-                    renderChart(chartRef1.current, chartInstance1, efficacyStats, 'Participación en Encuesta de Eficacia por Fefaturas', ['#4f46e5', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1', '#9ca3af']);
-                }
-            }, [efficacyStats, loading]);
-
-            // Render Chart 2: Docentes
-            useEffect(() => {
-                if (!loading && teacherStats && chartRef2.current) {
-                    renderChart(chartRef2.current, chartInstance2, teacherStats, 'Participación en Encuesta de Docentes', ['#be123c', '#e11d48', '#f43f5e', '#fb7185', '#fda4af', '#9f1239', '#881337', '#be123c', '#e11d48', '#f43f5e']);
-                }
-            }, [teacherStats, loading]);
-
-            const renderChart = (canvas, instanceRef, stats, label, colors) => {
-                const aggregatedCounts = {};
-                CHART_LABELS.forEach(label => { aggregatedCounts[label] = 0; });
-
-                if (stats.participacion) {
-                    Object.entries(stats.participacion).forEach(([raw, count]) => {
-                        const label = mapToChartLabel(raw);
-                        if (aggregatedCounts.hasOwnProperty(label)) {
-                            aggregatedCounts[label] += count;
-                        }
-                    });
-                }
-
-                const dataValues = CHART_LABELS.map(l => aggregatedCounts[l] || 0);
-
-                if(instanceRef.current) {
-                    instanceRef.current.destroy();
-                }
-                
-                instanceRef.current = new Chart(canvas.getContext('2d'), {
-                    type: 'bar',
-                    data: {
-                        labels: CHART_LABELS, 
-                        datasets: [{ 
-                            label: label, 
-                            data: dataValues, 
-                            backgroundColor: colors, 
-                            borderRadius: 4,
-                            borderWidth: 1
-                        }]
-                    },
-                    plugins: [ChartDataLabels],
-                    options: { 
-                        indexAxis: 'y', // Horizontal chart
-                        responsive: true, 
-                        maintainAspectRatio: false, 
-                        plugins: { 
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: { label: (ctx) => `${ctx.raw} evaluaciones` }
-                            },
-                            datalabels: {
-                                color: '#000',
-                                anchor: 'end',
-                                align: 'end',
-                                font: {
-                                    weight: 'bold'
-                                },
-                                formatter: (value) => value > 0 ? value : ''
-                            }
-                        }, 
-                        layout: {
-                            padding: {
-                                right: 30
-                            }
+                h('div', { className: 'bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-8' },
+                    h('div', { className: 'relative flex gap-2' },
+                        h('div', { className: 'flex-grow relative' },
+                            h('input', {
+                                type: 'text',
+                                value: query,
+                                onChange: handleSuggestion,
+                                onKeyDown: function(e) { if (e.key === 'Enter' && query.trim()) search(query); },
+                                placeholder: 'Escriba el nombre del docente o correo...',
+                                className: 'w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none'
+                            }),
+                            suggestions.length > 0 ? h('ul', { className: 'absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-xl max-h-60 overflow-auto' },
+                                suggestions.map(function(t, i) {
+                                    return h('li', {
+                                        key: i,
+                                        onClick: function() { 
+                                            setQuery(t.nombreCompleto); 
+                                            setSuggestions([]); 
+                                            search(t.nombreCompleto); 
+                                        },
+                                        className: 'px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-100 last:border-0'
+                                    },
+                                        h('div', { className: 'font-bold text-slate-800' }, t.nombreCompleto),
+                                        h('div', { className: 'text-xs text-slate-500' }, t.email)
+                                    );
+                                })
+                            ) : null
+                        ),
+                        h('button', {
+                            onClick: function() { search(query); },
+                            disabled: loading || !query.trim(),
+                            className: 'bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-lg shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center'
                         },
-                        scales: { 
-                            x: { beginAtZero: true, ticks: { stepSize: 1 } },
-                            y: { 
-                                ticks: { font: { size: 10, weight: 'bold' }, autoSkip: false } 
-                            }
-                        } 
+                            loading ? h('div', { className: 'loader-clock', style: { width: '20px', height: '20px', borderWidth: '2px' } }) : 'Buscar'
+                        )
+                    )
+                ),
+
+                result ? h('div', { className: 'bg-white rounded-xl shadow border border-slate-200 overflow-hidden' },
+                    h('div', { className: 'p-6 border-b border-slate-100 flex flex-wrap gap-4 justify-between items-center bg-slate-50' },
+                        h('div', null,
+                            h('h3', { className: 'text-xl font-bold text-slate-800' }, result.teacher.name),
+                            h('p', { className: 'text-slate-500 text-sm' }, result.teacher.email)
+                        ),
+                        h('div', { className: 'flex gap-2' },
+                            h('button', { 
+                                onClick: exportKardexPdf, 
+                                className: 'bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2'
+                            },
+                                h('span', null, '📄'),
+                                ' PDF'
+                            ),
+                            h('button', { 
+                                onClick: exportKardexExcel, 
+                                className: 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2'
+                            },
+                                h('span', null, '📊'),
+                                ' Excel'
+                            )
+                        )
+                    ),
+                    h('div', { className: 'max-h-[500px] overflow-auto custom-scrollbar' },
+                        h('table', { className: 'w-full text-sm text-left' },
+                            h('thead', { className: 'bg-slate-100 text-slate-700 uppercase font-bold text-xs sticky top-0' },
+                                h('tr', null,
+                                    h('th', { className: 'px-4 py-3' }, 'Año'),
+                                    h('th', { className: 'px-4 py-3' }, 'Curso'),
+                                    h('th', { className: 'px-4 py-3' }, 'Folio'),
+                                    h('th', { className: 'px-4 py-3' }, 'Hrs')
+                                )
+                            ),
+                            h('tbody', { className: 'divide-y divide-slate-100' },
+                                result.courses.map(function(c, i) {
+                                    return h('tr', { key: i, className: 'hover:bg-slate-50' },
+                                        h('td', { className: 'px-4 py-3 font-bold text-indigo-700' }, c.year),
+                                        h('td', { className: 'px-4 py-3 font-medium text-slate-800' }, c.courseName),
+                                        h('td', { className: 'px-4 py-3 text-slate-500 font-mono text-xs' }, c.folio),
+                                        h('td', { className: 'px-4 py-3' }, c.hours)
+                                    );
+                                })
+                            )
+                        )
+                    )
+                ) : null
+            )
+        );
+    };
+
+    // ============================================================
+    // 6. COMPONENTE: SURVEY PANEL (SIMPLIFICADO)
+    // ============================================================
+    var SurveyPanel = function() {
+        var _efficacyStats = useState(null);
+        var efficacyStats = _efficacyStats[0];
+        var setEfficacyStats = _efficacyStats[1];
+        
+        var _teacherStats = useState(null);
+        var teacherStats = _teacherStats[0];
+        var setTeacherStats = _teacherStats[1];
+        
+        var _loading = useState(true);
+        var loading = _loading[0];
+        var setLoading = _loading[1];
+        
+        var chartRef1 = useRef(null);
+        var chartInstance1 = useRef(null);
+        var chartRef2 = useRef(null);
+        var chartInstance2 = useRef(null);
+
+        useEffect(function() {
+            setLoading(true);
+            var url1 = CONFIG.APPS_SCRIPT_URL + '?action=getSurveyStats&t=' + Date.now();
+            var url2 = CONFIG.APPS_SCRIPT_URL + '?action=getTeacherSurveyStats&t=' + Date.now();
+            
+            Promise.all([
+                fetch(url1).then(function(r) { return r.json(); }),
+                fetch(url2).then(function(r) { return r.json(); })
+            ])
+            .then(function(results) {
+                if (results[0].success) setEfficacyStats(results[0].data);
+                if (results[1].success) setTeacherStats(results[1].data);
+            })
+            .catch(function(e) { console.error(e); })
+            .finally(function() {
+                setLoading(false);
+            });
+        }, []);
+
+        useEffect(function() {
+            if (!loading && efficacyStats && chartRef1.current) {
+                renderChart(chartRef1.current, chartInstance1, efficacyStats, 'Participación en Encuesta de Eficacia por Jefaturas', ['#4f46e5', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1', '#9ca3af']);
+            }
+        }, [efficacyStats, loading]);
+
+        useEffect(function() {
+            if (!loading && teacherStats && chartRef2.current) {
+                renderChart(chartRef2.current, chartInstance2, teacherStats, 'Participación en Encuesta de Docentes', ['#be123c', '#e11d48', '#f43f5e', '#fb7185', '#fda4af', '#9f1239', '#881337', '#be123c', '#e11d48', '#f43f5e']);
+            }
+        }, [teacherStats, loading]);
+
+        var renderChart = function(canvas, instanceRef, stats, label, colors) {
+            var aggregatedCounts = {};
+            CHART_LABELS.forEach(function(label) { aggregatedCounts[label] = 0; });
+
+            if (stats.participacion) {
+                Object.keys(stats.participacion).forEach(function(raw) {
+                    var mappedLabel = mapToChartLabel(raw);
+                    if (aggregatedCounts.hasOwnProperty(mappedLabel)) {
+                        aggregatedCounts[mappedLabel] += stats.participacion[raw];
                     }
                 });
-            };
+            }
 
-            const exportPdf = async (stats, chartRef, title, filename) => {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'a4');
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const logo = await getImageDataFromURL(ITD_LOGO_URL);
-                if (logo) drawLogo(doc, logo, 15, 10, 18);
-                doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(27, 57, 106);
-                doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth / 2, 18, { align: "center" });
-                doc.setFontSize(10); doc.setTextColor(100); 
-                doc.text("Coordinación de Actualización Docente", pageWidth / 2, 24, { align: "center" });
-                doc.setFontSize(12); doc.setTextColor(0); 
-                doc.text(title.toUpperCase(), pageWidth / 2, 35, { align: "center" });
-                doc.setDrawColor(27, 57, 106); doc.setLineWidth(0.5); doc.line(15, 40, pageWidth - 15, 40);
-                
-                if(chartRef.current) {
-                    const canvas = chartRef.current;
-                    const tempCanvas = document.createElement('canvas'); tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
-                    const ctx = tempCanvas.getContext('2d'); ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height); ctx.drawImage(canvas, 0, 0);
-                    const imgData = tempCanvas.toDataURL("image/png");
-                    doc.addImage(imgData, 'PNG', 15, 50, 180, 140); 
+            var dataValues = CHART_LABELS.map(function(l) { return aggregatedCounts[l] || 0; });
+
+            if (instanceRef.current) {
+                instanceRef.current.destroy();
+            }
+            
+            instanceRef.current = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: CHART_LABELS,
+                    datasets: [{ 
+                        label: label, 
+                        data: dataValues, 
+                        backgroundColor: colors, 
+                        borderRadius: 4,
+                        borderWidth: 1
+                    }]
+                },
+                plugins: [ChartDataLabels],
+                options: { 
+                    indexAxis: 'y',
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: { label: function(ctx) { return ctx.raw + ' evaluaciones'; } }
+                        },
+                        datalabels: {
+                            color: '#000',
+                            anchor: 'end',
+                            align: 'end',
+                            font: { weight: 'bold' },
+                            formatter: function(value) { return value > 0 ? value : ''; }
+                        }
+                    },
+                    layout: { padding: { right: 30 } },
+                    scales: { 
+                        x: { beginAtZero: true, ticks: { stepSize: 1 } },
+                        y: { ticks: { font: { size: 10, weight: 'bold' }, autoSkip: false } } 
+                    }
                 }
-                const dateStr = new Date().toLocaleDateString('es-MX', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
-                doc.setFontSize(10); doc.setTextColor(80); 
-                doc.text(`Total de Evaluaciones: ${stats?.total || 0}`, 15, 200);
-                doc.text(`Fecha de corte: ${dateStr}`, 15, 205);
-                doc.save(filename);
-            };
-
-            return (
-                <div className="animate-fadeIn p-6">
-                    <div className="max-w-5xl mx-auto space-y-12">
-                        {loading ? (
-                             <div className="text-center py-20">
-                                <div className="loader-clock"></div>
-                                <p className="mt-4 text-slate-500 font-semibold">Cargando encuestas...</p>
-                             </div>
-                        ) : (
-                            <>
-                                {/* Gráfica 1: Eficacia */}
-                                <div>
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                                            <span className="bg-yellow-100 p-2 rounded-lg text-yellow-600">📊</span> Encuesta de Eficacia
-                                        </h2>
-                                        <button onClick={() => exportPdf(efficacyStats, chartRef1, 'Encuesta de Eficacia - Avance por Departamento', 'Reporte_Eficacia.pdf')} className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition shadow flex items-center gap-2">
-                                            <span>📄</span> PDF
-                                        </button>
-                                    </div>
-                                    <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
-                                        <div className="mb-4 bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500 inline-block">
-                                            <span className="text-xs font-bold text-blue-600 uppercase block">Total</span>
-                                            <span className="text-2xl font-bold text-blue-900">{efficacyStats?.total || 0}</span>
-                                        </div>
-                                        <div className="h-[500px] w-full"><canvas ref={chartRef1}></canvas></div>
-                                    </div>
-                                </div>
-
-                                {/* Gráfica 2: Docentes */}
-                                <div>
-                                    <div className="flex justify-between items-center mb-4 border-t pt-8 border-slate-200">
-                                        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                                            <span className="bg-rose-100 p-2 rounded-lg text-rose-600">🎓</span> Encuesta de Docentes
-                                        </h2>
-                                        <button onClick={() => exportPdf(teacherStats, chartRef2, 'Encuesta de Docentes - Avance por Departamento', 'Reporte_Docentes.pdf')} className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition shadow flex items-center gap-2">
-                                            <span>📄</span> PDF
-                                        </button>
-                                    </div>
-                                    <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
-                                        <div className="mb-4 bg-rose-50 p-3 rounded-lg border-l-4 border-rose-500 inline-block">
-                                            <span className="text-xs font-bold text-rose-600 uppercase block">Total</span>
-                                            <span className="text-2xl font-bold text-rose-900">{teacherStats?.total || 0}</span>
-                                        </div>
-                                        <div className="h-[500px] w-full"><canvas ref={chartRef2}></canvas></div>
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            );
+            });
         };
 
-        // ==========================================
-        // MÓDULO 3: REPORTES (FILTROS MEJORADOS)
-        // ==========================================
-        const ReportsPanel = ({ user }) => {
-            const [year, setYear] = useState('ACTUAL');
-            const [dept, setDept] = useState('');
-            const [month, setMonth] = useState('');
-            const [departments, setDepartments] = useState([]);
-            const [data, setData] = useState([]);
-            const [filtered, setFiltered] = useState([]);
-            const [loading, setLoading] = useState(false);
+        if (loading) {
+            return h('div', { className: 'text-center py-20' },
+                h('div', { className: 'loader-clock' }),
+                h('p', { className: 'mt-4 text-slate-500 font-semibold' }, 'Cargando encuestas...')
+            );
+        }
 
-            const MONTHS = [
-                {v: '', l: '-- Todos --'},
-                {v: '1', l: 'Enero'},
-                {v: '6', l: 'Junio'},
-                {v: '8', l: 'Agosto'}
-            ];
+        return h('div', { className: 'animate-fadeIn p-6' },
+            h('div', { className: 'max-w-5xl mx-auto space-y-12' },
+                h('div', null,
+                    h('div', { className: 'flex justify-between items-center mb-4' },
+                        h('h2', { className: 'text-2xl font-bold text-slate-800 flex items-center gap-2' },
+                            h('span', { className: 'bg-yellow-100 p-2 rounded-lg text-yellow-600' }, '📊'),
+                            ' Encuesta de Eficacia'
+                        )
+                    ),
+                    h('div', { className: 'bg-white p-6 rounded-xl shadow border border-slate-200' },
+                        h('div', { className: 'mb-4 bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500 inline-block' },
+                            h('span', { className: 'text-xs font-bold text-blue-600 uppercase block' }, 'Total'),
+                            h('span', { className: 'text-2xl font-bold text-blue-900' }, efficacyStats ? efficacyStats.total : 0)
+                        ),
+                        h('div', { className: 'h-[500px] w-full' },
+                            h('canvas', { ref: chartRef1 })
+                        )
+                    )
+                ),
+                h('div', null,
+                    h('div', { className: 'flex justify-between items-center mb-4 border-t pt-8 border-slate-200' },
+                        h('h2', { className: 'text-2xl font-bold text-slate-800 flex items-center gap-2' },
+                            h('span', { className: 'bg-rose-100 p-2 rounded-lg text-rose-600' }, '🎓'),
+                            ' Encuesta de Docentes'
+                        )
+                    ),
+                    h('div', { className: 'bg-white p-6 rounded-xl shadow border border-slate-200' },
+                        h('div', { className: 'mb-4 bg-rose-50 p-3 rounded-lg border-l-4 border-rose-500 inline-block' },
+                            h('span', { className: 'text-xs font-bold text-rose-600 uppercase block' }, 'Total'),
+                            h('span', { className: 'text-2xl font-bold text-rose-900' }, teacherStats ? teacherStats.total : 0)
+                        ),
+                        h('div', { className: 'h-[500px] w-full' },
+                            h('canvas', { ref: chartRef2 })
+                        )
+                    )
+                )
+            )
+        );
+    };
 
-            useEffect(() => {
-                setLoading(true);
-                setDept('');
-                setMonth('');
-                setFiltered([]);
-                
-                fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getReportData&period=${year}&id_token=${user.token}`)
-                    .then(r => r.json())
-                    .then(res => {
-                        if(res.success) {
-                            const processedData = res.data.map(item => {
-                                // "Depto. Oferente" se obtiene directamente de la columna "Departamento" (índice 6 en el sheet).
-                                // La API devuelve ese valor en item.departamento.
-                                return { ...item, depto_oferente: item.departamento };
-                            });
+    // ============================================================
+    // 7. COMPONENTE: REPORTS PANEL
+    // ============================================================
+    var ReportsPanel = function(props) {
+        var user = props.user;
+        var _year = useState('ACTUAL');
+        var year = _year[0];
+        var setYear = _year[1];
+        
+        var _dept = useState('');
+        var dept = _dept[0];
+        var setDept = _dept[1];
+        
+        var _month = useState('');
+        var month = _month[0];
+        var setMonth = _month[1];
+        
+        var _departments = useState([]);
+        var departments = _departments[0];
+        var setDepartments = _departments[1];
+        
+        var _data = useState([]);
+        var data = _data[0];
+        var setData = _data[1];
+        
+        var _filtered = useState([]);
+        var filtered = _filtered[0];
+        var setFiltered = _filtered[1];
+        
+        var _loading = useState(false);
+        var loading = _loading[0];
+        var setLoading = _loading[1];
 
-                            setData(processedData);
-                            const uniqueDepts = [...new Set(processedData.map(i => i.departamento).filter(Boolean).map(d => d.trim().toUpperCase()))].sort();
-                            setDepartments(uniqueDepts);
-                        } else { setData([]); setDepartments([]); }
-                    })
-                    .finally(() => setLoading(false));
-            }, [year]);
+        var MONTHS = [
+            {v: '', l: '-- Todos --'},
+            {v: '1', l: 'Enero'},
+            {v: '6', l: 'Junio'},
+            {v: '8', l: 'Agosto'}
+        ];
 
-            useEffect(() => {
-                let temp = data;
+        useEffect(function() {
+            setLoading(true);
+            setDept('');
+            setMonth('');
+            setFiltered([]);
+            
+            var url = CONFIG.APPS_SCRIPT_URL + '?action=getReportData&period=' + year + '&id_token=' + encodeURIComponent(user.token) + '&t=' + Date.now();
+            
+            fetch(url)
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    if (res.success) {
+                        var processedData = res.data.map(function(item) {
+                            return { ...item, depto_oferente: item.departamento };
+                        });
+                        setData(processedData);
+                        var uniqueDepts = [];
+                        processedData.forEach(function(i) {
+                            if (i.departamento) {
+                                var d = i.departamento.trim().toUpperCase();
+                                if (uniqueDepts.indexOf(d) === -1) uniqueDepts.push(d);
+                            }
+                        });
+                        uniqueDepts.sort();
+                        setDepartments(uniqueDepts);
+                    } else {
+                        setData([]);
+                        setDepartments([]);
+                    }
+                })
+                .finally(function() {
+                    setLoading(false);
+                });
+        }, [year]);
 
-                if(dept) {
-                    temp = temp.filter(i => i.departamento && i.departamento.trim().toUpperCase() === dept);
-                }
+        useEffect(function() {
+            var temp = data.slice();
 
-                if(month) {
-                    temp = temp.filter(i => {
-                        if (!i.fechas) return false;
-                        const d = i.fechas.toUpperCase();
-                        if (month === '1') return d.includes('ENE') || d.includes('JAN') || d.includes('/01/') || d.includes('-01-') || d.startsWith('01/');
-                        if (month === '6') return d.includes('JUN') || d.includes('/06/') || d.includes('-06-') || d.startsWith('06/');
-                        if (month === '8') return d.includes('AGO') || d.includes('AUG') || d.includes('/08/') || d.includes('-08-') || d.startsWith('08/');
-                        return false;
-                    });
-                }
+            if (dept) {
+                temp = temp.filter(function(i) { 
+                    return i.departamento && i.departamento.trim().toUpperCase() === dept; 
+                });
+            }
 
-                setFiltered(temp);
-            }, [dept, month, data]);
+            if (month) {
+                temp = temp.filter(function(i) {
+                    if (!i.fechas) return false;
+                    var d = i.fechas.toUpperCase();
+                    if (month === '1') return d.includes('ENE') || d.includes('JAN') || d.includes('/01/') || d.includes('-01-') || d.startsWith('01/');
+                    if (month === '6') return d.includes('JUN') || d.includes('/06/') || d.includes('-06-') || d.startsWith('06/');
+                    if (month === '8') return d.includes('AGO') || d.includes('AUG') || d.includes('/08/') || d.includes('-08-') || d.startsWith('08/');
+                    return false;
+                });
+            }
 
-            const exportPdf = async () => {
-                if(filtered.length === 0) return;
-                const { jsPDF } = window.jspdf; 
-                const doc = new jsPDF();
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const logo = await getImageDataFromURL(ITD_LOGO_URL);
-                if(logo) drawLogo(doc, logo, 10, 8, 20);
+            setFiltered(temp);
+        }, [dept, month, data]);
 
-                doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(27, 57, 106);
+        var exportPdf = function() {
+            if (filtered.length === 0) return;
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF();
+            var pageWidth = doc.internal.pageSize.getWidth();
+            
+            getImageDataFromURL(ITD_LOGO_URL).then(function(logo) {
+                if (logo) drawLogo(doc, logo, 10, 8, 20);
+
+                doc.setFont("helvetica", "bold"); 
+                doc.setFontSize(12); 
+                doc.setTextColor(27, 57, 106);
                 doc.text("INSTITUTO TECNOLÓGICO DE DURANGO", pageWidth/2, 15, { align: "center" });
-                doc.setFontSize(10); doc.setTextColor(100);
+                doc.setFontSize(10); 
+                doc.setTextColor(100);
                 doc.text("Coordinación de Actualización Docente", pageWidth/2, 20, { align: "center" });
-                doc.setFontSize(14); doc.setTextColor(128, 0, 0);
-                doc.text(`REPORTE GENERAL ${year}`, pageWidth/2, 30, { align: "center" });
+                doc.setFontSize(14); 
+                doc.setTextColor(128, 0, 0);
+                doc.text("REPORTE GENERAL " + year, pageWidth/2, 30, { align: "center" });
                 
-                let subtitle = "";
-                if(dept) subtitle += ` Depto: ${dept}`;
-                if(month) subtitle += ` | Mes: ${MONTHS.find(m=>m.v===month)?.l}`;
-                if(subtitle) { doc.setFontSize(10); doc.setTextColor(0); doc.text(subtitle, 14, 38); }
+                var subtitle = "";
+                if (dept) subtitle += " Depto: " + dept;
+                if (month) subtitle += " | Mes: " + (MONTHS.find(function(m) { return m.v === month; })?.l || '');
+                if (subtitle) { 
+                    doc.setFontSize(10); 
+                    doc.setTextColor(0); 
+                    doc.text(subtitle, 14, 38); 
+                }
                 
-                doc.text(`Total: ${filtered.length}`, pageWidth-14, 38, { align: "right" });
+                doc.text("Total: " + filtered.length, pageWidth - 14, 38, { align: "right" });
 
                 doc.autoTable({
                     head: [['Nombre', 'Curso', 'Folio', 'Fecha', 'Depto. Oferente']],
-                    body: filtered.map(r => [r.nombre, r.curso, r.folio, r.fechas, r.depto_oferente]),
-                    startY: 42, theme: 'striped', 
+                    body: filtered.map(function(r) { return [r.nombre, r.curso, r.folio, r.fechas, r.depto_oferente]; }),
+                    startY: 42, 
+                    theme: 'striped', 
                     headStyles: { fillColor: [27, 57, 106], textColor: 255, halign: 'center' }, 
                     styles: { fontSize: 8, cellPadding: 2 }
                 });
                 
-                doc.save(`Reporte_${year}.pdf`);
-            };
-
-            const exportExcel = () => {
-                const rows = filtered.map(r => ({
-                    "Nombre": r.nombre, "Curso": r.curso, "Folio": r.folio, "Fecha": r.fechas, "Departamento Docente": r.departamento, "Departamento Oferente": r.depto_oferente
-                }));
-                const ws = XLSX.utils.json_to_sheet(rows);
-                const wb = XLSX.utils.book_new(); 
-                XLSX.utils.book_append_sheet(wb, ws, "Reporte");
-                XLSX.writeFile(wb, `Reporte_${year}.xlsx`);
-            };
-
-            return (
-                <div className="animate-fadeIn p-6">
-                    <div className="max-w-7xl mx-auto">
-                        <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                            <span className="bg-green-100 p-2 rounded-lg text-green-600">📋</span> Reportes Masivos
-                        </h2>
-                        <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                <div>
-                                    <label className="block text-sm font-bold mb-2 text-slate-700">Año</label>
-                                    <select value={year} onChange={e=>setYear(e.target.value)} className="w-full p-2 border rounded">
-                                        <option value="ACTUAL">🟢 Periodo Actual</option>
-                                        <option value="2025">2025</option>
-                                        <option value="2024">2024</option>
-                                        <option value="2023">2023</option>
-                                        <option value="2022">2022</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold mb-2 text-slate-700">Mes de Inicio</label>
-                                    <select value={month} onChange={e=>setMonth(e.target.value)} className="w-full p-2 border rounded">
-                                        {MONTHS.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold mb-2 text-slate-700">Departamento (Docente)</label>
-                                    <select value={dept} onChange={e=>setDept(e.target.value)} className="w-full p-2 border rounded" disabled={!departments.length}>
-                                        <option value="">-- Todos --</option>
-                                        {departments.map(d=><option key={d} value={d}>{d}</option>)}
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap gap-4 mb-6 border-b border-slate-100 pb-6">
-                                <button onClick={exportPdf} disabled={!filtered.length} className="bg-red-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed shadow transition flex items-center gap-2"><span>📄</span> Descargar PDF</button>
-                                <button onClick={exportExcel} disabled={!filtered.length} className="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed shadow transition flex items-center gap-2"><span>📊</span> Descargar Excel</button>
-                            </div>
-                            {loading ? <div className="text-center py-10"><div className="loader-clock"></div><p className="mt-2 text-gray-500">Cargando...</p></div> : (
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-2">Mostrando {filtered.length} registros</p>
-                                    <div className="overflow-x-auto border rounded-lg max-h-[500px]">
-                                        <table className="w-full text-xs text-left">
-                                            <thead className="bg-slate-100 font-bold sticky top-0 text-slate-700 z-10">
-                                                <tr>
-                                                    <th className="p-3 border-b">Nombre Docente</th>
-                                                    <th className="p-3 border-b">Curso</th>
-                                                    <th className="p-3 border-b">Folio</th>
-                                                    <th className="p-3 border-b">Fecha</th>
-                                                    <th className="p-3 border-b text-blue-700">Depto. Oferente</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100">
-                                                {filtered.map((r, i) => (
-                                                    <tr key={i} className="hover:bg-gray-50">
-                                                        <td className="p-3 font-medium">{r.nombre}</td>
-                                                        <td className="p-3">{r.curso}</td>
-                                                        <td className="p-3 font-mono text-gray-500">{r.folio}</td>
-                                                        <td className="p-3">{r.fechas}</td>
-                                                        <td className="p-3 font-semibold text-blue-800 bg-blue-50">{r.depto_oferente}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
+                doc.save("Reporte_" + year + ".pdf");
+            });
         };
 
-        const AdminApp = () => {
-            const [user, setUser] = useState(null);
-            const [activeTab, setActiveTab] = useState('search');
-            const [error, setError] = useState('');
-
-            const handleLogin = (response) => {
-                try {
-                    const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                    if (ADMIN_EMAILS.includes(payload.email)) {
-                        setUser({ name: payload.name, email: payload.email, token: response.credential, picture: payload.picture });
-                    } else {
-                        setError('Acceso denegado. No tienes permisos de administrador.');
-                    }
-                } catch(e) { setError('Error de autenticación.'); }
-            };
-
-            if (!user) return <LoginScreen onLogin={handleLogin} error={error} />;
-
-            return (
-                <div className="flex min-h-screen">
-                    <aside className="w-64 bg-slate-900 text-white flex flex-col fixed h-full z-10 shadow-2xl">
-                        <div className="p-6 border-b border-slate-700 flex items-center gap-3 bg-slate-900">
-                            <img src={user.picture} className="w-10 h-10 rounded-full border-2 border-indigo-500"/>
-                            <div className="overflow-hidden">
-                                <p className="font-bold text-sm truncate">{user.name}</p>
-                                <p className="text-xs text-slate-400">Administrador</p>
-                            </div>
-                        </div>
-                        <nav className="flex-1 p-4 space-y-2">
-                            {[
-                                {id:'search', icon:'🔍', label:'Consultar Docente'},
-                                {id:'surveys', icon:'📊', label:'Encuestas'},
-                                {id:'reports', icon:'📋', label:'Reportes'}
-                            ].map(item => (
-                                <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeTab === item.id ? 'bg-indigo-600 text-white shadow-lg translate-x-1' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}>
-                                    <span>{item.icon}</span> {item.label}
-                                </button>
-                            ))}
-                            <a
-                                href="https://da-itd.github.io/DA-itd-web/index.html"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-slate-800 text-slate-400 hover:text-white"
-                            >
-                                <span>🛠️</span> Herramientas
-                                <span className="ml-auto text-slate-600 text-xs">↗</span>
-                            </a>
-                        </nav>
-                        <div className="p-4 border-t border-slate-700 bg-slate-900">
-                            <a href="index.html" className="block w-full text-center py-2 text-sm text-slate-400 hover:text-white mb-2">Ir al Portal Publico</a>
-                            <button onClick={() => setUser(null)} className="block w-full text-center py-2 text-sm text-red-400 hover:text-red-300 font-bold border border-red-900/30 rounded hover:bg-red-900/20 transition">Cerrar Sesión</button>
-                        </div>
-                    </aside>
-
-                    <main className="flex-1 ml-64 bg-slate-50 min-h-screen">
-                        <header className="bg-white shadow-sm p-6 mb-6 border-b border-slate-200">
-                            <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                                {activeTab === 'search' && '🔎 Buscador del Historial Académico'}
-                                {activeTab === 'surveys' && '📈 Panel de Encuestas de Eficacia'}
-                                {activeTab === 'reports' && '📑 Generador de Reportes Masivos'}
-                            </h1>
-                        </header>
-                        <div className="px-6 pb-12">
-                            {activeTab === 'search' && <SearchPanel user={user} />}
-                            {activeTab === 'surveys' && <SurveyPanel />}
-                            {activeTab === 'reports' && <ReportsPanel user={user} />}
-                        </div>
-                    </main>
-                </div>
-            );
+        var exportExcel = function() {
+            var rows = filtered.map(function(r) {
+                return {
+                    "Nombre": r.nombre, 
+                    "Curso": r.curso, 
+                    "Folio": r.folio, 
+                    "Fecha": r.fechas, 
+                    "Departamento Docente": r.departamento, 
+                    "Departamento Oferente": r.depto_oferente
+                };
+            });
+            var ws = XLSX.utils.json_to_sheet(rows);
+            var wb = XLSX.utils.book_new(); 
+            XLSX.utils.book_append_sheet(wb, ws, "Reporte");
+            XLSX.writeFile(wb, "Reporte_" + year + ".xlsx");
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<AdminApp />);
+        return h('div', { className: 'animate-fadeIn p-6' },
+            h('div', { className: 'max-w-7xl mx-auto' },
+                h('h2', { className: 'text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2' },
+                    h('span', { className: 'bg-green-100 p-2 rounded-lg text-green-600' }, '📋'),
+                    ' Reportes Masivos'
+                ),
+                h('div', { className: 'bg-white p-6 rounded-xl shadow border border-slate-200' },
+                    h('div', { className: 'grid grid-cols-1 md:grid-cols-3 gap-6 mb-6' },
+                        h('div', null,
+                            h('label', { className: 'block text-sm font-bold mb-2 text-slate-700' }, 'Año'),
+                            h('select', { 
+                                value: year, 
+                                onChange: function(e) { setYear(e.target.value); }, 
+                                className: 'w-full p-2 border rounded'
+                            },
+                                h('option', { value: 'ACTUAL' }, '🟢 Periodo Actual'),
+                                h('option', { value: '2025' }, '2025'),
+                                h('option', { value: '2024' }, '2024'),
+                                h('option', { value: '2023' }, '2023'),
+                                h('option', { value: '2022' }, '2022')
+                            )
+                        ),
+                        h('div', null,
+                            h('label', { className: 'block text-sm font-bold mb-2 text-slate-700' }, 'Mes de Inicio'),
+                            h('select', { 
+                                value: month, 
+                                onChange: function(e) { setMonth(e.target.value); }, 
+                                className: 'w-full p-2 border rounded'
+                            },
+                                MONTHS.map(function(m) { 
+                                    return h('option', { key: m.v, value: m.v }, m.l); 
+                                })
+                            )
+                        ),
+                        h('div', null,
+                            h('label', { className: 'block text-sm font-bold mb-2 text-slate-700' }, 'Departamento (Docente)'),
+                            h('select', { 
+                                value: dept, 
+                                onChange: function(e) { setDept(e.target.value); }, 
+                                className: 'w-full p-2 border rounded',
+                                disabled: !departments.length
+                            },
+                                h('option', { value: '' }, '-- Todos --'),
+                                departments.map(function(d) { 
+                                    return h('option', { key: d, value: d }, d); 
+                                })
+                            )
+                        )
+                    ),
+                    h('div', { className: 'flex flex-wrap gap-4 mb-6 border-b border-slate-100 pb-6' },
+                        h('button', { 
+                            onClick: exportPdf, 
+                            disabled: !filtered.length, 
+                            className: 'bg-red-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed shadow transition flex items-center gap-2'
+                        },
+                            h('span', null, '📄'),
+                            ' Descargar PDF'
+                        ),
+                        h('button', { 
+                            onClick: exportExcel, 
+                            disabled: !filtered.length, 
+                            className: 'bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed shadow transition flex items-center gap-2'
+                        },
+                            h('span', null, '📊'),
+                            ' Descargar Excel'
+                        )
+                    ),
+                    loading ? 
+                        h('div', { className: 'text-center py-10' },
+                            h('div', { className: 'loader-clock' }),
+                            h('p', { className: 'mt-2 text-gray-500' }, 'Cargando...')
+                        ) :
+                        h('div', null,
+                            h('p', { className: 'text-sm text-gray-500 mb-2' }, 'Mostrando ' + filtered.length + ' registros'),
+                            h('div', { className: 'overflow-x-auto border rounded-lg max-h-[500px]' },
+                                h('table', { className: 'w-full text-xs text-left' },
+                                    h('thead', { className: 'bg-slate-100 font-bold sticky top-0 text-slate-700 z-10' },
+                                        h('tr', null,
+                                            h('th', { className: 'p-3 border-b' }, 'Nombre Docente'),
+                                            h('th', { className: 'p-3 border-b' }, 'Curso'),
+                                            h('th', { className: 'p-3 border-b' }, 'Folio'),
+                                            h('th', { className: 'p-3 border-b' }, 'Fecha'),
+                                            h('th', { className: 'p-3 border-b text-blue-700' }, 'Depto. Oferente')
+                                        )
+                                    ),
+                                    h('tbody', { className: 'divide-y divide-slate-100' },
+                                        filtered.map(function(r, i) {
+                                            return h('tr', { key: i, className: 'hover:bg-gray-50' },
+                                                h('td', { className: 'p-3 font-medium' }, r.nombre),
+                                                h('td', { className: 'p-3' }, r.curso),
+                                                h('td', { className: 'p-3 font-mono text-gray-500' }, r.folio),
+                                                h('td', { className: 'p-3' }, r.fechas),
+                                                h('td', { className: 'p-3 font-semibold text-blue-800 bg-blue-50' }, r.depto_oferente)
+                                            );
+                                        })
+                                    )
+                                )
+                            )
+                        )
+                )
+            )
+        );
+    };
+
+    // ============================================================
+    // 8. COMPONENTE: ADMIN APP
+    // ============================================================
+    var AdminApp = function() {
+        var _user = useState(null);
+        var user = _user[0];
+        var setUser = _user[1];
+        
+        var _activeTab = useState('search');
+        var activeTab = _activeTab[0];
+        var setActiveTab = _activeTab[1];
+        
+        var _error = useState('');
+        var error = _error[0];
+        var setError = _error[1];
+
+        var handleLogin = function(response) {
+            try {
+                var payload = JSON.parse(atob(response.credential.split('.')[1]));
+                if (ADMIN_EMAILS.indexOf(payload.email) !== -1) {
+                    setUser({ name: payload.name, email: payload.email, token: response.credential, picture: payload.picture });
+                } else {
+                    setError('Acceso denegado. No tienes permisos de administrador.');
+                }
+            } catch(e) { 
+                setError('Error de autenticación.'); 
+            }
+        };
+
+        if (!user) {
+            return h(LoginScreen, { onLogin: handleLogin, error: error });
+        }
+
+        var tabs = [
+            {id: 'search', icon: '🔍', label: 'Consultar Docente'},
+            {id: 'surveys', icon: '📊', label: 'Encuestas'},
+            {id: 'reports', icon: '📋', label: 'Reportes'}
+        ];
+
+        var tabContent = null;
+        if (activeTab === 'search') tabContent = h(SearchPanel, { user: user });
+        else if (activeTab === 'surveys') tabContent = h(SurveyPanel, null);
+        else if (activeTab === 'reports') tabContent = h(ReportsPanel, { user: user });
+
+        return h('div', { className: 'flex min-h-screen' },
+            h('aside', { className: 'w-64 bg-slate-900 text-white flex flex-col fixed h-full z-10 shadow-2xl' },
+                h('div', { className: 'p-6 border-b border-slate-700 flex items-center gap-3 bg-slate-900' },
+                    h('img', { src: user.picture, className: 'w-10 h-10 rounded-full border-2 border-indigo-500' }),
+                    h('div', { className: 'overflow-hidden' },
+                        h('p', { className: 'font-bold text-sm truncate' }, user.name),
+                        h('p', { className: 'text-xs text-slate-400' }, 'Administrador')
+                    )
+                ),
+                h('nav', { className: 'flex-1 p-4 space-y-2' },
+                    tabs.map(function(item) {
+                        return h('button', {
+                            key: item.id,
+                            onClick: function() { setActiveTab(item.id); },
+                            className: 'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ' + (activeTab === item.id ? 'bg-indigo-600 text-white shadow-lg translate-x-1' : 'hover:bg-slate-800 text-slate-400 hover:text-white')
+                        },
+                            h('span', null, item.icon),
+                            item.label
+                        );
+                    }),
+                    h('a', {
+                        href: 'https://da-itd.github.io/DA-itd-web/index.html',
+                        target: '_blank',
+                        rel: 'noopener noreferrer',
+                        className: 'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-slate-800 text-slate-400 hover:text-white'
+                    },
+                        h('span', null, '🛠️'),
+                        ' Herramientas',
+                        h('span', { className: 'ml-auto text-slate-600 text-xs' }, '↗')
+                    )
+                ),
+                h('div', { className: 'p-4 border-t border-slate-700 bg-slate-900' },
+                    h('a', { href: 'index.html', className: 'block w-full text-center py-2 text-sm text-slate-400 hover:text-white mb-2' }, 'Ir al Portal Publico'),
+                    h('button', { 
+                        onClick: function() { setUser(null); }, 
+                        className: 'block w-full text-center py-2 text-sm text-red-400 hover:text-red-300 font-bold border border-red-900/30 rounded hover:bg-red-900/20 transition'
+                    }, 'Cerrar Sesión')
+                )
+            ),
+            h('main', { className: 'flex-1 ml-64 bg-slate-50 min-h-screen' },
+                h('header', { className: 'bg-white shadow-sm p-6 mb-6 border-b border-slate-200' },
+                    h('h1', { className: 'text-2xl font-bold text-slate-800 flex items-center gap-2' },
+                        activeTab === 'search' && '🔎 Buscador del Historial Académico',
+                        activeTab === 'surveys' && '📈 Panel de Encuestas de Eficacia',
+                        activeTab === 'reports' && '📑 Generador de Reportes Masivos'
+                    )
+                ),
+                h('div', { className: 'px-6 pb-12' },
+                    tabContent
+                )
+            )
+        );
+    };
+
+    // ============================================================
+    // 9. MONTAJE
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        var rootEl = document.getElementById('root');
+        if (rootEl) {
+            try {
+                var root = createRoot(rootEl);
+                root.render(h(AdminApp, null));
+                console.log('✅ Admin ITD - App montada correctamente');
+            } catch(e) {
+                console.error('❌ Error al montar la app:', e);
+                rootEl.innerHTML = 
+                    '<div class="container mx-auto px-4 py-10 max-w-3xl">' +
+                        '<div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-sm">' +
+                            '<h3 class="text-lg font-bold text-red-800">⚠️ Error de carga</h3>' +
+                            '<p class="text-red-700">No se pudo cargar la aplicación. Error: ' + e.message + '</p>' +
+                            '<button onclick="location.reload()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">Recargar página</button>' +
+                        '</div>' +
+                    '</div>';
+            }
+        } else {
+            console.error('❌ No se encontró el elemento root');
+        }
+    });
     </script>
 </body>
 </html>
