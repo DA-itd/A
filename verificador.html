@@ -125,21 +125,41 @@
     };
 
     // ============================================================
-    // 5. BÚSQUEDA CARACTER POR CARACTER (NUEVA)
+    // 5. BÚSQUEDA EXACTA CON NORMALIZACIÓN
     // ============================================================
     const limpiarFolio = function(folio) {
         if (!folio) return '';
         return String(folio).toUpperCase().trim().replace(/^TNM-054-/, '');
     };
 
+    const normalizarNumero = function(num) {
+        if (!num) return '';
+        return String(parseInt(num, 10));
+    };
+
+    const extraerPartes = function(folioLimpio) {
+        const match = folioLimpio.match(/^(\d+)-(\d{4})(?:-(.+))?$/);
+        if (!match) return null;
+        return {
+            numero: normalizarNumero(match[1]),
+            año: match[2],
+            sufijo: match[3] ? match[3].toUpperCase() : ''
+        };
+    };
+
     const buscarFolio = function(dataSource, queryStr) {
         if (!queryStr || dataSource.length === 0) return null;
         
         const query = queryStr.trim().toUpperCase();
-        console.log('🔍 Buscando:', query);
+        const queryPartes = extraerPartes(query);
         
-        let mejorCoincidencia = null;
-        let mejorPuntaje = 0;
+        if (!queryPartes) {
+            console.log('⚠️ Formato de búsqueda no reconocido:', query);
+            return null;
+        }
+        
+        console.log('🔍 Buscando:', query);
+        console.log('📋 Partes:', queryPartes);
         
         for (let i = 0; i < dataSource.length; i++) {
             const record = dataSource[i];
@@ -149,60 +169,37 @@
             if (!folio || String(statusVal).trim().toUpperCase() !== 'VALIDO') continue;
             
             const folioLimpio = limpiarFolio(folio);
-            console.log('📋 Comparando:', folioLimpio, 'con:', query);
+            const folioPartes = extraerPartes(folioLimpio);
             
-            // Buscar coincidencia exacta o parcial
+            if (!folioPartes) continue;
+            
+            console.log('📋 Comparando:', folioLimpio);
+            
+            // Coincidencia exacta (folio completo)
             if (folioLimpio === query) {
                 console.log('✅ Coincidencia exacta:', folioLimpio);
                 return record;
             }
             
-            // Buscar si el folio contiene la query (coincidencia parcial)
-            if (folioLimpio.includes(query)) {
-                console.log('✅ Coincidencia parcial:', folioLimpio);
-                return record;
-            }
-            
-            // Buscar si la query contiene el folio (para casos donde el usuario escribe más)
-            if (query.includes(folioLimpio)) {
-                console.log('✅ Coincidencia inversa:', folioLimpio);
-                return record;
-            }
-            
-            // Buscar por partes (número y año) sin importar ceros a la izquierda
-            const partesFolio = folioLimpio.split('-');
-            const partesQuery = query.split('-');
-            
-            // Si el folio tiene al menos 2 partes y la query también
-            if (partesFolio.length >= 2 && partesQuery.length >= 2) {
-                // Normalizar números (eliminar ceros a la izquierda)
-                const numFolio = parseInt(partesFolio[0], 10);
-                const numQuery = parseInt(partesQuery[0], 10);
-                
-                // Si los números y años coinciden
-                if (numFolio === numQuery && partesFolio[1] === partesQuery[1]) {
-                    console.log('✅ Coincidencia por número y año:', folioLimpio);
-                    return record;
-                }
-                
-                // Si el año coincide y el número es similar
-                if (partesFolio[1] === partesQuery[1]) {
-                    // Verificar si el número es similar (ej: 1 vs 01)
-                    if (String(numFolio) === String(numQuery)) {
-                        console.log('✅ Coincidencia por año y número normalizado:', folioLimpio);
+            // Coincidencia por número y año (normalizado)
+            if (folioPartes.numero === queryPartes.numero && folioPartes.año === queryPartes.año) {
+                // Si el query tiene sufijo, debe coincidir
+                if (queryPartes.sufijo && folioPartes.sufijo) {
+                    if (folioPartes.sufijo === queryPartes.sufijo) {
+                        console.log('✅ Coincidencia con sufijo:', folioLimpio);
                         return record;
                     }
+                    continue;
                 }
+                // Si el query NO tiene sufijo, aceptar cualquier sufijo
+                console.log('✅ Coincidencia por número y año:', folioLimpio);
+                return record;
             }
             
-            // Si la query tiene sufijo romano (II, III, IV, etc.) y el folio también
-            if (partesFolio.length >= 3 && partesQuery.length >= 3) {
-                if (partesFolio[0] === partesQuery[0] && 
-                    partesFolio[1] === partesQuery[1] && 
-                    partesFolio[2] === partesQuery[2]) {
-                    console.log('✅ Coincidencia con sufijo romano:', folioLimpio);
-                    return record;
-                }
+            // Coincidencia con prefijo completo
+            if (folio === query) {
+                console.log('✅ Coincidencia con prefijo:', folio);
+                return record;
             }
         }
         
@@ -556,7 +553,7 @@
                 )
             ),
             h('p', { className: 'text-gray-600 mb-4 text-sm' }, 
-                'Ingrese el número de folio (ej: 1-2025, 23-2025-II, 5-2025-IV)'
+                'Ingrese exactamente el número de folio (ej: 1-2025, 23-2025-II)'
             ),
             
             h('div', { className: 'flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4' },
