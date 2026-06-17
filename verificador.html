@@ -125,40 +125,89 @@
     };
 
     // ============================================================
-    // 5. NORMALIZACIÓN DE FOLIOS (BÚSQUEDA FLEXIBLE)
+    // 5. BÚSQUEDA CARACTER POR CARACTER (NUEVA)
     // ============================================================
-    const normalizarFolio = function(folio) {
+    const limpiarFolio = function(folio) {
         if (!folio) return '';
-        let limpio = String(folio).toUpperCase().trim();
-        limpio = limpio.replace(/^TNM-054-/, '');
-        const match = limpio.match(/^(\d+)-(\d{4})(?:-(.+))?$/);
-        if (!match) return limpio;
-        const numero = match[1];
-        const año = match[2];
-        const sufijo = match[3] || '';
-        const numeroNormalizado = String(parseInt(numero, 10));
-        let normalizado = numeroNormalizado + '-' + año;
-        if (sufijo) {
-            normalizado += '-' + sufijo.toUpperCase();
-        }
-        return normalizado;
+        return String(folio).toUpperCase().trim().replace(/^TNM-054-/, '');
     };
 
-    const foliosCoinciden = function(folio1, folio2) {
-        if (!folio1 || !folio2) return false;
-        const f1 = normalizarFolio(folio1);
-        const f2 = normalizarFolio(folio2);
-        if (f1 === f2) return true;
-        if (f1.endsWith(f2) || f2.endsWith(f1)) return true;
-        const partes1 = f1.split('-');
-        const partes2 = f2.split('-');
-        if (partes2.length === 2 && partes1.length >= 2) {
-            if (partes1[0] === partes2[0] && partes1[1] === partes2[1]) return true;
+    const buscarFolio = function(dataSource, queryStr) {
+        if (!queryStr || dataSource.length === 0) return null;
+        
+        const query = queryStr.trim().toUpperCase();
+        console.log('🔍 Buscando:', query);
+        
+        let mejorCoincidencia = null;
+        let mejorPuntaje = 0;
+        
+        for (let i = 0; i < dataSource.length; i++) {
+            const record = dataSource[i];
+            const folio = getFlexibleProperty(record, ['folio']);
+            const statusVal = getFlexibleProperty(record, ['status']) || '';
+            
+            if (!folio || String(statusVal).trim().toUpperCase() !== 'VALIDO') continue;
+            
+            const folioLimpio = limpiarFolio(folio);
+            console.log('📋 Comparando:', folioLimpio, 'con:', query);
+            
+            // Buscar coincidencia exacta o parcial
+            if (folioLimpio === query) {
+                console.log('✅ Coincidencia exacta:', folioLimpio);
+                return record;
+            }
+            
+            // Buscar si el folio contiene la query (coincidencia parcial)
+            if (folioLimpio.includes(query)) {
+                console.log('✅ Coincidencia parcial:', folioLimpio);
+                return record;
+            }
+            
+            // Buscar si la query contiene el folio (para casos donde el usuario escribe más)
+            if (query.includes(folioLimpio)) {
+                console.log('✅ Coincidencia inversa:', folioLimpio);
+                return record;
+            }
+            
+            // Buscar por partes (número y año) sin importar ceros a la izquierda
+            const partesFolio = folioLimpio.split('-');
+            const partesQuery = query.split('-');
+            
+            // Si el folio tiene al menos 2 partes y la query también
+            if (partesFolio.length >= 2 && partesQuery.length >= 2) {
+                // Normalizar números (eliminar ceros a la izquierda)
+                const numFolio = parseInt(partesFolio[0], 10);
+                const numQuery = parseInt(partesQuery[0], 10);
+                
+                // Si los números y años coinciden
+                if (numFolio === numQuery && partesFolio[1] === partesQuery[1]) {
+                    console.log('✅ Coincidencia por número y año:', folioLimpio);
+                    return record;
+                }
+                
+                // Si el año coincide y el número es similar
+                if (partesFolio[1] === partesQuery[1]) {
+                    // Verificar si el número es similar (ej: 1 vs 01)
+                    if (String(numFolio) === String(numQuery)) {
+                        console.log('✅ Coincidencia por año y número normalizado:', folioLimpio);
+                        return record;
+                    }
+                }
+            }
+            
+            // Si la query tiene sufijo romano (II, III, IV, etc.) y el folio también
+            if (partesFolio.length >= 3 && partesQuery.length >= 3) {
+                if (partesFolio[0] === partesQuery[0] && 
+                    partesFolio[1] === partesQuery[1] && 
+                    partesFolio[2] === partesQuery[2]) {
+                    console.log('✅ Coincidencia con sufijo romano:', folioLimpio);
+                    return record;
+                }
+            }
         }
-        if (partes1.length === 2 && partes2.length >= 2) {
-            if (partes2[0] === partes1[0] && partes2[1] === partes1[1]) return true;
-        }
-        return false;
+        
+        console.log('❌ No se encontró coincidencia');
+        return null;
     };
 
     // ============================================================
@@ -241,7 +290,6 @@
             doc.setFontSize(18);
             doc.text(titleText, 105, 45, { align: 'center' });
             
-            // Obtener el folio exacto de la hoja (sin modificar)
             let folioExacto = getFlexibleProperty(result, ['folio']) || 'TNM-054-' + query;
             
             const data = {
@@ -482,7 +530,7 @@
     };
 
     // ============================================================
-    // SEARCH FORM CON BOTÓN DE RECARGA
+    // SEARCH FORM
     // ============================================================
     const SearchForm = function(props) {
         const query = props.query;
@@ -547,7 +595,7 @@
     };
 
     // ============================================================
-    // RESULTADO CON FOLIO EXACTO DE LA HOJA
+    // RESULTADO
     // ============================================================
     const Resultado = function(props) {
         const status = props.status;
@@ -586,12 +634,10 @@
         }
 
         if (status === 'success' && result) {
-            // OBTENER EL FOLIO EXACTO DE LA HOJA (sin modificaciones)
             let folioDisplay = getFlexibleProperty(result, ['folio']);
             if (!folioDisplay) {
                 folioDisplay = 'TNM-054-' + query;
             }
-            // NO modificar el folio, mostrarlo tal cual está en la hoja
             const folioLimpio = folioDisplay;
 
             const fields = [
@@ -619,7 +665,6 @@
                 );
             }).filter(function(item) { return item !== null; });
 
-            // Calcular código de verificación con el folio limpio
             const fullFolio = folioLimpio;
             const nombre = getFlexibleProperty(result, ['nombre']) || '';
             const fecha = getFlexibleProperty(result, ['fecha']) || '';
@@ -661,37 +706,7 @@
     };
 
     // ============================================================
-    // 10. FUNCIÓN DE BÚSQUEDA
-    // ============================================================
-    const realizarBusqueda = function(dataSource, queryStr) {
-        if (!queryStr || dataSource.length === 0) {
-            return null;
-        }
-
-        const cleanedQuery = queryStr.trim().toUpperCase();
-        let found = null;
-        
-        for (let i = 0; i < dataSource.length; i++) {
-            const record = dataSource[i];
-            const folio = getFlexibleProperty(record, ['folio']);
-            const statusVal = getFlexibleProperty(record, ['status']) || '';
-            
-            if (folio && String(statusVal).trim().toUpperCase() === 'VALIDO') {
-                const folioStr = String(folio).trim().toUpperCase();
-                
-                if (foliosCoinciden(folioStr, cleanedQuery)) {
-                    found = record;
-                    break;
-                }
-            }
-        }
-
-        console.log('🔍 Encontrado:', found);
-        return found;
-    };
-
-    // ============================================================
-    // 11. APP PRINCIPAL
+    // 10. APP PRINCIPAL
     // ============================================================
     const App = function() {
         const [loading, setLoading] = useState(true);
@@ -702,7 +717,6 @@
         const [result, setResult] = useState(null);
         const [searching, setSearching] = useState(false);
 
-        // Función para recargar datos
         const recargarDatos = function() {
             setLoading(true);
             setStatus('idle');
@@ -713,9 +727,8 @@
                     console.log('✅ Datos recargados:', db.length);
                     setData(db);
                     setLoading(false);
-                    // Mostrar mensaje de éxito
                     const msg = document.createElement('div');
-                    msg.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 animate-fade-in';
+                    msg.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50';
                     msg.textContent = '✅ Datos recargados correctamente';
                     document.body.appendChild(msg);
                     setTimeout(function() { msg.remove(); }, 3000);
@@ -743,7 +756,7 @@
                         const folioQuery = folioFromUrl.trim().toUpperCase();
                         setQuery(folioQuery);
                         setTimeout(function() {
-                            const found = realizarBusqueda(db, folioQuery);
+                            const found = buscarFolio(db, folioQuery);
                             if (found) {
                                 let folioValue = getFlexibleProperty(found, ['folio']);
                                 if (folioValue && !String(folioValue).toUpperCase().startsWith('TNM-054-')) {
@@ -773,7 +786,7 @@
             if (!query || data.length === 0 || searching) return;
             setSearching(true);
             setTimeout(function() {
-                const found = realizarBusqueda(data, query);
+                const found = buscarFolio(data, query);
                 if (found) {
                     let folioValue = getFlexibleProperty(found, ['folio']);
                     if (folioValue && !String(folioValue).toUpperCase().startsWith('TNM-054-')) {
@@ -850,7 +863,7 @@
     };
 
     // ============================================================
-    // 12. MONTAJE
+    // 11. MONTAJE
     // ============================================================
     const rootElement = document.getElementById('root');
     if (rootElement) {
