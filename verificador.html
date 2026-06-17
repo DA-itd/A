@@ -2,13 +2,424 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
     <title>Validador de Constancias ITD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    
+    <style>
+        /* ============================================================
+           ESTILOS RESPONSIVOS
+           ============================================================ */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* ── HEADER RESPONSIVE ── */
+        .header-responsive {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .header-responsive .logo {
+            height: 40px;
+            width: auto;
+            flex-shrink: 0;
+        }
+        .header-responsive .logo-itd {
+            height: 40px;
+            width: auto;
+            flex-shrink: 0;
+        }
+        .header-responsive h1 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .header-responsive h1 span {
+            display: block;
+            font-size: 11px;
+            font-weight: 400;
+            color: #64748b;
+        }
+        
+        /* ── CONTENEDOR PRINCIPAL ── */
+        .main-container {
+            max-width: 560px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 16px 16px 80px;
+        }
+        
+        /* ── BOTÓN VOLVER ── */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #2563eb;
+            text-decoration: none;
+            padding: 8px 0;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        .btn-back:hover { color: #1d4ed8; }
+        
+        /* ── TARJETA DE BÚSQUEDA ── */
+        .search-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 18px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .search-card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+        .search-card .subtitle {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+        .search-card .subtitle strong {
+            color: #1e293b;
+        }
+        
+        /* ── CAMPO DE BÚSQUEDA ── */
+        .search-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        @media (min-width: 480px) {
+            .search-row {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+        .search-input-wrapper {
+            display: flex;
+            flex: 1;
+            border: 1.5px solid #d1d5db;
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+            transition: border-color 0.2s;
+            min-width: 0;
+        }
+        .search-input-wrapper:focus-within {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+        }
+        .search-input-wrapper .prefix {
+            background: #f8fafc;
+            padding: 10px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            border-right: 1px solid #e2e8f0;
+            white-space: nowrap;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+        .search-input-wrapper input {
+            flex: 1;
+            border: none;
+            padding: 10px 12px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #0f172a;
+            background: transparent;
+            outline: none;
+            min-width: 0;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .search-input-wrapper input::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
+            font-size: 14px;
+            text-transform: none;
+        }
+        
+        .search-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .search-actions button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .search-actions .btn-verify {
+            background: #2563eb;
+            color: white;
+        }
+        .search-actions .btn-verify:hover:not(:disabled) {
+            background: #1d4ed8;
+        }
+        .search-actions .btn-verify:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+        .search-actions .btn-clear {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        .search-actions .btn-clear:hover:not(:disabled) {
+            background: #e2e8f0;
+        }
+        .search-actions .btn-clear:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* ── BOTÓN RECARGAR ── */
+        .reload-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        .btn-reload {
+            font-size: 12px;
+            color: #2563eb;
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .btn-reload:hover { background: #eff6ff; }
+        .btn-reload:disabled { opacity: 0.4; cursor: not-allowed; }
+        
+        .info-text {
+            font-size: 11px;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 12px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 12px;
+        }
+        
+        /* ── RESULTADOS ── */
+        .result-card {
+            margin-top: 16px;
+            border-radius: 16px;
+            padding: 18px;
+            animation: fadeIn 0.4s ease;
+        }
+        .result-card.success {
+            background: #f0fdf4;
+            border-left: 4px solid #22c55e;
+        }
+        .result-card.error {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .result-card .result-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .result-card .result-header .icon {
+            font-size: 28px;
+        }
+        .result-card .result-header .title {
+            font-size: 17px;
+            font-weight: 700;
+            flex: 1;
+        }
+        .result-card.success .title { color: #15803d; }
+        .result-card.error .title { color: #dc2626; }
+        
+        .result-card .folio-display {
+            font-size: 13px;
+            color: #475569;
+            margin-top: 2px;
+        }
+        .result-card .folio-display strong {
+            color: #0f172a;
+        }
+        
+        .result-card .verification-code {
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: #eff6ff;
+            border-radius: 10px;
+            border: 1px solid #bfdbfe;
+        }
+        .result-card .verification-code .label {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .result-card .verification-code .code {
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1d4ed8;
+            word-break: break-all;
+        }
+        
+        .result-card .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 12px;
+        }
+        .result-card .btn-download:hover:not(:disabled) {
+            background: #1d4ed8;
+        }
+        .result-card .btn-download:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+        
+        .result-card .fields-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 16px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #e2e8f0;
+        }
+        @media (max-width: 420px) {
+            .result-card .fields-grid {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+        }
+        .result-card .fields-grid .field .label {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .result-card .fields-grid .field .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+            word-break: break-word;
+        }
+        
+        .result-card .footer-link {
+            text-align: center;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .result-card .footer-link a {
+            font-size: 13px;
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .result-card .footer-link a:hover { text-decoration: underline; }
+        
+        /* ── LOADING ── */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            padding: 20px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-container p {
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        /* ── FOOTER ── */
+        .footer-responsive {
+            background: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            padding: 20px 16px;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .footer-responsive strong { color: #e2e8f0; }
+        
+        /* ── ANIMACIONES ── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        /* ── MEJORAS PARA TOCHEVENTS ── */
+        input, button, a {
+            touch-action: manipulation;
+        }
+        input {
+            font-size: 16px !important; /* Evita zoom en iOS */
+        }
+    </style>
 </head>
 <body>
     <div id="root"></div>
@@ -31,47 +442,61 @@
     const h = React.createElement;
 
     // ============================================================
-    // 3. SONIDOS
+    // 3. SONIDOS (solo si el usuario interactúa)
     // ============================================================
+    let audioCtx = null;
+    
+    const getAudioContext = function() {
+        if (!audioCtx) {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch(e) { return null; }
+        }
+        return audioCtx;
+    };
+
     const playSuccessSound = function() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
         try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const notas = [
-                { frecuencia: 523.25, duracion: 0.3 },
-                { frecuencia: 659.25, duracion: 0.3 },
-                { frecuencia: 783.99, duracion: 0.3 },
-                { frecuencia: 1046.50, duracion: 0.5 }
+                { frecuencia: 523.25, duracion: 0.25 },
+                { frecuencia: 659.25, duracion: 0.25 },
+                { frecuencia: 783.99, duracion: 0.25 },
+                { frecuencia: 1046.50, duracion: 0.4 }
             ];
+            const now = ctx.currentTime;
             notas.forEach(function(nota, index) {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
                 osc.connect(gain);
-                gain.connect(audioCtx.destination);
+                gain.connect(ctx.destination);
                 osc.type = 'sine';
                 osc.frequency.value = nota.frecuencia;
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime + index * 0.15);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + index * 0.15 + nota.duracion);
-                osc.start(audioCtx.currentTime + index * 0.15);
-                osc.stop(audioCtx.currentTime + index * 0.15 + nota.duracion);
+                gain.gain.setValueAtTime(0.25, now + index * 0.12);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + index * 0.12 + nota.duracion);
+                osc.start(now + index * 0.12);
+                osc.stop(now + index * 0.12 + nota.duracion);
             });
-        } catch(e) { console.warn('Audio no disponible:', e); }
+        } catch(e) { /* silencio */ }
     };
 
     const playErrorSound = function() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
         try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
             osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            gain.connect(ctx.destination);
             osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.5);
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-            osc.start(audioCtx.currentTime);
-            osc.stop(audioCtx.currentTime + 0.5);
-        } catch(e) { console.warn('Audio no disponible:', e); }
+            osc.frequency.setValueAtTime(150, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.4);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.4);
+        } catch(e) { /* silencio */ }
     };
 
     // ============================================================
@@ -127,58 +552,78 @@
     // ============================================================
     // 5. BÚSQUEDA EXACTA
     // ============================================================
+    const limpiarFolio = function(folio) {
+        if (!folio) return '';
+        return String(folio).toUpperCase().trim().replace(/^TNM-054-/, '');
+    };
+
+    const normalizarNumero = function(num) {
+        if (!num) return '';
+        return String(parseInt(num, 10));
+    };
+
+    const extraerPartes = function(folioLimpio) {
+        const match = folioLimpio.match(/^(\d+)-(\d{4})(?:-(.+))?$/);
+        if (!match) return null;
+        return {
+            numero: normalizarNumero(match[1]),
+            año: match[2],
+            sufijo: match[3] ? match[3].toUpperCase() : ''
+        };
+    };
+
     const buscarFolio = function(dataSource, queryStr) {
         if (!queryStr || dataSource.length === 0) return null;
         
-        var query = queryStr.trim();
-        console.log('🔍 Buscando exactamente:', query);
+        const query = queryStr.trim().toUpperCase();
+        const queryPartes = extraerPartes(query);
         
-        for (var i = 0; i < dataSource.length; i++) {
-            var record = dataSource[i];
-            var folio = getFlexibleProperty(record, ['folio']);
-            var statusVal = getFlexibleProperty(record, ['status']) || '';
+        if (!queryPartes) {
+            console.log('⚠️ Formato de búsqueda no reconocido:', query);
+            return null;
+        }
+        
+        console.log('🔍 Buscando:', query);
+        
+        for (let i = 0; i < dataSource.length; i++) {
+            const record = dataSource[i];
+            const folio = getFlexibleProperty(record, ['folio']);
+            const statusVal = getFlexibleProperty(record, ['status']) || '';
             
             if (!folio || String(statusVal).trim().toUpperCase() !== 'VALIDO') continue;
             
-            var folioStr = String(folio).trim();
-            console.log('📋 Comparando con:', folioStr);
+            const folioLimpio = limpiarFolio(folio);
+            const folioPartes = extraerPartes(folioLimpio);
             
-            // Coincidencia exacta (sin importar mayúsculas/minúsculas)
-            if (folioStr.toUpperCase() === query.toUpperCase()) {
-                console.log('✅ Coincidencia exacta encontrada:', folioStr);
+            if (!folioPartes) continue;
+            
+            // Coincidencia exacta
+            if (folioLimpio === query) {
+                console.log('✅ Coincidencia exacta:', folioLimpio);
                 return record;
             }
             
-            // También buscar si el usuario escribió el folio sin "TNM-054-"
-            var querySinPrefijo = query.toUpperCase().replace(/^TNM-054-/, '');
-            var folioSinPrefijo = folioStr.toUpperCase().replace(/^TNM-054-/, '');
-            
-            if (folioSinPrefijo === querySinPrefijo) {
-                console.log('✅ Coincidencia sin prefijo:', folioStr);
-                return record;
-            }
-            
-            // Si el usuario escribió con el formato corto (ej: 1-2025)
-            // y el folio es TNM-054-1-2025
-            if (folioSinPrefijo === query.toUpperCase()) {
-                console.log('✅ Coincidencia con formato corto:', folioStr);
-                return record;
-            }
-            
-            // Si el usuario escribió el folio completo pero sin el sufijo
-            // y el folio tiene sufijo (ej: TNM-054-1-2025 vs TNM-054-1-2025-001)
-            if (folioStr.toUpperCase().startsWith(query.toUpperCase()) && 
-                folioStr.length > query.length) {
-                // Verificar que lo que sobra es un sufijo numérico
-                var resto = folioStr.substring(query.length);
-                if (/^-\d{3}$/.test(resto)) {
-                    console.log('✅ Coincidencia sin sufijo:', folioStr);
-                    return record;
+            // Coincidencia por número y año (normalizado)
+            if (folioPartes.numero === queryPartes.numero && folioPartes.año === queryPartes.año) {
+                if (queryPartes.sufijo && folioPartes.sufijo) {
+                    if (folioPartes.sufijo === queryPartes.sufijo) {
+                        console.log('✅ Coincidencia con sufijo:', folioLimpio);
+                        return record;
+                    }
+                    continue;
                 }
+                console.log('✅ Coincidencia por número y año:', folioLimpio);
+                return record;
+            }
+            
+            // Coincidencia con prefijo completo
+            if (folio === query) {
+                console.log('✅ Coincidencia con prefijo:', folio);
+                return record;
             }
         }
         
-        console.log('❌ No se encontró coincidencia exacta');
+        console.log('❌ No se encontró coincidencia');
         return null;
     };
 
@@ -477,33 +922,69 @@
     };
 
     // ============================================================
-    // 9. COMPONENTES
+    // 9. COMPONENTES RESPONSIVOS
     // ============================================================
-    const Spinner = function() {
-        return h('div', { className: 'animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4' });
-    };
-
+    
+    // Header Responsive
     const Header = function() {
-        return h('header', { className: 'bg-white shadow-sm' },
-            h('div', { className: 'container mx-auto px-6 py-4 flex items-center' },
-                h('img', { src: ITD_LOGO_URL, alt: 'Logo ITD', className: 'h-16 mr-4' }),
-                h('h1', { className: 'text-lg sm:text-xl font-bold text-gray-800' }, 'Validador de Constancias ITD')
-            )
+        return h('header', { className: 'header-responsive' },
+            h('img', { 
+                src: TECNM_LOGO_URL, 
+                alt: 'TecNM', 
+                className: 'logo',
+                onError: function(e) { e.target.style.display = 'none'; }
+            }),
+            h('h1', null,
+                'Validador de Constancias',
+                h('span', null, 'Instituto Tecnológico de Durango')
+            ),
+            h('img', { 
+                src: ITD_LOGO_URL, 
+                alt: 'ITD', 
+                className: 'logo-itd',
+                onError: function(e) { e.target.style.display = 'none'; }
+            })
         );
     };
 
+    // Footer Responsive
     const Footer = function() {
-        return h('footer', { className: 'bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 mt-auto' },
-            h('div', { className: 'container mx-auto px-4' },
-                h('p', { className: 'font-semibold text-sm' }, '© Coordinación de Actualización Docente'),
-                h('p', { className: 'text-xs opacity-90' }, 'M.C. Alejandro Calderón Rentería')
+        return h('footer', { className: 'footer-responsive' },
+            h('p', null,
+                '© ', new Date().getFullYear(), ' ',
+                h('strong', null, 'Coordinación de Actualización Docente')
+            ),
+            h('p', { style: { marginTop: '4px', fontSize: '11px' } },
+                'M.C. Alejandro Calderón Rentería'
             )
         );
     };
 
-    // ============================================================
-    // SEARCH FORM
-    // ============================================================
+    // Loading
+    const Loading = function() {
+        return h('div', { className: 'loading-container' },
+            h('div', { className: 'spinner' }),
+            h('p', null, 'Cargando base de datos...')
+        );
+    };
+
+    // Error
+    const ErrorDisplay = function(props) {
+        return h('div', { className: 'main-container' },
+            h('div', { className: 'result-card error', style: { marginTop: '20px' } },
+                h('div', { className: 'result-header' },
+                    h('span', { className: 'icon' }, '❌'),
+                    h('span', { className: 'title' }, 'Error al cargar datos')
+                ),
+                h('p', { style: { fontSize: '14px', color: '#475569', marginTop: '8px' } }, props.message),
+                h('div', { className: 'footer-link' },
+                    h('a', { href: 'index.html' }, '← Volver al Portal Principal')
+                )
+            )
+        );
+    };
+
+    // SearchForm Responsive
     const SearchForm = function(props) {
         const query = props.query;
         const setQuery = props.setQuery;
@@ -516,59 +997,57 @@
             if (e.key === 'Enter') onSearch();
         };
 
-        return h('div', { className: 'bg-white p-6 sm:p-8 rounded-xl shadow-md w-full max-w-2xl' },
-            h('div', { className: 'flex justify-between items-center mb-2' },
-                h('h2', { className: 'text-xl font-bold text-gray-800' }, 'Buscar Constancia'),
-                h('button', {
-                    onClick: onReload,
-                    disabled: loading,
-                    className: 'text-xs text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 disabled:opacity-50'
-                },
-                    loading ? '⏳ Cargando...' : '🔄 Recargar datos'
-                )
-            ),
-            h('p', { className: 'text-gray-600 mb-4 text-sm' }, 
-                'Ingrese el folio exacto (ej: 1-2025, 23-2025-II, 1-2025-001)'
+        return h('div', { className: 'search-card' },
+            h('h2', null, 'Buscar Constancia'),
+            h('p', { className: 'subtitle' },
+                'Ingrese el folio exacto ',
+                h('strong', null, '(ej: 1-2025, 23-2025-II, 1-2025-001)')
             ),
             
-            h('div', { className: 'flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4' },
-                h('div', { className: 'flex-grow w-full' },
-                    h('div', { className: 'flex w-full border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 overflow-hidden' },
-                        h('span', { className: 'px-3 text-gray-500 bg-gray-50 border-r border-gray-300 flex items-center whitespace-nowrap text-sm' }, 'TNM-054-'),
-                        h('input', {
-                            type: 'text',
-                            className: 'w-full pl-4 pr-4 py-2 border-none focus:outline-none bg-transparent uppercase',
-                            placeholder: '1-2025',
-                            value: query,
-                            onChange: function(e) { setQuery(e.target.value.toUpperCase()); },
-                            onKeyDown: handleKeyDown,
-                            autoFocus: true,
-                            disabled: loading
-                        })
-                    )
+            h('div', { className: 'search-row' },
+                h('div', { className: 'search-input-wrapper' },
+                    h('span', { className: 'prefix' }, 'TNM-054-'),
+                    h('input', {
+                        type: 'text',
+                        placeholder: '1-2025',
+                        value: query,
+                        onChange: function(e) { setQuery(e.target.value.toUpperCase()); },
+                        onKeyDown: handleKeyDown,
+                        autoFocus: true,
+                        disabled: loading,
+                        inputMode: 'text',
+                        autoCapitalize: 'characters'
+                    })
                 ),
-                h('div', { className: 'flex space-x-2 w-full sm:w-auto flex-shrink-0' },
+                h('div', { className: 'search-actions' },
                     h('button', {
                         onClick: onSearch,
                         disabled: loading || !query,
-                        className: 'flex-1 sm:flex-none px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed'
-                    }, loading ? 'Buscando...' : 'Verificar'),
+                        className: 'btn-verify'
+                    }, loading ? '...' : 'Verificar'),
                     h('button', {
                         onClick: onClear,
                         disabled: loading,
-                        className: 'flex-1 sm:flex-none px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-md hover:bg-gray-300 disabled:opacity-50'
+                        className: 'btn-clear'
                     }, 'Borrar')
                 )
             ),
-            h('p', { className: 'text-xs text-gray-400 mt-3 text-center' },
+            
+            h('div', { className: 'reload-row' },
+                h('button', {
+                    onClick: onReload,
+                    disabled: loading,
+                    className: 'btn-reload'
+                }, loading ? '⏳ Cargando...' : '🔄 Recargar datos')
+            ),
+            
+            h('p', { className: 'info-text' },
                 'Los datos se cargan al abrir la página. Usa "Recargar datos" para actualizar cambios.'
             )
         );
     };
 
-    // ============================================================
-    // RESULTADO
-    // ============================================================
+    // Resultado Responsive
     const Resultado = function(props) {
         const status = props.status;
         const result = props.result;
@@ -591,16 +1070,16 @@
         if (status === 'idle') return null;
 
         if (status === 'not_found') {
-            return h('div', { className: 'mt-6 p-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow w-full max-w-2xl' },
-                h('div', { className: 'flex items-center gap-3' },
-                    h('span', { className: 'text-3xl' }, '❌'),
-                    h('div', null,
-                        h('h3', { className: 'text-lg font-bold text-red-800' }, 'Documento no Encontrado'),
-                        h('p', { className: 'text-red-700' }, 'El folio TNM-054-' + query + ' no fue encontrado.')
-                    )
+            return h('div', { className: 'result-card error main-container', style: { padding: '18px' } },
+                h('div', { className: 'result-header' },
+                    h('span', { className: 'icon' }, '❌'),
+                    h('span', { className: 'title' }, 'Documento no Encontrado')
                 ),
-                h('div', { className: 'mt-4 pt-4 border-t border-red-200 text-center' },
-                    h('a', { href: 'index.html', className: 'text-sm text-blue-600 hover:underline' }, '← Volver al Portal Principal')
+                h('p', { style: { fontSize: '14px', color: '#475569', marginTop: '4px' } },
+                    'El folio TNM-054-', query, ' no fue encontrado o no está vigente.'
+                ),
+                h('div', { className: 'footer-link' },
+                    h('a', { href: 'index.html' }, '← Volver al Portal Principal')
                 )
             );
         }
@@ -626,14 +1105,14 @@
                 let value = getFlexibleProperty(result, [field.key]);
                 if (!value) return null;
                 if (field.key === 'folio') {
-                    return h('div', { key: field.key },
-                        h('p', { className: 'text-gray-500' }, field.label),
-                        h('p', { className: 'font-bold text-gray-800 break-words' }, folioLimpio)
+                    return h('div', { className: 'field', key: field.key },
+                        h('div', { className: 'label' }, field.label),
+                        h('div', { className: 'value' }, folioLimpio)
                     );
                 }
-                return h('div', { key: field.key },
-                    h('p', { className: 'text-gray-500' }, field.label),
-                    h('p', { className: 'font-bold text-gray-800 break-words' }, String(value).toUpperCase())
+                return h('div', { className: 'field', key: field.key },
+                    h('div', { className: 'label' }, field.label),
+                    h('div', { className: 'value' }, String(value).toUpperCase())
                 );
             }).filter(function(item) { return item !== null; });
 
@@ -643,33 +1122,32 @@
             const hash = generateVerificationHash({ folio: fullFolio, nombre: nombre, fecha: fecha });
             const verificationCode = formatVerificationCode(hash, fullFolio);
 
-            return h('div', { className: 'mt-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow w-full max-w-2xl' },
-                h('div', { className: 'p-6' },
-                    h('div', { className: 'flex items-center gap-3' },
-                        h('span', { className: 'text-3xl' }, '✅'),
-                        h('div', { className: 'flex-1' },
-                            h('h3', { className: 'text-lg font-bold text-green-800' }, 'Documento Válido'),
-                            h('p', { className: 'text-green-700 text-sm' }, 'Folio: ' + folioLimpio)
-                        ),
-                        h('button', {
-                            onClick: handleDownload,
-                            disabled: generating,
-                            className: 'px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:bg-blue-400 text-sm flex items-center gap-2'
-                        },
-                            generating ? '⏳ Generando...' : '📄 Descargar PDF'
-                        )
-                    ),
-                    h('div', { className: 'mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200' },
-                        h('p', { className: 'text-xs text-gray-600' }, 'Código de Verificación:'),
-                        h('p', { className: 'font-mono font-bold text-blue-800 text-sm' }, verificationCode)
-                    ),
-                    h('p', { className: 'text-green-600 text-sm mt-2' }, 'Este documento ha sido verificado en la base de datos oficial del ITD.')
+            return h('div', { className: 'result-card success main-container', style: { padding: '18px' } },
+                h('div', { className: 'result-header' },
+                    h('span', { className: 'icon' }, '✅'),
+                    h('span', { className: 'title' }, 'Documento Válido')
                 ),
-                h('div', { className: 'bg-white p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm border-t border-green-200' },
+                h('div', { className: 'folio-display' },
+                    'Folio: ', h('strong', null, folioLimpio)
+                ),
+                
+                h('div', { className: 'verification-code' },
+                    h('div', { className: 'label' }, 'Código de Verificación'),
+                    h('div', { className: 'code' }, verificationCode)
+                ),
+                
+                h('button', {
+                    onClick: handleDownload,
+                    disabled: generating,
+                    className: 'btn-download'
+                }, generating ? '⏳ Generando...' : '📄 Descargar PDF'),
+                
+                h('div', { className: 'fields-grid' },
                     items
                 ),
-                h('div', { className: 'bg-white p-4 text-center border-t border-gray-100 rounded-b-lg' },
-                    h('a', { href: 'index.html', className: 'text-sm text-blue-600 hover:underline' }, '← Volver al Portal Principal')
+                
+                h('div', { className: 'footer-link' },
+                    h('a', { href: 'index.html' }, '← Volver al Portal Principal')
                 )
             );
         }
@@ -699,8 +1177,9 @@
                     console.log('✅ Datos recargados:', db.length);
                     setData(db);
                     setLoading(false);
+                    // Mostrar mensaje de éxito
                     const msg = document.createElement('div');
-                    msg.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50';
+                    msg.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#22c55e;color:white;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:999;max-width:90%;text-align:center;';
                     msg.textContent = '✅ Datos recargados correctamente';
                     document.body.appendChild(msg);
                     setTimeout(function() { msg.remove(); }, 3000);
@@ -725,18 +1204,17 @@
                     setLoading(false);
                     
                     if (folioFromUrl) {
-                        var folioQuery = folioFromUrl.trim().toUpperCase();
-                        // Si el folio de la URL no tiene "TNM-054-", se lo agregamos para la búsqueda
-                        if (!folioQuery.startsWith('TNM-054-')) {
-                            folioQuery = 'TNM-054-' + folioQuery;
-                        }
-                        setQuery(folioQuery.replace('TNM-054-', ''));
+                        const folioQuery = folioFromUrl.trim().toUpperCase();
+                        setQuery(folioQuery);
                         setTimeout(function() {
-                            var found = buscarFolio(db, folioQuery);
+                            const found = buscarFolio(db, folioQuery);
                             if (found) {
-                                var folioValue = getFlexibleProperty(found, ['folio']);
-                                var resultObj = Object.assign({}, found);
-                                resultObj.folio = folioValue || folioQuery;
+                                let folioValue = getFlexibleProperty(found, ['folio']);
+                                if (folioValue && !String(folioValue).toUpperCase().startsWith('TNM-054-')) {
+                                    folioValue = 'TNM-054-' + String(folioValue);
+                                }
+                                const resultObj = Object.assign({}, found);
+                                resultObj.folio = folioValue || 'TNM-054-' + folioQuery;
                                 setResult(resultObj);
                                 setStatus('success');
                                 playSuccessSound();
@@ -759,12 +1237,14 @@
             if (!query || data.length === 0 || searching) return;
             setSearching(true);
             setTimeout(function() {
-                var queryCompleta = 'TNM-054-' + query.trim().toUpperCase();
-                var found = buscarFolio(data, queryCompleta);
+                const found = buscarFolio(data, query);
                 if (found) {
-                    var folioValue = getFlexibleProperty(found, ['folio']);
-                    var resultObj = Object.assign({}, found);
-                    resultObj.folio = folioValue || queryCompleta;
+                    let folioValue = getFlexibleProperty(found, ['folio']);
+                    if (folioValue && !String(folioValue).toUpperCase().startsWith('TNM-054-')) {
+                        folioValue = 'TNM-054-' + String(folioValue);
+                    }
+                    const resultObj = Object.assign({}, found);
+                    resultObj.folio = folioValue || 'TNM-054-' + query;
                     setResult(resultObj);
                     setStatus('success');
                     playSuccessSound();
@@ -786,34 +1266,31 @@
             }
         };
 
+        // Renderizar según estado
         if (loading) {
-            return h('div', { className: 'flex flex-col items-center justify-center min-h-screen bg-slate-100' },
-                h(Spinner, null),
-                h('p', { className: 'text-gray-600 mt-4' }, 'Cargando base de datos...'),
-                h('p', { className: 'text-xs text-gray-400 mt-2' }, 'Revisa la consola (F12) para ver logs')
+            return h('div', { style: { minHeight: '100vh', display: 'flex', flexDirection: 'column' } },
+                h(Header, null),
+                h(Loading, null),
+                h(Footer, null)
             );
         }
 
         if (error) {
-            return h('div', { className: 'flex items-center justify-center min-h-screen bg-slate-100 p-4' },
-                h('div', { className: 'bg-white rounded-xl shadow-lg p-8 max-w-lg w-full text-center' },
-                    h('div', { className: 'text-red-500 text-6xl mb-4' }, '❌'),
-                    h('h2', { className: 'text-xl font-bold text-red-700 mb-2' }, 'Error al cargar datos'),
-                    h('p', { className: 'text-gray-600' }, error),
-                    h('p', { className: 'text-xs text-gray-400 mt-4' }, 'Revisa la consola (F12) para más detalles')
-                )
+            return h('div', { style: { minHeight: '100vh', display: 'flex', flexDirection: 'column' } },
+                h(Header, null),
+                h(ErrorDisplay, { message: error }),
+                h(Footer, null)
             );
         }
 
-        return h('div', { className: 'min-h-screen bg-slate-100 flex flex-col' },
+        return h('div', { style: { minHeight: '100vh', display: 'flex', flexDirection: 'column' } },
             h(Header, null),
             
-            h('main', { className: 'flex-grow container mx-auto p-4 sm:p-6 flex flex-col items-center' },
-                h('div', { className: 'w-full max-w-2xl mb-4' },
-                    h('a', { href: 'index.html', className: 'inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline' },
-                        '← Volver al Portal Principal'
-                    )
+            h('main', { className: 'main-container' },
+                h('a', { href: 'index.html', className: 'btn-back' },
+                    '← Volver al Portal Principal'
                 ),
+                
                 h(SearchForm, {
                     query: query,
                     setQuery: setQuery,
@@ -822,6 +1299,7 @@
                     onReload: recargarDatos,
                     loading: searching || loading
                 }),
+                
                 h(Resultado, {
                     status: status,
                     result: result,
@@ -840,7 +1318,7 @@
     if (rootElement) {
         const root = createRoot(rootElement);
         root.render(h(App, null));
-        console.log('✅ React montado');
+        console.log('✅ React montado - Versión Responsiva');
     } else {
         console.error('❌ No se encontró #root');
     }
