@@ -94,22 +94,34 @@
             margin-bottom: 20px;
         }
         
-        /* ===== TARJETAS ===== */
-        .card-grid {
+        /* ===== TARJETAS - NUEVA DISTRIBUCIÓN ===== */
+        .card-row {
             display: grid;
-            grid-template-columns: 1fr 1fr 1.3fr;
+            grid-template-columns: 1fr 2fr;
             gap: 16px;
-            align-items: stretch;
+            margin-bottom: 16px;
+        }
+        
+        .card-row-bottom {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
         }
         
         @media (max-width: 900px) {
-            .card-grid {
+            .card-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .card-row-bottom {
                 grid-template-columns: 1fr 1fr;
             }
         }
         
         @media (max-width: 600px) {
-            .card-grid {
+            .card-row {
+                grid-template-columns: 1fr;
+            }
+            .card-row-bottom {
                 grid-template-columns: 1fr;
             }
         }
@@ -126,7 +138,7 @@
             position: relative;
             overflow: hidden;
             height: 100%;
-            min-height: 200px;
+            min-height: 180px;
         }
         
         .card:hover {
@@ -276,7 +288,7 @@
             100% { transform: scale(1); }
         }
         
-        /* ===== TARJETA FORMATOS - MÁS ALTA ===== */
+        /* ===== TARJETA FORMATOS - COMPLETA ===== */
         .card-formatos {
             min-height: 240px;
         }
@@ -344,6 +356,20 @@
         .formato-item .download-btn:hover {
             color: #6b1e2e;
             transform: scale(1.15);
+        }
+        
+        /* ===== TARJETA INSTRUCTORES - CENTRADA ===== */
+        .card-instructores {
+            text-align: center;
+            align-items: center;
+        }
+        
+        .card-instructores .card-desc {
+            text-align: center;
+        }
+        
+        .card-instructores .card-status {
+            align-self: center;
         }
         
         /* ===== BOTÓN ADMIN ===== */
@@ -510,15 +536,12 @@
             .page-title {
                 font-size: 20px;
             }
-            .card-grid {
-                gap: 12px;
-            }
             .card {
                 padding: 14px 16px;
-                min-height: 160px;
+                min-height: 140px;
             }
             .card-formatos {
-                min-height: 200px;
+                min-height: 180px;
             }
             .modal-box {
                 padding: 24px 20px;
@@ -554,7 +577,7 @@
                 font-size: 12px;
             }
             .card-formatos {
-                min-height: 180px;
+                min-height: 160px;
             }
         }
     </style>
@@ -814,8 +837,8 @@
                 h('h1', { className: 'page-title' }, 'Portal Documental'),
                 h('p', { className: 'page-subtitle' }, 'Registro de cursos y formatos oficiales para los procesos de actualización docente.'),
                 
-                // Grid de tarjetas
-                h('div', { className: 'card-grid' },
+                // FILA SUPERIOR: Registro + Formatos
+                h('div', { className: 'card-row' },
                     // TARJETA 1: REGISTRO
                     h('a', {
                         ref: cardRef,
@@ -846,21 +869,7 @@
                         )
                     ),
                     
-                    // TARJETA 2: INSTRUCTORES
-                    h('a', {
-                        href: 'instructores.html',
-                        className: 'card',
-                        style: { textDecoration: 'none', display: 'flex', flexDirection: 'column' }
-                    },
-                        h('div', { className: 'card-icon' }, '🎓'),
-                        h('div', { className: 'card-title' }, 'Área para Instructores'),
-                        h('p', { className: 'card-desc' },
-                            'Sube tus propuestas de cursos, CV, fichas técnicas y gestiona tus evidencias.'
-                        ),
-                        h('span', { className: 'card-status available' }, '✓ Disponible')
-                    ),
-                    
-                    // TARJETA 3: FORMATOS (CON ALTURA SUFICIENTE)
+                    // TARJETA 2: FORMATOS (COMPLETA)
                     h('div', { className: 'card card-formatos', style: { display: 'flex', flexDirection: 'column' } },
                         h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 } },
                             h('div', { className: 'card-title' }, 'Documentos y Formatos'),
@@ -882,6 +891,24 @@
                             )
                         )
                     )
+                ),
+                
+                // FILA INFERIOR: Instructores (centrado)
+                h('div', { className: 'card-row-bottom' },
+                    h('div', null),
+                    h('a', {
+                        href: 'instructores.html',
+                        className: 'card card-instructores',
+                        style: { textDecoration: 'none', display: 'flex', flexDirection: 'column' }
+                    },
+                        h('div', { className: 'card-icon' }, '🎓'),
+                        h('div', { className: 'card-title' }, 'Área para Instructores'),
+                        h('p', { className: 'card-desc' },
+                            'Sube tus propuestas de cursos, CV, fichas técnicas y gestiona tus evidencias.'
+                        ),
+                        h('span', { className: 'card-status available' }, '✓ Disponible')
+                    ),
+                    h('div', null)
                 ),
                 
                 // BOTÓN ADMIN
@@ -912,7 +939,8 @@
                             onChange: (e) => { setAdminPass(e.target.value); setAdminError(''); },
                             onKeyDown: (e) => { if (e.key === 'Enter') handlePasswordToggle(); },
                             placeholder: '••••••••',
-                            autoFocus: true                        }),
+                            autoFocus: true
+                        }),
                         adminError && h('div', { className: 'error-msg' }, '⚠️ ', adminError),
                         h('button', {
                             className: `btn-toggle ${isOpen ? 'active' : 'inactive'}`,
@@ -940,7 +968,7 @@
     const root = createRoot(document.getElementById('root'));
     root.render(h(App, null));
     
-    console.log('✅ Formatos ITD - Versión Final');
+    console.log('✅ Formatos ITD - Reorganizado');
     </script>
 </body>
 </html>
