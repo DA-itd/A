@@ -95,33 +95,21 @@
         }
         
         /* ===== TARJETAS - NUEVA DISTRIBUCIÓN ===== */
-        .card-row {
+        .card-wrapper {
             display: grid;
-            grid-template-columns: 1fr 2fr;
+            grid-template-columns: 1fr 1.8fr;
             gap: 16px;
-            margin-bottom: 16px;
+            align-items: stretch;
         }
         
-        .card-row-bottom {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+        .card-left-col {
+            display: flex;
+            flex-direction: column;
             gap: 16px;
         }
         
-        @media (max-width: 900px) {
-            .card-row {
-                grid-template-columns: 1fr 1fr;
-            }
-            .card-row-bottom {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        
-        @media (max-width: 600px) {
-            .card-row {
-                grid-template-columns: 1fr;
-            }
-            .card-row-bottom {
+        @media (max-width: 768px) {
+            .card-wrapper {
                 grid-template-columns: 1fr;
             }
         }
@@ -138,7 +126,6 @@
             position: relative;
             overflow: hidden;
             height: 100%;
-            min-height: 180px;
         }
         
         .card:hover {
@@ -290,7 +277,8 @@
         
         /* ===== TARJETA FORMATOS - COMPLETA ===== */
         .card-formatos {
-            min-height: 240px;
+            min-height: 100%;
+            height: 100%;
         }
         
         .formatos-grid {
@@ -356,20 +344,6 @@
         .formato-item .download-btn:hover {
             color: #6b1e2e;
             transform: scale(1.15);
-        }
-        
-        /* ===== TARJETA INSTRUCTORES - CENTRADA ===== */
-        .card-instructores {
-            text-align: center;
-            align-items: center;
-        }
-        
-        .card-instructores .card-desc {
-            text-align: center;
-        }
-        
-        .card-instructores .card-status {
-            align-self: center;
         }
         
         /* ===== BOTÓN ADMIN ===== */
@@ -538,10 +512,6 @@
             }
             .card {
                 padding: 14px 16px;
-                min-height: 140px;
-            }
-            .card-formatos {
-                min-height: 180px;
             }
             .modal-box {
                 padding: 24px 20px;
@@ -575,9 +545,6 @@
             }
             .card-desc {
                 font-size: 12px;
-            }
-            .card-formatos {
-                min-height: 160px;
             }
         }
     </style>
@@ -837,39 +804,56 @@
                 h('h1', { className: 'page-title' }, 'Portal Documental'),
                 h('p', { className: 'page-subtitle' }, 'Registro de cursos y formatos oficiales para los procesos de actualización docente.'),
                 
-                // FILA SUPERIOR: Registro + Formatos
-                h('div', { className: 'card-row' },
-                    // TARJETA 1: REGISTRO
-                    h('a', {
-                        ref: cardRef,
-                        href: isOpen ? REGISTRO_URL : '#',
-                        target: isOpen ? '_blank' : undefined,
-                        onClick: handleMainCardClick,
-                        className: `card card-main ${pulsing ? 'pulse-effect' : ''}`,
-                        style: { 
-                            cursor: isOpen ? 'pointer' : 'default',
-                            opacity: isOpen ? 1 : 0.6,
-                            textDecoration: 'none',
-                            display: 'flex',
-                            flexDirection: 'column'
-                        }
-                    },
-                        h('span', { className: `badge-main ${isOpen ? '' : 'closed'}` }, 
-                            isOpen ? '⭐ DISPONIBLE' : '🔒 CERRADO'
+                // DISTRIBUCIÓN: Izquierda (Registro + Instructores) | Derecha (Formatos)
+                h('div', { className: 'card-wrapper' },
+                    // COLUMNA IZQUIERDA
+                    h('div', { className: 'card-left-col' },
+                        // REGISTRO
+                        h('a', {
+                            ref: cardRef,
+                            href: isOpen ? REGISTRO_URL : '#',
+                            target: isOpen ? '_blank' : undefined,
+                            onClick: handleMainCardClick,
+                            className: `card card-main ${pulsing ? 'pulse-effect' : ''}`,
+                            style: { 
+                                cursor: isOpen ? 'pointer' : 'default',
+                                opacity: isOpen ? 1 : 0.6,
+                                textDecoration: 'none',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }
+                        },
+                            h('span', { className: `badge-main ${isOpen ? '' : 'closed'}` }, 
+                                isOpen ? '⭐ DISPONIBLE' : '🔒 CERRADO'
+                            ),
+                            h('div', { className: 'icon-large' }, '🖥️'),
+                            h('div', { className: 'card-title' }, 'Registro Cursos - Taller'),
+                            h('p', { className: 'card-desc' }, 
+                                isOpen 
+                                    ? 'Completa el registro de tu curso y la evaluación de criterios del instructor en un solo lugar.'
+                                    : 'El registro se encuentra cerrado. Próximamente se abrirá un nuevo periodo.'
+                            ),
+                            h('span', { className: `card-status ${isOpen ? 'available' : 'soon'}` },
+                                isOpen ? '✓ Disponible' : '✗ No disponible'
+                            )
                         ),
-                        h('div', { className: 'icon-large' }, '🖥️'),
-                        h('div', { className: 'card-title' }, 'Registro Cursos - Taller'),
-                        h('p', { className: 'card-desc' }, 
-                            isOpen 
-                                ? 'Completa el registro de tu curso y la evaluación de criterios del instructor en un solo lugar.'
-                                : 'El registro se encuentra cerrado. Próximamente se abrirá un nuevo periodo.'
-                        ),
-                        h('span', { className: `card-status ${isOpen ? 'available' : 'soon'}` },
-                            isOpen ? '✓ Disponible' : '✗ No disponible'
+                        
+                        // INSTRUCTORES
+                        h('a', {
+                            href: 'instructores.html',
+                            className: 'card',
+                            style: { textDecoration: 'none', display: 'flex', flexDirection: 'column' }
+                        },
+                            h('div', { className: 'card-icon' }, '🎓'),
+                            h('div', { className: 'card-title' }, 'Área para Instructores'),
+                            h('p', { className: 'card-desc' },
+                                'Sube tus propuestas de cursos, CV, fichas técnicas y gestiona tus evidencias.'
+                            ),
+                            h('span', { className: 'card-status available' }, '✓ Disponible')
                         )
                     ),
                     
-                    // TARJETA 2: FORMATOS (COMPLETA)
+                    // COLUMNA DERECHA: FORMATOS (ocupa toda la altura)
                     h('div', { className: 'card card-formatos', style: { display: 'flex', flexDirection: 'column' } },
                         h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 } },
                             h('div', { className: 'card-title' }, 'Documentos y Formatos'),
@@ -891,24 +875,6 @@
                             )
                         )
                     )
-                ),
-                
-                // FILA INFERIOR: Instructores (centrado)
-                h('div', { className: 'card-row-bottom' },
-                    h('div', null),
-                    h('a', {
-                        href: 'instructores.html',
-                        className: 'card card-instructores',
-                        style: { textDecoration: 'none', display: 'flex', flexDirection: 'column' }
-                    },
-                        h('div', { className: 'card-icon' }, '🎓'),
-                        h('div', { className: 'card-title' }, 'Área para Instructores'),
-                        h('p', { className: 'card-desc' },
-                            'Sube tus propuestas de cursos, CV, fichas técnicas y gestiona tus evidencias.'
-                        ),
-                        h('span', { className: 'card-status available' }, '✓ Disponible')
-                    ),
-                    h('div', null)
                 ),
                 
                 // BOTÓN ADMIN
@@ -968,7 +934,7 @@
     const root = createRoot(document.getElementById('root'));
     root.render(h(App, null));
     
-    console.log('✅ Formatos ITD - Reorganizado');
+    console.log('✅ Formatos ITD - Distribución final correcta');
     </script>
 </body>
 </html>
