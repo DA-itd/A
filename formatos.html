@@ -27,18 +27,17 @@
             flex-direction: column;
         }
         
-        /* ===== HEADER ===== */
+        /* ===== HEADER ESTÁTICO ===== */
         .header-white {
             background: #ffffff;
             padding: 14px 24px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             max-width: 1100px;
             margin: 0 auto;
             width: 100%;
-            gap: 20px;
         }
         
         .header-white .logo {
@@ -67,40 +66,39 @@
             flex: 1;
         }
         
-        /* ===== BOTÓN SALIR DISCRETO ===== */
+        /* ===== BOTÓN SALIR ===== */
         .btn-exit {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            background: transparent;
-            color: #8a7a6a;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
+            gap: 6px;
+            background: #1B396A;
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
             text-decoration: none;
-            transition: all 0.2s;
-            border: 1px solid transparent;
+            transition: background 0.2s, transform 0.15s;
+            border: none;
+            cursor: pointer;
             flex-shrink: 0;
-            opacity: 0.5;
         }
         .btn-exit:hover {
-            background: rgba(0,0,0,0.04);
-            color: #6b1e2e;
-            opacity: 1;
-            border-color: rgba(107,30,46,0.15);
+            background: #B32032;
+            transform: scale(1.02);
         }
         .btn-exit svg {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
         }
         
         @media (max-width: 480px) {
+            .btn-exit {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
             .btn-exit span {
                 display: none;
-            }
-            .btn-exit {
-                padding: 4px 8px;
             }
         }
         
@@ -554,12 +552,6 @@
         
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .header-white .title {
-                font-size: 16px;
-            }
-            .header-white .logo {
-                height: 36px;
-            }
             .header-white {
                 flex-wrap: wrap;
                 gap: 8px;
@@ -567,7 +559,10 @@
                 padding: 12px 16px;
             }
             .header-white .logo {
-                height: 32px;
+                height: 36px;
+            }
+            .header-white .title {
+                font-size: 16px;
             }
             .page-title {
                 font-size: 20px;
@@ -584,14 +579,20 @@
             .header-white {
                 padding: 10px 12px;
             }
+            .header-white .logo {
+                height: 30px;
+            }
             .header-white .title {
                 font-size: 14px;
             }
             .header-white .subtitle {
                 font-size: 10px;
             }
-            .header-white .logo {
-                height: 28px;
+            .btn-exit span {
+                display: none;
+            }
+            .btn-exit {
+                padding: 4px 10px;
             }
             .main-container {
                 padding: 12px 12px 8px;
@@ -608,9 +609,6 @@
             .card-desc {
                 font-size: 12px;
             }
-            .btn-exit span {
-                display: none;
-            }
         }
     </style>
     
@@ -619,7 +617,52 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+    <!-- ===== HEADER ESTÁTICO CON LOGOS Y BOTÓN SALIR ===== -->
+    <header class="header-white">
+        <!-- Logo TecNM -->
+        <img 
+            src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" 
+            alt="TecNM" 
+            class="logo"
+        />
+        
+        <!-- Título central -->
+        <div class="header-center">
+            <span class="title">Desarrollo Académico</span>
+            <div class="subtitle">Actualización Docente ITD</div>
+        </div>
+        
+        <!-- Logo ITD -->
+        <img 
+            src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
+            alt="ITD" 
+            class="logo"
+        />
+        
+        <!-- Botón Salir -->
+        <a href="https://da-itd.github.io/A/index.html" class="btn-exit">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            <span>Salir</span>
+        </a>
+    </header>
+    
+    <!-- ===== LÍNEA GUINDA ===== -->
+    <div class="guinda-line"></div>
+    
     <div id="root"></div>
+    
+    <!-- ===== FOOTER ESTÁTICO ===== -->
+    <footer class="footer">
+        <p>© 2026 <strong>Coordinación de Actualización Docente</strong></p>
+        <p style="font-size: 11px; margin-top: 2px; opacity: 0.6;">M.C. Alejandro Calderón Rentería</p>
+        <p style="font-size: 10px; margin-top: 4px; opacity: 0.5;">
+            <a href="https://da-itd.github.io/A/index.html">← Volver al Portal Principal</a>
+        </p>
+    </footer>
     
     <script>
     // ============================================================
@@ -842,34 +885,6 @@
         }
         
         return h('div', { style: { display: 'flex', flexDirection: 'column', minHeight: '100vh' } },
-            // HEADER CON BOTÓN SALIR DISCRETO
-            h('header', { className: 'header-white' },
-                h('img', { 
-                    src: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg', 
-                    alt: 'TecNM', 
-                    className: 'logo'
-                }),
-                h('div', { className: 'header-center' },
-                    h('span', { className: 'title' }, 'Desarrollo Académico'),
-                    h('div', { className: 'subtitle' }, 'Actualización Docente ITD')
-                ),
-                h('a', {
-                    href: PORTAL_URL,
-                    className: 'btn-exit',
-                    title: 'Volver al Portal Principal'
-                },
-                    h('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' },
-                        h('path', { d: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4' }),
-                        h('polyline', { points: '16 17 21 12 16 7' }),
-                        h('line', { x1: '21', y1: '12', x2: '9', y2: '12' })
-                    ),
-                    h('span', null, 'Salir')
-                )
-            ),
-            
-            // LÍNEA GUINDA
-            h('div', { className: 'guinda-line' }),
-            
             // CONTENIDO
             h('div', { className: 'main-container' },
                 h('h1', { className: 'page-title' }, 'Portal Documental'),
@@ -989,15 +1004,6 @@
                         }, 'Cancelar')
                     )
                 )
-            ),
-            
-            // FOOTER CON ENLACE DE REGRESO
-            h('div', { className: 'footer' },
-                h('p', null, '© ', new Date().getFullYear(), ' ', h('strong', null, 'Coordinación de Actualización Docente')),
-                h('p', { style: { fontSize: 11, marginTop: 2, opacity: 0.6 } }, 'M.C. Alejandro Calderón Rentería'),
-                h('p', { style: { fontSize: 10, marginTop: 4, opacity: 0.5 } },
-                    h('a', { href: PORTAL_URL }, '← Volver al Portal Principal')
-                )
             )
         );
     };
@@ -1008,7 +1014,7 @@
     const root = createRoot(document.getElementById('root'));
     root.render(h(App, null));
     
-    console.log('✅ Formatos ITD - Botón Salir discreto');
+    console.log('✅ Formatos ITD - Con logo ITD y botón de salida');
     </script>
 </body>
 </html>
