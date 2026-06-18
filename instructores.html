@@ -1,106 +1,186 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-   <script async src="https://www.googletagmanager.com/gtag/js?id=G-V2V4CT2C69"></script>
-<script src="ga.js"></script>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V2V4CT2C69"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-V2V4CT2C69');
+    </script>
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área para Instructores - ITD</title>
     <meta name="description" content="Área exclusiva para instructores del ITD. Sube tus propuestas de cursos, CV, fichas técnicas y gestiona tus evidencias de impartición.">
-    <meta name="keywords" content="instructores ITD, propuestas de cursos, subir CV, evidencias curso, desarrollo académico">
     
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
-    
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-JH1X2720VL');
-    </script>
     
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background: #f0f4ff;
         }
-        
+        .card-shadow {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .card-shadow:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        .tab-active {
+            border-bottom: 3px solid #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .tab-inactive:hover {
+            color: #1f2937;
+            background: #f3f4f6;
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        .animate-fadeIn {
-            animation: fadeIn 0.5s ease-out forwards;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loader {
+            border: 4px solid #e5e7eb;
+            border-top-color: #4f46e5;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 0.8s linear infinite;
+        }
+        .file-drop {
+            border: 2px dashed #c7d2fe;
+            transition: all 0.2s;
+        }
+        .file-drop:hover, .file-drop.dragover {
+            border-color: #4f46e5;
+            background: #eef2ff;
+        }
+        .formato-link {
+            transition: all 0.2s;
+        }
+        .formato-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+        select, input[type="text"], input[type="file"] {
+            transition: all 0.2s;
+        }
+        select:focus, input[type="text"]:focus {
+            border-color: #4f46e5;
+            ring: 2px solid #4f46e5;
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+<body>
 
-    <header class="bg-white shadow-xl sticky top-0 z-40">
-        <div class="container mx-auto px-4 py-4 sm:py-6">
-            <div class="flex items-center justify-between gap-4">
+    <!-- HEADER -->
+    <header class="bg-white shadow-lg sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 sm:py-5">
+            <div class="flex items-center justify-between gap-3">
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" 
                      alt="TecNM" 
-                     class="h-12 sm:h-16 md:h-20 object-contain">
+                     class="h-12 sm:h-16 object-contain">
                 
-                <div class="text-center flex-1 px-2 sm:px-4">
-                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-blue-900 leading-tight">
+                <div class="text-center flex-1 px-2">
+                    <h1 class="text-base sm:text-xl md:text-2xl font-bold text-blue-900 leading-tight">
                         ÁREA PARA INSTRUCTORES
                     </h1>
-                    <p class="text-xs sm:text-sm md:text-base text-blue-700 mt-1 font-semibold">
-                        Desarrollo Académico
-                    </p>
-                    <p class="text-xs sm:text-sm text-blue-600">
-                        TecNM - Instituto Tecnológico de Durango
-                    </p>
+                    <p class="text-xs sm:text-sm text-blue-700 font-semibold">Desarrollo Académico</p>
+                    <p class="text-xs text-blue-600">TecNM - Instituto Tecnológico de Durango</p>
                 </div>
                 
                 <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
                      alt="ITD" 
-                     class="h-12 sm:h-16 md:h-20 object-contain">
+                     class="h-12 sm:h-16 object-contain">
             </div>
         </div>
     </header>
 
-    <div id="root"></div>
+    <!-- CONTENIDO PRINCIPAL -->
+    <div id="app" class="container mx-auto px-4 py-6">
+        <div class="max-w-4xl mx-auto">
+            <!-- Botón volver -->
+            <a href="formatos.html" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-4">
+                ← Volver a Formatos
+            </a>
 
-    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 sm:py-8 mt-12">
+            <!-- Card principal -->
+            <div class="bg-white rounded-xl card-shadow p-6 sm:p-8">
+
+                <!-- Título -->
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6">Instructores</h2>
+
+                <!-- Tabs -->
+                <div class="border-b border-gray-200 mb-6">
+                    <nav class="flex gap-2">
+                        <button id="tabProposal" class="px-4 sm:px-6 py-3 text-sm sm:text-base tab-active transition-colors rounded-t-lg">
+                            📄 Subir documentación
+                        </button>
+                        <button id="tabEvidence" class="px-4 sm:px-6 py-3 text-sm sm:text-base tab-inactive transition-colors rounded-t-lg">
+                            📎 Subir Evidencias
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Contenido Tabs -->
+                <div id="tabContent" class="fade-in">
+                    <!-- Cargando -->
+                    <div id="loadingState" class="flex justify-center items-center py-16">
+                        <div class="loader"></div>
+                        <span class="ml-4 text-gray-600">Cargando datos...</span>
+                    </div>
+
+                    <!-- Contenido dinámico -->
+                    <div id="dynamicContent" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white text-center py-6 mt-12">
         <div class="container mx-auto px-4">
-            <p class="font-semibold text-sm sm:text-base mb-2">
-                © Coordinación de Actualización Docente
-            </p>
-            <p class="text-xs sm:text-sm opacity-90">
-                M.C. Alejandro Calderón Rentería
-            </p>
-            <p class="text-xs sm:text-sm opacity-75 mt-1">
-                Todos los derechos reservados <span id="copyright-year"></span>
-            </p>
+            <p class="font-semibold text-sm sm:text-base">© Coordinación de Actualización Docente</p>
+            <p class="text-xs sm:text-sm opacity-90">M.C. Alejandro Calderón Rentería</p>
+            <p class="text-xs opacity-75 mt-1">Todos los derechos reservados <span id="year"></span></p>
         </div>
     </footer>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-
-        const COURSES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv';
-        const TEACHERS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv';
-
-        const removeAccents = (text) => {
-            if (!text) return '';
-            return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN
+        // ============================================================
+        const CONFIG = {
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
+            COURSES_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv',
+            TEACHERS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv'
         };
 
-        const parseCSVLine = (line) => {
+        // ============================================================
+        // UTILIDADES
+        // ============================================================
+        function removeAccents(text) {
+            if (!text) return '';
+            return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
+        function parseCSVLine(line) {
             const result = [];
             let current = '';
             let inQuotes = false;
-            
             for (let i = 0; i < line.length; i++) {
                 const char = line[i];
                 if (char === '"') {
@@ -119,1044 +199,640 @@
             }
             result.push(current.trim());
             return result;
-        };
+        }
 
-        const cleanCSVValue = (val) => {
+        function cleanCSVValue(val) {
             let cleaned = val.trim();
             if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
                 cleaned = cleaned.substring(1, cleaned.length - 1).replace(/""/g, '"');
             }
             return cleaned;
-        };
+        }
 
-        const fileToBase64 = (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        };
-
-        // Devuelve SOLO los bytes base64, sin el prefijo "data:...;base64,"
-        const fileToBase64Clean = (file) => {
+        function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = () => {
                     const result = reader.result;
-                    const base64 = result.includes(',') ? result.split(',')[1] : result;
-                    resolve(base64);
+                    resolve(result.includes(',') ? result.split(',')[1] : result);
                 };
-                reader.onerror = error => reject(error);
+                reader.onerror = reject;
             });
-        };
+        }
 
-        const fileToFileObject = (file, customFileName) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => {
-                    const result = reader.result;
-                    const base64 = result.includes(',') ? result.split(',')[1] : result;
-                    resolve({
-                        base64,
-                        mimeType: file.type || 'application/octet-stream',
-                        fileName: customFileName || file.name
-                    });
-                };
-                reader.onerror = error => reject(error);
-            });
-        };
+        function formatCourseDates(dates) {
+            if (!dates) return '';
+            return dates.split(',').map(d => d.trim()).join(' | ');
+        }
 
-        const getTeachers = async () => {
+        // ============================================================
+        // API
+        // ============================================================
+        async function getTeachers() {
             try {
-                const response = await fetch(`${TEACHERS_CSV_URL}&_=${Date.now()}`);
-                if (!response.ok) throw new Error('Error al cargar docentes');
-                
-                const csvText = await response.text();
-                const lines = csvText.trim().split(/\r?\n/);
-                
+                const resp = await fetch(`${CONFIG.TEACHERS_CSV_URL}&_=${Date.now()}`);
+                if (!resp.ok) throw new Error('Error al cargar docentes');
+                const text = await resp.text();
+                const lines = text.trim().split(/\r?\n/);
                 return lines.slice(1)
                     .filter(line => line.trim())
                     .map(line => {
-                        const values = parseCSVLine(line);
-                        if (values.length < 3) return null;
+                        const vals = parseCSVLine(line);
+                        if (vals.length < 3) return null;
                         return {
-                            nombreCompleto: cleanCSVValue(values[0]),
-                            curp: cleanCSVValue(values[1]),
-                            email: cleanCSVValue(values[2])
+                            nombreCompleto: cleanCSVValue(vals[0]),
+                            curp: cleanCSVValue(vals[1]),
+                            email: cleanCSVValue(vals[2])
                         };
                     })
-                    .filter(teacher => teacher !== null);
-            } catch (error) {
-                console.error("Error al obtener docentes:", error);
+                    .filter(t => t !== null);
+            } catch (e) {
+                console.error('Error getTeachers:', e);
                 return [];
             }
-        };
+        }
 
-        const getCourses = async () => {
+        async function getCourses() {
             try {
-                const response = await fetch(`${COURSES_CSV_URL}&_=${Date.now()}`);
-                if (!response.ok) throw new Error('Error al cargar cursos');
-                
-                const csvText = await response.text();
-                const lines = csvText.trim().split(/\r?\n/);
-                
+                const resp = await fetch(`${CONFIG.COURSES_CSV_URL}&_=${Date.now()}`);
+                if (!resp.ok) throw new Error('Error al cargar cursos');
+                const text = await resp.text();
+                const lines = text.trim().split(/\r?\n/);
                 return lines.slice(1)
                     .filter(line => line.trim())
                     .map(line => {
-                        const values = parseCSVLine(line);
-                        if (values.length < 8) return null;
-                        
-                        const hours = parseInt(cleanCSVValue(values[4]), 10);
-                        
+                        const vals = parseCSVLine(line);
+                        if (vals.length < 8) return null;
+                        const hours = parseInt(cleanCSVValue(vals[4]), 10);
                         return {
-                            id: cleanCSVValue(values[0]),
-                            name: cleanCSVValue(values[1]),
-                            dates: cleanCSVValue(values[2]),
-                            period: cleanCSVValue(values[3]),
+                            id: cleanCSVValue(vals[0]),
+                            name: cleanCSVValue(vals[1]),
+                            dates: cleanCSVValue(vals[2]),
+                            period: cleanCSVValue(vals[3]),
                             hours: isNaN(hours) ? 30 : hours,
-                            location: cleanCSVValue(values[5]),
-                            schedule: cleanCSVValue(values[6]),
-                            type: cleanCSVValue(values[7])
+                            location: cleanCSVValue(vals[5]),
+                            schedule: cleanCSVValue(vals[6]),
+                            type: cleanCSVValue(vals[7])
                         };
                     })
-                    .filter(course => course !== null);
-            } catch (error) {
-                console.error("Error al obtener cursos:", error);
+                    .filter(c => c !== null);
+            } catch (e) {
+                console.error('Error getCourses:', e);
                 return [];
             }
-        };
+        }
 
-        const submitInstructorProposal = async (data) => {
-            const APPS_SCRIPT_URL = window.CONFIG?.APPS_SCRIPT_URL;
-            if (!APPS_SCRIPT_URL) throw new Error("URL no disponible");
-            
-            try {
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    redirect: 'follow',
-                    body: JSON.stringify({ action: 'submitInstructorProposal', ...data })
-                });
-
-                const text = await response.text();
-                let result;
-                try { result = JSON.parse(text); }
-                catch { throw new Error('Respuesta inesperada del servidor: ' + text.substring(0, 120)); }
-
-                if (result?.success || result?.ok) {
-                    return result;
-                } else {
-                    throw new Error(result?.message || result?.error || 'Error al enviar propuesta');
-                }
-            } catch (error) {
-                if (error.message.includes('Respuesta inesperada') || error.message.includes('Error al enviar')) throw error;
-                throw new Error("No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.");
-            }
-        };
-
-        const submitEvidence = async (data) => {
-            const APPS_SCRIPT_URL = window.CONFIG?.APPS_SCRIPT_URL;
-            if (!APPS_SCRIPT_URL) throw new Error("URL no disponible");
-            
-            try {
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    redirect: 'follow',
-                    body: JSON.stringify({ action: 'submitInstructorEvidence', ...data })
-                });
-
-                const text = await response.text();
-                let result;
-                try { result = JSON.parse(text); }
-                catch { throw new Error('Respuesta inesperada del servidor: ' + text.substring(0, 120)); }
-
-                if (result?.success || result?.ok) {
-                    return result;
-                } else {
-                    throw new Error(result?.message || result?.error || 'Error al enviar evidencia');
-                }
-            } catch (error) {
-                if (error.message.includes('Respuesta inesperada') || error.message.includes('Error al enviar')) throw error;
-                throw new Error("No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.");
-            }
-        };
-
-        const AutocompleteInput = ({ teachers, onSelect, value, onChange, name, placeholder, required = false }) => {
-            const [suggestions, setSuggestions] = useState([]);
-            const [showSuggestions, setShowSuggestions] = useState(false);
-            const containerRef = React.useRef(null);
-
-            useEffect(() => {
-                const handleClickOutside = (event) => {
-                    if (containerRef.current && !containerRef.current.contains(event.target)) {
-                        setShowSuggestions(false);
-                    }
-                };
-                document.addEventListener('mousedown', handleClickOutside);
-                return () => document.removeEventListener('mousedown', handleClickOutside);
-            }, []);
-
-            const handleInputChange = (e) => {
-                const currentValue = e.target.value;
-                onChange(e);
-
-                if (currentValue && currentValue.length > 0) {
-                    const normalizedInput = removeAccents(currentValue.toLowerCase());
-                    const filtered = teachers.filter(teacher =>
-                        removeAccents(teacher.nombreCompleto.toLowerCase()).includes(normalizedInput)
-                    ).slice(0, 5);
-                    setSuggestions(filtered);
-                    setShowSuggestions(filtered.length > 0);
-                } else {
-                    setSuggestions([]);
-                    setShowSuggestions(false);
-                }
-            };
-
-            const handleSelect = (teacher) => {
-                onSelect(teacher);
-                setShowSuggestions(false);
-            };
-
-            return (
-                <div className="relative" ref={containerRef}>
-                    <input
-                        type="text"
-                        name={name}
-                        value={value}
-                        onChange={handleInputChange}
-                        onFocus={(e) => {
-                            const val = e.target.value;
-                            if (val) {
-                                const normalizedInput = removeAccents(val.toLowerCase());
-                                const filtered = teachers.filter(t =>
-                                    removeAccents(t.nombreCompleto.toLowerCase()).includes(normalizedInput)
-                                ).slice(0, 5);
-                                setSuggestions(filtered);
-                                setShowSuggestions(filtered.length > 0);
-                            }
-                        }}
-                        placeholder={placeholder || "Escriba su nombre"}
-                        className="mt-1 block w-full px-4 py-2.5 bg-white border-2 border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 text-sm transition-all"
-                        required={required}
-                        autoComplete="off"
-                    />
-                    {showSuggestions && suggestions.length > 0 && (
-                        <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
-                            {suggestions.map((teacher) => (
-                                <li
-                                    key={teacher.curp || teacher.nombreCompleto}
-                                    onMouseDown={(e) => {
-                                        e.preventDefault();
-                                        handleSelect(teacher);
-                                    }}
-                                    className="px-4 py-2.5 hover:bg-indigo-50 cursor-pointer text-sm font-medium text-slate-700 transition-colors border-b border-slate-50 last:border-0"
-                                >
-                                    {teacher.nombreCompleto}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
-            );
-        };
-
-        const FileInput = ({ id, label, onFileSelect, onError, acceptedFile, acceptedTypes, maxSizeMB }) => {
-            const [isDragging, setIsDragging] = useState(false);
-            const inputRef = React.useRef(null);
-
-            const handleFileValidation = (file) => {
-                const fileTypeParts = file.type.split('/');
-                const fileTypeMajor = fileTypeParts[0];
-                
-                const isValidType = acceptedTypes.some(type => {
-                    if (type.endsWith('/*')) {
-                        const typeMajor = type.split('/')[0];
-                        return typeMajor === fileTypeMajor;
-                    }
-                    return type === file.type;
-                });
-
-                if (!isValidType) {
-                    onError(`Tipo de archivo no permitido: ${file.type}`);
-                    return false;
-                }
-
-                if (file.size > maxSizeMB * 1024 * 1024) {
-                    onError(`El archivo excede ${maxSizeMB} MB`);
-                    return false;
-                }
-
-                onError(null);
-                onFileSelect(file);
-                return true;
-            };
-
-            const handleChange = (e) => {
-                if (e.target.files && e.target.files[0]) {
-                    handleFileValidation(e.target.files[0]);
-                } else {
-                    onFileSelect(null);
-                }
-            };
-
-            const handleRemoveFile = () => {
-                onFileSelect(null);
-                if (inputRef.current) inputRef.current.value = "";
-            };
-
-            return (
-                <div>
-                    <label
-                        htmlFor={id}
-                        className={`relative flex flex-col items-center justify-center w-full h-28 sm:h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 ${isDragging ? 'border-indigo-500' : ''}`}
-                    >
-                        <input
-                            type="file"
-                            id={id}
-                            ref={inputRef}
-                            className="sr-only"
-                            accept={acceptedTypes.join(',')}
-                            onChange={handleChange}
-                        />
-                        <div className="flex flex-col items-center justify-center space-y-2 text-center px-4">
-                            {acceptedFile 
-                                ? <p className="text-xs sm:text-sm font-semibold text-green-700 break-all">📄 {acceptedFile.name}</p>
-                                : <p className="text-xs sm:text-sm text-gray-500">{label}</p>
-                            }
-                        </div>
-                    </label>
-                    <div className="flex justify-between items-center mt-1">
-                        <p className="text-xs text-gray-500">PDF. Máx {maxSizeMB}MB</p>
-                        {acceptedFile && (
-                            <button
-                                type="button"
-                                onClick={handleRemoveFile}
-                                className="text-xs text-red-600 hover:underline"
-                            >
-                                Quitar
-                            </button>
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        const DownloadFormatsSection = () => {
-            return (
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-lg p-4 sm:p-6 mb-6">
-                    <div className="flex items-center mb-4">
-                        <div className="text-3xl mr-3">📋</div>
-                        <h3 className="text-lg sm:text-xl font-bold text-indigo-900">
-                            Documentación Requerida
-                        </h3>
-                    </div>
-                    <p className="text-sm text-gray-700 mb-4">
-                        Por favor sube tu <strong>CV</strong> y <strong>Ficha técnica</strong> del curso-taller a desarrollar.
-                        Para tu comodidad, las plantillas se encuentran en nuestra sección de formatos.
-                    </p>
-                    <a
-                        href="formatos.html"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-md"
-                    >
-                        Ir a la Página de Formatos ↗️
-                    </a>
-                    <div className="mt-4 flex items-start gap-2 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
-                        <span className="text-xl">⚠️</span>
-                        <p className="text-xs text-yellow-800">
-                            <strong>Importante: </strong>
-                            Los archivos deben ser convertidos a PDF antes de subirlos al sistema.
-                        </p>
-                    </div>
-                </div>
-            );
-        };
-
-
-        const FinalScreen = ({ onClose }) => {
-            return (
-                <div className="fixed inset-0 bg-gradient-to-br from-blue-900 to-indigo-900 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl p-8 sm:p-12 max-w-2xl w-full text-center animate-fadeIn">
-                        <div className="mb-6">
-                            <img
-                                src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png"
-                                alt="Logo ITD"
-                                className="h-24 sm:h-32 mx-auto mb-6"
-                            />
-                        </div>
-                        <div className="text-6xl mb-6">🎓</div>
-                        <h2 className="text-2xl sm:text-4xl font-bold text-blue-900 mb-4">
-                            ¡Gracias!
-                        </h2>
-                        <div className="text-base sm:text-lg text-gray-700 space-y-3 mb-8">
-                            <p>
-                                Por tu interés en la <strong className="text-indigo-700">superación académica</strong> y la <strong className="text-indigo-700">mejora continua</strong> del
-                            </p>
-                            <p className="text-xl sm:text-2xl font-bold text-blue-900">
-                                Instituto Tecnológico de Durango
-                            </p>
-                        </div>
-                        <div className="border-t-2 border-gray-200 pt-6 mt-6">
-                            <p className="text-sm text-gray-600 mb-4">
-                                Tu compromiso con la excelencia educativa es fundamental para nuestra institución.
-                            </p>
-                            <button
-                                onClick={onClose}
-                                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg"
-                            >
-                                ✓ Cerrar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const InstructorApp = () => {
-            const [activeTab, setActiveTab] = useState('proposal');
-            const [showFinalScreen, setShowFinalScreen] = useState(false);
-            const [teachers, setTeachers] = useState([]);
-            const [courses, setCourses] = useState([]);
-            const [isLoading, setIsLoading] = useState(true);
-
-            const [proposalForm, setProposalForm] = useState({ 
-                instructorName: '', 
-                courseName: '', 
-                courseId: '' 
+        async function submitProposal(data) {
+            const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'submitInstructorProposal', ...data })
             });
-            const [cvuFile, setCvuFile] = useState(null);
-            const [fichaFile, setFichaFile] = useState(null);
-            const [proposalStatus, setProposalStatus] = useState({ 
-                isSubmitting: false, 
-                error: null, 
-                success: null, 
-                progress: null 
-            });
-            const [cvuError, setCvuError] = useState(null);
-            const [fichaError, setFichaError] = useState(null);
-            
-            const [evidenceForm, setEvidenceForm] = useState({ 
-                instructorName: '', 
-                courseName: '',
-                courseId: ''
-            });
-            const [evidenceFiles, setEvidenceFiles] = useState([]);
-            const [evidenceError, setEvidenceError] = useState(null);
-            const [evidenceStatus, setEvidenceStatus] = useState({ 
-                isSubmitting: false, 
-                error: null, 
-                success: null,
-                progress: null
-            });
+            const text = await resp.text();
+            try { return JSON.parse(text); } catch { throw new Error('Error en el servidor'); }
+        }
 
-            useEffect(() => {
-                const fetchData = async () => {
-                    setIsLoading(true);
-                    try {
-                        const [teachersData, coursesData] = await Promise.all([
-                            getTeachers(),
-                            getCourses()
-                        ]);
-                        setTeachers(teachersData);
-                        setCourses(coursesData);
-                    } catch (err) {
-                        console.error("Error al cargar datos:", err);
-                    } finally {
-                        setIsLoading(false);
-                    }
-                };
-                fetchData();
-            }, []);
+        async function submitEvidence(data) {
+            const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'submitInstructorEvidence', ...data })
+            });
+            const text = await resp.text();
+            try { return JSON.parse(text); } catch { throw new Error('Error en el servidor'); }
+        }
 
-            const formatCourseDates = (dates) => {
-                if (!dates) return '';
-                return dates.split(',').map(d => d.trim()).join(' | ');
-            };
-
-            const groupedCourses = courses.reduce((acc, course) => {
-                const period = course.period || 'Sin Periodo';
+        // ============================================================
+        // COMPONENTES (DOM puro)
+        // ============================================================
+        function renderFormProposal(teachers, courses) {
+            const grouped = courses.reduce((acc, c) => {
+                const period = c.period || 'Sin Periodo';
                 if (!acc[period]) acc[period] = { courses: [], dates: '' };
-                acc[period].courses.push(course);
-                if (!acc[period].dates && course.dates) acc[period].dates = formatCourseDates(course.dates);
+                acc[period].courses.push(c);
+                if (!acc[period].dates && c.dates) acc[period].dates = formatCourseDates(c.dates);
                 return acc;
             }, {});
 
-            const handleProposalTeacherSelect = (teacher) => {
-                setProposalForm({
-                    ...proposalForm,
-                    instructorName: teacher.nombreCompleto.toUpperCase()
-                });
-            };
-            
-            const handleEvidenceTeacherSelect = (teacher) => {
-                setEvidenceForm({
-                    ...evidenceForm,
-                    instructorName: teacher.nombreCompleto.toUpperCase()
-                });
-            };
+            const periodColors = [
+                'from-violet-600 to-indigo-600',
+                'from-emerald-600 to-teal-600',
+                'from-amber-500 to-orange-500',
+                'from-rose-600 to-pink-600'
+            ];
 
-            const handleProposalSubmit = async (e) => {
+            let coursesHtml = '';
+            let pIdx = 0;
+            for (const [period, data] of Object.entries(grouped)) {
+                const color = periodColors[pIdx % periodColors.length];
+                coursesHtml += `
+                    <div class="mb-4">
+                        <div class="inline-flex items-center gap-2 bg-gradient-to-r ${color} text-white text-xs font-bold px-4 py-1.5 rounded-full mb-3 shadow-sm">
+                            ${data.dates ? `${period.replace(/_/g, ' ')} · ${data.dates}` : period.replace(/_/g, ' ')}
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            ${data.courses.map(c => `
+                                <label class="flex items-center gap-3 px-4 py-2.5 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 cursor-pointer transition-all">
+                                    <input type="radio" name="proposalCourse" value="${c.id}" data-name="${c.name}" class="w-4 h-4 text-indigo-600">
+                                    <span class="text-sm font-medium text-slate-700">${c.name}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                pIdx++;
+            }
+
+            return `
+                <form id="proposalForm" novalidate>
+                    <!-- Documentación requerida -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-lg p-4 sm:p-5 mb-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-2xl">📋</span>
+                            <h3 class="text-lg font-bold text-indigo-900">Documentación Requerida</h3>
+                        </div>
+                        <p class="text-sm text-gray-700 mb-3">
+                            Sube tu <strong>CV</strong> y <strong>Ficha técnica</strong> del curso-taller a desarrollar.
+                            Las plantillas están en la sección de formatos.
+                        </p>
+                        <a href="formatos.html" target="_blank" class="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors shadow-md text-sm">
+                            Ir a la Página de Formatos ↗️
+                        </a>
+                        <div class="mt-3 flex items-start gap-2 bg-yellow-50 border-l-4 border-yellow-400 p-2.5 rounded">
+                            <span class="text-xl">⚠️</span>
+                            <p class="text-xs text-yellow-800"><strong>Importante:</strong> Los archivos deben ser convertidos a PDF.</p>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje de error -->
+                    <div id="proposalError" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded text-sm"></div>
+                    <div id="proposalProgress" class="hidden bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-3 mb-4 rounded text-sm animate-pulse"></div>
+                    <div id="proposalSuccess" class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded text-sm"></div>
+
+                    <!-- Campos -->
+                    <div class="space-y-5">
+                        <!-- Instructor -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">👤 Nombre del Instructor *</label>
+                            <input type="text" id="propInstructor" list="teacherList" 
+                                   class="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 outline-none text-sm transition-all"
+                                   placeholder="Escriba su nombre completo" required autocomplete="off">
+                            <datalist id="teacherList">
+                                ${teachers.map(t => `<option value="${t.nombreCompleto}">`).join('')}
+                            </datalist>
+                        </div>
+
+                        <!-- Curso -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">📚 Selecciona el Curso a Ofrecer *</label>
+                            ${courses.length === 0 ? 
+                                '<p class="text-center py-6 text-slate-400 text-sm">No hay cursos disponibles.</p>' : 
+                                coursesHtml
+                            }
+                        </div>
+
+                        <!-- Archivos -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">📄 CV (PDF) *</label>
+                                <input type="file" id="propCvu" accept=".pdf,application/pdf" 
+                                       class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                                <p class="text-xs text-gray-400 mt-1">Máx 1MB</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">📋 Ficha Técnica (PDF) *</label>
+                                <input type="file" id="propFicha" accept=".pdf,application/pdf" 
+                                       class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                                <p class="text-xs text-gray-400 mt-1">Máx 1MB</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" id="propSubmitBtn" 
+                                class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-8 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                            Enviar Documentación
+                        </button>
+                    </div>
+                </form>
+            `;
+        }
+
+        function renderFormEvidence(teachers, courses) {
+            const grouped = courses.reduce((acc, c) => {
+                const period = c.period || 'Sin Periodo';
+                if (!acc[period]) acc[period] = { courses: [], dates: '' };
+                acc[period].courses.push(c);
+                if (!acc[period].dates && c.dates) acc[period].dates = formatCourseDates(c.dates);
+                return acc;
+            }, {});
+
+            const periodColors = [
+                'from-violet-600 to-indigo-600',
+                'from-emerald-600 to-teal-600',
+                'from-amber-500 to-orange-500',
+                'from-rose-600 to-pink-600'
+            ];
+
+            let coursesHtml = '';
+            let pIdx = 0;
+            for (const [period, data] of Object.entries(grouped)) {
+                const color = periodColors[pIdx % periodColors.length];
+                coursesHtml += `
+                    <div class="mb-4">
+                        <div class="inline-flex items-center gap-2 bg-gradient-to-r ${color} text-white text-xs font-bold px-4 py-1.5 rounded-full mb-3 shadow-sm">
+                            ${data.dates ? `${period.replace(/_/g, ' ')} · ${data.dates}` : period.replace(/_/g, ' ')}
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            ${data.courses.map(c => `
+                                <label class="flex items-center gap-3 px-4 py-2.5 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 cursor-pointer transition-all">
+                                    <input type="radio" name="evidenceCourse" value="${c.id}" data-name="${c.name}" class="w-4 h-4 text-indigo-600">
+                                    <span class="text-sm font-medium text-slate-700">${c.name}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                pIdx++;
+            }
+
+            return `
+                <form id="evidenceForm" novalidate>
+                    <!-- Info -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-3 rounded-lg mb-5 text-sm">
+                        <p>Suba hasta 6 archivos (máx 1MB cada uno). Formatos: PDF o imágenes.</p>
+                    </div>
+
+                    <!-- Mensajes -->
+                    <div id="evidenceError" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded text-sm"></div>
+                    <div id="evidenceProgress" class="hidden bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-3 mb-4 rounded text-sm animate-pulse"></div>
+                    <div id="evidenceSuccess" class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded text-sm"></div>
+
+                    <!-- Campos -->
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">👤 Nombre del Instructor *</label>
+                            <input type="text" id="evInstructor" list="teacherListEv" 
+                                   class="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 outline-none text-sm transition-all"
+                                   placeholder="Escriba su nombre completo" required autocomplete="off">
+                            <datalist id="teacherListEv">
+                                ${teachers.map(t => `<option value="${t.nombreCompleto}">`).join('')}
+                            </datalist>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">🎓 Selecciona el Curso Impartido *</label>
+                            ${courses.length === 0 ? 
+                                '<p class="text-center py-6 text-slate-400 text-sm">No hay cursos disponibles.</p>' : 
+                                coursesHtml
+                            }
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📎 Archivos de Evidencia (hasta 6) *</label>
+                            <div class="file-drop rounded-lg p-6 text-center bg-indigo-50/50 hover:bg-indigo-100 transition-colors">
+                                <div class="text-4xl mb-2">📁</div>
+                                <input type="file" id="evFiles" multiple accept=".pdf,application/pdf,image/*" 
+                                       class="block w-full text-sm text-gray-500 file:mr-3 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 file:cursor-pointer cursor-pointer">
+                                <p class="text-xs text-gray-500 mt-2">PDF o imágenes (JPG, PNG) • Máximo 1MB por archivo</p>
+                            </div>
+                            <div id="fileList" class="mt-3 hidden">
+                                <p class="text-sm font-semibold text-green-700">Archivos seleccionados:</p>
+                                <ul id="fileListItems" class="mt-1 space-y-1"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" id="evSubmitBtn" 
+                                class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-8 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                            📤 Enviar Evidencia(s)
+                        </button>
+                    </div>
+                </form>
+            `;
+        }
+
+        function renderSuccessScreen(message, isProposal) {
+            return `
+                <div class="text-center py-8">
+                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-6 rounded-md">
+                        <div class="text-5xl mb-4">✅</div>
+                        <p class="font-bold text-xl">${message}</p>
+                        <p class="text-sm mt-2">Tu información ha sido recibida correctamente.</p>
+                    </div>
+                    <button onclick="window.location.href='formatos.html'" 
+                            class="mt-6 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all shadow-lg">
+                        🚪 Salir
+                    </button>
+                </div>
+            `;
+        }
+
+        // ============================================================
+        // CONTROLADOR PRINCIPAL
+        // ============================================================
+        let teachersData = [];
+        let coursesData = [];
+        let currentTab = 'proposal';
+
+        async function initApp() {
+            const loading = document.getElementById('loadingState');
+            const content = document.getElementById('dynamicContent');
+
+            try {
+                [teachersData, coursesData] = await Promise.all([getTeachers(), getCourses()]);
+                loading.style.display = 'none';
+                content.style.display = 'block';
+                renderTab('proposal');
+            } catch (e) {
+                loading.innerHTML = `
+                    <div class="text-center py-8">
+                        <p class="text-red-500">Error al cargar los datos. Por favor recarga la página.</p>
+                        <p class="text-sm text-gray-500 mt-2">${e.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderTab(tab) {
+            currentTab = tab;
+            const content = document.getElementById('dynamicContent');
+            const tabProposal = document.getElementById('tabProposal');
+            const tabEvidence = document.getElementById('tabEvidence');
+
+            // Actualizar tabs
+            tabProposal.className = `px-4 sm:px-6 py-3 text-sm sm:text-base transition-colors rounded-t-lg ${tab === 'proposal' ? 'tab-active' : 'tab-inactive'}`;
+            tabEvidence.className = `px-4 sm:px-6 py-3 text-sm sm:text-base transition-colors rounded-t-lg ${tab === 'evidence' ? 'tab-active' : 'tab-inactive'}`;
+
+            if (tab === 'proposal') {
+                content.innerHTML = renderFormProposal(teachersData, coursesData);
+                attachProposalEvents();
+            } else {
+                content.innerHTML = renderFormEvidence(teachersData, coursesData);
+                attachEvidenceEvents();
+            }
+
+            // Animación
+            content.className = 'fade-in';
+        }
+
+        // ============================================================
+        // EVENTOS - PROPUESTA
+        // ============================================================
+        function attachProposalEvents() {
+            const form = document.getElementById('proposalForm');
+            if (!form) return;
+
+            // Seleccionar curso automáticamente
+            document.querySelectorAll('input[name="proposalCourse"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    document.querySelectorAll('input[name="proposalCourse"]').forEach(r => {
+                        r.closest('label').style.borderColor = '#e2e8f0';
+                    });
+                    if (this.checked) {
+                        this.closest('label').style.borderColor = '#4f46e5';
+                        this.closest('label').style.background = '#eef2ff';
+                    }
+                });
+            });
+
+            form.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                setProposalStatus({ isSubmitting: true, error: null, success: null, progress: null });
-                
-                if (cvuError || fichaError) {
-                    setProposalStatus({ isSubmitting: false, error: 'Corrija los errores en los archivos', success: null, progress: null });
+
+                const errorDiv = document.getElementById('proposalError');
+                const progressDiv = document.getElementById('proposalProgress');
+                const successDiv = document.getElementById('proposalSuccess');
+                const submitBtn = document.getElementById('propSubmitBtn');
+
+                // Reset
+                errorDiv.classList.add('hidden');
+                progressDiv.classList.add('hidden');
+                successDiv.classList.add('hidden');
+
+                // Obtener datos
+                const instructor = document.getElementById('propInstructor').value.trim();
+                const courseRadio = document.querySelector('input[name="proposalCourse"]:checked');
+                const cvuFile = document.getElementById('propCvu').files[0];
+                const fichaFile = document.getElementById('propFicha').files[0];
+
+                // Validar
+                if (!instructor) {
+                    errorDiv.textContent = '⚠️ Ingresa tu nombre completo.';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                if (!courseRadio) {
+                    errorDiv.textContent = '⚠️ Selecciona un curso.';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                if (!cvuFile) {
+                    errorDiv.textContent = '⚠️ Sube tu CV en PDF.';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                if (cvuFile.size > 1024 * 1024) {
+                    errorDiv.textContent = '⚠️ El CV no debe exceder 1MB.';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                if (!fichaFile) {
+                    errorDiv.textContent = '⚠️ Sube la ficha técnica en PDF.';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                if (fichaFile.size > 1024 * 1024) {
+                    errorDiv.textContent = '⚠️ La ficha técnica no debe exceder 1MB.';
+                    errorDiv.classList.remove('hidden');
                     return;
                 }
 
-                if (!proposalForm.instructorName || !proposalForm.courseName || !cvuFile || !fichaFile) {
-                    setProposalStatus({ isSubmitting: false, error: 'Todos los campos son obligatorios', success: null, progress: null });
-                    return;
-                }
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Enviando...';
+                progressDiv.textContent = '⏳ Subiendo documentación...';
+                progressDiv.classList.remove('hidden');
 
                 try {
-                  setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Convirtiendo archivos... ⏳' });
-                     const [cvuFileBase64, fichaFileBase64] = await Promise.all([
-                      fileToBase64Clean(cvuFile),
-                      fileToBase64Clean(fichaFile)
-                  ]);
+                    const [cvuBase64, fichaBase64] = await Promise.all([
+                        fileToBase64(cvuFile),
+                        fileToBase64(fichaFile)
+                    ]);
 
-setProposalStatus({ isSubmitting: true, error: null, success: null, progress: 'Subiendo documentación... 📤' });
-                    await submitInstructorProposal({
-                        instructorName: proposalForm.instructorName,
-                        courseName: proposalForm.courseName,
-                        courseId: proposalForm.courseId,
-                        cvuFile: cvuFileBase64,
+                    const result = await submitProposal({
+                        instructorName: instructor.toUpperCase(),
+                        courseName: courseRadio.dataset.name,
+                        courseId: courseRadio.value,
+                        cvuFile: cvuBase64,
                         cvuFileName: cvuFile.name,
-                        fichaFile: fichaFileBase64,
+                        fichaFile: fichaBase64,
                         fichaFileName: fichaFile.name
                     });
 
-                    setProposalStatus({ isSubmitting: false, error: null, success: '¡Propuesta enviada con éxito! ✅', progress: null });
+                    progressDiv.classList.add('hidden');
+                    if (result.success || result.ok) {
+                        document.getElementById('dynamicContent').innerHTML = renderSuccessScreen(
+                            '¡Propuesta enviada con éxito! ✅',
+                            true
+                        );
+                    } else {
+                        errorDiv.textContent = '❌ ' + (result.message || 'Error al enviar');
+                        errorDiv.classList.remove('hidden');
+                    }
                 } catch (err) {
-                    setProposalStatus({ isSubmitting: false, error: err instanceof Error ? err.message : "Error al enviar", success: null, progress: null });
+                    progressDiv.classList.add('hidden');
+                    errorDiv.textContent = '❌ ' + (err.message || 'Error de conexión');
+                    errorDiv.classList.remove('hidden');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Enviar Documentación';
                 }
-            };
+            });
+        }
 
-            const handleEvidenceSubmit = async (e) => {
+        // ============================================================
+        // EVENTOS - EVIDENCIAS
+        // ============================================================
+        function attachEvidenceEvents() {
+            const form = document.getElementById('evidenceForm');
+            if (!form) return;
+
+            // Lista de archivos
+            const fileInput = document.getElementById('evFiles');
+            const fileList = document.getElementById('fileList');
+            const fileListItems = document.getElementById('fileListItems');
+
+            fileInput.addEventListener('change', function() {
+                const files = Array.from(this.files);
+                if (files.length > 6) {
+                    alert('No puedes seleccionar más de 6 archivos.');
+                    this.value = '';
+                    fileList.classList.add('hidden');
+                    return;
+                }
+                const oversized = files.filter(f => f.size > 1024 * 1024);
+                if (oversized.length > 0) {
+                    alert(`Los siguientes archivos superan 1MB: ${oversized.map(f => f.name).join(', ')}`);
+                    this.value = '';
+                    fileList.classList.add('hidden');
+                    return;
+                }
+                if (files.length > 0) {
+                    fileList.classList.remove('hidden');
+                    fileListItems.innerHTML = files.map(f => `
+                        <li class="text-xs text-green-700 flex items-center gap-2">
+                            <span>📄</span>
+                            <span>${f.name}</span>
+                            <span class="text-gray-500">(${(f.size / 1024).toFixed(1)} KB)</span>
+                        </li>
+                    `).join('');
+                } else {
+                    fileList.classList.add('hidden');
+                }
+            });
+
+            // Seleccionar curso
+            document.querySelectorAll('input[name="evidenceCourse"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    document.querySelectorAll('input[name="evidenceCourse"]').forEach(r => {
+                        r.closest('label').style.borderColor = '#e2e8f0';
+                        r.closest('label').style.background = '';
+                    });
+                    if (this.checked) {
+                        this.closest('label').style.borderColor = '#4f46e5';
+                        this.closest('label').style.background = '#eef2ff';
+                    }
+                });
+            });
+
+            form.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                setEvidenceStatus({ isSubmitting: true, error: null, success: null });
 
-                if (evidenceFiles.length === 0) {
-                    setEvidenceStatus({ isSubmitting: false, error: 'Debe subir al menos un archivo', success: null });
+                const errorDiv = document.getElementById('evidenceError');
+                const progressDiv = document.getElementById('evidenceProgress');
+                const successDiv = document.getElementById('evidenceSuccess');
+                const submitBtn = document.getElementById('evSubmitBtn');
+
+                // Reset
+                errorDiv.classList.add('hidden');
+                progressDiv.classList.add('hidden');
+                successDiv.classList.add('hidden');
+
+                const instructor = document.getElementById('evInstructor').value.trim();
+                const courseRadio = document.querySelector('input[name="evidenceCourse"]:checked');
+                const files = document.getElementById('evFiles').files;
+
+                if (!instructor) {
+                    errorDiv.textContent = '⚠️ Ingresa tu nombre completo.';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                if (!courseRadio) {
+                    errorDiv.textContent = '⚠️ Selecciona un curso.';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                if (files.length === 0) {
+                    errorDiv.textContent = '⚠️ Sube al menos un archivo de evidencia.';
+                    errorDiv.classList.remove('hidden');
                     return;
                 }
 
-                if (!evidenceForm.instructorName || !evidenceForm.courseName) {
-                    setEvidenceStatus({ isSubmitting: false, error: 'Todos los campos son obligatorios', success: null });
-                    return;
-                }
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Enviando...';
+                progressDiv.textContent = '⏳ Subiendo evidencias...';
+                progressDiv.classList.remove('hidden');
 
                 try {
-                    setEvidenceStatus({ isSubmitting: true, error: null, success: null, progress: 'Preparando archivos... ⏳' });
-                    const evidenceFilesData = await Promise.all(evidenceFiles.map((file) => {
-                        return fileToFileObject(file, file.name);
-                    }));
+                    const filesData = await Promise.all(
+                        Array.from(files).map(async f => ({
+                            base64: await fileToBase64(f),
+                            mimeType: f.type || 'application/octet-stream',
+                            fileName: f.name
+                        }))
+                    );
 
-                    setEvidenceStatus({ isSubmitting: true, error: null, success: null, progress: 'Subiendo evidencias... 📤' });
-                    await submitEvidence({
-                        instructorName: evidenceForm.instructorName,
-                        courseName: evidenceForm.courseName,
-                        courseId: evidenceForm.courseId,
-                        evidenceFiles: evidenceFilesData
+                    const result = await submitEvidence({
+                        instructorName: instructor.toUpperCase(),
+                        courseName: courseRadio.dataset.name,
+                        courseId: courseRadio.value,
+                        evidenceFiles: filesData
                     });
 
-                    setEvidenceStatus({ isSubmitting: false, error: null, success: '¡Evidencias enviadas con éxito! ✅', progress: null });
+                    progressDiv.classList.add('hidden');
+                    if (result.success || result.ok) {
+                        document.getElementById('dynamicContent').innerHTML = renderSuccessScreen(
+                            '¡Evidencias enviadas con éxito! ✅',
+                            false
+                        );
+                    } else {
+                        errorDiv.textContent = '❌ ' + (result.message || 'Error al enviar');
+                        errorDiv.classList.remove('hidden');
+                    }
                 } catch (err) {
-                    setEvidenceStatus({ isSubmitting: false, error: err instanceof Error ? err.message : "Error al enviar", success: null, progress: null });
+                    progressDiv.classList.add('hidden');
+                    errorDiv.textContent = '❌ ' + (err.message || 'Error de conexión');
+                    errorDiv.classList.remove('hidden');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '📤 Enviar Evidencia(s)';
                 }
-            };
+            });
+        }
 
-            const handleExit = () => {
-                setShowFinalScreen(true);
-            };
+        // ============================================================
+        // EVENTOS DE TABS
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('tabProposal').addEventListener('click', () => renderTab('proposal'));
+            document.getElementById('tabEvidence').addEventListener('click', () => renderTab('evidence'));
 
-            const handleCloseFinalScreen = () => {
-                window.location.href = 'index.html';
-            };
+            // Año
+            document.getElementById('year').textContent = new Date().getFullYear();
 
-            if (isLoading) {
-                return (
-                    <div className="container mx-auto px-4 py-12">
-                        <div className="flex justify-center items-center h-64">
-                            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-800"></div>
-                        </div>
-                    </div>
-                );
-            }
-
-            if (showFinalScreen) {
-                return <FinalScreen onClose={handleCloseFinalScreen} />;
-            }
-
-            const renderProposalForm = () => {
-                if (proposalStatus.success) {
-                    return (
-                        <div className="text-center py-8">
-                            <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-6 mb-8 rounded-md">
-                                <div className="text-5xl mb-4">✅</div>
-                                <p className="font-bold text-xl">{proposalStatus.success}</p>
-                                <p className="text-sm mt-2">
-                                    Tu documentación ha sido recibida y será revisada por la coordinación.
-                                </p>
-                            </div>
-                            <button
-                                onClick={handleExit}
-                                className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg"
-                            >
-                                🚪 Salir
-                            </button>
-                        </div>
-                    );
-                }
-
-                return (
-                    <form onSubmit={handleProposalSubmit} noValidate>
-                        <DownloadFormatsSection />
-                        
-                        <div className="bg-blue-700 text-white p-4 rounded-lg mb-6 text-xs sm:text-sm text-center">
-                            <p>⚠️ Envíe CV y ficha técnica en PDF genuinos (No fotos ni capturas de pantalla).</p>
-                        </div>
-                        
-                        {proposalStatus.error && (
-                            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md">
-                                <p className="text-sm">{proposalStatus.error}</p>
-                            </div>
-                        )}
-                        
-                        {proposalStatus.progress && (
-                            <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-md">
-                                <p className="font-bold text-sm animate-pulse">{proposalStatus.progress}</p>
-                            </div>
-                        )}
-                        
-                        <div className="space-y-6">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                                    👤 Nombre del Instructor *
-                                </label>
-                                <AutocompleteInput
-                                    teachers={teachers}
-                                    onSelect={handleProposalTeacherSelect}
-                                    value={proposalForm.instructorName}
-                                    onChange={(e) => setProposalForm(prev => ({ ...prev, instructorName: e.target.value.toUpperCase() }))}
-                                    name="proposalInstructorName"
-                                    placeholder="Escriba su nombre completo"
-                                    required
-                                />
-                            </div>
-                            
-                            <div>
-                                <fieldset>
-                                    <legend className="block text-sm font-semibold text-slate-700 mb-3">
-                                        📚 Selecciona el Curso a Ofrecer *
-                                    </legend>
-                                    {courses.length === 0 ? (
-                                        <div className="text-center py-8 bg-slate-50 rounded-xl border border-slate-200">
-                                            <p className="text-slate-400 text-sm">No hay cursos disponibles en este momento.</p>
-                                        </div>
-                                    ) : (
-                                        Object.entries(groupedCourses).map(([period, data], pIdx) => {
-                                            const periodColors = [
-                                                { header: 'from-violet-600 to-indigo-600', dot: 'bg-violet-400', ring: 'ring-violet-500', checked: 'border-violet-500 bg-violet-50 shadow-violet-100', hover: 'hover:border-violet-300 hover:bg-violet-50/50', normal: 'border-slate-200 bg-white' },
-                                                { header: 'from-emerald-600 to-teal-600', dot: 'bg-emerald-400', ring: 'ring-emerald-500', checked: 'border-emerald-500 bg-emerald-50 shadow-emerald-100', hover: 'hover:border-emerald-300 hover:bg-emerald-50/50', normal: 'border-slate-200 bg-white' },
-                                                { header: 'from-amber-500 to-orange-500', dot: 'bg-amber-400', ring: 'ring-amber-500', checked: 'border-amber-500 bg-amber-50 shadow-amber-100', hover: 'hover:border-amber-300 hover:bg-amber-50/50', normal: 'border-slate-200 bg-white' },
-                                                { header: 'from-rose-600 to-pink-600', dot: 'bg-rose-400', ring: 'ring-rose-500', checked: 'border-rose-500 bg-rose-50 shadow-rose-100', hover: 'hover:border-rose-300 hover:bg-rose-50/50', normal: 'border-slate-200 bg-white' },
-                                            ];
-                                            const col = periodColors[pIdx % periodColors.length];
-                                            return (
-                                                <div key={period} className="mb-6">
-                                                    <div className={`inline-flex items-center gap-2 bg-gradient-to-r ${col.header} text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-sm`}>
-                                                        <span className={`w-2 h-2 rounded-full ${col.dot} opacity-80`}></span>
-                                                        {data.dates ? `${period.replace(/_/g, ' ')} · ${data.dates}` : period.replace(/_/g, ' ')}
-                                                    </div>
-                                                    <div className="flex flex-col gap-1.5">
-                                                        {data.courses.map((course, cIdx) => {
-                                                            const isSelected = proposalForm.courseName === course.name;
-                                                            return (
-                                                                <div key={course.id} className="relative">
-                                                                    <input
-                                                                        type="radio"
-                                                                        id={`proposal-course-${course.id}`}
-                                                                        name="course-selection"
-                                                                        checked={isSelected}
-                                                                        onChange={() => setProposalForm(prev => ({ ...prev, courseName: course.name, courseId: course.id }))}
-                                                                        className="sr-only peer"
-                                                                    />
-                                                                    <label
-                                                                        htmlFor={`proposal-course-${course.id}`}
-                                                                        className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all cursor-pointer ${
-                                                                            isSelected
-                                                                                ? `border-l-4 ${col.checked} ring-1 ${col.ring}`
-                                                                                : `border ${col.normal} ${col.hover}`
-                                                                        }`}
-                                                                    >
-                                                                        <span className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                                                                            isSelected ? 'border-current bg-current' : 'border-slate-300'
-                                                                        }`}>
-                                                                            {isSelected && <span className="w-2 h-2 rounded-full bg-white block"></span>}
-                                                                        </span>
-                                                                        <span className={`text-sm leading-snug ${isSelected ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
-                                                                            {course.name}
-                                                                        </span>
-                                                                        {isSelected && (
-                                                                            <span className="ml-auto flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-full bg-white/70 text-current border border-current/20">
-                                                                                ✓ Seleccionado
-                                                                            </span>
-                                                                        )}
-                                                                    </label>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })
-                                    )}
-                                </fieldset>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                                <div>
-                                    <FileInput
-                                        id="File"
-                                        label="CV (PDF)"
-                                        onFileSelect={setCvuFile}
-                                        onError={setCvuError}
-                                        acceptedFile={cvuFile}
-                                        acceptedTypes={['application/pdf']}
-                                        maxSizeMB={1}
-                                    />
-                                    {cvuError && <p className="text-red-500 text-xs mt-1">{cvuError}</p>}
-                                </div>
-                                <div>
-                                    <FileInput
-                                        id="fichaFile"
-                                        label="Ficha Técnica (PDF)"
-                                        onFileSelect={setFichaFile}
-                                        onError={setFichaError}
-                                        acceptedFile={fichaFile}
-                                        acceptedTypes={['application/pdf']}
-                                        maxSizeMB={1}
-                                    />
-                                    {fichaError && <p className="text-red-500 text-xs mt-1">{fichaError}</p>}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className="mt-8 flex justify-end">
-                            <button
-                                type="submit"
-                                disabled={proposalStatus.isSubmitting}
-                                className="w-full sm:w-auto bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-                            >
-                                {proposalStatus.isSubmitting ? 'Enviando...' : 'Enviar Documentación'}
-                            </button>
-                        </div>
-                    </form>
-                );
-            };
-
-            const renderEvidenceForm = () => {
-                if (evidenceStatus.success) {
-                    return (
-                        <div className="text-center py-8">
-                            <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-6 mb-8 rounded-md">
-                                <div className="text-5xl mb-4">✅</div>
-                                <p className="font-bold text-xl">{evidenceStatus.success}</p>
-                                <p className="text-sm mt-2">
-                                    Tus evidencias han sido recibidas correctamente.
-                                </p>
-                            </div>
-                            <button
-                                onClick={handleExit}
-                                className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg"
-                            >
-                                🚪 Salir
-                            </button>
-                        </div>
-                    );
-                }
-
-                return (
-                    <form onSubmit={handleEvidenceSubmit} noValidate>
-                        <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg mb-6 text-xs sm:text-sm">
-                            <p>Suba hasta 6 archivos (máx 1MB cada uno). Formatos: PDF o imágenes.</p>
-                        </div>
-                        
-                        {evidenceStatus.error && (
-                            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md">
-                                <p className="text-sm">{evidenceStatus.error}</p>
-                            </div>
-                        )}
-
-                        {evidenceStatus.progress && (
-                            <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-md">
-                                <p className="font-bold text-sm animate-pulse">{evidenceStatus.progress}</p>
-                            </div>
-                        )}
-                        
-                        {evidenceError && (
-                            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md">
-                                <p className="text-sm">{evidenceError}</p>
-                            </div>
-                        )}
-                        
-                        <div className="space-y-6">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                                    👤 Nombre del Instructor *
-                                </label>
-                                <AutocompleteInput
-                                    teachers={teachers}
-                                    onSelect={handleEvidenceTeacherSelect}
-                                    value={evidenceForm.instructorName}
-                                    onChange={(e) => setEvidenceForm(prev => ({ ...prev, instructorName: e.target.value.toUpperCase() }))}
-                                    name="evidenceInstructorName"
-                                    placeholder="Escriba su nombre completo"
-                                    required
-                                />
-                            </div>
-                            
-                            <div>
-                                <fieldset>
-                                    <legend className="block text-sm font-semibold text-slate-700 mb-3">
-                                        🎓 Selecciona el Curso Impartido *
-                                    </legend>
-                                    {courses.length === 0 ? (
-                                        <div className="text-center py-8 bg-slate-50 rounded-xl border border-slate-200">
-                                            <p className="text-slate-400 text-sm">No hay cursos disponibles en este momento.</p>
-                                        </div>
-                                    ) : (
-                                        Object.entries(groupedCourses).map(([period, data], pIdx) => {
-                                            const periodColors = [
-                                                { header: 'from-violet-600 to-indigo-600', dot: 'bg-violet-400', ring: 'ring-violet-500', checked: 'border-violet-500 bg-violet-50 shadow-violet-100', hover: 'hover:border-violet-300 hover:bg-violet-50/50', normal: 'border-slate-200 bg-white' },
-                                                { header: 'from-emerald-600 to-teal-600', dot: 'bg-emerald-400', ring: 'ring-emerald-500', checked: 'border-emerald-500 bg-emerald-50 shadow-emerald-100', hover: 'hover:border-emerald-300 hover:bg-emerald-50/50', normal: 'border-slate-200 bg-white' },
-                                                { header: 'from-amber-500 to-orange-500', dot: 'bg-amber-400', ring: 'ring-amber-500', checked: 'border-amber-500 bg-amber-50 shadow-amber-100', hover: 'hover:border-amber-300 hover:bg-amber-50/50', normal: 'border-slate-200 bg-white' },
-                                                { header: 'from-rose-600 to-pink-600', dot: 'bg-rose-400', ring: 'ring-rose-500', checked: 'border-rose-500 bg-rose-50 shadow-rose-100', hover: 'hover:border-rose-300 hover:bg-rose-50/50', normal: 'border-slate-200 bg-white' },
-                                            ];
-                                            const col = periodColors[pIdx % periodColors.length];
-                                            return (
-                                                <div key={period} className="mb-6">
-                                                    <div className={`inline-flex items-center gap-2 bg-gradient-to-r ${col.header} text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-sm`}>
-                                                        <span className={`w-2 h-2 rounded-full ${col.dot} opacity-80`}></span>
-                                                        {data.dates ? `${period.replace(/_/g, ' ')} · ${data.dates}` : period.replace(/_/g, ' ')}
-                                                    </div>
-                                                    <div className="flex flex-col gap-1.5">
-                                                        {data.courses.map((course, cIdx) => {
-                                                            const isSelected = evidenceForm.courseName === course.name;
-                                                            return (
-                                                                <div key={course.id} className="relative">
-                                                                    <input
-                                                                        type="radio"
-                                                                        id={`evidence-course-${course.id}`}
-                                                                        name="evidence-course-selection"
-                                                                        checked={isSelected}
-                                                                        onChange={() => setEvidenceForm(prev => ({ ...prev, courseName: course.name, courseId: course.id }))}
-                                                                        className="sr-only peer"
-                                                                    />
-                                                                    <label
-                                                                        htmlFor={`evidence-course-${course.id}`}
-                                                                        className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all cursor-pointer ${
-                                                                            isSelected
-                                                                                ? `border-l-4 ${col.checked} ring-1 ${col.ring}`
-                                                                                : `border ${col.normal} ${col.hover}`
-                                                                        }`}
-                                                                    >
-                                                                        <span className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                                                                            isSelected ? 'border-current bg-current' : 'border-slate-300'
-                                                                        }`}>
-                                                                            {isSelected && <span className="w-2 h-2 rounded-full bg-white block"></span>}
-                                                                        </span>
-                                                                        <span className={`text-sm leading-snug ${isSelected ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
-                                                                            {course.name}
-                                                                        </span>
-                                                                        {isSelected && (
-                                                                            <span className="ml-auto flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-full bg-white/70 text-current border border-current/20">
-                                                                                ✓ Seleccionado
-                                                                            </span>
-                                                                        )}
-                                                                    </label>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })
-                                    )}
-                                </fieldset>
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Archivos de Evidencia (hasta 6 archivos) *
-                                </label>
-                                <div className="border-2 border-dashed border-indigo-300 rounded-lg p-6 bg-indigo-50 hover:bg-indigo-100 transition-colors">
-                                    <div className="text-center">
-                                        <div className="text-5xl mb-3">📎</div>
-                                        <label
-                                            htmlFor="evidence-files"
-                                            className="cursor-pointer inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
-                                        >
-                                            <span className="text-2xl mr-2">📁</span>
-                                            <span>Seleccionar Archivos</span>
-                                        </label>
-                                        <input
-                                            type="file"
-                                            id="evidence-files"
-                                            multiple
-                                            accept="application/pdf,image/*"
-                                            onChange={(e) => {
-                                                if (e.target.files) {
-                                                    const filesArray = Array.from(e.target.files);
-                                                    if (filesArray.length > 6) {
-                                                        setEvidenceError('No puede seleccionar más de 6 archivos');
-                                                        setEvidenceFiles([]);
-                                                        e.target.value = '';
-                                                        return;
-                                                    }
-                                                    const oversized = filesArray.filter(f => f.size > 1 * 1024 * 1024);
-                                                    if (oversized.length > 0) {
-                                                        setEvidenceError(`Los siguientes archivos superan 1MB: ${oversized.map(f => f.name).join(', ')}`);
-                                                        setEvidenceFiles([]);
-                                                        e.target.value = '';
-                                                        return;
-                                                    }
-                                                    setEvidenceError(null);
-                                                    setEvidenceFiles(filesArray);
-                                                }
-                                            }}
-                                            className="hidden"
-                                        />
-                                        <p className="text-xs text-gray-600 mt-3">
-                                            PDF o imágenes (JPG, PNG) • Máximo 1MB por archivo
-                                        </p>
-                                    </div>
-                                </div>
-                                {evidenceFiles.length > 0 && (
-                                    <div className="mt-4 bg-green-50 border border-green-300 rounded-lg p-4">
-                                        <p className="text-sm font-semibold text-green-800 mb-2">
-                                            ✅ {evidenceFiles.length} archivo(s) seleccionado(s):
-                                        </p>
-                                        <ul className="space-y-1">
-                                            {evidenceFiles.map((file, index) => (
-                                                <li
-                                                    key={index}
-                                                    className="text-xs text-green-700 flex items-center gap-2"
-                                                >
-                                                    <span>📄</span>
-                                                    <span className="truncate">{file.name}</span>
-                                                    <span className="text-gray-500">
-                                                        ({(file.size / 1024).toFixed(1)} KB)
-                                                    </span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        
-                        <div className="mt-8 flex justify-end">
-                            <button
-                                type="submit"
-                                disabled={evidenceStatus.isSubmitting || evidenceFiles.length === 0}
-                                className="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
-                            >
-                                {evidenceStatus.isSubmitting && (
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                )}
-                                {evidenceStatus.isSubmitting 
-                                    ? 'Enviando archivos...' 
-                                    : `📤 Enviar ${evidenceFiles.length > 0 ? `(${evidenceFiles.length})` : ''} Evidencia${evidenceFiles.length !== 1 ? 's' : ''}`
-                                }
-                            </button>
-                        </div>
-                    </form>
-                );
-            };
-
-            return (
-                <div className="container mx-auto px-4 py-8">
-                    <div className="max-w-4xl mx-auto">
-                        <a
-                            href="index.html"
-                            className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-6"
-                        >
-                            ← Volver al Portal Principal
-                        </a>
-                        
-                        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:p-8">
-                            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800">
-                                Instructores
-                            </h2>
-                            
-                            <div className="border-b mb-4 bg-gray-50 rounded-t-lg">
-                                <nav className="flex space-x-2 sm:space-x-4 px-2 sm:px-4">
-                                    <button
-                                        onClick={() => setActiveTab('proposal')}
-                                        className={`px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base rounded-t-lg transition-colors ${
-                                            activeTab === 'proposal' 
-                                                ? 'bg-white text-indigo-700 border-b-2 border-indigo-500 -mb-px' 
-                                                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-                                        }`}
-                                    >
-                                        Subir documentación
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveTab('evidence')}
-                                        className={`px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base rounded-t-lg transition-colors ${
-                                            activeTab === 'evidence' 
-                                                ? 'bg-white text-indigo-700 border-b-2 border-indigo-500 -mb-px' 
-                                                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-                                        }`}
-                                    >
-                                        Subir Evidencias
-                                    </button>
-                                </nav>
-                            </div>
-                            
-                            <div className="pt-6">
-                                {activeTab === 'proposal' ? renderProposalForm() : renderEvidenceForm()}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        window.addEventListener('load', () => {
-            const rootElement = document.getElementById('root');
-            if (rootElement) {
-                const root = ReactDOM.createRoot(rootElement);
-                root.render(
-                    <React.StrictMode>
-                        <InstructorApp />
-                    </React.StrictMode>
-                );
-            } else {
-                console.error('No se encontró el elemento root');
-            }
+            // Iniciar app
+            initApp();
         });
     </script>
 
-    <script>
-        window.CONFIG = {
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec'
-        };
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const yearSpan = document.getElementById('copyright-year');
-            if (yearSpan) {
-                yearSpan.textContent = new Date().getFullYear();
-            }
-        });
-    </script>
 </body>
 </html>
