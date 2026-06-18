@@ -442,7 +442,7 @@
     const h = React.createElement;
 
     // ============================================================
-    // 3. SONIDOS (solo si el usuario interactúa)
+    // 3. SONIDOS
     // ============================================================
     let audioCtx = null;
     
@@ -550,7 +550,7 @@
     };
 
     // ============================================================
-    // 5. BÚSQUEDA EXACTA
+    // 5. BÚSQUEDA EXACTA (CORREGIDA)
     // ============================================================
     const limpiarFolio = function(folio) {
         if (!folio) return '';
@@ -583,7 +583,7 @@
             return null;
         }
         
-        console.log('🔍 Buscando:', query);
+        console.log('🔍 Buscando exactamente:', query);
         
         for (let i = 0; i < dataSource.length; i++) {
             const record = dataSource[i];
@@ -597,33 +597,55 @@
             
             if (!folioPartes) continue;
             
-            // Coincidencia exacta
+            // ============================================================
+            // 1. COINCIDENCIA EXACTA (folio completo)
+            // ============================================================
             if (folioLimpio === query) {
                 console.log('✅ Coincidencia exacta:', folioLimpio);
                 return record;
             }
             
-            // Coincidencia por número y año (normalizado)
-            if (folioPartes.numero === queryPartes.numero && folioPartes.año === queryPartes.año) {
-                if (queryPartes.sufijo && folioPartes.sufijo) {
-                    if (folioPartes.sufijo === queryPartes.sufijo) {
-                        console.log('✅ Coincidencia con sufijo:', folioLimpio);
+            // ============================================================
+            // 2. COINCIDENCIA EXACTA por número y año (SIN sufijo)
+            //    Si el usuario busca "31-2025", SOLO debe encontrar "31-2025"
+            //    NO debe encontrar "31-2025-01", "31-2025-II", etc.
+            // ============================================================
+            if (folioPartes.numero === queryPartes.numero && 
+                folioPartes.año === queryPartes.año) {
+                
+                // Si el usuario NO tiene sufijo en la búsqueda
+                if (!queryPartes.sufijo) {
+                    // Solo coincidir si el folio TAMPOCO tiene sufijo
+                    if (!folioPartes.sufijo) {
+                        console.log('✅ Coincidencia exacta (sin sufijo):', folioLimpio);
                         return record;
                     }
+                    // Si el folio tiene sufijo, NO coincide
                     continue;
                 }
-                console.log('✅ Coincidencia por número y año:', folioLimpio);
-                return record;
+                
+                // Si el usuario SÍ tiene sufijo en la búsqueda
+                if (queryPartes.sufijo) {
+                    // Solo coincidir si el folio tiene el MISMO sufijo
+                    if (folioPartes.sufijo === queryPartes.sufijo) {
+                        console.log('✅ Coincidencia exacta con sufijo:', folioLimpio);
+                        return record;
+                    }
+                    // Si el sufijo no coincide, NO coincide
+                    continue;
+                }
             }
             
-            // Coincidencia con prefijo completo
+            // ============================================================
+            // 3. COINCIDENCIA con prefijo completo (TNM-054-...)
+            // ============================================================
             if (folio === query) {
                 console.log('✅ Coincidencia con prefijo:', folio);
                 return record;
             }
         }
         
-        console.log('❌ No se encontró coincidencia');
+        console.log('❌ No se encontró coincidencia exacta');
         return null;
     };
 
@@ -1177,7 +1199,6 @@
                     console.log('✅ Datos recargados:', db.length);
                     setData(db);
                     setLoading(false);
-                    // Mostrar mensaje de éxito
                     const msg = document.createElement('div');
                     msg.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#22c55e;color:white;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:999;max-width:90%;text-align:center;';
                     msg.textContent = '✅ Datos recargados correctamente';
@@ -1266,7 +1287,6 @@
             }
         };
 
-        // Renderizar según estado
         if (loading) {
             return h('div', { style: { minHeight: '100vh', display: 'flex', flexDirection: 'column' } },
                 h(Header, null),
@@ -1318,7 +1338,7 @@
     if (rootElement) {
         const root = createRoot(rootElement);
         root.render(h(App, null));
-        console.log('✅ React montado - Versión Responsiva');
+        console.log('✅ React montado - Búsqueda exacta');
     } else {
         console.error('❌ No se encontró #root');
     }
