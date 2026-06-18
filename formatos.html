@@ -32,11 +32,19 @@
             background: #ffffff;
             padding: 14px 24px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 1100px;
+            margin: 0 auto;
+            width: 100%;
+            gap: 20px;
         }
         
         .header-white .logo {
             height: 44px;
             width: auto;
+            flex-shrink: 0;
         }
         
         .header-white .title {
@@ -52,6 +60,48 @@
             color: #8a7a6a;
             font-weight: 500;
             letter-spacing: 1px;
+        }
+        
+        .header-center {
+            text-align: center;
+            flex: 1;
+        }
+        
+        /* ===== BOTÓN SALIR DISCRETO ===== */
+        .btn-exit {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: transparent;
+            color: #8a7a6a;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            flex-shrink: 0;
+            opacity: 0.5;
+        }
+        .btn-exit:hover {
+            background: rgba(0,0,0,0.04);
+            color: #6b1e2e;
+            opacity: 1;
+            border-color: rgba(107,30,46,0.15);
+        }
+        .btn-exit svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        @media (max-width: 480px) {
+            .btn-exit span {
+                display: none;
+            }
+            .btn-exit {
+                padding: 4px 8px;
+            }
         }
         
         /* ===== LÍNEA GUINDA ===== */
@@ -493,6 +543,15 @@
             color: #c4b5a5;
         }
         
+        .footer a {
+            color: #8a7a6a;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            color: #c4b5a5;
+            text-decoration: underline;
+        }
+        
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .header-white .title {
@@ -500,6 +559,15 @@
             }
             .header-white .logo {
                 height: 36px;
+            }
+            .header-white {
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: center;
+                padding: 12px 16px;
+            }
+            .header-white .logo {
+                height: 32px;
             }
             .page-title {
                 font-size: 20px;
@@ -514,7 +582,7 @@
         
         @media (max-width: 480px) {
             .header-white {
-                padding: 10px 16px;
+                padding: 10px 12px;
             }
             .header-white .title {
                 font-size: 14px;
@@ -523,7 +591,7 @@
                 font-size: 10px;
             }
             .header-white .logo {
-                height: 30px;
+                height: 28px;
             }
             .main-container {
                 padding: 12px 12px 8px;
@@ -539,6 +607,9 @@
             }
             .card-desc {
                 font-size: 12px;
+            }
+            .btn-exit span {
+                display: none;
             }
         }
     </style>
@@ -559,6 +630,7 @@
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
     const REGISTRO_URL = 'https://script.google.com/macros/s/AKfycbxAkhCTUui7Ii45A9bCQZcxsWb045rRWJwwGSRqCAf_7EWBvTBZwxLBwWSLd-_rsdBaJg/exec';
     const ADMIN_PASSWORD = "X987ela";
+    const PORTAL_URL = 'https://da-itd.github.io/A/index.html';
     
     const FORMATOS = [
         { id: 'criterios_dl', title: 'Criterios para Seleccionar Instructor', fileType: 'Word (.docx)', icon: '📋', url: 'https://raw.githubusercontent.com/DA-itd/A/main/ITD-AD-FO-06%20Formatos%20de%20Criterios%20para%20Seleccionar%20Instructores.docx' },
@@ -770,23 +842,28 @@
         }
         
         return h('div', { style: { display: 'flex', flexDirection: 'column', minHeight: '100vh' } },
-            // HEADER
+            // HEADER CON BOTÓN SALIR DISCRETO
             h('header', { className: 'header-white' },
-                h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: 1100, margin: '0 auto' } },
-                    h('img', { 
-                        src: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg', 
-                        alt: 'TecNM', 
-                        className: 'logo'
-                    }),
-                    h('div', { style: { textAlign: 'center' } },
-                        h('span', { className: 'title' }, 'Desarrollo Académico'),
-                        h('div', { className: 'subtitle' }, 'Actualización Docente ITD')
+                h('img', { 
+                    src: 'https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg', 
+                    alt: 'TecNM', 
+                    className: 'logo'
+                }),
+                h('div', { className: 'header-center' },
+                    h('span', { className: 'title' }, 'Desarrollo Académico'),
+                    h('div', { className: 'subtitle' }, 'Actualización Docente ITD')
+                ),
+                h('a', {
+                    href: PORTAL_URL,
+                    className: 'btn-exit',
+                    title: 'Volver al Portal Principal'
+                },
+                    h('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' },
+                        h('path', { d: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4' }),
+                        h('polyline', { points: '16 17 21 12 16 7' }),
+                        h('line', { x1: '21', y1: '12', x2: '9', y2: '12' })
                     ),
-                    h('img', { 
-                        src: 'https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png', 
-                        alt: 'ITD', 
-                        className: 'logo'
-                    })
+                    h('span', null, 'Salir')
                 )
             ),
             
@@ -798,7 +875,7 @@
                 h('h1', { className: 'page-title' }, 'Portal Documental'),
                 h('p', { className: 'page-subtitle' }, 'Registro de cursos y formatos oficiales para los procesos de actualización docente.'),
                 
-                // DISTRIBUCIÓN: Izquierda (Registro + Instructores) | Derecha (Formatos)
+                // DISTRIBUCIÓN
                 h('div', { className: 'card-wrapper' },
                     // COLUMNA IZQUIERDA
                     h('div', { className: 'card-left-col' },
@@ -847,7 +924,7 @@
                         )
                     ),
                     
-                    // COLUMNA DERECHA: FORMATOS (UNA SOLA COLUMNA)
+                    // COLUMNA DERECHA: FORMATOS
                     h('div', { className: 'card card-formatos', style: { display: 'flex', flexDirection: 'column' } },
                         h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 } },
                             h('div', { className: 'card-title' }, 'Documentos y Formatos'),
@@ -914,10 +991,13 @@
                 )
             ),
             
-            // FOOTER
+            // FOOTER CON ENLACE DE REGRESO
             h('div', { className: 'footer' },
                 h('p', null, '© ', new Date().getFullYear(), ' ', h('strong', null, 'Coordinación de Actualización Docente')),
-                h('p', { style: { fontSize: 11, marginTop: 2, opacity: 0.6 } }, 'M.C. Alejandro Calderón Rentería')
+                h('p', { style: { fontSize: 11, marginTop: 2, opacity: 0.6 } }, 'M.C. Alejandro Calderón Rentería'),
+                h('p', { style: { fontSize: 10, marginTop: 4, opacity: 0.5 } },
+                    h('a', { href: PORTAL_URL }, '← Volver al Portal Principal')
+                )
             )
         );
     };
@@ -928,7 +1008,7 @@
     const root = createRoot(document.getElementById('root'));
     root.render(h(App, null));
     
-    console.log('✅ Formatos ITD - Una sola columna');
+    console.log('✅ Formatos ITD - Botón Salir discreto');
     </script>
 </body>
 </html>
