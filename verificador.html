@@ -40,12 +40,7 @@
             z-index: 50;
         }
         .header-responsive .logo {
-            height: 40px;
-            width: auto;
-            flex-shrink: 0;
-        }
-        .header-responsive .logo-itd {
-            height: 40px;
+            height: 44px;
             width: auto;
             flex-shrink: 0;
         }
@@ -65,7 +60,7 @@
             color: #64748b;
         }
         
-        /* ── BOTÓN SALIR EN EL HEADER ── */
+        /* ── BOTÓN SALIR ── */
         .btn-exit {
             display: inline-flex;
             align-items: center;
@@ -970,26 +965,33 @@
     // 9. COMPONENTES RESPONSIVOS
     // ============================================================
     
-    // Header Responsive con botón Salir
+    // Header Responsive con ambos logos del mismo tamaño
     const Header = function() {
         return h('header', { className: 'header-responsive' },
+            // Logo TecNM (izquierda)
             h('img', { 
                 src: TECNM_LOGO_URL, 
                 alt: 'TecNM', 
                 className: 'logo',
                 onError: function(e) { e.target.style.display = 'none'; }
             }),
+            // Título central
             h('h1', null,
                 'Validador de Constancias',
                 h('span', null, 'Instituto Tecnológico de Durango')
             ),
+            // Logo ITD (derecha) - misma clase "logo" para igual tamaño
+            h('img', { 
+                src: ITD_LOGO_URL, 
+                alt: 'ITD', 
+                className: 'logo',
+                onError: function(e) { e.target.style.display = 'none'; }
+            }),
+            // Botón Salir
             h('a', {
                 href: PORTAL_URL,
                 className: 'btn-exit',
-                onClick: function(e) {
-                    // No prevenir el comportamiento por defecto
-                    // El enlace navegará a la URL
-                }
+                onClick: function(e) {}
             },
                 h('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2.5', strokeLinecap: 'round', strokeLinejoin: 'round' },
                     h('path', { d: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4' }),
@@ -1371,7 +1373,7 @@
     if (rootElement) {
         const root = createRoot(rootElement);
         root.render(h(App, null));
-        console.log('✅ React montado - Versión con botón Salir');
+        console.log('✅ React montado - Logos del mismo tamaño');
     } else {
         console.error('❌ No se encontró #root');
     }
