@@ -316,11 +316,125 @@
             transform-origin: top right;
             transition: transform 0.2s ease-out, opacity 0.2s ease-out;
         }
-    </style>
+    
+/* ── ANIMACIONES ANIVERSARIO ── */
+@keyframes goldShimmer { 0% { background-position: -300% 0; } 100% { background-position: 300% 0; } }
+@keyframes glowGold { from { text-shadow: 0 0 8px rgba(197,149,14,0.4), 0 0 18px rgba(197,149,14,0.2); } to { text-shadow: 0 0 22px rgba(224,176,48,0.85), 0 0 45px rgba(224,176,48,0.5), 0 0 70px rgba(224,176,48,0.25); } }
+@keyframes glowWhite { from { text-shadow: 0 0 8px rgba(255,255,255,0.3); } to { text-shadow: 0 0 20px rgba(255,255,255,0.9), 0 0 40px rgba(255,255,255,0.4); } }
+@keyframes confettiFall { 0% { transform: translateY(-30px) rotate(0deg) scale(1); opacity: 1; } 85% { opacity: 0.7; } 100% { transform: translateY(108vh) rotate(810deg) scale(0.4); opacity: 0; } }
+@keyframes borderGlow { 0%, 100% { box-shadow: 0 0 10px rgba(197,149,14,0.3), inset 0 0 10px rgba(197,149,14,0.05); } 50% { box-shadow: 0 0 30px rgba(197,149,14,0.7), 0 0 60px rgba(197,149,14,0.3), inset 0 0 20px rgba(197,149,14,0.1); } }
+@keyframes rotateSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes fadeInScale { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+.animate-fadeInScale { animation: fadeInScale 1s ease-out forwards; }
+.font-display-aniv { font-family: 'Cinzel Decorative', Georgia, serif; }
+.font-heading-aniv { font-family: 'Cinzel', Georgia, serif; }
+.font-body-aniv { font-family: 'EB Garamond', Georgia, serif; }
+
+.hero-aniversario {
+    background: linear-gradient(135deg, #0d0408 0%, #1a0810 12%, #3d0a18 28%, #6b1e2e 42%, #8c1f3b 50%, #6b1e2e 58%, #3d0a18 72%, #1a0810 88%, #0d0408 100%);
+    position: relative; overflow: hidden;
+}
+.hero-aniversario::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(45deg, transparent 0px, transparent 28px, rgba(197,149,14,0.035) 28px, rgba(197,149,14,0.035) 29px), radial-gradient(ellipse at 50% 0%, rgba(197,149,14,0.12) 0%, transparent 60%), radial-gradient(ellipse at 20% 100%, rgba(140,31,59,0.3) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(140,31,59,0.3) 0%, transparent 50%);
+    pointer-events: none;
+}
+.hero-aniversario::after {
+    content: ''; position: absolute; top: 12px; left: 12px; right: 12px; bottom: 0;
+    border: 1px solid rgba(197,149,14,0.2); border-bottom: none; pointer-events: none;
+}
+.text-gold-shimmer {
+    background: linear-gradient(90deg, #a37a0a 0%, #c5950e 15%, #e0b030 30%, #f5e08a 45%, #eecc55 50%, #f5e08a 55%, #e0b030 70%, #c5950e 85%, #a37a0a 100%);
+    background-size: 300% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: goldShimmer 4s linear infinite;
+}
+.text-gold-glow { color: #e0b030; animation: glowGold 2.5s ease-in-out infinite alternate; }
+.text-white-glow { color: #ffffff; animation: glowWhite 3s ease-in-out infinite alternate; }
+.ornament-gold { display: inline-block; color: #c5950e; letter-spacing: 0.4em; opacity: 0.8; font-size: 0.85em; }
+.gold-line { height: 1px; background: linear-gradient(90deg, transparent, #c5950e, #f5e08a, #c5950e, transparent); margin: 8px auto; }
+.aniv-img-wrap { position: relative; display: inline-block; }
+.aniv-img-wrap::before {
+    content: ''; position: absolute; inset: -18px; border-radius: 50%;
+    background: conic-gradient(rgba(197,149,14,0) 0deg, rgba(197,149,14,0.6) 60deg, rgba(245,224,138,0.9) 120deg, rgba(197,149,14,0.6) 180deg, rgba(197,149,14,0) 240deg, rgba(245,224,138,0.5) 300deg, rgba(197,149,14,0) 360deg);
+    animation: rotateSlow 8s linear infinite; filter: blur(3px);
+}
+.aniv-img-wrap::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 1.5px solid rgba(197,149,14,0.35); animation: borderGlow 3s ease-in-out infinite; }
+.aniv-bar { height: 5px; background: linear-gradient(90deg, #a72344, #c5950e, #f5e08a, #c5950e, #a72344); background-size: 200% 100%; animation: goldShimmer 4s linear infinite; }
+.confeti-aniv { position: fixed; pointer-events: none; z-index: 9990; border-radius: 2px; animation: confettiFall linear infinite; }
+
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 </head>
 <body class="bg-crema-100 dark:bg-dark-bg min-h-screen transition-colors duration-500">
     
     <div id="cursor-dot"></div>
+
+    <div id="confeti-container"></div>
+    
+    <!-- ══════════════════════════════════════
+         HERO 78 ANIVERSARIO
+    ══════════════════════════════════════ -->
+    <div class="hero-aniversario py-8 sm:py-12 text-center animate-fadeInUp">
+        <div class="relative z-10 container mx-auto px-4">
+
+            <!-- Años arriba -->
+            <p class="font-heading-aniv text-xs sm:text-sm tracking-[0.4em] uppercase mb-3 text-gold-glow" style="opacity:0.85;">
+                1948 &nbsp;·&nbsp; Instituto Tecnológico de Durango &nbsp;·&nbsp; 2026
+            </p>
+
+            <!-- Línea ornamental superior -->
+            <div class="gold-line w-48 sm:w-72 mb-4"></div>
+            <div class="ornament-gold text-sm mb-4">✦ ✦ ✦</div>
+
+            <!-- Imagen 78 Aniversario — pieza central -->
+            <div class="flex justify-center mb-5">
+                <div class="aniv-img-wrap weather-icon" style="border-radius:50%;padding:8px;">
+                    <img src="https://github.com/DA-itd/A/blob/main/imagen%2078%20aniversario%20(1).png?raw=true"
+                         alt="78 Aniversario ITD"
+                         class="relative z-10 animate-fadeInScale"
+                         style="height:clamp(130px,24vw,240px);width:auto;object-fit:contain;
+                                filter:drop-shadow(0 0 30px rgba(197,149,14,0.55)) drop-shadow(0 0 10px rgba(197,149,14,0.3)) drop-shadow(0 6px 20px rgba(0,0,0,0.6));
+                                border-radius:50%;">
+                </div>
+            </div>
+
+            <!-- Título principal -->
+            <h1 class="font-display-aniv text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-1 leading-tight">
+                <span class="text-gold-shimmer">78 Aniversario</span>
+            </h1>
+            <h2 class="font-heading-aniv text-base sm:text-xl md:text-2xl mb-2 text-white-glow tracking-widest uppercase">
+                Instituto Tecnológico de Durango
+            </h2>
+
+            <!-- Línea ornamental media -->
+            <div class="gold-line w-64 sm:w-80 mx-auto my-3"></div>
+
+            <!-- Subtítulo elegante -->
+            <p class="font-body-aniv text-base sm:text-lg md:text-xl italic mb-1"
+               style="color:rgba(245,224,138,0.88);letter-spacing:0.04em;">
+                "Siete décadas y ocho años forjando excelencia académica"
+            </p>
+            <p class="font-heading-aniv text-xs sm:text-sm tracking-[0.3em] uppercase mb-4"
+               style="color:rgba(255,255,255,0.55);">
+                2 de Agosto · Durango, México
+            </p>
+
+            <!-- Fechas solemnes -->
+            <div class="inline-flex items-center gap-4 bg-white/10 backdrop-blur-sm border rounded-full px-6 py-3"
+                 style="border-color:rgba(197,149,14,0.35);">
+                <span class="font-heading-aniv text-xs tracking-widest uppercase" style="color:rgba(245,224,138,0.7);">Fundación</span>
+                <span class="font-display-aniv text-lg font-bold text-gold-shimmer">1948</span>
+                <span style="color:rgba(197,149,14,0.4);font-size:1.2em;">✦</span>
+                <span class="font-display-aniv text-lg font-bold text-gold-shimmer">2026</span>
+                <span class="font-heading-aniv text-xs tracking-widest uppercase" style="color:rgba(245,224,138,0.7);">Aniversario</span>
+            </div>
+
+            <div class="ornament-gold text-sm mt-5 mb-2">✦ ✦ ✦</div>
+            <div class="gold-line w-48 sm:w-72 mt-2"></div>
+        </div>
+
+        <div class="aniv-bar mt-6"></div>
+    </div>
+
 
     <!-- Header -->
     <header class="bg-white dark:bg-dark-card shadow-xl sticky top-0 z-40 transition-colors duration-500 border-b-4 border-guinda-900 dark:border-guinda-400">
@@ -449,13 +563,16 @@
     </div>
     
     <!-- Banner -->
-    <div id="announcement-banner" class="bg-gradient-to-r from-guinda-800 via-guinda-700 to-guinda-800 text-white p-4 text-center font-bold shadow-lg relative cursor-pointer">
-        <div class="container mx-auto flex items-center justify-center gap-4">
-            <span class="text-2xl animate-pulse">✨</span>
+    <!-- Banner anuncio (Estilo Aniversario) -->
+    <div id="announcement-banner" class="text-white p-3 text-center font-heading-aniv font-bold shadow-lg cursor-pointer text-sm"
+         style="background:linear-gradient(90deg,#0d0408,#3d0a18,#6b1e2e,#3d0a18,#0d0408);">
+        <div class="container mx-auto flex items-center justify-center gap-3">
+            <span class="animate-pulse" style="color:#f5e08a">✦</span>
             <div>
-                <strong class="block sm:inline text-lg">¡Próximos Cursos-Taller del 10 al 14 y 17 al 21 de agosto!</strong>
-                <span class="block sm:inline ml-2">los esperamos!</span>
+                <strong class="block sm:inline tracking-widest text-base sm:text-lg">¡Próximos Cursos-Taller del 10 al 14 y 17 al 21 de agosto!</strong>
+                <span class="block sm:inline ml-2 font-body-aniv font-normal opacity-90 text-sm sm:text-base italic">¡Los esperamos!</span>
             </div>
+            <span class="animate-pulse" style="color:#f5e08a">✦</span>
         </div>
     </div>
 
@@ -482,8 +599,9 @@
               <div id="stats-dept-breakdown" class="hidden px-4 pb-4 sm:px-5 sm:pb-5 mt-1 border-t border-gray-100 dark:border-gray-800/60 cursor-default"></div>
             </div>
         </section>
-        
+
         <!-- Servicios -->
+        
         <div id="servicios" class="text-center mb-6 sm:mb-8 animate-fadeInUp scroll-mt-32">
             <h2 class="inline-block text-lg sm:text-xl font-display font-semibold text-guinda-800 dark:text-guinda-200 border-b-2 border-guinda-200 dark:border-guinda-800 pb-1">
                 Servicios Disponibles
@@ -1383,5 +1501,32 @@
       }
     })();
     </script>
+
+    <script>
+        (function() {
+
+            const c = document.getElementById('confeti-container');
+            if (!c) return;
+            const cols = ['#6b1e2e','#8c1f3b','#c5950e','#e0b030','#f5e08a','#ffffff','#fce7eb','#a72344'];
+            const shapes = ['circle','square','rect','diamond'];
+            for (let i = 0; i < 50; i++) {
+                const el = document.createElement('div');
+                el.className = 'confeti-aniv';
+                const col   = cols[Math.floor(Math.random() * cols.length)];
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                const size  = 5 + Math.random() * 10;
+                const dur   = 7 + Math.random() * 10;
+                const delay = Math.random() * 16;
+                const left  = Math.random() * 100;
+                let br = '2px', w = size, h = size * 1.6;
+                if (shape === 'circle') { br = '50%'; w = size; h = size; }
+                else if (shape === 'square') { w = size; h = size; }
+                else if (shape === 'diamond') { br = '2px'; w = size; h = size; }
+                el.style.cssText = `left:${left}vw;width:${w}px;height:${h}px;background:${col};border-radius:${br};animation-duration:${dur}s;animation-delay:${delay}s;opacity:0.85;`;
+                c.appendChild(el);
+            }
+        })();
+    </script>
 </body>
+
 </html>
