@@ -569,8 +569,8 @@
         <div class="container mx-auto flex items-center justify-center gap-3">
             <span class="animate-pulse" style="color:#f5e08a">✦</span>
             <div>
-                <strong class="block sm:inline tracking-widest text-base sm:text-lg">¡Próximos Cursos-Taller del 10 al 14 y 17 al 21 de agosto!</strong>
-                <span class="block sm:inline ml-2 font-body-aniv font-normal opacity-90 text-sm sm:text-base italic">¡Los esperamos!</span>
+                <strong class="block sm:inline tracking-widest text-sm sm:text-base">¡Próximos Cursos-Taller del 10 al 14 y 17 al 21 de agosto!</strong>
+                <span class="block sm:inline ml-2 font-body-aniv font-normal opacity-90 text-xs sm:text-sm italic">¡Los esperamos!</span>
             </div>
             <span class="animate-pulse" style="color:#f5e08a">✦</span>
         </div>
@@ -1079,21 +1079,6 @@
         }
 
         // Banner and Stats Auto-hide
-        const announcementBanner = document.getElementById('announcement-banner');
-        if (announcementBanner) {
-            let bannerHidden = false;
-            const hideBanner = () => {
-                if (!bannerHidden) {
-                    bannerHidden = true;
-                    announcementBanner.classList.add('hidden-banner');
-                    window.removeEventListener('scroll', hideBanner);
-                }
-            };
-            setTimeout(hideBanner, 10000);
-            window.addEventListener('scroll', hideBanner, { once: true });
-            announcementBanner.addEventListener('click', hideBanner);
-        }
-
         const statsBanner = document.getElementById('banner-estadisticas');
         if (statsBanner) {
             setTimeout(() => {
