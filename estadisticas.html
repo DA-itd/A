@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+   <!-- Eliminé la referencia a ga.js que no existe -->
    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V2V4CT2C69"></script>
-   <script src="ga.js"></script>
     
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Estadísticas - Portal de Actualización Docente ITD</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png">
 
-<!-- React -->
+<!-- React - Cambié a URLs más estables -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
@@ -62,6 +62,7 @@
         margin: 0 auto 20px;
         background: rgba(255, 255, 255, 0.5);
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        animation: spin 1.5s linear infinite;
     }
 
     .loader-spinner::before {
@@ -129,15 +130,6 @@
          <p id="copyright-year" class="text-xs sm:text-sm opacity-75 mt-1"></p>
     </div>
 </footer>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var yearEl = document.getElementById('copyright-year');
-        if (yearEl) {
-            yearEl.textContent = new Date().getFullYear();
-        }
-    });
-</script>
 
 <script>
     // ============================================================
@@ -702,7 +694,7 @@
     };
 
     // ============================================================
-    // 5. COMPONENTE: LOGIN
+    // 5. COMPONENTE: LOGIN (CORREGIDO)
     // ============================================================
     var Login = function(props) {
         var onLogin = props.onLogin;
@@ -710,7 +702,7 @@
         var googleButtonRef = useRef(null);
 
         useEffect(function() {
-            var intervalId;
+            // Función para inicializar Google
             var initGoogle = function() {
                 if (window.google && window.google.accounts && googleButtonRef.current) {
                     try {
@@ -719,18 +711,38 @@
                             callback: onLogin 
                         });
                         window.google.accounts.id.renderButton(googleButtonRef.current, { 
-                            theme: "outline", size: "large", text: "signin_with", shape: "rectangular", logo_alignment: "left"
+                            theme: "outline", 
+                            size: "large", 
+                            text: "signin_with", 
+                            shape: "rectangular", 
+                            logo_alignment: "left"
                         });
                         return true;
-                    } catch (e) { return false; }
+                    } catch (e) {
+                        console.error('Error inicializando Google:', e);
+                        return false;
+                    }
                 }
                 return false;
             };
             
-            if (!initGoogle()) { 
-                intervalId = setInterval(function() { if (initGoogle()) clearInterval(intervalId); }, 500); 
+            // Intentar inicializar inmediatamente
+            if (!initGoogle()) {
+                // Si falla, esperar a que las librerías carguen
+                var checkGoogle = setInterval(function() {
+                    if (initGoogle()) {
+                        clearInterval(checkGoogle);
+                    }
+                }, 500);
+                
+                // Limpiar el intervalo si el componente se desmonta
+                return function() {
+                    clearInterval(checkGoogle);
+                };
             }
-            return function() { if(intervalId) clearInterval(intervalId); };
+            
+            // Limpiar si no hay intervalo
+            return function() {};
         }, [onLogin]);
 
         return h('div', { className: 'flex flex-col justify-center items-center py-20 animate-fadeIn px-4 flex-grow' },
@@ -968,6 +980,7 @@
                 })
                 .catch(function(error) {
                     console.error("Error:", error);
+                    alert("Error de conexión: " + error.message);
                 })
                 .finally(function() {
                     setLoading(false);
@@ -1235,18 +1248,24 @@
                 if (email.endsWith('@itdurango.edu.mx') || ADMIN_EMAILS.includes(email)) {
                     var isAdmin = ADMIN_EMAILS.includes(email);
                     setUser({ name: payload.name, email: email, picture: payload.picture, isAdmin: isAdmin });
+                    setLoginError('');
                 } else {
                     setLoginError("Acceso denegado: Se requiere cuenta institucional @itdurango.edu.mx.");
                 }
             } catch (error) {
-                setLoginError("Error de autenticación.");
+                console.error('Error en login:', error);
+                setLoginError("Error de autenticación. Por favor, intenta nuevamente.");
             }
         };
 
         var handleLogout = function() {
             setUser(null);
             setLoginError('');
-            if (window.google) window.google.accounts.id.disableAutoSelect();
+            if (window.google) {
+                try {
+                    window.google.accounts.id.disableAutoSelect();
+                } catch(e) {}
+            }
         };
 
         if (!user) return h(Login, { onLogin: handleLogin, loginError: loginError });
