@@ -1465,7 +1465,7 @@
 
       try {
         const currentYear = new Date().getFullYear();
-        const res  = await fetch(APPS_URL + '?action=getStatisticsData&period=' + currentYear);
+        const res  = await fetch(APPS_URL + '?action=getStatisticsData&period=ACTUAL');
         const json = await res.json();
         const label = document.getElementById('stats-period-label');
 
