@@ -1059,10 +1059,9 @@
                         isAdmin ? 'Dashboard Estratégico' : 'Estadísticas de Actualización Docente'
                     ),
                     h('p', { className: 'text-gray-500 mt-1' },
-                        isAdmin ? 'Análisis de datos de actualización docente. Usuario: ' : 'Bienvenido/a, ',
-                        h('span', { className: 'font-semibold text-[#1B396A]' }, user.name),
-                        isAdmin ? null : '. Aquí puedes consultar los indicadores del programa.'
-                    )
+                     isAdmin ? h('span', null, 'Análisis de datos de actualización docente. Usuario: ', h('span', { className: 'font-semibold text-[#1B396A]' }, user.name)) : h('span', null, 'Bienvenido/a, ', h('span', { className: 'font-semibold text-[#1B396A]' }, user.name), '. Aquí puedes consultar los indicadores del programa.')
+
+                  
                 ),
                 h('div', { className: 'flex gap-3 flex-wrap' },
                     h('div', { className: 'relative' },
