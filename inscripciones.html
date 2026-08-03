@@ -2,6 +2,22 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <script>
+  // Purga de emergencia: elimina Service Workers y cachés viejos
+  // que puedan estar sirviendo una versión desactualizada del sitio.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+  if ('caches' in window) {
+    caches.keys().then(function(names) {
+      for (let name of names) caches.delete(name);
+    });
+  }
+</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inscripción a Cursos - ITD</title>
     <meta name="description" content="Inscríbete a los cursos de actualización docente del Instituto Tecnológico de Durango.">
