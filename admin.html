@@ -492,7 +492,7 @@
     };
 
     // ============================================================
-    // 6. COMPONENTE: SURVEY PANEL (SIMPLIFICADO)
+    // 6. COMPONENTE: SURVEY PANEL
     // ============================================================
     var SurveyPanel = function() {
         var _efficacyStats = useState(null);
@@ -649,7 +649,7 @@
     };
 
     // ============================================================
-    // 7. COMPONENTE: REPORTS PANEL
+    // 7. COMPONENTE: REPORTS PANEL (CORREGIDO)
     // ============================================================
     var ReportsPanel = function(props) {
         var user = props.user;
@@ -700,14 +700,23 @@
                 .then(function(r) { return r.json(); })
                 .then(function(res) {
                     if (res.success) {
+                        // CORRECCIÓN: Separamos el departamento del docente del departamento oferente
                         var processedData = res.data.map(function(item) {
-                            return { ...item, depto_oferente: item.departamento };
+                            return { 
+                                ...item, 
+                                // El departamento del docente (para filtrar)
+                                departamento_docente: item.departamento,
+                                // El departamento oferente (para mostrar en el reporte)
+                                depto_oferente: item.departamento_oferente || item.departamento
+                            };
                         });
                         setData(processedData);
+                        
+                        // Obtenemos los departamentos únicos de los docentes para el filtro
                         var uniqueDepts = [];
                         processedData.forEach(function(i) {
-                            if (i.departamento) {
-                                var d = i.departamento.trim().toUpperCase();
+                            if (i.departamento_docente) {
+                                var d = i.departamento_docente.trim().toUpperCase();
                                 if (uniqueDepts.indexOf(d) === -1) uniqueDepts.push(d);
                             }
                         });
@@ -726,12 +735,14 @@
         useEffect(function() {
             var temp = data.slice();
 
+            // Filtro por departamento del docente
             if (dept) {
                 temp = temp.filter(function(i) { 
-                    return i.departamento && i.departamento.trim().toUpperCase() === dept; 
+                    return i.departamento_docente && i.departamento_docente.trim().toUpperCase() === dept; 
                 });
             }
 
+            // Filtro por mes
             if (month) {
                 temp = temp.filter(function(i) {
                     if (!i.fechas) return false;
@@ -767,7 +778,7 @@
                 doc.text("REPORTE GENERAL " + year, pageWidth/2, 30, { align: "center" });
                 
                 var subtitle = "";
-                if (dept) subtitle += " Depto: " + dept;
+                if (dept) subtitle += " Depto. Docente: " + dept;
                 if (month) subtitle += " | Mes: " + (MONTHS.find(function(m) { return m.v === month; })?.l || '');
                 if (subtitle) { 
                     doc.setFontSize(10); 
@@ -778,8 +789,10 @@
                 doc.text("Total: " + filtered.length, pageWidth - 14, 38, { align: "right" });
 
                 doc.autoTable({
-                    head: [['Nombre', 'Curso', 'Folio', 'Fecha', 'Depto. Oferente']],
-                    body: filtered.map(function(r) { return [r.nombre, r.curso, r.folio, r.fechas, r.depto_oferente]; }),
+                    head: [['Nombre', 'Curso', 'Folio', 'Fecha', 'Depto. Docente', 'Depto. Oferente']],
+                    body: filtered.map(function(r) { 
+                        return [r.nombre, r.curso, r.folio, r.fechas, r.departamento_docente, r.depto_oferente]; 
+                    }),
                     startY: 42, 
                     theme: 'striped', 
                     headStyles: { fillColor: [27, 57, 106], textColor: 255, halign: 'center' }, 
@@ -797,7 +810,7 @@
                     "Curso": r.curso, 
                     "Folio": r.folio, 
                     "Fecha": r.fechas, 
-                    "Departamento Docente": r.departamento, 
+                    "Departamento Docente": r.departamento_docente, 
                     "Departamento Oferente": r.depto_oferente
                 };
             });
@@ -889,6 +902,7 @@
                                             h('th', { className: 'p-3 border-b' }, 'Curso'),
                                             h('th', { className: 'p-3 border-b' }, 'Folio'),
                                             h('th', { className: 'p-3 border-b' }, 'Fecha'),
+                                            h('th', { className: 'p-3 border-b text-gray-700' }, 'Depto. Docente'),
                                             h('th', { className: 'p-3 border-b text-blue-700' }, 'Depto. Oferente')
                                         )
                                     ),
@@ -899,6 +913,7 @@
                                                 h('td', { className: 'p-3' }, r.curso),
                                                 h('td', { className: 'p-3 font-mono text-gray-500' }, r.folio),
                                                 h('td', { className: 'p-3' }, r.fechas),
+                                                h('td', { className: 'p-3 text-gray-600' }, r.departamento_docente),
                                                 h('td', { className: 'p-3 font-semibold text-blue-800 bg-blue-50' }, r.depto_oferente)
                                             );
                                         })
