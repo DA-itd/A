@@ -1,695 +1,728 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth">
+<html lang="es" class="scroll-smooth" style="visibility: hidden; opacity: 0;">
 <head>
     <meta name="google-site-verification" content="no3sRtXHiydJtG7sAE69l-JoUZRF4z6EPipOGbJ1jkE" />
     <script src="ga.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Actualización Docente - ITD | Instituto Tecnológico de Durango</title>
-    <meta name="description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango (ITD). Descarga constancias, reconocimientos y consulta cursos de actualización docente en Durango.">
-    <meta name="keywords" content="ITD, Instituto Tecnológico de Durango, Tecno Durango, actualización docente ITD, Durango, constancias ITD, reconocimientos docentes, cursos docentes Durango, TecNM Durango, portal docente ITD">
+    <title>Portal de Actualización Docente - ITD | Feliz Navidad y Próspero Año Nuevo</title>
+    <meta name="description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango. Felices Fiestas y Próspero Año Nuevo.">
+    <meta name="keywords" content="ITD, Instituto Tecnológico de Durango, Navidad, Año Nuevo, actualización docente, Durango, TecNM">
     <meta name="author" content="Coordinación de Actualización Docente - ITD">
     <meta name="robots" content="index, follow">
-    <meta name="language" content="Spanish">
     <link rel="canonical" href="https://da-itd.github.io/A/">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://da-itd.github.io/A/">
-    <meta property="og:title" content="Portal de Actualización Docente - ITD | Instituto Tecnológico de Durango">
-    <meta property="og:description" content="Portal oficial de la Coordinación de Actualización Docente del Instituto Tecnológico de Durango (ITD). Descarga constancias y reconocimientos docentes.">
+    <meta property="og:title" content="¡Feliz Navidad y Próspero Año Nuevo! | Portal ITD">
+    <meta property="og:description" content="La Coordinación de Actualización Docente del ITD les desea una hermosa Navidad y un excelente Año Nuevo.">
     <meta property="og:image" content="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
     <meta property="og:locale" content="es_MX">
-    <meta property="og:site_name" content="Portal Actualización Docente ITD">
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "EducationalOrganization",
-      "name": "Instituto Tecnológico de Durango - Coordinación de Actualización Docente",
-      "alternateName": ["ITD", "Tecno Durango", "TecNM Durango"],
-      "url": "https://da-itd.github.io/A/",
-      "logo": "https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png",
-      "description": "Portal oficial de actualización docente del Instituto Tecnológico de Durango.",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Durango",
-        "addressRegion": "Durango",
-        "addressCountry": "MX"
-      }
-    }
-    </script>
     <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
     <link rel="shortcut icon" type="image/png" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
     <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png">
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Fuentes: Playfair Display SC (display navideño solemne) + Libre Baskerville (body cálido) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display+SC:ital,wght@0,400;0,700;0,900;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Identity Services para la función de Admin -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
+
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
-                        'display': ['Playfair Display', 'Georgia', 'serif'],
-                        'body': ['Inter', 'system-ui', 'sans-serif'],
+                        'display': ['Playfair Display SC', 'Georgia', 'serif'],
+                        'heading': ['Playfair Display', 'Georgia', 'serif'],
+                        'body':    ['Libre Baskerville', 'Georgia', 'serif'],
+                        'sans':    ['system-ui', 'sans-serif'],
                     },
                     colors: {
-                        guinda: {
-                            50:  '#fdf2f4',
-                            100: '#fce7eb',
-                            200: '#f9d0d8',
-                            300: '#f4a8b8',
-                            400: '#ec7590',
-                            500: '#e04d6d',
-                            600: '#c73153',
-                            700: '#a72344',
-                            800: '#8c1f3b',
-                            900: '#6b1e2e',
-                            950: '#3d0a18',
+                        navidad: {
+                            rojo:    '#c0392b', rojov:  '#a93226', rojop:  '#e74c3c',
+                            verde:   '#1a5c2a', verdev: '#145a20', verdel: '#27ae60',
+                            dorado:  '#c9a12a', doradol:'#e8c84a', doradop:'#f5e08a',
+                            guinda:  '#6b1e2e', guindav:'#3d0a18',
+                            crema:   '#fdf6ee', calidez:'#fef9f0',
                         },
-                        crema: {
-                            50:  '#fefcf8',
-                            100: '#fdf8f0',
-                            200: '#faf0e0',
-                            300: '#f5e4c8',
-                            400: '#edd4a8',
-                            500: '#e2be82',
-                        },
-                        dark: {
-                            bg: '#1a0e10',
-                            card: '#2d1a1e',
-                            nav: '#3d0a18',
-                            text: '#f5e8ec'
-                        }
+                        dark: { bg:'#0a0f08', card:'#111a0e', nav:'#0d1a0a', deep:'#060c04' }
                     },
                     animation: {
-                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'border-dance': 'border-dance 4s linear infinite',
-                        'slide-down': 'slideDown 0.3s ease-out forwards',
+                        'slide-down':   'slideDown 0.3s ease-out forwards',
+                        'fadeInUp':     'fadeInUp 0.8s ease-out forwards',
+                        'fadeInScale':  'fadeInScale 1s ease-out forwards',
+                        'float':        'floatAnim 5s ease-in-out infinite',
+                        'float-slow':   'floatAnim 7s ease-in-out infinite',
+                        'gold-shimmer': 'goldShimmer 4s linear infinite',
+                        'snow-fall':    'snowFall linear infinite',
+                        'twinkle':      'twinkle 2s ease-in-out infinite',
+                        'glow-gold':    'glowGold 2.5s ease-in-out infinite alternate',
+                        'pulse-slow':   'pulseSlow 3.5s ease-in-out infinite',
+                        'bell-swing':   'bellSwing 2s ease-in-out infinite',
+                        'star-spin':    'starSpin 8s linear infinite',
+                        'firework':     'firework 1.5s ease-out infinite',
+                        'countdown':    'countdownPulse 1s ease-in-out infinite',
                     },
                     keyframes: {
-                        'border-dance': {
-                            '0%, 100%': { 'background-position': '0% 50%' },
-                            '50%': { 'background-position': '100% 50%' },
-                        },
-                        slideDown: {
-                            '0%': { opacity: '0', transform: 'translateY(-10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
+                        slideDown:      { '0%':{opacity:'0',transform:'translateY(-10px)'},'100%':{opacity:'1',transform:'translateY(0)'} },
+                        fadeInUp:       { from:{opacity:'0',transform:'translateY(35px)'}, to:{opacity:'1',transform:'translateY(0)'} },
+                        fadeInScale:    { from:{opacity:'0',transform:'scale(0.8)'}, to:{opacity:'1',transform:'scale(1)'} },
+                        floatAnim:      { '0%,100%':{transform:'translateY(0) rotate(-1deg)'},'50%':{transform:'translateY(-14px) rotate(1deg)'} },
+                        goldShimmer:    { '0%':{backgroundPosition:'-300% 0'},'100%':{backgroundPosition:'300% 0'} },
+                        snowFall:       { '0%':{transform:'translateY(-20px) rotate(0deg)',opacity:'1'},'100%':{transform:'translateY(105vh) rotate(720deg)',opacity:'0'} },
+                        twinkle:        { '0%,100%':{opacity:'0.2',transform:'scale(0.8)'},'50%':{opacity:'1',transform:'scale(1.3)'} },
+                        glowGold:       { from:{textShadow:'0 0 8px rgba(201,161,42,0.4)'}, to:{textShadow:'0 0 22px rgba(232,200,74,0.9),0 0 45px rgba(232,200,74,0.5)'} },
+                        pulseSlow:      { '0%,100%':{transform:'scale(1)'},'50%':{transform:'scale(1.05)'} },
+                        bellSwing:      { '0%,100%':{transform:'rotate(-12deg) translateY(0)'},'25%':{transform:'rotate(12deg) translateY(-3px)'},'75%':{transform:'rotate(-8deg) translateY(-2px)'} },
+                        starSpin:       { from:{transform:'rotate(0deg)'},to:{transform:'rotate(360deg)'} },
+                        firework:       { '0%':{transform:'scale(0)',opacity:'1'},'60%':{transform:'scale(1)',opacity:'1'},'100%':{transform:'scale(1.3)',opacity:'0'} },
+                        countdownPulse: { '0%,100%':{transform:'scale(1)',opacity:'1'},'50%':{transform:'scale(1.06)',opacity:'0.85'} },
                     }
                 }
             }
         }
     </script>
 
-    <!-- ESTILOS & MODO OSCURO -->
     <script>
-        // Aplicar tema oscuro inmediatamente antes de pintar para evitar FOUC
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
+        } else { document.documentElement.classList.remove('dark'); }
+        window.onunload = function() {};
+        function safeReveal() {
+            var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            var hasStyles = window.getComputedStyle(document.body).backgroundImage.includes('gradient');
+            if (isSafari && !hasStyles) { window.location.reload(); return; }
+            document.documentElement.style.transition = 'opacity 0.5s ease-in';
+            document.documentElement.style.visibility = 'visible';
+            document.documentElement.style.opacity = '1';
         }
+        window.addEventListener('pageshow', e => e.persisted ? window.location.reload() : setTimeout(safeReveal, 150));
+        window.addEventListener('load', () => setTimeout(safeReveal, 150));
     </script>
 
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH1X2720VL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-JH1X2720VL');
-    </script>
-    
-    <style>
-        /* ── FUENTES Y BASE ── */
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            cursor: none;
-            background-color: #fdf8f0;
-        }
-        h1, h2, h3, .font-display {
-            font-family: 'Playfair Display', Georgia, serif;
-        }
-        a, button, .cursor-pointer { cursor: none; }
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-JH1X2720VL');</script>
 
-        /* ── CURSOR INSTITUCIONAL (guinda) ── */
+    <style>
+        :root {
+            --rojo:    #c0392b;
+            --verde:   #1a5c2a;
+            --dorado:  #c9a12a;
+            --doradol: #e8c84a;
+            --doradop: #f5e08a;
+            --guinda:  #6b1e2e;
+            --blanco:  #ffffff;
+            --crema:   #fdf6ee;
+            --nieve:   #f0f4f0;
+        }
+
+        body {
+            font-family: 'Libre Baskerville', Georgia, serif;
+            cursor: none;
+            background: linear-gradient(160deg, #0a150c 0%, #0d1a0a 35%, #0a0f08 70%, #060c04 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        html:not(.dark) body {
+            background: linear-gradient(160deg, #f0f4f0 0%, #fdf6ee 35%, #f5f9f0 65%, #fef9f0 100%);
+            background-attachment: fixed;
+        }
+        h1,h2,h3,.font-display { font-family: 'Playfair Display SC', Georgia, serif; }
+        .font-heading { font-family: 'Playfair Display', Georgia, serif; }
+        a,button,.cursor-pointer { cursor: none; }
+
+        /* ── CURSOR ── */
         #cursor-dot {
             position: fixed; width: 13px; height: 13px;
-            background-color: rgba(107, 30, 46, 0.85);
-            border: 2px solid rgba(167, 35, 68, 1);
+            background: radial-gradient(circle, #f5e08a, #c9a12a);
+            border: 2px solid rgba(201,161,42,0.7);
             border-radius: 50%; pointer-events: none;
-            transform: translate(-50%, -50%); z-index: 9999;
-            transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
-            box-shadow: 0 0 8px rgba(107, 30, 46, 0.5);
+            transform: translate(-50%,-50%); z-index: 9999;
+            transition: width .2s, height .2s;
+            box-shadow: 0 0 12px rgba(201,161,42,0.6);
         }
         #cursor-dot.active {
-            width: 36px; height: 36px;
-            background-color: rgba(107, 30, 46, 0.12);
-            border: 2px solid rgba(167, 35, 68, 0.9);
-            box-shadow: 0 0 14px rgba(107, 30, 46, 0.4);
+            width: 38px; height: 38px;
+            background: rgba(201,161,42,0.12);
+            border-color: rgba(201,161,42,0.8);
         }
-        .dark #cursor-dot {
-            background-color: rgba(244, 168, 184, 0.85);
-            border: 2px solid rgba(244, 168, 184, 1);
-            box-shadow: 0 0 8px rgba(244, 168, 184, 0.5);
+
+        /* ── HERO NAVIDAD ── */
+        .hero-navidad {
+            background: linear-gradient(160deg,
+                #060c04 0%, #0a1508 10%,
+                #0d2010 20%, #122a14 35%,
+                #1a5c2a 48%, #122a14 62%,
+                #0d2010 75%, #0a1508 88%, #060c04 100%);
+            position: relative; overflow: hidden;
         }
-        .dark #cursor-dot.active {
-            background-color: rgba(244, 168, 184, 0.15);
-            border: 2px solid rgba(244, 168, 184, 0.9);
-            box-shadow: 0 0 14px rgba(244, 168, 184, 0.4);
+        /* Estrellas de fondo */
+        .hero-navidad::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                radial-gradient(circle at 15% 25%, rgba(245,224,138,0.12) 1px, transparent 1px),
+                radial-gradient(circle at 35% 60%, rgba(245,224,138,0.08) 1px, transparent 1px),
+                radial-gradient(circle at 55% 15%, rgba(245,224,138,0.15) 1px, transparent 1px),
+                radial-gradient(circle at 72% 45%, rgba(245,224,138,0.10) 1px, transparent 1px),
+                radial-gradient(circle at 88% 20%, rgba(245,224,138,0.13) 1px, transparent 1px),
+                radial-gradient(circle at 8%  75%, rgba(245,224,138,0.09) 1px, transparent 1px),
+                radial-gradient(circle at 92% 80%, rgba(245,224,138,0.11) 1px, transparent 1px),
+                radial-gradient(circle at 48% 85%, rgba(245,224,138,0.07) 1px, transparent 1px),
+                repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(26,92,42,0.08) 60px, rgba(26,92,42,0.08) 61px),
+                radial-gradient(ellipse at 50% 0%, rgba(201,161,42,0.1) 0%, transparent 55%);
+            pointer-events: none;
+        }
+        /* Marco elegante */
+        .hero-navidad::after {
+            content: '';
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 0;
+            border: 1px solid rgba(201,161,42,0.18);
+            border-bottom: none;
+            pointer-events: none;
+        }
+
+        /* ── TEXTO DORADO ── */
+        .text-gold-shimmer {
+            background: linear-gradient(90deg,
+                #8a5e08 0%, #c9a12a 18%, #e8c84a 32%,
+                #f5e08a 45%, #eecc55 50%, #f5e08a 55%,
+                #e8c84a 68%, #c9a12a 82%, #8a5e08 100%);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: goldShimmer 4s linear infinite;
+        }
+        .text-gold-glow { color: #e8c84a; animation: glowGold 2.5s ease-in-out infinite alternate; }
+
+        /* ── NIEVE ── */
+        .snowflake {
+            position: fixed; pointer-events: none; z-index: 9990;
+            color: #ffffff; font-size: 12px; opacity: 0.8;
+            animation: snowFall linear infinite;
+            text-shadow: 0 0 4px rgba(255,255,255,0.5);
+            user-select: none;
+        }
+
+        /* ── CONFETI FIN DE AÑO ── */
+        .confeti-nav {
+            position: fixed; pointer-events: none; z-index: 9989;
+            border-radius: 2px;
+            animation: snowFall linear infinite;
+        }
+
+        /* ── BARRAS ── */
+        .nav-bar {
+            height: 5px;
+            background: linear-gradient(90deg, var(--verde), var(--dorado), var(--rojo), var(--doradol), var(--verde));
+            background-size: 200% 100%;
+            animation: goldShimmer 5s linear infinite;
+        }
+        .nav-bar-thin {
+            height: 3px;
+            background: linear-gradient(90deg, var(--verde), var(--doradol), var(--verde));
+        }
+
+        /* ── ORNAMENTOS ── */
+        .ornament { color: var(--doradol); letter-spacing: 0.35em; opacity: 0.8; }
+        .gold-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--dorado), #f5e08a, var(--dorado), transparent);
+        }
+
+        /* ── NAV ── */
+        .nav-navidad {
+            background: linear-gradient(90deg, #060c04 0%, #0d2010 25%, #1a5c2a 50%, #0d2010 75%, #060c04 100%);
+            position: relative;
+        }
+        .nav-navidad::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--dorado), #f5e08a, var(--dorado), transparent);
         }
 
         /* ── TARJETAS ── */
         .card-portal {
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            background: #ffffff;
+            transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+            position: relative; overflow: hidden;
             border-radius: 20px;
-            border: 1px solid rgba(107,30,46,0.10);
-            box-shadow: 0 2px 12px rgba(107,30,46,0.07), 0 1px 3px rgba(0,0,0,0.04);
+            background: #ffffff;
+            border: 1px solid rgba(26,92,42,0.12);
+            box-shadow: 0 2px 16px rgba(26,92,42,0.07);
         }
-        /* franja decorativa inferior */
+        html.dark .card-portal {
+            background: linear-gradient(145deg, #111a0e 0%, #0a0f08 100%);
+            border-color: rgba(201,161,42,0.15);
+        }
         .card-portal::after {
             content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0; height: 3px;
-            background: linear-gradient(90deg, #6b1e2e, #a72344, #e2be82, #a72344, #6b1e2e);
+            position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--verde), var(--dorado), var(--rojo), var(--doradol), var(--verde));
             background-size: 200% 100%;
-            opacity: 0;
-            transition: opacity 0.35s;
+            opacity: 0; transition: opacity 0.35s;
         }
-        .card-portal:hover::after { opacity: 1; animation: shimmer-bar 2s linear infinite; }
-        @keyframes shimmer-bar {
-            0%   { background-position: 0% 0%; }
-            100% { background-position: 200% 0%; }
-        }
-        /* barrido de luz */
+        .card-portal:hover::after { opacity: 1; animation: goldShimmer 2s linear infinite; }
         .card-portal::before {
             content: '';
-            position: absolute;
-            top: -60%; left: -60%; width: 60%; height: 220%;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.55) 50%, transparent 60%);
-            transition: left 0.55s ease;
-            pointer-events: none;
+            position: absolute; top: -60%; left: -60%; width: 60%; height: 220%;
+            background: linear-gradient(105deg, transparent 40%, rgba(245,224,138,0.22) 50%, transparent 60%);
+            transition: left 0.6s ease; pointer-events: none;
         }
         .card-portal:hover::before { left: 140%; }
         .card-portal:hover {
             transform: translateY(-7px) scale(1.02);
-            box-shadow: 0 20px 44px rgba(107,30,46,0.16), 0 4px 12px rgba(107,30,46,0.08);
-            border-color: rgba(167,35,68,0.25);
+            box-shadow: 0 20px 44px rgba(26,92,42,0.16), 0 4px 12px rgba(201,161,42,0.14);
+            border-color: rgba(201,161,42,0.45);
         }
-        /* fondo degradado sutil */
-        .card-portal .card-bg {
-            position: absolute; inset: 0;
-            background: radial-gradient(ellipse at 80% 0%, rgba(226,190,130,0.13) 0%, transparent 65%);
-            pointer-events: none;
+        html.dark .card-portal:hover {
+            box-shadow: 0 20px 44px rgba(0,0,0,0.5), 0 4px 12px rgba(201,161,42,0.2);
+            border-color: rgba(201,161,42,0.5);
         }
-        /* contenedor del ícono */
+        .card-bg { position:absolute;inset:0;background:radial-gradient(ellipse at 80% 0%,rgba(201,161,42,0.07) 0%,transparent 60%);pointer-events:none; }
+        html.dark .card-bg { background:radial-gradient(ellipse at 80% 0%,rgba(26,92,42,0.2) 0%,transparent 60%); }
         .card-icon-wrap {
-            width: 64px; height: 64px;
-            margin: 0 auto 14px;
-            border-radius: 18px;
-            background: linear-gradient(135deg, rgba(107,30,46,0.08) 0%, rgba(226,190,130,0.15) 100%);
-            border: 1px solid rgba(107,30,46,0.12);
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.35s;
-            box-shadow: 0 2px 8px rgba(107,30,46,0.08);
+            width:64px;height:64px;margin:0 auto 14px;border-radius:18px;
+            background:linear-gradient(135deg,rgba(26,92,42,0.09) 0%,rgba(201,161,42,0.12) 100%);
+            border:1px solid rgba(26,92,42,0.13);
+            display:flex;align-items:center;justify-content:center;transition:all .35s;
         }
-        .card-portal:hover .card-icon-wrap {
-            background: linear-gradient(135deg, rgba(107,30,46,0.14) 0%, rgba(226,190,130,0.25) 100%);
-            transform: scale(1.1) rotate(-3deg);
-            box-shadow: 0 6px 18px rgba(107,30,46,0.15);
-        }
-        /* línea separadora decorativa */
-        .card-divider {
-            width: 32px; height: 2px;
-            background: linear-gradient(90deg, #6b1e2e, #e2be82);
-            border-radius: 2px;
-            margin: 10px auto;
-            transition: width 0.35s;
-        }
-        .card-portal:hover .card-divider { width: 52px; }
+        .card-portal:hover .card-icon-wrap { transform:scale(1.1) rotate(-3deg); box-shadow:0 6px 18px rgba(26,92,42,0.18); border-color:rgba(201,161,42,0.5); }
+        .card-divider { width:32px;height:2px;background:linear-gradient(90deg,var(--verde),var(--doradol),var(--rojo));border-radius:2px;margin:10px auto;transition:width .35s; }
+        .card-portal:hover .card-divider { width:58px; }
 
-        /* DARK MODE */
-        .dark .card-portal {
-            background: linear-gradient(145deg, #2d1a1e 0%, #241318 100%);
-            border-color: rgba(244,168,184,0.12);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        /* ── COUNTDOWN ── */
+        .countdown-box {
+            border: 1px solid rgba(201,161,42,0.35);
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
         }
-        .dark .card-portal:hover {
-            box-shadow: 0 20px 44px rgba(0,0,0,0.4), 0 4px 12px rgba(244,168,184,0.1);
-            border-color: rgba(244,168,184,0.25);
+        .countdown-unit { min-width: 60px; }
+        .countdown-num {
+            font-family: 'Playfair Display SC', Georgia, serif;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 700;
+            color: #f5e08a;
+            text-shadow: 0 0 16px rgba(245,224,138,0.5);
+            animation: countdownPulse 1s ease-in-out infinite;
+            display: block; line-height: 1;
         }
-        .dark .card-portal .card-bg {
-            background: radial-gradient(ellipse at 80% 0%, rgba(107,30,46,0.2) 0%, transparent 65%);
-        }
-        .dark .card-icon-wrap {
-            background: linear-gradient(135deg, rgba(107,30,46,0.25) 0%, rgba(61,10,24,0.4) 100%);
-            border-color: rgba(244,168,184,0.15);
-        }
-        .dark .card-portal:hover .card-icon-wrap {
-            background: linear-gradient(135deg, rgba(167,35,68,0.35) 0%, rgba(107,30,46,0.5) 100%);
-        }
-        .dark .card-divider {
-            background: linear-gradient(90deg, #f4a8b8, #e2be82);
-        }
+        .countdown-label { font-size: 10px; letter-spacing: 0.18em; color: rgba(255,255,255,0.55); text-transform: uppercase; font-family: 'Libre Baskerville', serif; }
 
         /* ── ANIMACIONES ── */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(28px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeInUp { animation: fadeInUp 0.55s ease-out forwards; }
-        .delay-100 { animation-delay: 0.1s; opacity: 0; }
-        .delay-200 { animation-delay: 0.2s; opacity: 0; }
-        .delay-300 { animation-delay: 0.3s; opacity: 0; }
-        .delay-400 { animation-delay: 0.4s; opacity: 0; }
-        .delay-500 { animation-delay: 0.5s; opacity: 0; }
-        .delay-600 { animation-delay: 0.6s; opacity: 0; }
-        .delay-700 { animation-delay: 0.7s; opacity: 0; }
-        .delay-800 { animation-delay: 0.8s; opacity: 0; }
-        .delay-900 { animation-delay: 0.9s; opacity: 0; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fadeInUp { animation: fadeInUp 0.7s ease-out forwards; }
+        .delay-100{animation-delay:.1s;opacity:0}.delay-200{animation-delay:.2s;opacity:0}
+        .delay-300{animation-delay:.3s;opacity:0}.delay-400{animation-delay:.4s;opacity:0}
+        .delay-500{animation-delay:.5s;opacity:0}.delay-600{animation-delay:.6s;opacity:0}
+        .delay-700{animation-delay:.7s;opacity:0}.delay-800{animation-delay:.8s;opacity:0}
+        .delay-900{animation-delay:.9s;opacity:0}
 
-        @keyframes pulse-slow {
-            0%, 100% { transform: scale(1); }
-            50%       { transform: scale(1.05); }
+        /* ── QUOTE ── */
+        .quote-container {
+            background: linear-gradient(135deg, rgba(240,244,240,0.7) 0%, rgba(253,246,238,0.7) 100%);
+            border-left: 3px solid rgba(26,92,42,0.5);
         }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-
-        .badge-new {
-            position: absolute; top: 10px; right: 10px;
-            background: linear-gradient(135deg, #6b1e2e, #a72344);
-            color: white; font-size: 10px; padding: 4px 8px;
-            border-radius: 12px; font-weight: bold;
-            box-shadow: 0 2px 8px rgba(107,30,46,0.35);
-            animation: pulse-slow 2s infinite;
-        }
-
-        /* ── CLIMA / FLOAT ── */
-        .weather-icon { animation: float 3s ease-in-out infinite; }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50%       { transform: translateY(-8px); }
+        html.dark .quote-container {
+            background: linear-gradient(135deg, rgba(13,26,10,0.6) 0%, rgba(10,15,8,0.6) 100%);
+            border-left-color: rgba(201,161,42,0.5);
         }
 
         /* ── BANNER ── */
-        #announcement-banner {
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
-        }
-        #announcement-banner.hidden-banner,
-        #banner-estadisticas.hidden-stats {
-            opacity: 0; height: 0 !important; padding: 0 !important; margin: 0 !important;
-        }
+        #announcement-banner{transition:all .8s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+        #announcement-banner.hidden-banner{opacity:0;height:0!important;padding:0!important;margin:0!important;}
+        .weather-icon{animation:floatAnim 3.5s ease-in-out infinite}
 
-        /* ── MODAL ── */
-        .modal-overlay {
-            background-color: rgba(26,14,16,0.75);
-            backdrop-filter: blur(5px);
-        }
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar{width:6px}
+        ::-webkit-scrollbar-track{background:#f0f4f0}
+        ::-webkit-scrollbar-thumb{background:linear-gradient(var(--verde),var(--dorado));border-radius:3px}
+        html.dark ::-webkit-scrollbar-track{background:#0a0f08}
 
-        /* ── DROPDOWN ── */
-        .dropdown-menu {
-            transform-origin: top right;
-            transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+        /* ── ÁRBOL MINI CSS ── */
+        .tree-decoration {
+            display: inline-block;
+            font-size: clamp(3rem, 8vw, 5.5rem);
+            filter: drop-shadow(0 0 12px rgba(201,161,42,0.45)) drop-shadow(0 4px 16px rgba(0,0,0,0.5));
+            animation: pulseSlow 3s ease-in-out infinite;
+        }
+        @keyframes pulseSlow{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+        /* ── TWINKLE STARS ── */
+        .star-twinkle {
+            position: absolute;
+            animation: twinkle 2s ease-in-out infinite;
         }
     </style>
 </head>
-<body class="bg-crema-100 dark:bg-dark-bg min-h-screen transition-colors duration-500">
-    
+
+<body class="dark min-h-screen transition-colors duration-500">
+
+    <div id="nieve-container"></div>
+    <div id="confeti-container"></div>
     <div id="cursor-dot"></div>
 
-    <!-- Header -->
-    <header class="bg-white dark:bg-dark-card shadow-xl sticky top-0 z-40 transition-colors duration-500 border-b-4 border-guinda-900 dark:border-guinda-400">
-        <div class="container mx-auto px-4 py-4 sm:py-6">
-            <div class="flex items-center justify-between gap-4">
-                <!-- Logo TecNM -->
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 md:h-20 object-contain bg-white rounded-lg p-1">
-                
-                <!-- Título -->
-                <div class="text-center flex-1 px-2 sm:px-4">
-                    <h1 class="text-sm sm:text-xl md:text-2xl lg:text-3xl font-display font-bold text-guinda-900 dark:text-guinda-200 leading-tight tracking-wide transition-colors">
-                        ACTUALIZACIÓN DOCENTE
-                    </h1>
-                    <p class="text-xs sm:text-sm md:text-base text-guinda-700 dark:text-guinda-300 mt-1 font-semibold tracking-widest uppercase transition-colors">
-                        Desarrollo Académico
-                    </p>
-                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 transition-colors">
-                        TecNM - Instituto Tecnológico de Durango
-                    </p>
+    <!-- ══════════════════════════════════════
+         HERO NAVIDAD
+    ══════════════════════════════════════ -->
+    <div class="hero-navidad py-8 sm:py-12 text-center animate-fadeInUp" style="position:relative;overflow:hidden;">
+        <div class="relative z-10 container mx-auto px-4">
+
+            <!-- Estrellas decorativas -->
+            <div class="star-twinkle text-dorado-300 text-2xl" style="left:8%;top:12%;animation-delay:0s;">✦</div>
+            <div class="star-twinkle text-dorado-300 text-sm" style="right:10%;top:8%;animation-delay:.7s;">✦</div>
+            <div class="star-twinkle text-dorado-300 text-lg" style="left:18%;top:65%;animation-delay:1.3s;">✦</div>
+            <div class="star-twinkle text-dorado-300 text-xs" style="right:20%;top:55%;animation-delay:.4s;">✦</div>
+
+            <!-- Ornamento superior -->
+            <p class="font-body text-xs sm:text-sm tracking-[0.35em] uppercase mb-3 text-gold-glow" style="opacity:0.8;">
+                Instituto Tecnológico de Durango · TecNM
+            </p>
+            <div class="gold-line w-48 sm:w-64 mx-auto mb-4"></div>
+            <div class="ornament text-sm mb-4">✦ ✦ ✦</div>
+
+            <!-- Árbol + imagen central -->
+            <div class="flex items-center justify-center gap-4 sm:gap-8 mb-5">
+                <span class="tree-decoration hidden sm:inline" style="animation-delay:.3s;">🎄</span>
+
+                <!-- Círculo decorativo con estrellas girando -->
+                <div class="relative inline-block animate-fadeInScale">
+                    <!-- Anillo exterior girando -->
+                    <div style="position:absolute;inset:-22px;border-radius:50%;
+                                border:1px solid rgba(201,161,42,0.3);
+                                animation:starSpin 12s linear infinite;"></div>
+                    <!-- Puntitos dorados en el anillo -->
+                    <div style="position:absolute;inset:-22px;border-radius:50%;animation:starSpin 12s linear infinite;">
+                        <span style="position:absolute;top:0;left:50%;transform:translateX(-50%);color:#f5e08a;font-size:10px;">✦</span>
+                        <span style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);color:#f5e08a;font-size:10px;">✦</span>
+                        <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);color:#f5e08a;font-size:10px;">✦</span>
+                        <span style="position:absolute;right:0;top:50%;transform:translateY(-50%);color:#f5e08a;font-size:10px;">✦</span>
+                    </div>
+                    <!-- Imagen principal -->
+                    <div style="position:relative;z-index:2;display:flex;align-items:center;justify-content:center;
+                                width:clamp(120px,22vw,200px);height:clamp(120px,22vw,200px);
+                                background:radial-gradient(circle,rgba(26,92,42,0.5) 0%,rgba(6,12,4,0.8) 70%);
+                                border-radius:50%;
+                                box-shadow:0 0 35px rgba(201,161,42,0.4),0 0 70px rgba(201,161,42,0.15),inset 0 0 30px rgba(26,92,42,0.3);">
+                        <!-- Emoji navideño grande en vez de imagen de placeholder -->
+                        <div class="animate-float" style="font-size:clamp(3.5rem,12vw,7rem);filter:drop-shadow(0 0 20px rgba(201,161,42,0.6)) drop-shadow(0 4px 12px rgba(0,0,0,0.5));">🎁</div>
+                    </div>
                 </div>
-                
-                <!-- Logo ITD -->
-                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 md:h-20 object-contain">
+
+                <span class="tree-decoration hidden sm:inline" style="animation-delay:.6s;">🎄</span>
+            </div>
+
+            <!-- Título principal -->
+            <h1 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-1 leading-tight">
+                <span class="text-gold-shimmer">¡Feliz Navidad!</span>
+            </h1>
+            <h2 class="font-heading text-lg sm:text-xl md:text-2xl mb-2 text-gold-glow italic">
+                y Próspero Año Nuevo
+            </h2>
+
+            <div class="gold-line w-64 sm:w-80 mx-auto my-3"></div>
+
+            <!-- Dedicatoria -->
+            <p class="font-body text-sm sm:text-base italic mb-4 max-w-xl mx-auto"
+               style="color:rgba(240,244,240,0.82);line-height:1.7;">
+                La Coordinación de Actualización Docente les desea a toda<br class="hidden sm:block">
+                la comunidad del ITD una hermosa temporada navideña
+            </p>
+
+            <!-- Countdown al Año Nuevo -->
+            <div id="countdown-section" class="inline-block countdown-box px-5 sm:px-8 py-4 sm:py-5 mb-4">
+                <p class="font-body text-xs tracking-[0.3em] uppercase mb-3"
+                   style="color:rgba(245,224,138,0.65);">Cuenta regresiva · Año Nuevo</p>
+                <div id="countdown-display" class="flex items-center justify-center gap-3 sm:gap-5">
+                    <div class="countdown-unit text-center">
+                        <span id="cd-dias" class="countdown-num">--</span>
+                        <span class="countdown-label">Días</span>
+                    </div>
+                    <span style="color:rgba(245,224,138,0.4);font-size:1.5rem;font-family:serif;">:</span>
+                    <div class="countdown-unit text-center">
+                        <span id="cd-hrs" class="countdown-num">--</span>
+                        <span class="countdown-label">Horas</span>
+                    </div>
+                    <span style="color:rgba(245,224,138,0.4);font-size:1.5rem;font-family:serif;">:</span>
+                    <div class="countdown-unit text-center">
+                        <span id="cd-min" class="countdown-num">--</span>
+                        <span class="countdown-label">Min</span>
+                    </div>
+                    <span style="color:rgba(245,224,138,0.4);font-size:1.5rem;font-family:serif;">:</span>
+                    <div class="countdown-unit text-center">
+                        <span id="cd-seg" class="countdown-num">--</span>
+                        <span class="countdown-label">Seg</span>
+                    </div>
+                </div>
+                <p id="anio-nuevo-msg" class="hidden font-display text-lg text-gold-glow mt-2">🎊 ¡Feliz Año Nuevo! 🎊</p>
+            </div>
+
+            <div class="ornament text-sm mt-4 mb-2">🎄 ✦ 🎁 ✦ 🎄</div>
+            <div class="gold-line w-48 sm:w-64 mx-auto"></div>
+        </div>
+
+        <div class="nav-bar mt-6"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         HEADER INSTITUCIONAL
+    ══════════════════════════════════════ -->
+    <header class="bg-white dark:bg-dark-card shadow-xl sticky top-0 z-40 transition-colors duration-500"
+            style="border-bottom:4px solid var(--verde);">
+        <div class="nav-bar-thin"></div>
+        <div class="container mx-auto px-4 py-3 sm:py-4">
+            <div class="flex items-center justify-between gap-4">
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/TecNM_logo.jpg" alt="TecNM"
+                     class="h-10 sm:h-14 md:h-16 object-contain bg-white rounded-lg p-1">
+                <div class="text-center flex-1 px-2">
+                    <h2 class="text-xs sm:text-lg md:text-xl font-heading font-bold leading-tight tracking-wide uppercase transition-colors"
+                        style="color:var(--verde);">Actualización Docente</h2>
+                    <p class="text-xs sm:text-sm font-heading font-semibold tracking-widest uppercase opacity-75 transition-colors"
+                       style="color:var(--dorado);">Desarrollo Académico · Felices Fiestas</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500">TecNM · Instituto Tecnológico de Durango</p>
+                </div>
+                <img src="https://cdn.jsdelivr.net/gh/DA-itd/web/logo_itdurango.png" alt="ITD"
+                     class="h-10 sm:h-14 md:h-16 object-contain">
             </div>
         </div>
-        
-        <!-- Navbar con Menú Hamburguesa -->
-        <nav class="bg-guinda-900 dark:bg-dark-nav text-white shadow-md transition-colors duration-500 relative">
+
+        <!-- Navbar -->
+        <nav class="nav-navidad text-white shadow-md relative">
             <div class="container mx-auto px-4">
-                <div class="flex justify-between items-center h-14">
-                    
-                    <!-- Enlace Inicio -->
-                    <a href="#inicio" class="flex items-center gap-2 font-bold text-lg hover:text-crema-300 transition-colors px-2 py-1 rounded">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
+                <div class="flex justify-between items-center py-1">
+                    <a href="#inicio" class="flex items-center gap-2 font-heading text-sm hover:text-yellow-300 transition-colors px-2 py-2 rounded tracking-wide">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         <span class="hidden sm:inline">Inicio</span>
                     </a>
-
-                    <!-- Botón Cursos Actuales -->
-                    <button id="btn-cursos-actuales" onclick="abrirModalCursos()" class="relative flex items-center gap-2 bg-gradient-to-r from-crema-400 to-crema-500 hover:from-crema-300 hover:to-crema-400 text-guinda-900 font-extrabold text-sm px-5 py-2 rounded-lg transition-all duration-300 shadow-[0_0_15px_rgba(226,190,130,0.4)] hover:shadow-[0_0_25px_rgba(226,190,130,0.6)] transform hover:scale-105">
-                        <span class="absolute -top-2 -right-2 flex h-4 w-4">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 border-2 border-white"></span>
-                        </span>
-                        <span class="text-base">📋</span>
-                        <span class="hidden sm:inline tracking-wide">Cursos Actuales</span>
-                        <span class="sm:hidden tracking-wide">Cursos</span>
+                    <button id="btn-cursos-actuales" onclick="abrirModalCursos()"
+                        class="flex items-center gap-2 font-heading text-xs px-4 py-2 rounded-lg transition-all border shadow-sm tracking-wide"
+                        style="background:rgba(201,161,42,0.15);border-color:rgba(201,161,42,0.4);"
+                        onmouseover="this.style.background='rgba(201,161,42,0.28)'"
+                        onmouseout="this.style.background='rgba(201,161,42,0.15)'">
+                        <span>📋</span>
+                        <span class="hidden sm:inline">Cursos Actuales</span>
+                        <span class="sm:hidden">Cursos</span>
                     </button>
-
-                    <!-- Grupo Derecha: Tema + Menú -->
                     <div class="flex items-center gap-3">
-                        
-                        <!-- Botón Tema (Unificado) -->
-                        <button id="theme-toggle-btn" class="p-2 rounded-lg hover:bg-guinda-800 dark:hover:bg-guinda-950 transition-colors focus:outline-none" title="Cambiar tema">
-                            <!-- Icono Sol (Light Mode) -->
-                            <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
-                            </svg>
-                            <!-- Icono Luna (Dark Mode) -->
-                            <svg id="theme-toggle-dark-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586 1 1 0 01-5.293-5.293zM16.707 16.707a6 6 0 11-5.236-8.236 8.003 8.003 0 008.165 4.928.75.75 0 01.378 1.054 7.999 7.999 0 01-3.307 2.254z" fill-rule="evenodd" clip-rule="evenodd"></path>
-                            </svg>
+                        <button id="theme-toggle-btn" class="p-2 rounded-lg hover:bg-white/10 transition-colors focus:outline-none">
+                            <svg id="theme-toggle-light-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
+                            <svg id="theme-toggle-dark-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
                         </button>
-
-                        <!-- Botón Hamburguesa -->
-                        <button id="main-menu-btn" class="p-2 rounded-lg bg-guinda-800 dark:bg-guinda-950 hover:bg-guinda-700 dark:hover:bg-guinda-900 focus:outline-none transition-colors shadow-sm border border-guinda-700 dark:border-guinda-800 group" aria-label="Menú Principal">
-                            <svg class="w-6 h-6 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                            </svg>
+                        <button id="main-menu-btn" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 focus:outline-none group">
+                            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
                         </button>
                     </div>
                 </div>
             </div>
-
-            <!-- Dropdown Menu (Hidden by default) -->
-            <div id="main-menu-dropdown" class="hidden absolute right-0 top-full w-64 bg-white dark:bg-dark-card shadow-2xl rounded-b-xl border-t border-guinda-100 dark:border-guinda-900 z-50 overflow-hidden transform origin-top-right animate-slide-down">
+            <!-- Dropdown -->
+            <div id="main-menu-dropdown" class="hidden absolute right-0 top-full w-64 bg-white dark:bg-dark-card shadow-2xl rounded-b-xl z-50 overflow-hidden animate-slide-down"
+                 style="border-top:2px solid rgba(201,161,42,0.5);">
                 <div class="flex flex-col py-2">
-                    <a href="inscripciones.html" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-500 group">
-                        <span class="text-guinda-600 text-xl group-hover:scale-110 transition-transform">📝</span> 
-                        <span class="font-medium">Inscripciones</span>
-                    </a>
-                    <a href="historial.html" class="px-6 py-3 hover:bg-crema-100 dark:hover:bg-guinda-900/20 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-crema-400 group">
-                        <span class="text-crema-500 text-xl group-hover:scale-110 transition-transform">📚</span> 
-                        <span class="font-medium">Historial</span>
-                    </a>
-                    <a href="formatos.html" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-400 group">
-                        <span class="text-guinda-700 text-xl group-hover:scale-110 transition-transform">📋</span> 
-                        <span class="font-medium">Formatos</span>
-                    </a>
-                    <a href="verificador.html" class="px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/30 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-gray-400 group">
-                        <span class="text-gray-500 text-xl group-hover:scale-110 transition-transform">✅</span> 
-                        <span class="font-medium">Validación</span>
-                    </a>
-                    <a href="estadisticas.html" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-500 group">
-                        <span class="text-guinda-500 text-xl group-hover:scale-110 transition-transform">📊</span> 
-                        <span class="font-medium">Estadísticas</span>
-                    </a>
-                    <a href="https://da-itd.github.io/B/" target="_blank" rel="noopener noreferrer" class="px-6 py-3 hover:bg-guinda-50 dark:hover:bg-guinda-900/20 text-guinda-900 dark:text-guinda-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-guinda-400 group">
-                        <span class="text-guinda-500 text-xl group-hover:scale-110 transition-transform">🏅</span> 
-                        <span class="font-medium">Constancias</span>
-                    </a>
+                    <a href="inscripciones.html" class="px-6 py-3 hover:bg-green-50 dark:hover:bg-green-900/10 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-green-700 group"><span class="text-xl group-hover:scale-110 transition-transform">📝</span><span class="font-sans font-medium text-sm">Inscripciones</span></a>
+                    <a href="historial.html" class="px-6 py-3 hover:bg-yellow-50 dark:hover:bg-yellow-900/10 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-yellow-600 group"><span class="text-xl group-hover:scale-110 transition-transform">📚</span><span class="font-sans font-medium text-sm">Historial</span></a>
+                    <a href="formatos.html" class="px-6 py-3 hover:bg-green-50 dark:hover:bg-green-900/10 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-green-600 group"><span class="text-xl group-hover:scale-110 transition-transform">📋</span><span class="font-sans font-medium text-sm">Formatos</span></a>
+                    <a href="instructores.html" class="px-6 py-3 hover:bg-green-50 dark:hover:bg-green-900/10 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-green-800 group"><span class="text-xl group-hover:scale-110 transition-transform">👨‍🏫</span><span class="font-sans font-medium text-sm">Instructores</span></a>
+                    <a href="encuestas.html" class="px-6 py-3 hover:bg-green-50 dark:hover:bg-green-900/10 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-green-500 group"><span class="text-xl group-hover:scale-110 transition-transform">📊</span><span class="font-sans font-medium text-sm">Encuestas</span></a>
+                    <a href="verificador.html" class="px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/30 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-gray-400 group"><span class="text-xl group-hover:scale-110 transition-transform">✅</span><span class="font-sans font-medium text-sm">Validación</span></a>
+                    <a href="https://da-itd.github.io/B/" target="_blank" rel="noopener noreferrer" class="px-6 py-3 hover:bg-green-50 dark:hover:bg-green-900/10 text-gray-800 dark:text-gray-100 flex items-center gap-3 transition-colors border-l-4 border-transparent hover:border-green-700 group"><span class="text-xl group-hover:scale-110 transition-transform">🏅</span><span class="font-sans font-medium text-sm">Constancias</span></a>
                 </div>
             </div>
         </nav>
     </header>
 
-    <!-- Barra Clima -->
-    <div class="bg-guinda-800 dark:bg-dark-nav text-white shadow-lg transition-colors duration-500">
-        <div class="container mx-auto px-4 py-3">
+    <!-- Barra clima -->
+    <div class="text-white shadow-lg transition-colors duration-500" style="background:var(--verde);">
+        <div class="container mx-auto px-4 py-2.5">
             <div class="flex flex-wrap items-center justify-center sm:justify-between gap-4 text-sm">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">📅</span>
-                    <span id="currentDate" class="font-semibold">Cargando...</span>
-                </div>
-                <div id="weatherInfo" class="flex items-center gap-2">
-                    <span class="text-2xl weather-icon">🌤️</span>
-                    <span class="font-semibold">Durango, Dgo.</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🕒</span>
-                    <span id="clock" class="font-mono font-bold text-lg">--:--:--</span>
-                </div>
+                <div class="flex items-center gap-2"><span>📅</span><span id="currentDate" class="font-sans font-semibold text-sm">Cargando...</span></div>
+                <div id="weatherInfo" class="flex items-center gap-2"><span class="text-xl weather-icon">🌤️</span><span class="font-sans font-semibold text-sm">Durango, Dgo.</span></div>
+                <div class="flex items-center gap-2"><span>🕒</span><span id="clock" class="font-mono font-bold text-base" style="color:var(--doradop);">--:--:--</span></div>
             </div>
         </div>
+        <div class="nav-bar-thin"></div>
     </div>
-    
+
     <!-- Banner -->
-    <div id="announcement-banner" class="bg-gradient-to-r from-guinda-800 via-guinda-700 to-guinda-800 text-white p-4 text-center font-bold shadow-lg relative cursor-pointer">
-        <div class="container mx-auto flex items-center justify-center gap-4">
-            <span class="text-2xl animate-pulse">✨</span>
+    <div id="announcement-banner" class="text-white p-3 text-center cursor-pointer font-heading font-bold text-sm shadow-lg"
+         style="background:linear-gradient(90deg,#060c04,#0d2010,#1a5c2a,#0d2010,#060c04);">
+        <div class="container mx-auto flex items-center justify-center gap-3">
+            <span class="animate-pulse" style="color:var(--doradop)">🎄</span>
             <div>
-                <strong class="block sm:inline text-lg">¡Próximos Cursos-Taller del 10 al 14 y 17 al 21 de agosto!</strong>
-                <span class="block sm:inline ml-2">los esperamos!</span>
+                <strong class="block sm:inline tracking-widest">¡GRACIAS!</strong>
+                <span class="block sm:inline ml-2 font-sans font-normal opacity-90">Por su participación. ¡Les deseamos Felices Fiestas y un excelente Año Nuevo!</span>
             </div>
+            <span class="animate-pulse" style="color:var(--doradop)">🎁</span>
         </div>
     </div>
 
+    <!-- ══════════════════════════════════════
+         MAIN CONTENT
+    ══════════════════════════════════════ -->
     <main id="inicio" class="container mx-auto px-4 py-8 sm:py-12 scroll-mt-32">
-        
-        <!-- Estadísticas -->
-        <section id="banner-estadisticas" class="max-w-4xl mx-auto mb-8 animate-fadeInUp transition-all duration-1000 overflow-hidden origin-top">
-            <div class="bg-white dark:bg-dark-card rounded-2xl shadow-lg border-t-4 border-guinda-600 dark:border-guinda-400 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-              <a href="estadisticas.html" class="block no-underline group p-4 sm:p-5">
-                <div class="flex items-center justify-between mb-3">
-                  <div class="flex items-center gap-2">
-                    <span class="text-lg">📊</span>
-                    <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200">Estadísticas — Último Periodo</h3>
-                  </div>
-                  <span id="stats-period-label" class="text-xs bg-guinda-50 dark:bg-guinda-900/40 text-guinda-700 dark:text-guinda-300 font-semibold px-3 py-1 rounded-full flex items-center gap-1"><span class="animate-pulse inline-block w-2 h-2 rounded-full bg-guinda-400"></span>Cargando...</span>
-                </div>
-                <div id="stats-kpi-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
-                  <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
-                  <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
-                  <div class="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-20"></div>
-                </div>
-              </a>
-              <div id="stats-dept-breakdown" class="hidden px-4 pb-4 sm:px-5 sm:pb-5 mt-1 border-t border-gray-100 dark:border-gray-800/60 cursor-default"></div>
-            </div>
+
+        <!-- Frase motivacional -->
+        <section class="max-w-4xl mx-auto mb-8 animate-fadeInUp">
+            <div id="quote-container" class="quote-container rounded-xl p-6 text-center transition-opacity duration-500"></div>
         </section>
-        
-        <!-- Servicios -->
-        <div id="servicios" class="text-center mb-6 sm:mb-8 animate-fadeInUp scroll-mt-32">
-            <h2 class="inline-block text-lg sm:text-xl font-display font-semibold text-guinda-800 dark:text-guinda-200 border-b-2 border-guinda-200 dark:border-guinda-800 pb-1">
-                Servicios Disponibles
-            </h2>
+
+        <!-- Título Servicios -->
+        <div id="servicios" class="text-center mb-8 sm:mb-12 animate-fadeInUp scroll-mt-32" style="position:relative;">
+            <!-- Árbol decorativo izquierda -->
+            <div class="pointer-events-none select-none hidden sm:block"
+                 style="position:absolute;left:-5px;top:50%;transform:translateY(-50%);font-size:clamp(60px,10vw,130px);opacity:0.15;z-index:0;filter:drop-shadow(0 0 8px rgba(201,161,42,0.3));">🎄</div>
+            <div class="pointer-events-none select-none hidden sm:block"
+                 style="position:absolute;right:-5px;top:50%;transform:translateY(-50%) scaleX(-1);font-size:clamp(60px,10vw,130px);opacity:0.15;z-index:0;filter:drop-shadow(0 0 8px rgba(201,161,42,0.3));">🎄</div>
+
+            <div class="relative" style="z-index:1;">
+                <div class="flex items-baseline justify-center gap-4 sm:gap-6 mb-3">
+                    <div class="inline-block" style="animation:pulseSlow 3s ease-in-out infinite">
+                        <img src="https://raw.githubusercontent.com/DA-itd/A/main/pola.png" alt="Servicios" class="h-14 object-contain">
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-heading font-bold transition-colors"
+                        style="color:var(--verde);">
+                        <span class="dark:hidden">Servicios Disponibles</span>
+                        <span class="hidden dark:inline text-gold-shimmer">Servicios Disponibles</span>
+                    </h2>
+                </div>
+                <div class="gold-line w-48 mx-auto mb-3"></div>
+                <p class="text-base sm:text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto px-4 font-body italic">
+                    Seleccione la opción que necesite para acceder a los diferentes servicios
+                </p>
+            </div>
         </div>
 
-        <!-- Grid - 6 Tarjetas (3 columnas en escritorio, 2 en tablet, 1 en móvil) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto mb-12">
-            
-            <!-- 1. Inscripción a Cursos -->
-            <a id="card-inscripciones" href="inscripciones.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-300 relative group">
+        <!-- Grid Tarjetas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto mb-12">
+
+            <a id="card-inscripciones" href="inscripciones.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-300 relative group">
                 <div class="card-bg"></div>
-                <div id="badge-inscripciones" class="absolute top-3 right-3 bg-guinda-700 text-white text-[10px] px-2.5 py-1 rounded-full font-bold tracking-widest shadow-md">¡ABIERTO!</div>
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">📝</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Inscripción a Cursos
-                </h3>
+                <div id="badge-inscripciones" class="absolute top-3 right-3 text-white text-[10px] px-2.5 py-1 rounded-full font-sans font-bold tracking-widest shadow-md" style="background:var(--verde);">¡ABIERTO!</div>
+                <div class="card-icon-wrap"><span class="text-3xl">📝</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--verde);"><span class="dark:hidden">Inscripción a Cursos</span><span class="hidden dark:inline" style="color:var(--doradop);">Inscripción a Cursos</span></h3>
                 <div class="card-divider"></div>
-                <p id="desc-inscripciones" class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Regístrate y no pierdas tu lugar</p>
-                <div id="status-inscripciones" class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
+                <p id="desc-inscripciones" class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Regístrate y no pierdas tu lugar</p>
+                <div id="status-inscripciones" class="inline-flex items-center gap-1.5 text-xs font-sans font-semibold px-3 py-1 rounded-full border" style="background:rgba(26,92,42,0.07);color:var(--verde);border-color:rgba(26,92,42,0.2);">✓ Disponible</div>
             </a>
 
-            <!-- 2. Historial de Cursos -->
-            <a href="historial.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-400 group">
+            <a href="historial.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-400 group">
                 <div class="card-bg"></div>
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">📚</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Historial de Cursos
-                </h3>
+                <div class="card-icon-wrap"><span class="text-3xl">📚</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--verde);"><span class="dark:hidden">Historial de Cursos</span><span class="hidden dark:inline" style="color:var(--doradop);">Historial de Cursos</span></h3>
                 <div class="card-divider"></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Consulta tu historial de actualización docente</p>
-                <div class="inline-flex items-center gap-1.5 bg-crema-200 dark:bg-guinda-900/40 text-guinda-800 dark:text-crema-300 text-xs font-semibold px-3 py-1 rounded-full border border-crema-300 dark:border-guinda-800">✓ Disponible</div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Consulta tu historial de actualización docente</p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans font-semibold px-3 py-1 rounded-full border" style="background:rgba(201,161,42,0.08);color:var(--dorado);border-color:rgba(201,161,42,0.3);">✓ Disponible</div>
             </a>
 
-            <!-- 3. Formatos Oficiales -->
-            <a href="formatos.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-500 relative group">
+            <a href="formatos.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-500 relative group">
                 <div class="card-bg"></div>
-                <div class="absolute top-3 right-3 bg-guinda-600 text-white text-[10px] px-2.5 py-1 rounded-full font-bold shadow-md animate-pulse tracking-widest">PRE-REGISTRO</div>
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">📋</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Formatos Oficiales
-                </h3>
+                <div class="absolute top-3 right-3 text-white text-[10px] px-2.5 py-1 rounded-full font-sans font-bold shadow-md animate-pulse tracking-widest" style="background:var(--rojo);">PRE-REGISTRO</div>
+                <div class="card-icon-wrap"><span class="text-3xl">📋</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--verde);"><span class="dark:hidden">Formatos Oficiales</span><span class="hidden dark:inline" style="color:var(--doradop);">Formatos Oficiales</span></h3>
                 <div class="card-divider"></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Descarga de formatos y <span class="text-guinda-700 dark:text-guinda-300 font-semibold">Pre-Registro de Cursos</span></p>
-                <div class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Descarga de formatos y <strong style="color:var(--rojo);">Pre-Registro</strong></p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans font-semibold px-3 py-1 rounded-full border" style="background:rgba(26,92,42,0.07);color:var(--verde);border-color:rgba(26,92,42,0.2);">✓ Disponible</div>
             </a>
 
-            <!-- 4. Validación de Constancias -->
-            <a href="verificador.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-600 group">
+            <a href="verificador.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-600 group">
                 <div class="card-bg"></div>
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">✅</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Validación de Constancias
-                </h3>
+                <div class="card-icon-wrap"><span class="text-3xl">✅</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--verde);"><span class="dark:hidden">Validación de Constancias</span><span class="hidden dark:inline" style="color:var(--doradop);">Validación de Constancias</span></h3>
                 <div class="card-divider"></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Verifica la autenticidad de documentos oficiales</p>
-                <div class="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 text-xs font-semibold px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700">✓ Disponible</div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Verifica la autenticidad de documentos</p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans font-semibold px-3 py-1 rounded-full border bg-gray-50 dark:bg-gray-800/40 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600">✓ Disponible</div>
             </a>
 
-            <!-- 5. Estadísticas -->
-            <a href="estadisticas.html" 
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-700 group">
+            <a href="instructores.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-700 group">
                 <div class="card-bg"></div>
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">📈</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Estadísticas
-                </h3>
+                <div class="card-icon-wrap"><span class="text-3xl">👨‍🏫</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--verde);"><span class="dark:hidden">Área para Instructores</span><span class="hidden dark:inline" style="color:var(--doradop);">Área para Instructores</span></h3>
                 <div class="card-divider"></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Análisis y resultados de actualización docente</p>
-                <div class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Carga tu CV y Evidencias de cursos</p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans font-semibold px-3 py-1 rounded-full border" style="background:rgba(26,92,42,0.07);color:var(--verde);border-color:rgba(26,92,42,0.2);">✓ Disponible</div>
             </a>
 
-            <!-- 6. Descarga de Constancias -->
-            <a href="https://da-itd.github.io/B/" target="_blank" rel="noopener noreferrer"
-               class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-800 relative group">
+            <a href="encuestas.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-800 group">
                 <div class="card-bg"></div>
-                <div class="card-icon-wrap">
-                    <span class="text-3xl">🏅</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-display font-bold text-guinda-900 dark:text-guinda-100 mb-1 leading-tight">
-                    Descarga de Constancias
-                </h3>
+                <div class="card-icon-wrap"><span class="text-3xl">📊</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--verde);"><span class="dark:hidden">Encuestas de Opinión</span><span class="hidden dark:inline" style="color:var(--doradop);">Encuestas de Opinión</span></h3>
                 <div class="card-divider"></div>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-guinda-200/70 mb-3 leading-relaxed">Descarga constancias y reconocimientos oficiales</p>
-                <div class="inline-flex items-center gap-1.5 bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full border border-guinda-200 dark:border-guinda-800">✓ Disponible</div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Evaluación de cursos y servicios docentes</p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans font-semibold px-3 py-1 rounded-full border" style="background:rgba(201,161,42,0.08);color:var(--dorado);border-color:rgba(201,161,42,0.3);">✓ Disponible</div>
             </a>
 
+            <a href="estadisticas.html" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-900 group">
+                <div class="card-bg"></div>
+                <div class="card-icon-wrap"><span class="text-3xl">📈</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--verde);"><span class="dark:hidden">Estadísticas</span><span class="hidden dark:inline" style="color:var(--doradop);">Estadísticas</span></h3>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Análisis y resultados de actualización docente</p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans font-semibold px-3 py-1 rounded-full border" style="background:rgba(26,92,42,0.07);color:var(--verde);border-color:rgba(26,92,42,0.2);">✓ Disponible</div>
+            </a>
+
+            <a href="https://da-itd.github.io/B/" target="_blank" rel="noopener noreferrer" class="card-portal shadow-lg p-6 text-center animate-fadeInUp delay-900 group">
+                <div class="card-bg"></div>
+                <div class="card-icon-wrap"><span class="text-3xl">🏅</span></div>
+                <h3 class="text-base sm:text-lg font-heading font-bold mb-1" style="color:var(--verde);"><span class="dark:hidden">Descarga de Constancias</span><span class="hidden dark:inline" style="color:var(--doradop);">Descarga de Constancias</span></h3>
+                <div class="card-divider"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 font-body italic">Descarga constancias y reconocimientos oficiales</p>
+                <div class="inline-flex items-center gap-1.5 text-xs font-sans font-semibold px-3 py-1 rounded-full border" style="background:rgba(26,92,42,0.07);color:var(--verde);border-color:rgba(26,92,42,0.2);">✓ Disponible</div>
+            </a>
         </div>
 
-        <!-- Información -->
+        <!-- Info importante -->
         <div id="informacion" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
-            <div class="rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600 dark:border-blue-500 transition-colors">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="text-3xl sm:text-4xl">ℹ️</div>
-                    <h3 class="text-xl sm:text-2xl font-display font-bold text-guinda-900 dark:text-guinda-100">
-                        Información Importante
-                    </h3>
+            <div class="rounded-2xl shadow-xl p-6 sm:p-8 bg-white dark:bg-dark-card transition-colors" style="border-top:4px solid var(--verde);">
+                <div class="nav-bar-thin rounded mb-5"></div>
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="text-3xl">ℹ️</div>
+                    <h3 class="text-xl sm:text-2xl font-heading font-bold" style="color:var(--verde);">Información Importante</h3>
                 </div>
-                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="flex items-start gap-3 bg-guinda-50 dark:bg-guinda-950/50 p-4 rounded-xl border border-guinda-100 dark:border-guinda-900">
-                        <div class="text-2xl flex-shrink-0">📚</div>
-                        <div>
-                            <p class="text-sm font-semibold text-guinda-900 dark:text-guinda-100">Límite de cursos</p>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Puedes tomar hasta <strong>dos cursos</strong> sin empalme de horarios y fechas.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3 bg-crema-100 dark:bg-guinda-950/50 p-4 rounded-xl border border-crema-300 dark:border-guinda-900">
-                        <div class="text-2xl flex-shrink-0">📝</div>
-                        <div>
-                            <p class="text-sm font-semibold text-guinda-900 dark:text-guinda-100">Formatos</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Los formatos (CVU y Ficha técnica) serán en PDF, los demás firmados en Coordinación.</p>
-                        </div>
-                    </div>
-                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 bg-guinda-50 dark:bg-guinda-950/50 p-4 rounded-xl border border-guinda-100 dark:border-guinda-900 hover:bg-guinda-100 dark:hover:bg-guinda-900/40 transition-colors cursor-pointer">
-                        <div class="text-2xl flex-shrink-0">🗓️</div>
-                        <div>
-                            <p id="calendar-year-text" class="text-sm font-semibold text-gray-800 dark:text-gray-200">Calendario Institucional</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Consulte las fechas importantes del ciclo escolar.</p>
-                        </div>
-                    </a>
+                    <div class="flex items-start gap-3 p-4 rounded-xl border" style="background:rgba(26,92,42,0.04);border-color:rgba(26,92,42,0.12);"><div class="text-2xl flex-shrink-0">📚</div><div><p class="text-sm font-sans font-semibold" style="color:var(--verde);">Límite de cursos</p><p class="text-sm text-gray-600 dark:text-gray-400 mt-1 font-sans">Puedes tomar hasta <strong>dos cursos</strong> sin empalme de horarios y fechas.</p></div></div>
+                    <div class="flex items-start gap-3 p-4 rounded-xl border" style="background:rgba(201,161,42,0.05);border-color:rgba(201,161,42,0.2);"><div class="text-2xl flex-shrink-0">📝</div><div><p class="text-sm font-sans font-semibold" style="color:var(--dorado);">Formatos</p><p class="text-xs text-gray-600 dark:text-gray-400 mt-1 font-sans">Los formatos (CVU y Ficha técnica) serán en PDF, los demás firmados en Coordinación.</p></div></div>
+                    <a href="https://cdn.jsdelivr.net/gh/DA-itd/A@main/calendario.pdf" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 p-4 rounded-xl border transition-colors hover:opacity-80" style="background:rgba(26,92,42,0.04);border-color:rgba(26,92,42,0.12);"><div class="text-2xl flex-shrink-0">🗓️</div><div><p id="calendar-year-text" class="text-sm font-sans font-semibold text-gray-800 dark:text-gray-200">Calendario Institucional</p><p class="text-xs text-gray-600 dark:text-gray-400 mt-1 font-sans">Consulte las fechas importantes del ciclo escolar.</p></div></a>
                 </div>
-                <div class="mt-4 flex items-start gap-3 bg-crema-100 dark:bg-guinda-950/60 p-4 rounded-xl border-l-4 border-guinda-700 dark:border-guinda-400">
-                    <div class="text-2xl flex-shrink-0">🧑‍💼</div>
-                    <div>
-                        <p class="text-sm font-semibold text-guinda-900 dark:text-guinda-100">Nota Importante</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Estos cursos están dirigidos al personal docente con plaza.</p>
-                    </div>
-                </div>
+                <div class="mt-4 flex items-start gap-3 p-4 rounded-xl border-l-4" style="background:rgba(26,92,42,0.04);border-left-color:var(--verde);"><div class="text-2xl flex-shrink-0">🧑‍💼</div><div><p class="text-sm font-sans font-semibold" style="color:var(--verde);">Nota Importante</p><p class="text-sm text-gray-600 dark:text-gray-400 mt-1 font-sans">Estos cursos están dirigidos al personal docente con plaza.</p></div></div>
             </div>
         </div>
 
         <!-- Enlaces -->
         <div id="enlaces" class="max-w-4xl mx-auto scroll-mt-32">
-            <div class="bg-gradient-to-r from-guinda-900 to-guinda-800 dark:from-dark-nav dark:to-dark-card rounded-2xl shadow-xl p-6 text-white transition-colors">
-                <h3 class="text-xl font-bold mb-4 text-center">🔗 Enlaces Institucionales</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                    <a href="https://www.itdurango.edu.mx" target="_blank" rel="noopener noreferrer" class="bg-sky-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">🏛️</div>
-                        <p class="font-semibold text-sm">ITD</p>
-                        <p class="text-xs opacity-90">Portal Principal</p>
-                    </a>
-                    <a href="https://www.tecnm.mx" target="_blank" rel="noopener noreferrer" class="bg-emerald-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">🎓</div>
-                        <p class="font-semibold text-sm">TecNM</p>
-                        <p class="text-xs opacity-90">Sitio Nacional</p>
-                    </a>
-                    <a href="https://mooc.tecnm.mx/portal/" target="_blank" rel="noopener noreferrer" class="bg-purple-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">💻</div>
-                        <p class="font-semibold text-sm">MOOC</p>
-                        <p class="text-xs opacity-90">Cursos en Línea</p>
-                    </a>
-                    <a href="https://integrado.itdurango.edu.mx" target="_blank" rel="noopener noreferrer" class="bg-rose-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">📂</div>
-                        <p class="font-semibold text-sm">SGI</p>
-                        <p class="text-xs opacity-90">Gestión Integrado</p>
-                    </a>
-                     <a href="https://www.labmexia.gob.mx" target="_blank" rel="noopener noreferrer" class="bg-fuchsia-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">🧪</div>
-                        <p class="font-semibold text-sm">LabMexIA</p>
-                        <p class="text-xs opacity-90">Laboratorio IA</p>
-                    </a>
-                    <a href="https://saberes.gob.mx/cms/index.php" target="_blank" rel="noopener noreferrer" class="bg-teal-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all transform hover:scale-105 shadow-lg">
-                        <div class="text-3xl mb-2">🧠</div>
-                        <p class="font-semibold text-sm">Saberes</p>
-                        <p class="text-xs opacity-90">Plataforma</p>
-                    </a>
+            <div class="rounded-2xl shadow-xl p-6 text-white" style="background:linear-gradient(135deg,#060c04 0%,#0d2010 40%,#1a5c2a 70%,#0d2010 100%);">
+                <h3 class="text-xl font-heading font-bold mb-2 text-center tracking-widest" style="color:var(--doradop);">🔗 <span class="text-white">Enlaces</span> Institucionales</h3>
+                <div class="gold-line w-48 mx-auto mb-5"></div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <a href="https://www.itdurango.edu.mx" target="_blank" rel="noopener noreferrer" class="bg-sky-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-2xl mb-1">🏛️</div><p class="font-sans font-semibold text-xs">ITD</p><p class="text-xs opacity-90">Portal Principal</p></a>
+                    <a href="https://www.tecnm.mx" target="_blank" rel="noopener noreferrer" class="bg-emerald-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-2xl mb-1">🎓</div><p class="font-sans font-semibold text-xs">TecNM</p><p class="text-xs opacity-90">Sitio Nacional</p></a>
+                    <a href="https://mooc.tecnm.mx/portal/" target="_blank" rel="noopener noreferrer" class="bg-purple-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-2xl mb-1">💻</div><p class="font-sans font-semibold text-xs">MOOC</p><p class="text-xs opacity-90">Cursos en Línea</p></a>
+                    <a href="https://www.itdurango.edu.mx/sgi/" target="_blank" rel="noopener noreferrer" class="bg-rose-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-2xl mb-1">📂</div><p class="font-sans font-semibold text-xs">SGI</p><p class="text-xs opacity-90">Gestión Integrado</p></a>
+                    <a href="https://www.labmexia.gob.mx" target="_blank" rel="noopener noreferrer" class="bg-fuchsia-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-2xl mb-1">🧪</div><p class="font-sans font-semibold text-xs">LabMexIA</p><p class="text-xs opacity-90">Laboratorio IA</p></a>
+                    <a href="https://saberes.gob.mx/cms/index.php" target="_blank" rel="noopener noreferrer" class="bg-teal-500 bg-opacity-80 hover:bg-opacity-100 rounded-lg p-4 text-center transition-all hover:scale-105 shadow-lg"><div class="text-2xl mb-1">🧠</div><p class="font-sans font-semibold text-xs">Saberes</p><p class="text-xs opacity-90">Plataforma</p></a>
                 </div>
             </div>
         </div>
 
         <!-- Contacto -->
         <div id="contacto" class="max-w-4xl mx-auto mt-8 scroll-mt-32">
-            <div class="bg-gradient-to-r from-guinda-900 to-guinda-800 dark:from-dark-nav dark:to-dark-card rounded-2xl shadow-xl p-6 text-white transition-colors">
+            <div class="rounded-2xl shadow-xl p-6 text-white" style="background:linear-gradient(135deg,#060c04,#0d2010,#1a5c2a,#0d2010);">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
                     <div class="flex items-center gap-4">
                         <div class="text-4xl hidden sm:block">💬</div>
                         <div>
-                            <h3 class="text-lg font-bold">¿Necesitas Ayuda?</h3>
-                            <p class="text-sm opacity-90">Contacta a la Coordinación de Actualización Docente.</p>
+                            <h3 class="text-lg font-heading font-bold tracking-widest" style="color:var(--doradop);">¿Necesitas Ayuda?</h3>
+                            <p class="text-sm opacity-85 font-body italic">Contacta a la Coordinación de Actualización Docente.</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <!-- ADMIN TRIGGER: Click on Logo -->
-                        <img 
-                            id="admin-trigger"
-                            src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
-                            alt="ITD Admin Access" 
-                            class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity bg-white/20 p-1 rounded"
-                            title="Acceso Administrativo"
-                        />
-                        <a href="mailto:alejandro.calderon@itdurango.edu.mx" class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md cursor-pointer">
+                        <img id="admin-trigger" src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD Admin"
+                             class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity bg-white/20 p-1 rounded" title="Acceso Administrativo"/>
+                        <a href="mailto:alejandro.calderon@itdurango.edu.mx"
+                           class="inline-flex items-center justify-center font-sans font-bold px-5 py-2 rounded-lg transition-colors shadow-md"
+                           style="background:var(--doradop);color:var(--verde);"
+                           onmouseover="this.style.background='#f5e08a'" onmouseout="this.style.background='var(--doradop)'">
                             <span class="mr-2">📧</span> Enviar Email
                         </a>
                     </div>
@@ -700,688 +733,220 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gradient-to-r from-guinda-950 to-guinda-900 dark:from-slate-900 dark:to-slate-950 text-white text-center py-6 sm:py-8 mt-8 transition-colors">
+    <footer class="text-white text-center py-6 sm:py-8 mt-8" style="background:linear-gradient(180deg,#0d2010 0%,#060c04 100%);">
+        <div class="nav-bar mb-6"></div>
         <div class="container mx-auto px-4">
-            <p class="font-semibold text-sm sm:text-base mb-2">
-                © Coordinación de Actualización Docente
+            <div class="text-3xl mb-2">🎄</div>
+            <p class="font-heading font-semibold text-sm sm:text-base mb-1 tracking-widest" style="color:var(--doradop);">© Coordinación de Actualización Docente</p>
+            <p class="text-xs sm:text-sm opacity-85 font-body italic">M.C. Alejandro Calderón Rentería</p>
+            <p class="text-xs opacity-60 mt-1 font-sans">Todos los derechos reservados <span id="copyright-year"></span></p>
+            <div class="gold-line w-48 mx-auto my-3"></div>
+            <p class="text-xs font-body italic" style="color:var(--dorado);opacity:0.75;">
+                "La mejor forma de terminar el año es con gratitud; la mejor de comenzarlo, con esperanza."
             </p>
-            <p class="text-xs sm:text-sm opacity-90">
-                M.C. Alejandro Calderón Rentería
-            </p>
-            <p class="text-xs sm:text-sm opacity-75 mt-1">
-                Todos los derechos reservados <span id="copyright-year"></span>
-            </p>
-            <!-- Enlace al Aviso de Privacidad -->
-            <div class="mt-4 pt-4 border-t border-white/10 flex flex-col sm:flex-row justify-center items-center gap-4">
-                <a href="aviso.html" class="text-xs text-white/60 hover:text-white transition-colors underline">
-                    Aviso de Privacidad
-                </a>
-                <a href="admin.html" class="text-xs text-white/40 hover:text-white/80 transition-colors flex items-center gap-1">
-                    <span>🔒</span> Acceso Administrativo
-                </a>
+            <div class="mt-4 pt-4 border-t border-white/8 flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="aviso.html" class="text-xs text-white/50 hover:text-white transition-colors underline">Aviso de Privacidad</a>
+                <a href="admin.html" class="text-xs text-white/35 hover:text-white/75 transition-colors flex items-center gap-1"><span>🔒</span> Acceso Administrativo</a>
             </div>
         </div>
     </footer>
 
-    <!-- Modal Cursos Actuales -->
-    <div id="modal-cursos" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(15,23,42,0.75);backdrop-filter:blur(6px);">
-        <div class="rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-fadeInUp">
-            <!-- Header modal -->
-            <div class="bg-gradient-to-r from-guinda-900 to-guinda-700 px-6 py-4 flex items-center justify-between flex-shrink-0">
+    <!-- Modal Cursos -->
+    <div id="modal-cursos" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+         style="background:rgba(6,12,4,0.9);backdrop-filter:blur(6px);">
+        <div class="rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-fadeInUp bg-white dark:bg-dark-card">
+            <div class="px-6 py-4 flex items-center justify-between flex-shrink-0"
+                 style="background:linear-gradient(90deg,#060c04,#0d2010,#1a5c2a);">
                 <div class="flex items-center gap-3">
                     <span class="text-2xl">📋</span>
                     <div>
-                        <h2 class="text-white font-bold text-lg leading-tight">Cursos del Periodo Actual</h2>
-                        <p class="text-blue-200 text-xs">Coordinación de Actualización Docente · ITD</p>
+                        <h2 class="text-white font-heading font-bold text-base tracking-wide">Cursos del Periodo Actual</h2>
+                        <p class="text-xs opacity-70 font-sans" style="color:var(--doradop);">Coordinación de Actualización Docente · ITD</p>
                     </div>
                 </div>
                 <button onclick="cerrarModalCursos()" class="text-white/70 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <!-- Body -->
-            <div id="modal-cursos-body" class="overflow-y-auto flex-1 p-5">
-                <div class="flex items-center justify-center py-12 text-gray-400">
-                    <svg class="animate-spin w-8 h-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                    </svg>
-                    <span class="text-sm font-medium">Cargando cursos...</span>
-                </div>
-            </div>
-            <!-- Footer -->
-            <div class="border-t border-gray-100 dark:border-slate-700 px-6 py-3 flex-shrink-0 text-center">
-                <p class="text-xs text-gray-400 dark:text-gray-500">Los datos se actualizan en tiempo real desde el registro oficial</p>
+            <div id="modal-cursos-body" class="overflow-y-auto flex-1 p-5"></div>
+            <div class="border-t px-6 py-3 flex-shrink-0 text-center border-gray-100 dark:border-gray-700">
+                <p class="text-xs text-gray-400 font-sans">Los datos se actualizan en tiempo real desde el registro oficial</p>
             </div>
         </div>
     </div>
 
+    <!-- ══════════ JAVASCRIPT ══════════ -->
     <script>
-        // --- 1. Gestión de Estado Admin ---
+        // ── NIEVE ──
+        (function() {
+            const c = document.getElementById('nieve-container');
+            const flakes = ['❄', '❅', '❆', '✦', '·', '•'];
+            for (let i = 0; i < 45; i++) {
+                const el = document.createElement('div');
+                el.className = 'snowflake';
+                const f = flakes[Math.floor(Math.random() * flakes.length)];
+                const size = 8 + Math.random() * 14;
+                el.textContent = f;
+                el.style.cssText = `left:${Math.random()*100}vw;font-size:${size}px;animation-duration:${8+Math.random()*12}s;animation-delay:${Math.random()*15}s;opacity:${0.3+Math.random()*0.6};color:${Math.random()>.7?'#f5e08a':'#ffffff'};`;
+                c.appendChild(el);
+            }
+        })();
+
+        // ── CONFETI FIN DE AÑO ──
+        (function() {
+            const c = document.getElementById('confeti-container');
+            const cols = ['#c0392b','#1a5c2a','#c9a12a','#e8c84a','#f5e08a','#ffffff','#6b1e2e','#27ae60'];
+            for (let i = 0; i < 30; i++) {
+                const el = document.createElement('div');
+                el.className = 'confeti-nav';
+                const col = cols[Math.floor(Math.random() * cols.length)];
+                const size = 5 + Math.random() * 9;
+                el.style.cssText = `left:${Math.random()*100}vw;width:${size}px;height:${size*1.8}px;background:${col};border-radius:2px;animation-duration:${9+Math.random()*11}s;animation-delay:${Math.random()*18}s;opacity:0.75;`;
+                c.appendChild(el);
+            }
+        })();
+
+        // ── COUNTDOWN AÑO NUEVO ──
+        function updateCountdown() {
+            const now = new Date();
+            // Próximo 1 de enero
+            const nextYear = now.getMonth() === 0 && now.getDate() === 1 && now.getHours() === 0 && now.getMinutes() === 0
+                ? now.getFullYear() : (now.getMonth() === 0 && now.getDate() === 1 ? now.getFullYear() + 1 : now.getFullYear() + 1);
+            const target = new Date(`January 1, ${nextYear} 00:00:00`);
+            const diff = target - now;
+            if (diff <= 0) {
+                document.getElementById('cd-dias').textContent = '00';
+                document.getElementById('cd-hrs').textContent  = '00';
+                document.getElementById('cd-min').textContent  = '00';
+                document.getElementById('cd-seg').textContent  = '00';
+                document.getElementById('anio-nuevo-msg').classList.remove('hidden');
+                return;
+            }
+            const d = Math.floor(diff / (1000*60*60*24));
+            const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+            const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+            const s = Math.floor((diff % (1000*60)) / 1000);
+            document.getElementById('cd-dias').textContent = String(d).padStart(2,'0');
+            document.getElementById('cd-hrs').textContent  = String(h).padStart(2,'0');
+            document.getElementById('cd-min').textContent  = String(m).padStart(2,'0');
+            document.getElementById('cd-seg').textContent  = String(s).padStart(2,'0');
+        }
+
+        // ── ADMIN ──
         const ADMIN_EMAIL = 'alejandro.calderon@itdurango.edu.mx';
         const GOOGLE_CLIENT_ID = '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com';
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
+        const APPS_SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
 
-        async function fetchInscriptionState() {
-            try {
-                const res = await fetch(APPS_SCRIPT_URL + '?action=getRegistryStatus');
-                const data = await res.json();
-                return data.success ? (data.status === 'OPEN') : true;
-            } catch(e) {
-                console.error('Error al obtener estado de inscripciones:', e);
-                return true;
-            }
+        async function fetchInscriptionState(){try{const r=await fetch(APPS_SCRIPT_URL+'?action=getRegistryStatus');const d=await r.json();return d.success?(d.status==='OPEN'):true;}catch(e){return true;}}
+        async function saveInscriptionState(isOpen,idToken){try{const r=await fetch(APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'setRegistryStatus',status:isOpen?'OPEN':'CLOSED',id_token:idToken})});const d=await r.json();return d.success===true;}catch(e){return false;}}
+        function updateUI(isOpen){
+            const card=document.getElementById('card-inscripciones'),desc=document.getElementById('desc-inscripciones'),badge=document.getElementById('badge-inscripciones'),status=document.getElementById('status-inscripciones');
+            if(!card)return;
+            if(isOpen){card.href='inscripciones.html';card.classList.remove('grayscale','opacity-60','cursor-not-allowed');desc.textContent='Regístrate y no pierdas tu lugar';badge.style.display='block';badge.style.background='var(--verde)';badge.textContent='¡ABIERTO!';}
+            else{card.removeAttribute('href');card.classList.add('grayscale','opacity-60','cursor-not-allowed');desc.textContent='Periodo de inscripciones cerrado';badge.style.background='#6b7280';badge.textContent='🔒 CERRADO';}
+        }
+        async function handleCredentialResponse(response){
+            try{const b=response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');const p=JSON.parse(decodeURIComponent(atob(b).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+            if(p.email===ADMIN_EMAIL){const cur=await fetchInscriptionState();const nw=!cur;const ok=await saveInscriptionState(nw,response.credential);if(ok){updateUI(nw);alert(`✅ MODO ADMINISTRADOR\n\nInscripciones: ${nw?'ABIERTAS ✅':'CERRADAS 🔒'}`);}else alert('⚠️ Error al guardar.');}
+            else alert('⛔ Acceso denegado.');}catch(e){alert('Error de autenticación.');}
         }
 
-        async function saveInscriptionState(isOpen, idToken) {
-            try {
-                const res = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'setRegistryStatus',
-                        status: isOpen ? 'OPEN' : 'CLOSED',
-                        id_token: idToken
-                    })
-                });
-                const data = await res.json();
-                return data.success === true;
-            } catch(e) {
-                console.error('Error al guardar estado:', e);
-                return false;
-            }
+        // ── CURSOR ──
+        const cd=document.getElementById('cursor-dot');
+        window.addEventListener('mousemove',e=>{requestAnimationFrame(()=>{cd.style.left=`${e.clientX}px`;cd.style.top=`${e.clientY}px`;});cd.classList.toggle('active',!!e.target.closest('a,button,[role="button"],.card-portal,.cursor-pointer'));});
+
+        // ── MENÚ ──
+        const mb=document.getElementById('main-menu-btn'),md=document.getElementById('main-menu-dropdown');
+        if(mb&&md){mb.addEventListener('click',e=>{e.stopPropagation();md.classList.toggle('hidden');});document.addEventListener('click',e=>{if(!mb.contains(e.target)&&!md.contains(e.target))md.classList.add('hidden');});}
+
+        // ── RELOJ / FECHA ──
+        function updateDate(){const d=new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});document.getElementById('currentDate').textContent=d.charAt(0).toUpperCase()+d.slice(1);}
+        function startClock(){const t=()=>{const n=new Date();document.getElementById('clock').textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;};t();setInterval(t,1000);}
+        function updateYears(){const y=new Date().getFullYear();const c=document.getElementById('calendar-year-text');if(c)c.textContent=`Calendario Institucional ${y}`;const cp=document.getElementById('copyright-year');if(cp)cp.textContent=y;}
+
+        // ── CLIMA ──
+        function updateWeather(){
+            const el=document.getElementById('weatherInfo');if(!el)return;
+            const ic=c=>c===0?'☀️':[1,2,3].includes(c)?'⛅':[45,48].includes(c)?'🌫️':[51,53,55].includes(c)?'🌦️':[61,63,65].includes(c)?'🌧️':[80,81,82].includes(c)?'⛈️':'🌤️';
+            const sh=(lat,lon)=>fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`).then(r=>r.json()).then(d=>{if(d&&d.current_weather)el.innerHTML=`<span class="text-xl weather-icon">${ic(d.current_weather.weathercode)}</span><span class="font-sans font-semibold text-sm">Durango ${Math.round(d.current_weather.temperature)}°C</span>`;}).catch(()=>{});
+            navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>sh(p.coords.latitude,p.coords.longitude),()=>sh(24.0277,-104.653)):sh(24.0277,-104.653);
         }
 
-        function updateUI(isOpen) {
-            const card = document.getElementById('card-inscripciones');
-            const desc = document.getElementById('desc-inscripciones');
-            const badge = document.getElementById('badge-inscripciones');
-            const status = document.getElementById('status-inscripciones');
-
-            if (!card) return;
-
-            if (isOpen) {
-                card.href = "inscripciones.html";
-                card.classList.remove('bg-gray-50', 'grayscale', 'opacity-60', 'cursor-not-allowed');
-                card.classList.add('bg-white', 'hover:bg-rose-50', 'hover:border-rose-400');
-                
-                desc.textContent = "Registrate y no pierdas tu lugar";
-                desc.classList.remove('text-gray-500');
-                desc.classList.add('text-rose-600', 'dark:text-rose-400');
-                
-                badge.style.display = "block";
-                badge.textContent = "¡ABIERTO!";
-                
-                status.className = "inline-block bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full";
-                status.textContent = "✓ Disponible";
-            } else {
-                card.removeAttribute('href');
-                card.classList.remove('bg-white', 'hover:bg-rose-50', 'hover:border-rose-400');
-                card.classList.add('bg-gray-50', 'grayscale', 'opacity-60', 'cursor-not-allowed');
-                
-                desc.textContent = "Periodo de inscripciones cerrado";
-                desc.classList.remove('text-rose-600', 'dark:text-rose-400');
-                desc.classList.add('text-gray-500');
-                
-                badge.style.display = "block";
-                badge.textContent = "🔒 CERRADO";
-                
-                status.className = "inline-block bg-guinda-100 dark:bg-guinda-900/40 text-guinda-700 dark:text-guinda-300 text-xs font-semibold px-3 py-1 rounded-full";
-                status.textContent = "✗ No disponible";
-            }
-        }
-
-        async function handleCredentialResponse(response) {
-            try {
-                const base64Url = response.credential.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                
-                const payload = JSON.parse(jsonPayload);
-
-                if (payload.email === ADMIN_EMAIL) {
-                    const currentState = await fetchInscriptionState();
-                    const newState = !currentState;
-                    const ok = await saveInscriptionState(newState, response.credential);
-                    
-                    if (ok) {
-                        updateUI(newState);
-                        const statusText = newState ? "ABIERTAS ✅" : "CERRADAS 🔒";
-                        alert(`✅ MODO ADMINISTRADOR\n\nCambio exitoso. Inscripciones ahora: ${statusText}\n\nEl cambio es visible para TODOS los usuarios de inmediato.`);
-                    } else {
-                        alert("⚠️ Error al guardar en el servidor. Intente nuevamente.");
-                    }
-                } else {
-                    alert("⛔ Acceso denegado.\nSolo el administrador puede modificar el estado del portal.");
-                }
-            } catch (e) {
-                console.error("Error al procesar credencial", e);
-                alert("Error de autenticación.");
-            }
-        }
-
-        // Cursor
-        const cursorDot = document.getElementById('cursor-dot');
-        window.addEventListener('mousemove', e => {
-            const { clientX, clientY } = e;
-            requestAnimationFrame(() => {
-                cursorDot.style.left = `${clientX}px`;
-                cursorDot.style.top = `${clientY}px`;
-            });
-            const target = e.target;
-            if (target.closest('a, button, [role="button"], .card-portal, .cursor-pointer')) {
-                cursorDot.classList.add('active');
-            } else {
-                cursorDot.classList.remove('active');
-            }
-        });
-
-        // ==========================================
-        // MENU HAMBURGUESA LÓGICA
-        // ==========================================
-        const mainMenuBtn = document.getElementById('main-menu-btn');
-        const mainMenuDropdown = document.getElementById('main-menu-dropdown');
-
-        if (mainMenuBtn && mainMenuDropdown) {
-            mainMenuBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                mainMenuDropdown.classList.toggle('hidden');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!mainMenuBtn.contains(e.target) && !mainMenuDropdown.contains(e.target)) {
-                    mainMenuDropdown.classList.add('hidden');
-                }
-            });
-        }
-
-        // Date & Clock
-        function updateDate() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const ds = now.toLocaleDateString('es-MX', options);
-            document.getElementById('currentDate').textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
-        }
-        function startClock() {
-            function updateClock() {
-                const now = new Date();
-                document.getElementById('clock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-            }
-            updateClock(); setInterval(updateClock, 1000);
-        }
-        
-        function updateYears() {
-             const year = new Date().getFullYear();
-             const calEl = document.getElementById('calendar-year-text');
-             if(calEl) calEl.textContent = `Calendario Institucional ${year}`;
-             
-             const copyEl = document.getElementById('copyright-year');
-             if(copyEl) copyEl.textContent = year;
-        }
-
-        // Weather
-        function updateWeather() {
-            const weatherElement = document.getElementById('weatherInfo');
-            if (!weatherElement) return;
-            const getWeatherIcon = (code) => {
-                if (code === 0) return '☀️';
-                if ([1, 2, 3].includes(code)) return '⛅';
-                if ([45, 48].includes(code)) return '🌫️';
-                if ([51, 53, 55].includes(code)) return '🌦️';
-                if ([61, 63, 65].includes(code)) return '🌧️';
-                if ([71, 73, 75, 77].includes(code)) return '🌨️';
-                if ([80, 81, 82].includes(code)) return '⛈️';
-                if ([95, 96, 99].includes(code)) return '🌩️';
-                return '🌤️';
-            };
-            const showWeather = (lat, lon) => {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
-                fetch(url)
-                    .then(response => { if (!response.ok) throw new Error('Err'); return response.json(); })
-                    .then(data => {
-                        if (data && data.current_weather) {
-                            const temp = Math.round(data.current_weather.temperature);
-                            const icon = getWeatherIcon(data.current_weather.weathercode);
-                            weatherElement.innerHTML = `<span class="text-2xl weather-icon">${icon}</span><span class="font-semibold">Durango, Dgo. ${temp}°C</span>`;
-                        }
-                    })
-                    .catch(e => console.error(e));
-            };
-            const durangoLat = 24.0277;
-            const durangoLon = -104.653;
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (p) => showWeather(p.coords.latitude, p.coords.longitude),
-                    (e) => showWeather(durangoLat, durangoLon)
-                );
-            } else { showWeather(durangoLat, durangoLon); }
-        }
-
-        // Banner and Stats Auto-hide
-        const announcementBanner = document.getElementById('announcement-banner');
-        if (announcementBanner) {
-            let bannerHidden = false;
-            const hideBanner = () => {
-                if (!bannerHidden) {
-                    bannerHidden = true;
-                    announcementBanner.classList.add('hidden-banner');
-                    window.removeEventListener('scroll', hideBanner);
-                }
-            };
-            setTimeout(hideBanner, 10000);
-            window.addEventListener('scroll', hideBanner, { once: true });
-            announcementBanner.addEventListener('click', hideBanner);
-        }
-
-        const statsBanner = document.getElementById('banner-estadisticas');
-        if (statsBanner) {
-            setTimeout(() => {
-                statsBanner.classList.add('hidden-stats');
-            }, 30000);
-        }
-
-        // Dark Mode Toggle Logic
-        var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-        var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-        var themeToggleBtn = document.getElementById('theme-toggle-btn');
-
-        function updateThemeIcons() {
-            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                themeToggleLightIcon.classList.remove('hidden');
-                themeToggleDarkIcon.classList.add('hidden');
-                document.documentElement.classList.add('dark');
-            } else {
-                themeToggleLightIcon.classList.add('hidden');
-                themeToggleDarkIcon.classList.remove('hidden');
-                document.documentElement.classList.remove('dark');
-            }
-        }
-
-        updateThemeIcons();
-
-        function toggleTheme() {
-            if (localStorage.getItem('color-theme')) {
-                if (localStorage.getItem('color-theme') === 'light') {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                }
-            } else {
-                if (document.documentElement.classList.contains('dark')) {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                } else {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                }
-            }
-            updateThemeIcons();
-        }
-
-        if(themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
-
-        window.addEventListener('load', function() {
-            startClock(); updateDate(); updateWeather(); updateYears();
-
-            fetchInscriptionState().then(isOpen => updateUI(isOpen));
-
-            const trigger = document.getElementById('admin-trigger');
-            if (trigger) {
-                trigger.addEventListener('click', () => {
-                    if (typeof google === 'undefined' || !google.accounts) {
-                        alert("El servicio de Google no ha cargado. Intente recargar la página.");
-                        return;
-                    }
-
-                    const existing = document.getElementById('admin-google-modal');
-                    if (existing) { existing.remove(); return; }
-
-                    const modal = document.createElement('div');
-                    modal.id = 'admin-google-modal';
-                    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);';
-
-                    const box = document.createElement('div');
-                    box.style.cssText = 'background:#fff;border-radius:20px;padding:36px 32px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.4);max-width:340px;width:90%;';
-                    box.innerHTML = '<p style="font-size:28px;margin-bottom:8px;">🔐</p><p style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:4px;">Acceso Administrativo</p><p style="font-size:12px;color:#64748b;margin-bottom:24px;">Identifícate para cambiar el estado del portal</p>';
-
-                    const btnContainer = document.createElement('div');
-                    btnContainer.id = 'admin-google-btn';
-                    btnContainer.style.cssText = 'display:flex;justify-content:center;margin-bottom:16px;min-height:44px;';
-
-                    const cancelBtn = document.createElement('button');
-                    cancelBtn.textContent = 'Cancelar';
-                    cancelBtn.style.cssText = 'font-size:13px;color:#94a3b8;background:none;border:none;cursor:pointer;margin-top:4px;padding:4px 12px;border-radius:8px;transition:color 0.2s;';
-                    cancelBtn.onmouseover = () => cancelBtn.style.color = '#475569';
-                    cancelBtn.onmouseout = () => cancelBtn.style.color = '#94a3b8';
-                    cancelBtn.onclick = () => modal.remove();
-
-                    box.appendChild(btnContainer);
-                    box.appendChild(cancelBtn);
-                    modal.appendChild(box);
-                    modal.addEventListener('click', (ev) => { if (ev.target === modal) modal.remove(); });
-                    document.body.appendChild(modal);
-
-                    google.accounts.id.initialize({
-                        client_id: GOOGLE_CLIENT_ID,
-                        callback: (response) => {
-                            modal.remove();
-                            handleCredentialResponse(response);
-                        }
-                    });
-                    google.accounts.id.renderButton(btnContainer, {
-                        theme: 'filled_blue', size: 'large', shape: 'pill', text: 'continue_with'
-                    });
-                });
-            }
-        });
-    </script>
-
-    <script>
-    // ==========================================
-    // MODAL CURSOS ACTUALES
-    // ==========================================
-    const COURSES_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRK9g_iWtGGIazGRfNNmnb1W2qpedwy_9pgSr6NKz04aav65YYd-DOF7dCP425wdRIwQ4hIe-H7jFx8/pub?gid=0&single=true&output=csv';
-
-    function parseCSVCursos(text) {
-        const lines = text.trim().split(/\r?\n/).slice(1);
-        return lines.map(line => {
-            const values = [];
-            let current = '', inQuotes = false;
-            for (let ch of line) {
-                if (ch === '"') { inQuotes = !inQuotes; }
-                else if (ch === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
-                else { current += ch; }
-            }
-            values.push(current.trim());
-            return {
-                fecha:        values[0] || '',
-                curso:        values[2] || '',
-                instructor:   values[3] || '',
-                duracion:     values[4] || '',
-                modalidad:    values[5] || '',
-                departamento: values[8] || '',
-                lugar:        values[9] || '',
-                status:       values[12] || ''
-            };
-        }).filter(r => r.curso && r.curso !== '' && r.status.trim().toUpperCase() === 'VALIDO');
-    }
-
-    const DATE_PALETTE = [
-        { bg: '#eff6ff', border: '#3b82f6', text: '#1d4ed8', label: '#dbeafe' },
-        { bg: '#f0fdf4', border: '#16a34a', text: '#15803d', label: '#dcfce7' },
-        { bg: '#fff7ed', border: '#ea580c', text: '#c2410c', label: '#ffedd5' },
-        { bg: '#faf5ff', border: '#9333ea', text: '#7e22ce', label: '#f3e8ff' },
-        { bg: '#fefce8', border: '#ca8a04', text: '#854d0e', label: '#fef9c3' },
-        { bg: '#f0fdfa', border: '#0d9488', text: '#0f766e', label: '#ccfbf1' },
-        { bg: '#fff1f2', border: '#e11d48', text: '#be123c', label: '#ffe4e6' },
-        { bg: '#fdf4ff', border: '#c026d3', text: '#86198f', label: '#fae8ff' },
-    ];
-
-    function buildDateColorMap(cursos) {
-        const map = {};
-        let idx = 0;
-        cursos.forEach(c => {
-            if (c.fecha && !map[c.fecha]) {
-                map[c.fecha] = DATE_PALETTE[idx % DATE_PALETTE.length];
-                idx++;
-            }
-        });
-        return map;
-    }
-
-    function renderCursos(cursos) {
-        const body = document.getElementById('modal-cursos-body');
-        if (!cursos.length) {
-            body.innerHTML = `
-                <div style="text-align:center;padding:48px 24px;">
-                    <div style="font-size:56px;margin-bottom:16px;">🗓️</div>
-                    <p style="font-size:17px;font-weight:700;color:#1e293b;margin:0 0 8px;">Sin cursos en este momento</p>
-                    <p style="font-size:13px;color:#64748b;line-height:1.6;max-width:300px;margin:0 auto 20px;">
-                        El periodo actual ha concluido o aún no se han registrado cursos para el próximo periodo u opciones válidas.
-                    </p>
-                    <div style="display:inline-flex;align-items:center;gap:8px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:10px 18px;">
-                        <span style="font-size:16px;">✨</span>
-                        <span style="font-size:12px;font-weight:600;color:#15803d;">Pronto se publicarán los cursos del siguiente periodo</span>
-                    </div>
-                </div>`;
-            return;
-        }
-
-        const MESES = {
-            ENERO:1, FEBRERO:2, MARZO:3, ABRIL:4, MAYO:5, JUNIO:6,
-            JULIO:7, AGOSTO:8, SEPTIEMBRE:9, OCTUBRE:10, NOVIEMBRE:11, DICIEMBRE:12,
-            ENE:1, FEB:2, MAR:3, ABR:4, MAY:5, JUN:6, JUL:7, AGO:8, SEP:9, OCT:10, NOV:11, DIC:12
-        };
-        function parseFechaOrden(fecha) {
-            if (!fecha) return 9999;
-            const upper = fecha.toUpperCase();
-            const mesMatch = upper.match(/\s*(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE|ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\s*/);
-            const diaMatch = upper.match(/\s*(\d{1,2})\s*/);
-            const mes = mesMatch ? (MESES[mesMatch[1]] || 99) : 99;
-            const dia = diaMatch ? parseInt(diaMatch[1]) : 99;
-            return mes * 100 + dia;
-        }
-        cursos.sort((a, b) => parseFechaOrden(a.fecha) - parseFechaOrden(b.fecha));
-
-        const dateColorMap = buildDateColorMap(cursos);
-
-        const leyenda = Object.entries(dateColorMap).map(([fecha, col]) =>
-            `<span style="display:inline-flex;align-items:center;gap:5px;background:${col.label};border:1px solid ${col.border};color:${col.text};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
-                <span style="width:8px;height:8px;border-radius:50%;background:${col.border};display:inline-block;"></span>${fecha}
-            </span>`
-        ).join('');
-
-        const header = `
-            <div style="margin-bottom:14px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-                    <span style="background:#dbeafe;color:#1d4ed8;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;">
-                        ${cursos.length} curso${cursos.length !== 1 ? 's' : ''}
-                    </span>
-                    <span style="font-size:11px;color:#94a3b8;">● color por periodo de fechas</span>
-                </div>
-                <div style="display:flex;flex-wrap:wrap;gap:6px;">${leyenda}</div>
-            </div>`;
-
-        const cards = cursos.map((c, i) => {
-            const col = dateColorMap[c.fecha] || DATE_PALETTE[0];
-            return `
-            <div style="background:${col.bg};border-left:4px solid ${col.border};border-top:1px solid ${col.border}33;border-right:1px solid ${col.border}33;border-bottom:1px solid ${col.border}33;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
-                <div style="font-size:22px;flex-shrink:0;">📖</div>
-                <div style="flex:1;min-width:0;">
-                    <p style="font-size:14px;font-weight:700;color:#1e293b;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.curso}</p>
-                    <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#64748b;">
-                        <span style="display:flex;align-items:center;gap:3px;font-weight:600;color:${col.text};">📅 ${c.fecha}</span>
-                        <span style="display:flex;align-items:center;gap:3px;">👤 ${c.instructor}</span>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-
-        body.innerHTML = header + cards;
-    }
-
-    async function abrirModalCursos() {
-        const modal = document.getElementById('modal-cursos');
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-
-        document.getElementById('modal-cursos-body').innerHTML = `
-            <div class="flex items-center justify-center py-12 text-gray-400">
-                <svg class="animate-spin w-8 h-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                </svg>
-                <span class="text-sm font-medium">Cargando cursos...</span>
-            </div>`;
-
-        try {
-            const res = await fetch(COURSES_SHEET_URL);
-            const text = await res.text();
-            const cursos = parseCSVCursos(text);
-            renderCursos(cursos);
-        } catch(e) {
-            document.getElementById('modal-cursos-body').innerHTML = 
-                '<div class="text-center py-12"><p class="text-4xl mb-3">⚠️</p><p class="text-red-500 font-medium">No se pudo cargar la información.</p><p class="text-gray-400 text-sm mt-1">Verifica tu conexión e intenta de nuevo.</p></div>';
-        }
-    }
-
-    function cerrarModalCursos() {
-        document.getElementById('modal-cursos').classList.add('hidden');
-        document.body.style.overflow = '';
-    }
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') cerrarModalCursos();
-    });
-
-    document.getElementById('modal-cursos').addEventListener('click', function(e) {
-        if (e.target === this) cerrarModalCursos();
-    });
-    </script>
-
-    <script>
-    // ── Mini estadísticas del último periodo en la página principal ──
-    (async function loadHomeStats() {
-      const APPS_URL = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
-
-      function renderKPIs(d) {
-        const sinTotal = d.docentesNoParticiparon ? d.docentesNoParticiparon.total : 0;
-        const sinH     = d.docentesNoParticiparon ? d.docentesNoParticiparon.hombres : 0;
-        const sinM     = d.docentesNoParticiparon ? d.docentesNoParticiparon.mujeres : 0;
-        const cobertura = d.coberturaDocente ? d.coberturaDocente.porcentaje : 0;
-        const unicos    = d.coberturaDocente ? d.coberturaDocente.actualizados : 0;
-
-        const kpis = [
-          {
-            label: 'TOTAL INSCRIPCIONES',
-            value: d.totalInscripciones ?? 0,
-            icon: '📝',
-            color: 'guinda',
-            border: 'border-guinda-400',
-            bg: 'bg-guinda-50 dark:bg-guinda-900/20',
-            text: 'text-guinda-700 dark:text-guinda-300',
-            sub: null
-          },
-          {
-            label: 'DOCENTES ÚNICOS',
-            value: unicos,
-            icon: '👥',
-            color: 'crema',
-            border: 'border-crema-400',
-            bg: 'bg-crema-50 dark:bg-guinda-900/20',
-            text: 'text-crema-600 dark:text-crema-300',
-            sub: null
-          },
-          {
-            label: 'COBERTURA PLANTILLA',
-            value: cobertura + '%',
-            icon: '🏫',
-            color: 'yellow',
-            border: 'border-yellow-400',
-            bg: 'bg-yellow-50 dark:bg-yellow-900/20',
-            text: 'text-yellow-700 dark:text-yellow-500',
-            sub: null
-          },
-          {
-            label: 'SIN PARTICIPAR',
-            value: sinTotal,
-            icon: '🚫',
-            color: 'red',
-            border: 'border-red-400',
-            bg: 'bg-red-50 dark:bg-red-900/20',
-            text: 'text-red-600 dark:text-red-400',
-            sub: sinTotal > 0 ? 'H: ' + sinH + ' | M: ' + sinM : null
-          }
+        // ── FRASES NAVIDEÑAS ──
+        const quotes = [
+            {quote:'La Navidad es el tiempo de los milagros, pero los milagros ocurren todo el año para quienes saben ver.',author:'Anónimo'},
+            {quote:'La mejor manera de encontrar paz es dar alegría a los demás.',author:'Charles Dickens'},
+            {quote:'No es la abundancia de regalos lo que hace feliz la Navidad, sino la abundancia de amor.',author:'Anónimo'},
+            {quote:'En la oscuridad del invierno hay una luz que nunca se apaga: la del corazón humano.',author:'Victor Hugo'},
+            {quote:'Que el Año Nuevo te traiga todo lo que mereces, que es mucho.',author:'Anónimo'},
+            {quote:'Enseñar es dar lo mejor de ti para que otros brillen más que tú.',author:'Anónimo'},
         ];
-
-        const grid = document.getElementById('stats-kpi-grid');
-        if (!grid) return;
-        grid.innerHTML = kpis.map(k => `
-          <div class="rounded-xl border-2 ${k.border} ${k.bg} p-3 flex items-center justify-between gap-2 transition-colors">
-            <div class="min-w-0">
-              <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide leading-tight mb-1">${k.label}</p>
-              <p class="text-2xl sm:text-3xl font-extrabold ${k.text} leading-none">${k.value}</p>
-              ${k.sub ? `<p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1">${k.sub}</p>` : ''}
-            </div>
-            <span class="text-2xl sm:text-3xl opacity-60 flex-shrink-0">${k.icon}</span>
-          </div>
-        `).join('');
-
-        const deptDiv = document.getElementById('stats-dept-breakdown');
-        if (deptDiv && d.docentesNoParticiparon) {
-           let deptData = d.docentesNoParticiparon.porDepartamento || d.docentesNoParticiparon.departamentos || d.docentesNoParticiparon.carreras;
-           
-           if (!deptData && Array.isArray(d.docentesNoParticiparon.lista)) {
-             deptData = {};
-             d.docentesNoParticiparon.lista.forEach(docente => {
-                const depto = docente.departamento && docente.departamento.trim() !== '' ? docente.departamento : 'No registrado';
-                if (depto.toLowerCase() !== 'departamento') {
-                    deptData[depto] = (deptData[depto] || 0) + 1;
-                }
-             });
-           }
-
-           if (deptData && Object.keys(deptData).length > 0) {
-             const depts = Object.entries(deptData).sort((a, b) => b[1] - a[1]);
-             let deptHtml = `<p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1"><span class="text-red-500">↘</span> DETALLE: SIN PARTICIPAR POR CARRERA / DEPTO</p>`;
-             deptHtml += `<div class="flex flex-wrap gap-2">`;
-             
-             let hasValidDepts = false;
-             depts.forEach(([dept, count]) => {
-               if (dept && dept.trim() !== '' && dept !== 'undefined' && dept.toLowerCase() !== 'total' && count > 0) {
-                 hasValidDepts = true;
-                 deptHtml += `<span class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300 text-[10px] sm:text-xs px-2 py-1 rounded-md shadow-sm opacity-90"><strong class="font-black text-red-600 dark:text-red-400">${count}</strong> - ${dept}</span>`;
-               }
-             });
-             
-             deptHtml += `</div>`;
-             
-             if (hasValidDepts) {
-               deptDiv.innerHTML = deptHtml;
-             } else {
-               deptDiv.innerHTML = `
-                 <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1"><span class="text-red-500">↘</span> DETALLE: SIN PARTICIPAR POR CARRERA / DEPTO</p>
-                 <p class="text-xs text-gray-400 italic">Información detallada aún en proceso de recopilación...</p>
-               `;
-             }
-             deptDiv.classList.remove('hidden');
-           } else {
-             deptDiv.innerHTML = `
-               <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1"><span class="text-red-500">↘</span> DETALLE: SIN PARTICIPAR POR CARRERA / DEPTO</p>
-               <p class="text-xs text-gray-400 italic">Información detallada aún en proceso de recopilación...</p>
-             `;
-             deptDiv.classList.remove('hidden');
-           }
+        function rotateQuotes(){
+            const qc=document.getElementById('quote-container');if(!qc)return;
+            const q=quotes[Math.floor(Math.random()*quotes.length)];
+            qc.style.opacity=0;
+            setTimeout(()=>{qc.innerHTML=`<p class="text-base sm:text-lg italic text-gray-700 dark:text-gray-300 font-body leading-relaxed" style="font-size:1.12rem">"${q.quote}"</p><p class="text-sm text-gray-500 dark:text-gray-400 text-right mt-2 font-body">— ${q.author}</p>`;qc.style.opacity=1;},500);
         }
-      }
 
-      try {
-        const currentYear = new Date().getFullYear();
-        const res  = await fetch(APPS_URL + '?action=getStatisticsData&period=' + currentYear);
-        const json = await res.json();
-        const label = document.getElementById('stats-period-label');
+        // ── BANNER ──
+        const banner=document.getElementById('announcement-banner');
+        if(banner){let h=false;const hide=()=>{if(!h){h=true;banner.classList.add('hidden-banner');}};setTimeout(hide,10000);window.addEventListener('scroll',hide,{once:true});banner.addEventListener('click',hide);}
 
-        if (json.success && json.data) {
-          renderKPIs(json.data);
-          if (label) label.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-green-400 mr-1"></span>Periodo Actual ' + currentYear;
-        } else {
-          if (label) label.textContent = 'Sin datos';
-          document.getElementById('stats-kpi-grid').innerHTML =
-            '<div class="col-span-4 text-center text-sm text-gray-400 py-4">No se pudieron cargar las estadísticas.</div>';
+        // ── DARK MODE ──
+        const li=document.getElementById('theme-toggle-light-icon'),di=document.getElementById('theme-toggle-dark-icon'),tb=document.getElementById('theme-toggle-btn');
+        function updateThemeIcons(){const dk=localStorage.getItem('color-theme')==='dark'||(!('color-theme' in localStorage)&&window.matchMedia('(prefers-color-scheme: dark)').matches);li.classList.toggle('hidden',!dk);di.classList.toggle('hidden',dk);document.documentElement.classList.toggle('dark',dk);}
+        updateThemeIcons();
+        function toggleTheme(){const dk=document.documentElement.classList.contains('dark');document.documentElement.classList.toggle('dark',!dk);localStorage.setItem('color-theme',dk?'light':'dark');updateThemeIcons();}
+        if(tb)tb.addEventListener('click',toggleTheme);
+
+        // ── INIT ──
+        window.addEventListener('load',function(){
+            startClock(); updateDate(); updateWeather(); updateYears();
+            rotateQuotes(); setInterval(rotateQuotes, 15000);
+            updateCountdown(); setInterval(updateCountdown, 1000);
+            fetchInscriptionState().then(o=>updateUI(o));
+            const trigger=document.getElementById('admin-trigger');
+            if(trigger){trigger.addEventListener('click',()=>{
+                if(typeof google==='undefined'||!google.accounts){alert('El servicio de Google no ha cargado.');return;}
+                const ex=document.getElementById('admin-google-modal');if(ex){ex.remove();return;}
+                const modal=document.createElement('div');modal.id='admin-google-modal';modal.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);';
+                const box=document.createElement('div');box.style.cssText='background:#fff;border-radius:20px;padding:36px 32px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.5);max-width:340px;width:90%;border-top:4px solid #1a5c2a;';
+                box.innerHTML='<p style="font-size:28px;margin-bottom:8px;">🔐</p><p style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:4px;">Acceso Administrativo</p><p style="font-size:12px;color:#64748b;margin-bottom:24px;">Identifícate para cambiar el estado del portal</p>';
+                const bc=document.createElement('div');bc.id='admin-google-btn';bc.style.cssText='display:flex;justify-content:center;margin-bottom:16px;min-height:44px;';
+                const cb=document.createElement('button');cb.textContent='Cancelar';cb.style.cssText='font-size:13px;color:#94a3b8;background:none;border:none;cursor:pointer;padding:4px 12px;border-radius:8px;';cb.onclick=()=>modal.remove();
+                box.appendChild(bc);box.appendChild(cb);modal.appendChild(box);modal.addEventListener('click',ev=>{if(ev.target===modal)modal.remove();});document.body.appendChild(modal);
+                google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:r=>{modal.remove();handleCredentialResponse(r);}});
+                google.accounts.id.renderButton(bc,{theme:'filled_blue',size:'large',shape:'pill',text:'continue_with'});
+            });}
+        });
+    </script>
+
+    <!-- MODAL CURSOS -->
+    <script>
+        const COURSES_SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRK9g_iWtGGIazGRfNNmnb1W2qpedwy_9pgSr6NKz04aav65YYd-DOF7dCP425wdRIwQ4hIe-H7jFx8/pub?gid=0&single=true&output=csv';
+        function parseCSVCursos(t){return t.trim().split(/\r?\n/).slice(1).map(l=>{const v=[];let c='',q=false;for(let ch of l){if(ch==='"')q=!q;else if(ch===','&&!q){v.push(c.trim());c='';}else c+=ch;}v.push(c.trim());return{fecha:v[0]||'',curso:v[2]||'',instructor:v[3]||''};}).filter(r=>r.curso&&r.curso!=='');}
+        const DP=[{bg:'#f0fdf4',border:'#16a34a',text:'#15803d',label:'#dcfce7'},{bg:'#fdf8e8',border:'#c9a12a',text:'#7a5a08',label:'#faefc4'},{bg:'#fdf2f4',border:'#c0392b',text:'#6b1e2e',label:'#f9d0d8'},{bg:'#eff6ff',border:'#3b82f6',text:'#1d4ed8',label:'#dbeafe'},{bg:'#fef9f0',border:'#ea580c',text:'#c2410c',label:'#ffedd5'},{bg:'#f0fdfa',border:'#0d9488',text:'#0f766e',label:'#ccfbf1'},{bg:'#fdf4ff',border:'#c026d3',text:'#86198f',label:'#fae8ff'},{bg:'#f8fafc',border:'#475569',text:'#334155',label:'#e2e8f0'}];
+        function bdc(cs){const m={};let i=0;cs.forEach(c=>{if(c.fecha&&!m[c.fecha]){m[c.fecha]=DP[i%DP.length];i++;}});return m;}
+        function renderCursos(cs){
+            const body=document.getElementById('modal-cursos-body');
+            if(!cs.length){body.innerHTML='<div style="text-align:center;padding:48px 24px;"><div style="font-size:56px;margin-bottom:16px;">🎄</div><p style="font-size:17px;font-weight:700;color:#1e293b;margin:0 0 8px;">Sin cursos en este momento</p></div>';return;}
+            const MS={ENERO:1,FEBRERO:2,MARZO:3,ABRIL:4,MAYO:5,JUNIO:6,JULIO:7,AGOSTO:8,SEPTIEMBRE:9,OCTUBRE:10,NOVIEMBRE:11,DICIEMBRE:12,ENE:1,FEB:2,MAR:3,ABR:4,MAY:5,JUN:6,JUL:7,AGO:8,SEP:9,OCT:10,NOV:11,DIC:12};
+            const pf=f=>{if(!f)return 9999;const u=f.toUpperCase();const ms=(u.match(/(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE|ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)/)||[])[1];return((MS[ms]||99)*100)+(parseInt((u.match(/(\d{1,2})/)||[])[1])||99);};
+            cs.sort((a,b)=>pf(a.fecha)-pf(b.fecha));const dm=bdc(cs);
+            const ley=Object.entries(dm).map(([f,c])=>`<span style="display:inline-flex;align-items:center;gap:5px;background:${c.label};border:1px solid ${c.border};color:${c.text};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;"><span style="width:8px;height:8px;border-radius:50%;background:${c.border};display:inline-block;"></span>${f}</span>`).join('');
+            const hdr=`<div style="margin-bottom:14px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="background:#dcfce7;color:#15803d;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;">${cs.length} curso${cs.length!==1?'s':''}</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">${ley}</div></div>`;
+            const cards=cs.map(c=>{const cl=dm[c.fecha]||DP[0];return`<div style="background:${cl.bg};border-left:4px solid ${cl.border};border:1px solid ${cl.border}33;border-left:4px solid ${cl.border};border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;"><div style="font-size:22px;flex-shrink:0;">📖</div><div style="flex:1;min-width:0;"><p style="font-size:14px;font-weight:700;color:#1e293b;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.curso}</p><div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#64748b;"><span style="font-weight:600;color:${cl.text};">📅 ${c.fecha}</span><span>👤 ${c.instructor}</span></div></div></div>`;}).join('');
+            body.innerHTML=hdr+cards;
         }
-      } catch(e) {
-        const label = document.getElementById('stats-period-label');
-        if (label) label.textContent = 'Error';
-        const grid = document.getElementById('stats-kpi-grid');
-        if (grid) grid.innerHTML =
-          '<div class="col-span-4 text-center text-sm text-gray-400 py-4">Error al cargar estadísticas.</div>';
-      }
-    })();
+        async function abrirModalCursos(){
+            document.getElementById('modal-cursos').classList.remove('hidden');document.body.style.overflow='hidden';
+            document.getElementById('modal-cursos-body').innerHTML='<div class="flex items-center justify-center py-12 text-gray-400"><svg class="animate-spin w-8 h-8 mr-3" style="color:#1a5c2a" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg><span class="text-sm">Cargando cursos...</span></div>';
+            try{const r=await fetch(COURSES_SHEET_URL);renderCursos(parseCSVCursos(await r.text()));}
+            catch(e){document.getElementById('modal-cursos-body').innerHTML='<div class="text-center py-12"><p class="text-4xl mb-3">⚠️</p><p class="text-red-500">No se pudo cargar la información.</p></div>';}
+        }
+        function cerrarModalCursos(){document.getElementById('modal-cursos').classList.add('hidden');document.body.style.overflow='';}
+        document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrarModalCursos();});
+        document.getElementById('modal-cursos').addEventListener('click',function(e){if(e.target===this)cerrarModalCursos();});
     </script>
 </body>
 </html>
