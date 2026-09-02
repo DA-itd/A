@@ -1086,21 +1086,55 @@
         });
     </script>
 
-    <!-- MODAL CURSOS -->
+    <!-- MODAL CURSOS (CORREGIDO: FILTRA ESTRICTAMENTE LOS VALIDOS Y EXCLUYE INACTIVOS) -->
     <script>
         const COURSES_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRK9g_iWtGGIazGRfNNmnb1W2qpedwy_9pgSr6NKz04aav65YYd-DOF7dCP425wdRIwQ4hIe-H7jFx8/pub?gid=0&single=true&output=csv';
 
         function parseCSVCursos(text) {
-            return text.trim().split(/\r?\n/).slice(1).map(line => {
-                const values=[]; let current='', inQuotes=false;
+            const lines = text.trim().split(/\r?\n/).slice(1);
+            return lines.map(line => {
+                const values = [];
+                let current = '', inQuotes = false;
                 for (let ch of line) {
-                    if(ch==='"') inQuotes=!inQuotes;
-                    else if(ch===','&&!inQuotes){ values.push(current.trim()); current=''; }
-                    else current+=ch;
+                    if (ch === '"') { inQuotes = !inQuotes; }
+                    else if (ch === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
+                    else { current += ch; }
                 }
                 values.push(current.trim());
-                return { fecha:values[0]||'', curso:values[2]||'', instructor:values[3]||'', duracion:values[4]||'', modalidad:values[5]||'', departamento:values[8]||'', lugar:values[9]||'' };
-            }).filter(r=>r.curso&&r.curso!=='');
+
+                // Detecta estatus en la columna 12 (M) o busca en toda la fila si dice INACTIVO / CANCELADO
+                const statusCol = String(values[12] || '').trim().toUpperCase();
+                const filaCompleta = values.join(' ').toUpperCase();
+
+                return {
+                    fecha:        values[0] || '',
+                    curso:        values[2] || '',
+                    instructor:   values[3] || '',
+                    duracion:     values[4] || '',
+                    modalidad:    values[5] || '',
+                    departamento: values[8] || '',
+                    lugar:        values[9] || '',
+                    status:       statusCol,
+                    filaCompleta: filaCompleta
+                };
+            }).filter(r => {
+                // 1. Debe tener nombre de curso
+                if (!r.curso || r.curso.trim() === '') return false;
+
+                // 2. EXCLUSIÓN EXPLÍCITA: Si dice INACTIVO, CANCELADO, BAJA o NO en cualquier parte
+                if (r.status.includes('INACTIVO') || r.filaCompleta.includes('INACTIVO') ||
+                    r.status.includes('CANCELADO') || r.filaCompleta.includes('CANCELADO') ||
+                    r.status.includes('BAJA')     || r.status === 'NO') {
+                    return false;
+                }
+
+                // 3. Si tiene columna de estatus específica, debe ser VALIDO o ACTIVO
+                if (r.status !== '') {
+                    return r.status === 'VALIDO' || r.status === 'ACTIVO' || r.status === 'DISPONIBLE';
+                }
+
+                return true;
+            });
         }
 
         const DATE_PALETTE = [
@@ -1115,52 +1149,141 @@
         ];
 
         function buildDateColorMap(cursos) {
-            const map={}; let idx=0;
-            cursos.forEach(c=>{ if(c.fecha&&!map[c.fecha]){ map[c.fecha]=DATE_PALETTE[idx%DATE_PALETTE.length]; idx++; } });
+            const map = {};
+            let idx = 0;
+            cursos.forEach(c => {
+                if (c.fecha && !map[c.fecha]) {
+                    map[c.fecha] = DATE_PALETTE[idx % DATE_PALETTE.length];
+                    idx++;
+                }
+            });
             return map;
         }
 
         function renderCursos(cursos) {
             const body = document.getElementById('modal-cursos-body');
+            if (!body) return;
+
             if (!cursos.length) {
-                body.innerHTML = `<div style="text-align:center;padding:48px 24px;"><div style="font-size:56px;margin-bottom:16px;">🗓️</div><p style="font-size:17px;font-weight:700;color:#1e293b;margin:0 0 8px;">Sin cursos en este momento</p><p style="font-size:13px;color:#64748b;line-height:1.6;max-width:300px;margin:0 auto 20px;">El periodo actual ha concluido o aún no se han registrado cursos.</p><div style="display:inline-flex;align-items:center;gap:8px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:10px 18px;"><span style="font-size:16px;">✨</span><span style="font-size:12px;font-weight:600;color:#15803d;">Pronto se publicarán los cursos del siguiente periodo</span></div></div>`;
+                body.innerHTML = `
+                    <div style="text-align:center;padding:48px 24px;">
+                        <div style="font-size:56px;margin-bottom:16px;">🗓️</div>
+                        <p style="font-size:17px;font-weight:700;color:#1e293b;margin:0 0 8px;">Sin cursos en este momento</p>
+                        <p style="font-size:13px;color:#64748b;line-height:1.6;max-width:300px;margin:0 auto 20px;">
+                            El periodo actual ha concluido o los cursos se encuentran inactivos.
+                        </p>
+                        <div style="display:inline-flex;align-items:center;gap:8px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:10px 18px;">
+                            <span style="font-size:16px;">✨</span>
+                            <span style="font-size:12px;font-weight:600;color:#15803d;">Pronto se publicarán los cursos del siguiente periodo</span>
+                        </div>
+                    </div>`;
                 return;
             }
-            const MESES = {ENERO:1,FEBRERO:2,MARZO:3,ABRIL:4,MAYO:5,JUNIO:6,JULIO:7,AGOSTO:8,SEPTIEMBRE:9,OCTUBRE:10,NOVIEMBRE:11,DICIEMBRE:12,ENE:1,FEB:2,MAR:3,ABR:4,MAY:5,JUN:6,JUL:7,AGO:8,SEP:9,OCT:10,NOV:11,DIC:12};
+
+            const MESES = {
+                ENERO:1, FEBRERO:2, MARZO:3, ABRIL:4, MAYO:5, JUNIO:6,
+                JULIO:7, AGOSTO:8, SEPTIEMBRE:9, OCTUBRE:10, NOVIEMBRE:11, DICIEMBRE:12,
+                ENE:1, FEB:2, MAR:3, ABR:4, MAY:5, JUN:6, JUL:7, AGO:8, SEP:9, OCT:10, NOV:11, DIC:12
+            };
+
             function parseFecha(f) {
-                if(!f) return 9999;
-                const u=f.toUpperCase();
-                const mes=(u.match(/(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE|ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)/)||[])[1];
-                const dia=parseInt((u.match(/(\d{1,2})/)||[])[1])||99;
-                return (MESES[mes]||99)*100+dia;
+                if (!f) return 9999;
+                const u = f.toUpperCase();
+                const mes = (u.match(/(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE|ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)/) || [])[1];
+                const dia = parseInt((u.match(/(\d{1,2})/) || [])[1]) || 99;
+                return (MESES[mes] || 99) * 100 + dia;
             }
-            cursos.sort((a,b)=>parseFecha(a.fecha)-parseFecha(b.fecha));
+
+            cursos.sort((a, b) => parseFecha(a.fecha) - parseFecha(b.fecha));
             const dcm = buildDateColorMap(cursos);
-            const leyenda = Object.entries(dcm).map(([f,c])=>`<span style="display:inline-flex;align-items:center;gap:5px;background:${c.label};border:1px solid ${c.border};color:${c.text};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;"><span style="width:8px;height:8px;border-radius:50%;background:${c.border};display:inline-block;"></span>${f}</span>`).join('');
-            const header = `<div style="margin-bottom:14px;"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;"><span style="background:#dcfce7;color:#15803d;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;">${cursos.length} curso${cursos.length!==1?'s':''}</span><span style="font-size:11px;color:#94a3b8;">● color por periodo</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">${leyenda}</div></div>`;
-            const cards = cursos.map(c=>{ const col=dcm[c.fecha]||DATE_PALETTE[0]; return `<div style="background:${col.bg};border-left:4px solid ${col.border};border-top:1px solid ${col.border}33;border-right:1px solid ${col.border}33;border-bottom:1px solid ${col.border}33;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;"><div style="font-size:22px;flex-shrink:0;">📖</div><div style="flex:1;min-width:0;"><p style="font-size:14px;font-weight:700;color:#1e293b;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.curso}</p><div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#64748b;"><span style="font-weight:600;color:${col.text};">📅 ${c.fecha}</span><span>👤 ${c.instructor}</span></div></div></div>`; }).join('');
+
+            const leyenda = Object.entries(dcm).map(([f, c]) =>
+                `<span style="display:inline-flex;align-items:center;gap:5px;background:${c.label};border:1px solid ${c.border};color:${c.text};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:${c.border};display:inline-block;"></span>${f}
+                </span>`
+            ).join('');
+
+            const header = `
+                <div style="margin-bottom:14px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                        <span style="background:#dcfce7;color:#15803d;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;">
+                            ${cursos.length} curso${cursos.length !== 1 ? 's' : ''}
+                        </span>
+                        <span style="font-size:11px;color:#94a3b8;">● color por periodo</span>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">${leyenda}</div>
+                </div>`;
+
+            const cards = cursos.map(c => {
+                const col = dcm[c.fecha] || DATE_PALETTE[0];
+                return `
+                    <div style="background:${col.bg};border-left:4px solid ${col.border};border-top:1px solid ${col.border}33;border-right:1px solid ${col.border}33;border-bottom:1px solid ${col.border}33;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+                        <div style="font-size:22px;flex-shrink:0;">📖</div>
+                        <div style="flex:1;min-width:0;">
+                            <p style="font-size:14px;font-weight:700;color:#1e293b;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                ${c.curso}
+                            </p>
+                            <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#64748b;">
+                                <span style="font-weight:600;color:${col.text};">📅 ${c.fecha}</span>
+                                <span>👤 ${c.instructor}</span>
+                                ${c.lugar ? `<span>📍 ${c.lugar}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+
             body.innerHTML = header + cards;
         }
 
-        async function abrirModalCursos() {
-            document.getElementById('modal-cursos').classList.remove('hidden');
+        window.abrirModalCursos = async function() {
+            const modal = document.getElementById('modal-cursos');
+            if (!modal) return;
+            modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            document.getElementById('modal-cursos-body').innerHTML = `<div class="flex items-center justify-center py-12 text-gray-400"><svg class="animate-spin w-8 h-8 mr-3 text-mx-verde" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg><span class="text-sm font-medium">Cargando cursos...</span></div>`;
+
+            const body = document.getElementById('modal-cursos-body');
+            body.innerHTML = `
+                <div class="flex items-center justify-center py-12 text-gray-400">
+                    <svg class="animate-spin w-8 h-8 mr-3 text-mx-verde" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                    </svg>
+                    <span class="text-sm font-medium">Cargando cursos...</span>
+                </div>`;
+
             try {
-                const res = await fetch(COURSES_SHEET_URL);
-                renderCursos(parseCSVCursos(await res.text()));
+                // Se añade un parámetro anti-caché para traer la hoja siempre fresca
+                const res = await fetch(COURSES_SHEET_URL + '&_t=' + new Date().getTime());
+                const text = await res.text();
+                const cursos = parseCSVCursos(text);
+                renderCursos(cursos);
             } catch(e) {
-                document.getElementById('modal-cursos-body').innerHTML = '<div class="text-center py-12"><p class="text-4xl mb-3">⚠️</p><p class="text-red-500 font-medium">No se pudo cargar la información.</p><p class="text-gray-400 text-sm mt-1">Verifica tu conexión e intenta de nuevo.</p></div>';
+                console.error("Error al cargar cursos:", e);
+                body.innerHTML = `
+                    <div class="text-center py-12">
+                        <p class="text-4xl mb-3">⚠️</p>
+                        <p class="text-red-500 font-medium">No se pudo cargar la información.</p>
+                        <p class="text-gray-400 text-sm mt-1">Verifica tu conexión e intenta de nuevo.</p>
+                    </div>`;
             }
-        }
+        };
 
-        function cerrarModalCursos() {
-            document.getElementById('modal-cursos').classList.add('hidden');
-            document.body.style.overflow = '';
-        }
+        window.cerrarModalCursos = function() {
+            const modal = document.getElementById('modal-cursos');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        };
 
-        document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarModalCursos(); });
-        document.getElementById('modal-cursos').addEventListener('click', function(e){ if(e.target===this) cerrarModalCursos(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') window.cerrarModalCursos(); });
+        
+        const modalElement = document.getElementById('modal-cursos');
+        if (modalElement) {
+            modalElement.addEventListener('click', function(e) {
+                if (e.target === this) window.cerrarModalCursos();
+            });
+        }
     </script>
 
 </body>
