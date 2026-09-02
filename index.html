@@ -841,29 +841,142 @@
         </div>
     </footer>
 
-    <!-- Modal Cursos Actuales -->
-    <div id="modal-cursos" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(5,20,10,0.82);backdrop-filter:blur(6px);">
-        <div class="rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-fadeInUp bg-white dark:bg-dark-card">
-            <div class="bg-gradient-to-r from-mx-verde-dark to-mx-verde px-6 py-4 flex items-center justify-between flex-shrink-0">
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl">📋</span>
-                    <div>
-                        <h2 class="text-white font-display font-bold text-base leading-tight tracking-wide">Cursos del Periodo Actual</h2>
-                        <p class="text-green-200 text-xs opacity-80">Coordinación de Actualización Docente · ITD</p>
+   <!-- MODAL CURSOS ACTUALES -->
+<script>
+    const DATE_PALETTE = [
+        { bg:'#f0fdf4', border:'#16a34a', text:'#15803d', label:'#dcfce7' },
+        { bg:'#fff7ed', border:'#ea580c', text:'#c2410c', label:'#ffedd5' },
+        { bg:'#eff6ff', border:'#3b82f6', text:'#1d4ed8', label:'#dbeafe' },
+        { bg:'#faf5ff', border:'#9333ea', text:'#7e22ce', label:'#f3e8ff' },
+        { bg:'#fefce8', border:'#ca8a04', text:'#854d0e', label:'#fef9c3' },
+        { bg:'#f0fdfa', border:'#0d9488', text:'#0f766e', label:'#ccfbf1' },
+        { bg:'#fff1f2', border:'#e11d48', text:'#be123c', label:'#ffe4e6' },
+        { bg:'#fdf4ff', border:'#c026d3', text:'#86198f', label:'#fae8ff' },
+    ];
+
+    function buildDateColorMap(cursos) {
+        const map = {};
+        let idx = 0;
+        cursos.forEach(c => {
+            const f = c.fecha || 'Sin fecha';
+            if (!map[f]) {
+                map[f] = DATE_PALETTE[idx % DATE_PALETTE.length];
+                idx++;
+            }
+        });
+        return map;
+    }
+
+    function renderCursos(cursos) {
+        const body = document.getElementById('modal-cursos-body');
+        
+        if (!cursos || !cursos.length) {
+            body.innerHTML = `
+                <div style="text-align:center;padding:48px 24px;">
+                    <div style="font-size:56px;margin-bottom:16px;">🗓️</div>
+                    <p style="font-size:17px;font-weight:700;color:#1e293b;margin:0 0 8px;">Sin cursos con inscripciones activas</p>
+                    <p style="font-size:13px;color:#64748b;line-height:1.6;max-width:320px;margin:0 auto 20px;">
+                        Actualmente no hay participantes registrados en los cursos de este periodo.
+                    </p>
+                    <div style="display:inline-flex;align-items:center;gap:8px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:10px 18px;">
+                        <span style="font-size:16px;">✨</span>
+                        <span style="font-size:12px;font-weight:600;color:#15803d;">Los cursos se mostrarán automáticamente al recibir inscripciones</span>
                     </div>
+                </div>`;
+            return;
+        }
+
+        const dcm = buildDateColorMap(cursos);
+        const leyenda = Object.entries(dcm).map(([f, c]) => `
+            <span style="display:inline-flex;align-items:center;gap:5px;background:${c.label};border:1px solid ${c.border};color:${c.text};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
+                <span style="width:8px;height:8px;border-radius:50%;background:${c.border};display:inline-block;"></span>${f}
+            </span>
+        `).join('');
+
+        const totalDocentes = cursos.reduce((acc, curr) => acc + (curr.totalInscritos || 0), 0);
+
+        const header = `
+            <div style="margin-bottom:14px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                    <div style="display:flex;gap:8px;">
+                        <span style="background:#dcfce7;color:#15803d;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;">
+                            ${cursos.length} curso${cursos.length !== 1 ? 's' : ''} activo${cursos.length !== 1 ? 's' : ''}
+                        </span>
+                        <span style="background:#e0f2fe;color:#0369a1;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;">
+                            👥 ${totalDocentes} docente${totalDocentes !== 1 ? 's' : ''} inscrito${totalDocentes !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                    <span style="font-size:11px;color:#94a3b8;">● agrupado por periodo</span>
                 </div>
-                <button onclick="cerrarModalCursos()" class="text-white/70 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <div id="modal-cursos-body" class="overflow-y-auto flex-1 p-5"></div>
-            <div class="border-t border-gray-100 dark:border-gray-700 px-6 py-3 flex-shrink-0 text-center">
-                <p class="text-xs text-gray-400">Los datos se actualizan en tiempo real desde el registro oficial</p>
-            </div>
-        </div>
-    </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">${leyenda}</div>
+            </div>`;
+
+        const cards = cursos.map(c => {
+            const col = dcm[c.fecha || 'Sin fecha'] || DATE_PALETTE[0];
+            return `
+                <div style="background:${col.bg};border-left:4px solid ${col.border};border-top:1px solid ${col.border}33;border-right:1px solid ${col.border}33;border-bottom:1px solid ${col.border}33;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+                    <div style="font-size:22px;flex-shrink:0;">📖</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                            <p style="font-size:14px;font-weight:700;color:#1e293b;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                ${c.curso}
+                            </p>
+                            <span style="background:#ffffff;border:1px solid ${col.border};color:${col.text};font-size:11px;font-weight:bold;padding:2px 8px;border-radius:12px;white-space:nowrap;">
+                                👤 ${c.totalInscritos} inscrito${c.totalInscritos !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#64748b;">
+                            <span style="font-weight:600;color:${col.text};">📅 ${c.fecha || 'Fecha por definir'}</span>
+                            ${c.horario ? `<span>⏰ ${c.horario}</span>` : ''}
+                            ${c.lugar ? `<span>📍 ${c.lugar}</span>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+
+        body.innerHTML = header + cards;
+    }
+
+    async function abrirModalCursos() {
+        document.getElementById('modal-cursos').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('modal-cursos-body').innerHTML = `
+            <div class="flex items-center justify-center py-12 text-gray-400">
+                <svg class="animate-spin w-8 h-8 mr-3 text-mx-verde" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>
+                <span class="text-sm font-medium">Consultando cursos con inscritos...</span>
+            </div>`;
+        
+        try {
+            // Se consulta directamente la acción de Apps Script en tiempo real
+            const res = await fetch(APPS_SCRIPT_URL + '?action=getActiveEnrolledCourses');
+            const result = await res.json();
+            
+            if (result.success && result.data) {
+                renderCursos(result.data);
+            } else {
+                throw new Error(result.message || "Error al obtener datos");
+            }
+        } catch(e) {
+            document.getElementById('modal-cursos-body').innerHTML = `
+                <div class="text-center py-12">
+                    <p class="text-4xl mb-3">⚠️</p>
+                    <p class="text-red-500 font-medium">No se pudo cargar la información de los cursos inscritos.</p>
+                    <p class="text-gray-400 text-sm mt-1">Verifica la conexión con el servidor e intenta nuevamente.</p>
+                </div>`;
+        }
+    }
+
+    function cerrarModalCursos() {
+        document.getElementById('modal-cursos').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModalCursos(); });
+    document.getElementById('modal-cursos').addEventListener('click', function(e) { if (e.target === this) cerrarModalCursos(); });
+</script>
 
     <!-- ══════════════════════════════════════
          JAVASCRIPT
