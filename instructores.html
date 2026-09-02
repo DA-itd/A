@@ -23,65 +23,26 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
             background: #f0f4ff;
         }
-        .card-shadow {
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-        .card-shadow:hover {
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-        }
-        .tab-active {
-            border-bottom: 3px solid #4f46e5;
-            color: #4f46e5;
-            font-weight: 600;
-        }
-        .tab-inactive {
-            color: #6b7280;
-            font-weight: 500;
-        }
-        .tab-inactive:hover {
-            color: #1f2937;
-            background: #f3f4f6;
-        }
-        .fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
+        .card-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .card-shadow:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+        .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: 600; }
+        .tab-inactive { color: #6b7280; font-weight: 500; }
+        .tab-inactive:hover { color: #1f2937; background: #f3f4f6; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .loader {
             border: 4px solid #e5e7eb;
             border-top-color: #4f46e5;
             border-radius: 50%;
-            width: 48px;
-            height: 48px;
+            width: 48px; height: 48px;
             animation: spin 0.8s linear infinite;
         }
-        .file-drop {
-            border: 2px dashed #c7d2fe;
-            transition: all 0.2s;
-        }
-        .file-drop:hover, .file-drop.dragover {
-            border-color: #4f46e5;
-            background: #eef2ff;
-        }
-        .formato-link {
-            transition: all 0.2s;
-        }
-        .formato-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
-        }
-        select, input[type="text"], input[type="file"] {
-            transition: all 0.2s;
-        }
-        select:focus, input[type="text"]:focus {
-            border-color: #4f46e5;
-            ring: 2px solid #4f46e5;
-        }
+        .file-drop { border: 2px dashed #c7d2fe; transition: all 0.2s; }
+        .file-drop:hover, .file-drop.dragover { border-color: #4f46e5; background: #eef2ff; }
     </style>
 </head>
 <body>
@@ -90,10 +51,7 @@
     <header class="bg-white shadow-lg sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 sm:py-5">
             <div class="flex items-center justify-between gap-3">
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" 
-                     alt="TecNM" 
-                     class="h-12 sm:h-16 object-contain">
-                
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/TecNM_logo.jpg" alt="TecNM" class="h-12 sm:h-16 object-contain">
                 <div class="text-center flex-1 px-2">
                     <h1 class="text-base sm:text-xl md:text-2xl font-bold text-blue-900 leading-tight">
                         ÁREA PARA INSTRUCTORES
@@ -101,10 +59,7 @@
                     <p class="text-xs sm:text-sm text-blue-700 font-semibold">Desarrollo Académico</p>
                     <p class="text-xs text-blue-600">TecNM - Instituto Tecnológico de Durango</p>
                 </div>
-                
-                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" 
-                     alt="ITD" 
-                     class="h-12 sm:h-16 object-contain">
+                <img src="https://raw.githubusercontent.com/DA-itd/web/main/logo_itdurango.png" alt="ITD" class="h-12 sm:h-16 object-contain">
             </div>
         </div>
     </header>
@@ -112,15 +67,11 @@
     <!-- CONTENIDO PRINCIPAL -->
     <div id="app" class="container mx-auto px-4 py-6">
         <div class="max-w-4xl mx-auto">
-            <!-- Botón volver -->
             <a href="formatos.html" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline mb-4">
                 ← Volver a Formatos
             </a>
 
-            <!-- Card principal -->
             <div class="bg-white rounded-xl card-shadow p-6 sm:p-8">
-
-                <!-- Título -->
                 <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6">Instructores</h2>
 
                 <!-- Tabs -->
@@ -137,13 +88,10 @@
 
                 <!-- Contenido Tabs -->
                 <div id="tabContent" class="fade-in">
-                    <!-- Cargando -->
                     <div id="loadingState" class="flex justify-center items-center py-16">
                         <div class="loader"></div>
-                        <span class="ml-4 text-gray-600">Cargando datos...</span>
+                        <span class="ml-4 text-gray-600">Cargando datos de cursos y docentes...</span>
                     </div>
-
-                    <!-- Contenido dinámico -->
                     <div id="dynamicContent" style="display:none;"></div>
                 </div>
             </div>
@@ -160,39 +108,22 @@
     </footer>
 
     <script>
-        // ============================================================
-        // CONFIGURACIÓN
-        // ============================================================
         const CONFIG = {
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec',
             COURSES_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=0&single=true&output=csv',
             TEACHERS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAe4dmVN4CArjEy_lvI5qrXf16naxZLO1lAxGm2Pj4TrdnoebBg03Vv4-DCXciAkHJFiZaBMKletUs/pub?gid=987931491&single=true&output=csv'
         };
 
-        // ============================================================
-        // UTILIDADES
-        // ============================================================
-        function removeAccents(text) {
-            if (!text) return '';
-            return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        }
-
         function parseCSVLine(line) {
             const result = [];
-            let current = '';
-            let inQuotes = false;
+            let current = '', inQuotes = false;
             for (let i = 0; i < line.length; i++) {
                 const char = line[i];
                 if (char === '"') {
-                    if (inQuotes && line[i + 1] === '"') {
-                        current += '"';
-                        i++;
-                    } else {
-                        inQuotes = !inQuotes;
-                    }
+                    if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
                 } else if (char === ',' && !inQuotes) {
-                    result.push(current.trim());
-                    current = '';
+                    result.push(current.trim()); current = '';
                 } else {
                     current += char;
                 }
@@ -202,7 +133,7 @@
         }
 
         function cleanCSVValue(val) {
-            let cleaned = val.trim();
+            let cleaned = (val || '').trim();
             if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
                 cleaned = cleaned.substring(1, cleaned.length - 1).replace(/""/g, '"');
             }
@@ -226,16 +157,12 @@
             return dates.split(',').map(d => d.trim()).join(' | ');
         }
 
-        // ============================================================
-        // API
-        // ============================================================
         async function getTeachers() {
             try {
                 const resp = await fetch(`${CONFIG.TEACHERS_CSV_URL}&_=${Date.now()}`);
                 if (!resp.ok) throw new Error('Error al cargar docentes');
                 const text = await resp.text();
-                const lines = text.trim().split(/\r?\n/);
-                return lines.slice(1)
+                return text.trim().split(/\r?\n/).slice(1)
                     .filter(line => line.trim())
                     .map(line => {
                         const vals = parseCSVLine(line);
@@ -258,8 +185,7 @@
                 const resp = await fetch(`${CONFIG.COURSES_CSV_URL}&_=${Date.now()}`);
                 if (!resp.ok) throw new Error('Error al cargar cursos');
                 const text = await resp.text();
-                const lines = text.trim().split(/\r?\n/);
-                return lines.slice(1)
+                return text.trim().split(/\r?\n/).slice(1)
                     .filter(line => line.trim())
                     .map(line => {
                         const vals = parseCSVLine(line);
@@ -289,7 +215,7 @@
                 body: JSON.stringify({ action: 'submitInstructorProposal', ...data })
             });
             const text = await resp.text();
-            try { return JSON.parse(text); } catch { throw new Error('Error en el servidor'); }
+            try { return JSON.parse(text); } catch { throw new Error('Respuesta inválida del servidor: ' + text.substring(0, 80)); }
         }
 
         async function submitEvidence(data) {
@@ -298,11 +224,11 @@
                 body: JSON.stringify({ action: 'submitInstructorEvidence', ...data })
             });
             const text = await resp.text();
-            try { return JSON.parse(text); } catch { throw new Error('Error en el servidor'); }
+            try { return JSON.parse(text); } catch { throw new Error('Respuesta inválida del servidor: ' + text.substring(0, 80)); }
         }
 
         // ============================================================
-        // COMPONENTES (DOM puro)
+        // RENDER PROPUESTA (TAB 1)
         // ============================================================
         function renderFormProposal(teachers, courses) {
             const grouped = courses.reduce((acc, c) => {
@@ -332,7 +258,7 @@
                         <div class="flex flex-col gap-1.5">
                             ${data.courses.map(c => `
                                 <label class="flex items-center gap-3 px-4 py-2.5 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 cursor-pointer transition-all">
-                                    <input type="radio" name="proposalCourse" value="${c.id}" data-name="${c.name}" class="w-4 h-4 text-indigo-600">
+                                    <input type="radio" name="proposalCourse" value="${c.id}" class="w-4 h-4 text-indigo-600">
                                     <span class="text-sm font-medium text-slate-700">${c.name}</span>
                                 </label>
                             `).join('')}
@@ -344,44 +270,32 @@
 
             return `
                 <form id="proposalForm" novalidate>
-                    <!-- Documentación requerida -->
                     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-lg p-4 sm:p-5 mb-5">
-                        <div class="flex items-center gap-2 mb-3">
+                        <div class="flex items-center gap-2 mb-2">
                             <span class="text-2xl">📋</span>
                             <h3 class="text-lg font-bold text-indigo-900">Documentación Requerida</h3>
                         </div>
                         <p class="text-sm text-gray-700 mb-3">
-                            Sube tu <strong>CV</strong> y <strong>Ficha técnica</strong> del curso-taller a desarrollar.
-                            Las plantillas están en la sección de formatos.
+                            Sube tu <strong>CV</strong> y <strong>Ficha técnica</strong> del curso-taller en formato PDF (máximo 10MB por archivo).
                         </p>
-                        <a href="formatos.html" target="_blank" class="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors shadow-md text-sm">
-                            Ir a la Página de Formatos ↗️
+                        <a href="formatos.html" target="_blank" class="block w-full sm:w-auto sm:inline-block text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-sm text-sm">
+                            Ver Plantillas de Formatos ↗️
                         </a>
-                        <div class="mt-3 flex items-start gap-2 bg-yellow-50 border-l-4 border-yellow-400 p-2.5 rounded">
-                            <span class="text-xl">⚠️</span>
-                            <p class="text-xs text-yellow-800"><strong>Importante:</strong> Los archivos deben ser convertidos a PDF.</p>
-                        </div>
                     </div>
 
-                    <!-- Mensaje de error -->
-                    <div id="proposalError" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded text-sm"></div>
-                    <div id="proposalProgress" class="hidden bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-3 mb-4 rounded text-sm animate-pulse"></div>
-                    <div id="proposalSuccess" class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded text-sm"></div>
-
-                    <!-- Campos -->
                     <div class="space-y-5">
                         <!-- Instructor -->
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">👤 Nombre del Instructor *</label>
                             <input type="text" id="propInstructor" list="teacherList" 
                                    class="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 outline-none text-sm transition-all"
-                                   placeholder="Escriba su nombre completo" required autocomplete="off">
+                                   placeholder="Escriba o seleccione su nombre completo" required autocomplete="off">
                             <datalist id="teacherList">
                                 ${teachers.map(t => `<option value="${t.nombreCompleto}">`).join('')}
                             </datalist>
                         </div>
 
-                        <!-- Curso -->
+                        <!-- Cursos -->
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-2">📚 Selecciona el Curso a Ofrecer *</label>
                             ${courses.length === 0 ? 
@@ -392,31 +306,40 @@
 
                         <!-- Archivos -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">📄 CV (PDF) *</label>
+                            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">📄 CV en PDF *</label>
                                 <input type="file" id="propCvu" accept=".pdf,application/pdf" 
-                                       class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                                <p class="text-xs text-gray-400 mt-1">Máx 1MB</p>
+                                       class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                                <p class="text-xs text-gray-400 mt-1">Límite: hasta 10MB</p>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">📋 Ficha Técnica (PDF) *</label>
+                            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">📋 Ficha Técnica en PDF *</label>
                                 <input type="file" id="propFicha" accept=".pdf,application/pdf" 
-                                       class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                                <p class="text-xs text-gray-400 mt-1">Máx 1MB</p>
+                                       class="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                                <p class="text-xs text-gray-400 mt-1">Límite: hasta 10MB</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-6 flex justify-end">
+                    <!-- Mensajes de estado (visibles junto al botón) -->
+                    <div id="proposalAlerts" class="mt-6">
+                        <div id="proposalError" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-3 rounded text-sm font-medium"></div>
+                        <div id="proposalProgress" class="hidden bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-3 mb-3 rounded text-sm font-medium animate-pulse"></div>
+                    </div>
+
+                    <div class="mt-4 flex justify-end">
                         <button type="submit" id="propSubmitBtn" 
-                                class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-8 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                            Enviar Documentación
+                                class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-all shadow-md flex items-center justify-center gap-2">
+                            <span>📤</span> Enviar Documentación
                         </button>
                     </div>
                 </form>
             `;
         }
 
+        // ============================================================
+        // RENDER EVIDENCIAS (TAB 2)
+        // ============================================================
         function renderFormEvidence(teachers, courses) {
             const grouped = courses.reduce((acc, c) => {
                 const period = c.period || 'Sin Periodo';
@@ -445,7 +368,7 @@
                         <div class="flex flex-col gap-1.5">
                             ${data.courses.map(c => `
                                 <label class="flex items-center gap-3 px-4 py-2.5 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 cursor-pointer transition-all">
-                                    <input type="radio" name="evidenceCourse" value="${c.id}" data-name="${c.name}" class="w-4 h-4 text-indigo-600">
+                                    <input type="radio" name="evidenceCourse" value="${c.id}" class="w-4 h-4 text-indigo-600">
                                     <span class="text-sm font-medium text-slate-700">${c.name}</span>
                                 </label>
                             `).join('')}
@@ -457,17 +380,10 @@
 
             return `
                 <form id="evidenceForm" novalidate>
-                    <!-- Info -->
                     <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-3 rounded-lg mb-5 text-sm">
-                        <p>Suba hasta 6 archivos (máx 1MB cada uno). Formatos: PDF o imágenes.</p>
+                        <p>Suba hasta 6 archivos (máx 10MB cada uno). Formatos permitidos: PDF o imágenes (JPG, PNG).</p>
                     </div>
 
-                    <!-- Mensajes -->
-                    <div id="evidenceError" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded text-sm"></div>
-                    <div id="evidenceProgress" class="hidden bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-3 mb-4 rounded text-sm animate-pulse"></div>
-                    <div id="evidenceSuccess" class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded text-sm"></div>
-
-                    <!-- Campos -->
                     <div class="space-y-5">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">👤 Nombre del Instructor *</label>
@@ -493,7 +409,7 @@
                                 <div class="text-4xl mb-2">📁</div>
                                 <input type="file" id="evFiles" multiple accept=".pdf,application/pdf,image/*" 
                                        class="block w-full text-sm text-gray-500 file:mr-3 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 file:cursor-pointer cursor-pointer">
-                                <p class="text-xs text-gray-500 mt-2">PDF o imágenes (JPG, PNG) • Máximo 1MB por archivo</p>
+                                <p class="text-xs text-gray-500 mt-2">PDF o imágenes • Máximo 10MB por archivo</p>
                             </div>
                             <div id="fileList" class="mt-3 hidden">
                                 <p class="text-sm font-semibold text-green-700">Archivos seleccionados:</p>
@@ -502,38 +418,44 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 flex justify-end">
+                    <!-- Mensajes de estado -->
+                    <div id="evidenceAlerts" class="mt-6">
+                        <div id="evidenceError" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-3 rounded text-sm font-medium"></div>
+                        <div id="evidenceProgress" class="hidden bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-3 mb-3 rounded text-sm font-medium animate-pulse"></div>
+                    </div>
+
+                    <div class="mt-4 flex justify-end">
                         <button type="submit" id="evSubmitBtn" 
-                                class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-8 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                            📤 Enviar Evidencia(s)
+                                class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-all shadow-md flex items-center justify-center gap-2">
+                            <span>📤</span> Enviar Evidencia(s)
                         </button>
                     </div>
                 </form>
             `;
         }
 
-        function renderSuccessScreen(message, isProposal) {
+        function renderSuccessScreen(message) {
             return `
                 <div class="text-center py-8">
                     <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-6 rounded-md">
                         <div class="text-5xl mb-4">✅</div>
                         <p class="font-bold text-xl">${message}</p>
-                        <p class="text-sm mt-2">Tu información ha sido recibida correctamente.</p>
+                        <p class="text-sm mt-2">Los archivos se han guardado correctamente en tu carpeta de Google Drive.</p>
                     </div>
                     <button onclick="window.location.href='formatos.html'" 
                             class="mt-6 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all shadow-lg">
-                        🚪 Salir
+                        🚪 Salir a Formatos
                     </button>
                 </div>
             `;
         }
 
         // ============================================================
-        // CONTROLADOR PRINCIPAL
+        // CONTROLADOR
         // ============================================================
         let teachersData = [];
         let coursesData = [];
-        let currentTab = 'proposal';
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
         async function initApp() {
             const loading = document.getElementById('loadingState');
@@ -547,20 +469,19 @@
             } catch (e) {
                 loading.innerHTML = `
                     <div class="text-center py-8">
-                        <p class="text-red-500">Error al cargar los datos. Por favor recarga la página.</p>
+                        <p class="text-red-500 font-bold">Error al cargar datos de Google Sheets.</p>
                         <p class="text-sm text-gray-500 mt-2">${e.message}</p>
+                        <button onclick="location.reload()" class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm">Reintentar</button>
                     </div>
                 `;
             }
         }
 
         function renderTab(tab) {
-            currentTab = tab;
             const content = document.getElementById('dynamicContent');
             const tabProposal = document.getElementById('tabProposal');
             const tabEvidence = document.getElementById('tabEvidence');
 
-            // Actualizar tabs
             tabProposal.className = `px-4 sm:px-6 py-3 text-sm sm:text-base transition-colors rounded-t-lg ${tab === 'proposal' ? 'tab-active' : 'tab-inactive'}`;
             tabEvidence.className = `px-4 sm:px-6 py-3 text-sm sm:text-base transition-colors rounded-t-lg ${tab === 'evidence' ? 'tab-active' : 'tab-inactive'}`;
 
@@ -571,23 +492,27 @@
                 content.innerHTML = renderFormEvidence(teachersData, coursesData);
                 attachEvidenceEvents();
             }
-
-            // Animación
             content.className = 'fade-in';
         }
 
-        // ============================================================
-        // EVENTOS - PROPUESTA
-        // ============================================================
+        function showProposalError(msg) {
+            const errorDiv = document.getElementById('proposalError');
+            if (errorDiv) {
+                errorDiv.textContent = msg;
+                errorDiv.classList.remove('hidden');
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
         function attachProposalEvents() {
             const form = document.getElementById('proposalForm');
             if (!form) return;
 
-            // Seleccionar curso automáticamente
             document.querySelectorAll('input[name="proposalCourse"]').forEach(radio => {
                 radio.addEventListener('change', function() {
                     document.querySelectorAll('input[name="proposalCourse"]').forEach(r => {
                         r.closest('label').style.borderColor = '#e2e8f0';
+                        r.closest('label').style.background = '';
                     });
                     if (this.checked) {
                         this.closest('label').style.borderColor = '#4f46e5';
@@ -601,55 +526,48 @@
 
                 const errorDiv = document.getElementById('proposalError');
                 const progressDiv = document.getElementById('proposalProgress');
-                const successDiv = document.getElementById('proposalSuccess');
                 const submitBtn = document.getElementById('propSubmitBtn');
 
-                // Reset
                 errorDiv.classList.add('hidden');
                 progressDiv.classList.add('hidden');
-                successDiv.classList.add('hidden');
 
-                // Obtener datos
                 const instructor = document.getElementById('propInstructor').value.trim();
                 const courseRadio = document.querySelector('input[name="proposalCourse"]:checked');
                 const cvuFile = document.getElementById('propCvu').files[0];
                 const fichaFile = document.getElementById('propFicha').files[0];
 
-                // Validar
                 if (!instructor) {
-                    errorDiv.textContent = '⚠️ Ingresa tu nombre completo.';
-                    errorDiv.classList.remove('hidden');
+                    showProposalError('⚠️ Por favor ingresa tu nombre completo.');
                     return;
                 }
                 if (!courseRadio) {
-                    errorDiv.textContent = '⚠️ Selecciona un curso.';
-                    errorDiv.classList.remove('hidden');
+                    showProposalError('⚠️ Selecciona el curso que vas a impartir de la lista.');
                     return;
                 }
                 if (!cvuFile) {
-                    errorDiv.textContent = '⚠️ Sube tu CV en PDF.';
-                    errorDiv.classList.remove('hidden');
+                    showProposalError('⚠️ Debes seleccionar tu CV en formato PDF.');
                     return;
                 }
-                if (cvuFile.size > 1024 * 1024) {
-                    errorDiv.textContent = '⚠️ El CV no debe exceder 1MB.';
-                    errorDiv.classList.remove('hidden');
+                if (cvuFile.size > MAX_FILE_SIZE) {
+                    showProposalError(`⚠️ El archivo de CV (${(cvuFile.size / 1024 / 1024).toFixed(1)}MB) supera el límite de 10MB.`);
                     return;
                 }
                 if (!fichaFile) {
-                    errorDiv.textContent = '⚠️ Sube la ficha técnica en PDF.';
-                    errorDiv.classList.remove('hidden');
+                    showProposalError('⚠️ Debes seleccionar la Ficha Técnica en formato PDF.');
                     return;
                 }
-                if (fichaFile.size > 1024 * 1024) {
-                    errorDiv.textContent = '⚠️ La ficha técnica no debe exceder 1MB.';
-                    errorDiv.classList.remove('hidden');
+                if (fichaFile.size > MAX_FILE_SIZE) {
+                    showProposalError(`⚠️ La Ficha Técnica (${(fichaFile.size / 1024 / 1024).toFixed(1)}MB) supera el límite de 10MB.`);
                     return;
                 }
 
+                // Buscar el objeto curso correspondiente
+                const selectedCourseObj = coursesData.find(c => c.id === courseRadio.value) || {};
+                const courseNameSafe = selectedCourseObj.name || courseRadio.value;
+
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Enviando...';
-                progressDiv.textContent = '⏳ Subiendo documentación...';
+                submitBtn.innerHTML = '<span>⏳</span> Subiendo archivos a Drive...';
+                progressDiv.textContent = '⏳ Procesando archivos y guardando en Google Drive... Por favor no cierres la ventana.';
                 progressDiv.classList.remove('hidden');
 
                 try {
@@ -660,7 +578,7 @@
 
                     const result = await submitProposal({
                         instructorName: instructor.toUpperCase(),
-                        courseName: courseRadio.dataset.name,
+                        courseName: courseNameSafe,
                         courseId: courseRadio.value,
                         cvuFile: cvuBase64,
                         cvuFileName: cvuFile.name,
@@ -671,32 +589,34 @@
                     progressDiv.classList.add('hidden');
                     if (result.success || result.ok) {
                         document.getElementById('dynamicContent').innerHTML = renderSuccessScreen(
-                            '¡Propuesta enviada con éxito! ✅',
-                            true
+                            '¡Documentación enviada con éxito! ✅'
                         );
                     } else {
-                        errorDiv.textContent = '❌ ' + (result.message || 'Error al enviar');
-                        errorDiv.classList.remove('hidden');
+                        showProposalError('❌ ' + (result.message || 'Error al guardar en el servidor'));
                     }
                 } catch (err) {
                     progressDiv.classList.add('hidden');
-                    errorDiv.textContent = '❌ ' + (err.message || 'Error de conexión');
-                    errorDiv.classList.remove('hidden');
+                    showProposalError('❌ ' + (err.message || 'Error de conexión con Google Drive'));
                 } finally {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Enviar Documentación';
+                    submitBtn.innerHTML = '<span>📤</span> Enviar Documentación';
                 }
             });
         }
 
-        // ============================================================
-        // EVENTOS - EVIDENCIAS
-        // ============================================================
+        function showEvidenceError(msg) {
+            const errorDiv = document.getElementById('evidenceError');
+            if (errorDiv) {
+                errorDiv.textContent = msg;
+                errorDiv.classList.remove('hidden');
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
         function attachEvidenceEvents() {
             const form = document.getElementById('evidenceForm');
             if (!form) return;
 
-            // Lista de archivos
             const fileInput = document.getElementById('evFiles');
             const fileList = document.getElementById('fileList');
             const fileListItems = document.getElementById('fileListItems');
@@ -704,14 +624,14 @@
             fileInput.addEventListener('change', function() {
                 const files = Array.from(this.files);
                 if (files.length > 6) {
-                    alert('No puedes seleccionar más de 6 archivos.');
+                    alert('No puedes seleccionar más de 6 archivos de evidencia.');
                     this.value = '';
                     fileList.classList.add('hidden');
                     return;
                 }
-                const oversized = files.filter(f => f.size > 1024 * 1024);
+                const oversized = files.filter(f => f.size > MAX_FILE_SIZE);
                 if (oversized.length > 0) {
-                    alert(`Los siguientes archivos superan 1MB: ${oversized.map(f => f.name).join(', ')}`);
+                    alert(`Los siguientes archivos superan 10MB: ${oversized.map(f => f.name).join(', ')}`);
                     this.value = '';
                     fileList.classList.add('hidden');
                     return;
@@ -722,7 +642,7 @@
                         <li class="text-xs text-green-700 flex items-center gap-2">
                             <span>📄</span>
                             <span>${f.name}</span>
-                            <span class="text-gray-500">(${(f.size / 1024).toFixed(1)} KB)</span>
+                            <span class="text-gray-500">(${(f.size / 1024 / 1024).toFixed(2)} MB)</span>
                         </li>
                     `).join('');
                 } else {
@@ -730,7 +650,6 @@
                 }
             });
 
-            // Seleccionar curso
             document.querySelectorAll('input[name="evidenceCourse"]').forEach(radio => {
                 radio.addEventListener('change', function() {
                     document.querySelectorAll('input[name="evidenceCourse"]').forEach(r => {
@@ -749,37 +668,34 @@
 
                 const errorDiv = document.getElementById('evidenceError');
                 const progressDiv = document.getElementById('evidenceProgress');
-                const successDiv = document.getElementById('evidenceSuccess');
                 const submitBtn = document.getElementById('evSubmitBtn');
 
-                // Reset
                 errorDiv.classList.add('hidden');
                 progressDiv.classList.add('hidden');
-                successDiv.classList.add('hidden');
 
                 const instructor = document.getElementById('evInstructor').value.trim();
                 const courseRadio = document.querySelector('input[name="evidenceCourse"]:checked');
                 const files = document.getElementById('evFiles').files;
 
                 if (!instructor) {
-                    errorDiv.textContent = '⚠️ Ingresa tu nombre completo.';
-                    errorDiv.classList.remove('hidden');
+                    showEvidenceError('⚠️ Ingresa tu nombre completo.');
                     return;
                 }
                 if (!courseRadio) {
-                    errorDiv.textContent = '⚠️ Selecciona un curso.';
-                    errorDiv.classList.remove('hidden');
+                    showEvidenceError('⚠️ Selecciona el curso impartido.');
                     return;
                 }
                 if (files.length === 0) {
-                    errorDiv.textContent = '⚠️ Sube al menos un archivo de evidencia.';
-                    errorDiv.classList.remove('hidden');
+                    showEvidenceError('⚠️ Sube al menos un archivo de evidencia.');
                     return;
                 }
 
+                const selectedCourseObj = coursesData.find(c => c.id === courseRadio.value) || {};
+                const courseNameSafe = selectedCourseObj.name || courseRadio.value;
+
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Enviando...';
-                progressDiv.textContent = '⏳ Subiendo evidencias...';
+                submitBtn.innerHTML = '<span>⏳</span> Subiendo evidencias...';
+                progressDiv.textContent = '⏳ Subiendo evidencias a Google Drive...';
                 progressDiv.classList.remove('hidden');
 
                 try {
@@ -793,7 +709,7 @@
 
                     const result = await submitEvidence({
                         instructorName: instructor.toUpperCase(),
-                        courseName: courseRadio.dataset.name,
+                        courseName: courseNameSafe,
                         courseId: courseRadio.value,
                         evidenceFiles: filesData
                     });
@@ -801,38 +717,27 @@
                     progressDiv.classList.add('hidden');
                     if (result.success || result.ok) {
                         document.getElementById('dynamicContent').innerHTML = renderSuccessScreen(
-                            '¡Evidencias enviadas con éxito! ✅',
-                            false
+                            '¡Evidencias enviadas con éxito! ✅'
                         );
                     } else {
-                        errorDiv.textContent = '❌ ' + (result.message || 'Error al enviar');
-                        errorDiv.classList.remove('hidden');
+                        showEvidenceError('❌ ' + (result.message || 'Error al enviar'));
                     }
                 } catch (err) {
                     progressDiv.classList.add('hidden');
-                    errorDiv.textContent = '❌ ' + (err.message || 'Error de conexión');
-                    errorDiv.classList.remove('hidden');
+                    showEvidenceError('❌ ' + (err.message || 'Error de conexión'));
                 } finally {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = '📤 Enviar Evidencia(s)';
+                    submitBtn.innerHTML = '<span>📤</span> Enviar Evidencia(s)';
                 }
             });
         }
 
-        // ============================================================
-        // EVENTOS DE TABS
-        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('tabProposal').addEventListener('click', () => renderTab('proposal'));
             document.getElementById('tabEvidence').addEventListener('click', () => renderTab('evidence'));
-
-            // Año
             document.getElementById('year').textContent = new Date().getFullYear();
-
-            // Iniciar app
             initApp();
         });
     </script>
-
 </body>
 </html>
