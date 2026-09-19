@@ -126,34 +126,38 @@
         /* ── FUENTES Y BASE ── */
         body {
             font-family: 'Inter', system-ui, sans-serif;
-            cursor: none;
             background-color: #fdf8f0;
+            cursor: default;
         }
         h1, h2, h3, .font-display {
             font-family: 'Playfair Display', Georgia, serif;
         }
-        a, button, .cursor-pointer { cursor: none; }
+        a, button, [role="button"], .cursor-pointer {
+            cursor: pointer;
+        }
 
-        /* ── CURSOR INSTITUCIONAL (guinda) ── */
+        /* ── CURSOR INSTITUCIONAL ACOMPAÑANTE (guinda) ── */
         #cursor-dot {
-            position: fixed; width: 13px; height: 13px;
-            background-color: rgba(107, 30, 46, 0.85);
-            border: 2px solid rgba(167, 35, 68, 1);
+            position: fixed; width: 12px; height: 12px;
+            background-color: rgba(107, 30, 46, 0.65);
+            border: 1.5px solid rgba(167, 35, 68, 0.9);
             border-radius: 50%; pointer-events: none;
             transform: translate(-50%, -50%); z-index: 9999;
-            transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
-            box-shadow: 0 0 8px rgba(107, 30, 46, 0.5);
+            transition: width 0.15s ease-out, height 0.15s ease-out, background-color 0.2s, opacity 0.2s;
+            box-shadow: 0 0 8px rgba(107, 30, 46, 0.4);
+            opacity: 0;
         }
+        #cursor-dot.visible { opacity: 1; }
         #cursor-dot.active {
-            width: 36px; height: 36px;
+            width: 28px; height: 28px;
             background-color: rgba(107, 30, 46, 0.12);
-            border: 2px solid rgba(167, 35, 68, 0.9);
-            box-shadow: 0 0 14px rgba(107, 30, 46, 0.4);
+            border: 2px solid rgba(167, 35, 68, 0.85);
+            box-shadow: 0 0 12px rgba(107, 30, 46, 0.35);
         }
         .dark #cursor-dot {
-            background-color: rgba(244, 168, 184, 0.85);
-            border: 2px solid rgba(244, 168, 184, 1);
-            box-shadow: 0 0 8px rgba(244, 168, 184, 0.5);
+            background-color: rgba(244, 168, 184, 0.7);
+            border: 1.5px solid rgba(244, 168, 184, 0.95);
+            box-shadow: 0 0 8px rgba(244, 168, 184, 0.45);
         }
         .dark #cursor-dot.active {
             background-color: rgba(244, 168, 184, 0.15);
@@ -279,15 +283,6 @@
         }
         .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
 
-        .badge-new {
-            position: absolute; top: 10px; right: 10px;
-            background: linear-gradient(135deg, #6b1e2e, #a72344);
-            color: white; font-size: 10px; padding: 4px 8px;
-            border-radius: 12px; font-weight: bold;
-            box-shadow: 0 2px 8px rgba(107,30,46,0.35);
-            animation: pulse-slow 2s infinite;
-        }
-
         /* ── CLIMA / FLOAT ── */
         .weather-icon { animation: float 3s ease-in-out infinite; }
         @keyframes float {
@@ -305,21 +300,15 @@
             opacity: 0; height: 0 !important; padding: 0 !important; margin: 0 !important;
         }
 
-        /* ── MODAL ── */
-        .modal-overlay {
-            background-color: rgba(26,14,16,0.75);
-            backdrop-filter: blur(5px);
-        }
-
-        /* ── DROPDOWN ── */
-        .dropdown-menu {
-            transform-origin: top right;
-            transition: transform 0.2s ease-out, opacity 0.2s ease-out;
-        }
+        /* ── SCROLLBAR ── */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="bg-crema-100 dark:bg-dark-bg min-h-screen transition-colors duration-500">
     
+    <!-- Puntero visual institucional acompañante (no reemplaza el mouse nativo) -->
     <div id="cursor-dot"></div>
 
     <!-- Header -->
@@ -453,8 +442,8 @@
         <div class="container mx-auto flex items-center justify-center gap-4">
             <span class="text-2xl animate-pulse">✨</span>
             <div>
-                <strong class="block sm:inline text-lg">¡Próximos Cursos-Taller del 10 al 14 y 17 al 21 de agosto!</strong>
-                <span class="block sm:inline ml-2">los esperamos!</span>
+                <strong class="block sm:inline text-lg">¡Próximos Cursos-Taller Enero 2027!</strong>
+                <span class="ml-2">¡Los esperamos!</span>
             </div>
         </div>
     </div>
@@ -589,7 +578,7 @@
 
         <!-- Información -->
         <div id="informacion" class="max-w-4xl mx-auto mb-8 scroll-mt-32">
-            <div class="rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600 dark:border-blue-500 transition-colors">
+            <div class="bg-white dark:bg-dark-card rounded-2xl shadow-xl p-6 sm:p-8 border-t-4 border-blue-600 dark:border-blue-500 transition-colors">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="text-3xl sm:text-4xl">ℹ️</div>
                     <h3 class="text-xl sm:text-2xl font-display font-bold text-guinda-900 dark:text-guinda-100">
@@ -689,7 +678,7 @@
                             class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity bg-white/20 p-1 rounded"
                             title="Acceso Administrativo"
                         />
-                        <a href="mailto:alejandro.calderon@itdurango.edu.mx" class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-blue-600 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md cursor-pointer">
+                        <a href="mailto:alejandro.calderon@itdurango.edu.mx" class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center bg-white text-guinda-900 font-bold px-5 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-md cursor-pointer">
                             <span class="mr-2">📧</span> Enviar Email
                         </a>
                     </div>
@@ -723,7 +712,36 @@
         </div>
     </footer>
 
-     <!-- MODAL CURSOS ACTUALES -->
+    <!-- MODAL CURSOS ACTUALES (Estructura HTML que faltaba) -->
+    <div id="modal-cursos" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden" role="dialog" aria-modal="true">
+        <div class="bg-white dark:bg-dark-card w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden border border-guinda-200 dark:border-guinda-900 max-h-[90vh] flex flex-col animate-fadeInUp">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-guinda-900 to-guinda-800 text-white px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">📋</span>
+                    <div>
+                        <h3 class="font-display font-bold text-lg text-white">Catálogo de Cursos Actuales</h3>
+                        <p class="text-xs text-crema-200">Actualización Docente ITD</p>
+                    </div>
+                </div>
+                <button onclick="cerrarModalCursos()" class="text-white/70 hover:text-white text-2xl font-bold p-1 leading-none rounded-lg hover:bg-white/10 transition-colors" aria-label="Cerrar">
+                    &times;
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div id="modal-cursos-body" class="p-6 overflow-y-auto max-h-[calc(90vh-130px)] custom-scrollbar">
+                <!-- Se llena dinámicamente con JavaScript -->
+            </div>
+            <!-- Modal Footer -->
+            <div class="px-6 py-3 bg-gray-50 dark:bg-dark-nav border-t border-gray-100 dark:border-gray-800 flex justify-end">
+                <button onclick="cerrarModalCursos()" class="px-4 py-2 bg-guinda-800 hover:bg-guinda-700 text-white text-xs font-bold rounded-lg transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DEL MODAL DE CURSOS -->
     <script>
         const COURSES_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRK9g_iWtGGIazGRfNNmnb1W2qpedwy_9pgSr6NKz04aav65YYd-DOF7dCP425wdRIwQ4hIe-H7jFx8/pub?gid=0&single=true&output=csv';
 
@@ -751,7 +769,6 @@
             }).filter(r => {
                 if (!r.curso || r.curso.trim() === '') return false;
                 const st = r.status.trim().toUpperCase();
-                // Si la columna M tiene texto, requiere que sea VALIDO o ACTIVO; si no tiene columna M, acepta los cursos con nombre
                 return st === 'VALIDO' || st === 'ACTIVO' || st === '' || st === 'DISPONIBLE';
             });
         }
@@ -863,7 +880,7 @@
             const body = document.getElementById('modal-cursos-body');
             body.innerHTML = `
                 <div class="flex items-center justify-center py-12 text-gray-400">
-                    <svg class="animate-spin w-8 h-8 mr-3 text-mx-verde" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin w-8 h-8 mr-3 text-guinda-600" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                     </svg>
@@ -903,7 +920,9 @@
             });
         }
     </script>
-    
+
+    <!-- SCRIPT GENERAL: ADMIN, RELOJ, CLIMA, CURSOR Y ESTADÍSTICAS -->
+    <script>
         // --- 1. Gestión de Estado Admin ---
         const ADMIN_EMAIL = 'alejandro.calderon@itdurango.edu.mx';
         const GOOGLE_CLIENT_ID = '524996225715-5l95j3lces5hi49c19rfgotdrfo2seq1.apps.googleusercontent.com';
@@ -951,29 +970,41 @@
                 card.classList.remove('bg-gray-50', 'grayscale', 'opacity-60', 'cursor-not-allowed');
                 card.classList.add('bg-white', 'hover:bg-rose-50', 'hover:border-rose-400');
                 
-                desc.textContent = "Registrate y no pierdas tu lugar";
-                desc.classList.remove('text-gray-500');
-                desc.classList.add('text-rose-600', 'dark:text-rose-400');
+                if (desc) {
+                    desc.textContent = "Regístrate y no pierdas tu lugar";
+                    desc.classList.remove('text-gray-500');
+                    desc.classList.add('text-rose-600', 'dark:text-rose-400');
+                }
                 
-                badge.style.display = "block";
-                badge.textContent = "¡ABIERTO!";
+                if (badge) {
+                    badge.style.display = "block";
+                    badge.textContent = "¡ABIERTO!";
+                }
                 
-                status.className = "inline-block bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full";
-                status.textContent = "✓ Disponible";
+                if (status) {
+                    status.className = "inline-block bg-guinda-100 dark:bg-guinda-900/40 text-guinda-800 dark:text-guinda-200 text-xs font-semibold px-3 py-1 rounded-full";
+                    status.textContent = "✓ Disponible";
+                }
             } else {
                 card.removeAttribute('href');
                 card.classList.remove('bg-white', 'hover:bg-rose-50', 'hover:border-rose-400');
                 card.classList.add('bg-gray-50', 'grayscale', 'opacity-60', 'cursor-not-allowed');
                 
-                desc.textContent = "Periodo de inscripciones cerrado";
-                desc.classList.remove('text-rose-600', 'dark:text-rose-400');
-                desc.classList.add('text-gray-500');
+                if (desc) {
+                    desc.textContent = "Periodo de inscripciones cerrado";
+                    desc.classList.remove('text-rose-600', 'dark:text-rose-400');
+                    desc.classList.add('text-gray-500');
+                }
                 
-                badge.style.display = "block";
-                badge.textContent = "🔒 CERRADO";
+                if (badge) {
+                    badge.style.display = "block";
+                    badge.textContent = "🔒 CERRADO";
+                }
                 
-                status.className = "inline-block bg-guinda-100 dark:bg-guinda-900/40 text-guinda-700 dark:text-guinda-300 text-xs font-semibold px-3 py-1 rounded-full";
-                status.textContent = "✗ No disponible";
+                if (status) {
+                    status.className = "inline-block bg-guinda-100 dark:bg-guinda-900/40 text-guinda-700 dark:text-guinda-300 text-xs font-semibold px-3 py-1 rounded-full";
+                    status.textContent = "✗ No disponible";
+                }
             }
         }
 
@@ -1008,25 +1039,28 @@
             }
         }
 
-        // Cursor
+        // --- 2. Cursor visual acompañante ---
         const cursorDot = document.getElementById('cursor-dot');
-        window.addEventListener('mousemove', e => {
-            const { clientX, clientY } = e;
-            requestAnimationFrame(() => {
-                cursorDot.style.left = `${clientX}px`;
-                cursorDot.style.top = `${clientY}px`;
+        if (cursorDot) {
+            window.addEventListener('mousemove', e => {
+                cursorDot.classList.add('visible');
+                cursorDot.style.left = `${e.clientX}px`;
+                cursorDot.style.top = `${e.clientY}px`;
+                const target = e.target;
+                if (target && target.closest('a, button, [role="button"], .card-portal, .cursor-pointer')) {
+                    cursorDot.classList.add('active');
+                } else {
+                    cursorDot.classList.remove('active');
+                }
             });
-            const target = e.target;
-            if (target.closest('a, button, [role="button"], .card-portal, .cursor-pointer')) {
-                cursorDot.classList.add('active');
-            } else {
-                cursorDot.classList.remove('active');
-            }
-        });
+            window.addEventListener('mouseout', e => {
+                if (!e.relatedTarget && !e.toElement) {
+                    cursorDot.classList.remove('visible');
+                }
+            });
+        }
 
-        // ==========================================
-        // MENU HAMBURGUESA LÓGICA
-        // ==========================================
+        // --- 3. Menú Hamburguesa ---
         const mainMenuBtn = document.getElementById('main-menu-btn');
         const mainMenuDropdown = document.getElementById('main-menu-dropdown');
 
@@ -1043,31 +1077,37 @@
             });
         }
 
-        // Date & Clock
+        // --- 4. Fecha, Reloj y Años ---
         function updateDate() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const ds = now.toLocaleDateString('es-MX', options);
-            document.getElementById('currentDate').textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
+            const el = document.getElementById('currentDate');
+            if (el) el.textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
         }
+
         function startClock() {
             function updateClock() {
                 const now = new Date();
-                document.getElementById('clock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+                const clockEl = document.getElementById('clock');
+                if (clockEl) {
+                    clockEl.textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+                }
             }
-            updateClock(); setInterval(updateClock, 1000);
+            updateClock(); 
+            setInterval(updateClock, 1000);
         }
         
         function updateYears() {
              const year = new Date().getFullYear();
              const calEl = document.getElementById('calendar-year-text');
-             if(calEl) calEl.textContent = `Calendario Institucional ${year}`;
+             if (calEl) calEl.textContent = `Calendario Institucional ${year}`;
              
              const copyEl = document.getElementById('copyright-year');
-             if(copyEl) copyEl.textContent = year;
+             if (copyEl) copyEl.textContent = year;
         }
 
-        // Weather
+        // --- 5. Clima con Open-Meteo ---
         function updateWeather() {
             const weatherElement = document.getElementById('weatherInfo');
             if (!weatherElement) return;
@@ -1100,12 +1140,14 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (p) => showWeather(p.coords.latitude, p.coords.longitude),
-                    (e) => showWeather(durangoLat, durangoLon)
+                    () => showWeather(durangoLat, durangoLon)
                 );
-            } else { showWeather(durangoLat, durangoLon); }
+            } else { 
+                showWeather(durangoLat, durangoLon); 
+            }
         }
 
-        // Banner and Stats Auto-hide
+        // --- 6. Banner de Anuncio y Estadísticas ---
         const announcementBanner = document.getElementById('announcement-banner');
         if (announcementBanner) {
             let bannerHidden = false;
@@ -1128,19 +1170,19 @@
             }, 30000);
         }
 
-        // Dark Mode Toggle Logic
+        // --- 7. Modo Oscuro ---
         var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
         var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
         var themeToggleBtn = document.getElementById('theme-toggle-btn');
 
         function updateThemeIcons() {
             if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                themeToggleLightIcon.classList.remove('hidden');
-                themeToggleDarkIcon.classList.add('hidden');
+                if (themeToggleLightIcon) themeToggleLightIcon.classList.remove('hidden');
+                if (themeToggleDarkIcon) themeToggleDarkIcon.classList.add('hidden');
                 document.documentElement.classList.add('dark');
             } else {
-                themeToggleLightIcon.classList.add('hidden');
-                themeToggleDarkIcon.classList.remove('hidden');
+                if (themeToggleLightIcon) themeToggleLightIcon.classList.add('hidden');
+                if (themeToggleDarkIcon) themeToggleDarkIcon.classList.remove('hidden');
                 document.documentElement.classList.remove('dark');
             }
         }
@@ -1168,10 +1210,14 @@
             updateThemeIcons();
         }
 
-        if(themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
+        if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
 
+        // --- 8. Inicialización al cargar la ventana ---
         window.addEventListener('load', function() {
-            startClock(); updateDate(); updateWeather(); updateYears();
+            startClock(); 
+            updateDate(); 
+            updateWeather(); 
+            updateYears();
 
             fetchInscriptionState().then(isOpen => updateUI(isOpen));
 
@@ -1226,171 +1272,8 @@
         });
     </script>
 
+    <!-- SCRIPT DE ESTADÍSTICAS -->
     <script>
-    // ==========================================
-    // MODAL CURSOS ACTUALES
-    // ==========================================
-    const COURSES_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRK9g_iWtGGIazGRfNNmnb1W2qpedwy_9pgSr6NKz04aav65YYd-DOF7dCP425wdRIwQ4hIe-H7jFx8/pub?gid=0&single=true&output=csv';
-
-    function parseCSVCursos(text) {
-        const lines = text.trim().split(/\r?\n/).slice(1);
-        return lines.map(line => {
-            const values = [];
-            let current = '', inQuotes = false;
-            for (let ch of line) {
-                if (ch === '"') { inQuotes = !inQuotes; }
-                else if (ch === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
-                else { current += ch; }
-            }
-            values.push(current.trim());
-            return {
-                fecha:        values[0] || '',
-                curso:        values[2] || '',
-                instructor:   values[3] || '',
-                duracion:     values[4] || '',
-                modalidad:    values[5] || '',
-                departamento: values[8] || '',
-                lugar:        values[9] || '',
-                status:       values[12] || ''
-            };
-        }).filter(r => r.curso && r.curso !== '' && r.status.trim().toUpperCase() === 'VALIDO');
-    }
-
-    const DATE_PALETTE = [
-        { bg: '#eff6ff', border: '#3b82f6', text: '#1d4ed8', label: '#dbeafe' },
-        { bg: '#f0fdf4', border: '#16a34a', text: '#15803d', label: '#dcfce7' },
-        { bg: '#fff7ed', border: '#ea580c', text: '#c2410c', label: '#ffedd5' },
-        { bg: '#faf5ff', border: '#9333ea', text: '#7e22ce', label: '#f3e8ff' },
-        { bg: '#fefce8', border: '#ca8a04', text: '#854d0e', label: '#fef9c3' },
-        { bg: '#f0fdfa', border: '#0d9488', text: '#0f766e', label: '#ccfbf1' },
-        { bg: '#fff1f2', border: '#e11d48', text: '#be123c', label: '#ffe4e6' },
-        { bg: '#fdf4ff', border: '#c026d3', text: '#86198f', label: '#fae8ff' },
-    ];
-
-    function buildDateColorMap(cursos) {
-        const map = {};
-        let idx = 0;
-        cursos.forEach(c => {
-            if (c.fecha && !map[c.fecha]) {
-                map[c.fecha] = DATE_PALETTE[idx % DATE_PALETTE.length];
-                idx++;
-            }
-        });
-        return map;
-    }
-
-    function renderCursos(cursos) {
-        const body = document.getElementById('modal-cursos-body');
-        if (!cursos.length) {
-            body.innerHTML = `
-                <div style="text-align:center;padding:48px 24px;">
-                    <div style="font-size:56px;margin-bottom:16px;">🗓️</div>
-                    <p style="font-size:17px;font-weight:700;color:#1e293b;margin:0 0 8px;">Sin cursos en este momento</p>
-                    <p style="font-size:13px;color:#64748b;line-height:1.6;max-width:300px;margin:0 auto 20px;">
-                        El periodo actual ha concluido o aún no se han registrado cursos para el próximo periodo u opciones válidas.
-                    </p>
-                    <div style="display:inline-flex;align-items:center;gap:8px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:10px 18px;">
-                        <span style="font-size:16px;">✨</span>
-                        <span style="font-size:12px;font-weight:600;color:#15803d;">Pronto se publicarán los cursos del siguiente periodo</span>
-                    </div>
-                </div>`;
-            return;
-        }
-
-        const MESES = {
-            ENERO:1, FEBRERO:2, MARZO:3, ABRIL:4, MAYO:5, JUNIO:6,
-            JULIO:7, AGOSTO:8, SEPTIEMBRE:9, OCTUBRE:10, NOVIEMBRE:11, DICIEMBRE:12,
-            ENE:1, FEB:2, MAR:3, ABR:4, MAY:5, JUN:6, JUL:7, AGO:8, SEP:9, OCT:10, NOV:11, DIC:12
-        };
-        function parseFechaOrden(fecha) {
-            if (!fecha) return 9999;
-            const upper = fecha.toUpperCase();
-            const mesMatch = upper.match(/\s*(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE|ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\s*/);
-            const diaMatch = upper.match(/\s*(\d{1,2})\s*/);
-            const mes = mesMatch ? (MESES[mesMatch[1]] || 99) : 99;
-            const dia = diaMatch ? parseInt(diaMatch[1]) : 99;
-            return mes * 100 + dia;
-        }
-        cursos.sort((a, b) => parseFechaOrden(a.fecha) - parseFechaOrden(b.fecha));
-
-        const dateColorMap = buildDateColorMap(cursos);
-
-        const leyenda = Object.entries(dateColorMap).map(([fecha, col]) =>
-            `<span style="display:inline-flex;align-items:center;gap:5px;background:${col.label};border:1px solid ${col.border};color:${col.text};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
-                <span style="width:8px;height:8px;border-radius:50%;background:${col.border};display:inline-block;"></span>${fecha}
-            </span>`
-        ).join('');
-
-        const header = `
-            <div style="margin-bottom:14px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-                    <span style="background:#dbeafe;color:#1d4ed8;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;">
-                        ${cursos.length} curso${cursos.length !== 1 ? 's' : ''}
-                    </span>
-                    <span style="font-size:11px;color:#94a3b8;">● color por periodo de fechas</span>
-                </div>
-                <div style="display:flex;flex-wrap:wrap;gap:6px;">${leyenda}</div>
-            </div>`;
-
-        const cards = cursos.map((c, i) => {
-            const col = dateColorMap[c.fecha] || DATE_PALETTE[0];
-            return `
-            <div style="background:${col.bg};border-left:4px solid ${col.border};border-top:1px solid ${col.border}33;border-right:1px solid ${col.border}33;border-bottom:1px solid ${col.border}33;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
-                <div style="font-size:22px;flex-shrink:0;">📖</div>
-                <div style="flex:1;min-width:0;">
-                    <p style="font-size:14px;font-weight:700;color:#1e293b;margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.curso}</p>
-                    <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#64748b;">
-                        <span style="display:flex;align-items:center;gap:3px;font-weight:600;color:${col.text};">📅 ${c.fecha}</span>
-                        <span style="display:flex;align-items:center;gap:3px;">👤 ${c.instructor}</span>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-
-        body.innerHTML = header + cards;
-    }
-
-    async function abrirModalCursos() {
-        const modal = document.getElementById('modal-cursos');
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-
-        document.getElementById('modal-cursos-body').innerHTML = `
-            <div class="flex items-center justify-center py-12 text-gray-400">
-                <svg class="animate-spin w-8 h-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                </svg>
-                <span class="text-sm font-medium">Cargando cursos...</span>
-            </div>`;
-
-        try {
-            const res = await fetch(COURSES_SHEET_URL);
-            const text = await res.text();
-            const cursos = parseCSVCursos(text);
-            renderCursos(cursos);
-        } catch(e) {
-            document.getElementById('modal-cursos-body').innerHTML = 
-                '<div class="text-center py-12"><p class="text-4xl mb-3">⚠️</p><p class="text-red-500 font-medium">No se pudo cargar la información.</p><p class="text-gray-400 text-sm mt-1">Verifica tu conexión e intenta de nuevo.</p></div>';
-        }
-    }
-
-    function cerrarModalCursos() {
-        document.getElementById('modal-cursos').classList.add('hidden');
-        document.body.style.overflow = '';
-    }
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') cerrarModalCursos();
-    });
-
-    document.getElementById('modal-cursos').addEventListener('click', function(e) {
-        if (e.target === this) cerrarModalCursos();
-    });
-    </script>
-
-    <script>
-    // ── Mini estadísticas del último periodo en la página principal ──
     (async function loadHomeStats() {
       const APPS_URL = 'https://script.google.com/macros/s/AKfycbwFO97VhIEO2ke2p-ZvYpXMWHP_LAxqmR0U5CmhPvOoQAH24FUAOt2rqGtoUhU-MKQauw/exec';
 
@@ -1516,17 +1399,21 @@
           if (label) label.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-green-400 mr-1"></span>Periodo Actual ' + currentYear;
         } else {
           if (label) label.textContent = 'Sin datos';
-          document.getElementById('stats-kpi-grid').innerHTML =
-            '<div class="col-span-4 text-center text-sm text-gray-400 py-4">No se pudieron cargar las estadísticas.</div>';
+          const grid = document.getElementById('stats-kpi-grid');
+          if (grid) {
+            grid.innerHTML = '<div class="col-span-4 text-center text-sm text-gray-400 py-4">No se pudieron cargar las estadísticas.</div>';
+          }
         }
       } catch(e) {
         const label = document.getElementById('stats-period-label');
         if (label) label.textContent = 'Error';
         const grid = document.getElementById('stats-kpi-grid');
-        if (grid) grid.innerHTML =
-          '<div class="col-span-4 text-center text-sm text-gray-400 py-4">Error al cargar estadísticas.</div>';
+        if (grid) {
+          grid.innerHTML = '<div class="col-span-4 text-center text-sm text-gray-400 py-4">Error al cargar estadísticas.</div>';
+        }
       }
     })();
     </script>
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>
